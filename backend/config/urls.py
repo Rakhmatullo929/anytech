@@ -5,7 +5,11 @@ from django.urls import include, path
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/", include([])),
+    path("api/v1/auth/", include("auth_tenant.urls")),
+    path("api/v1/products/", include("products.urls")),
+    path("api/v1/clients/", include("clients.urls")),
+    path("api/v1/sales/", include("sales.urls")),
+    path("api/v1/debts/", include("debts.urls")),
 ]
 
 if settings.DEBUG:
