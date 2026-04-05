@@ -19,22 +19,23 @@ import { RouterLink } from 'src/routes/components';
 // config
 import { PATH_AFTER_LOGIN } from 'src/config-global';
 // auth
-import { useAuthContext } from 'src/auth/hooks';
+import { useRegisterMutation } from 'src/auth/api';
 // components
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
-
+import { getAuthFormErrorMessage } from 'src/utils/api-error-messages';
 // ----------------------------------------------------------------------
 
 type FormValuesProps = {
+  tenantName: string;
+  name: string;
   email: string;
   password: string;
-  firstName: string;
-  lastName: string;
+  passwordConfirm: string;
 };
 
 export default function JwtRegisterView() {
-  const { register } = useAuthContext();
+  const registerMutation = useRegisterMutation();
 
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -45,17 +46,21 @@ export default function JwtRegisterView() {
   const password = useBoolean();
 
   const RegisterSchema = Yup.object().shape({
-    firstName: Yup.string().required('First name required'),
-    lastName: Yup.string().required('Last name required'),
+    tenantName: Yup.string().required('Organization name is required'),
+    name: Yup.string().required('Full name is required'),
     email: Yup.string().required('Email is required').email('Email must be a valid email address'),
-    password: Yup.string().required('Password is required'),
+    password: Yup.string().required('Password is required').min(8, 'Password must be at least 8 characters'),
+    passwordConfirm: Yup.string()
+      .required('Confirm password is required')
+      .oneOf([Yup.ref('password')], 'Passwords must match'),
   });
 
   const defaultValues = {
-    firstName: '',
-    lastName: '',
+    tenantName: '',
+    name: '',
     email: '',
     password: '',
+    passwordConfirm: '',
   };
 
   const methods = useForm<FormValuesProps>({
@@ -63,24 +68,26 @@ export default function JwtRegisterView() {
     defaultValues,
   });
 
-  const {
-    reset,
-    handleSubmit,
-    formState: { isSubmitting },
-  } = methods;
+  const { handleSubmit, formState: { isSubmitting } } = methods;
 
   const onSubmit = useCallback(
     async (data: FormValuesProps) => {
       try {
-        await register?.(data.email, data.password, data.firstName, data.lastName);
+        setErrorMsg('');
+        await registerMutation.mutateAsync({
+          tenantName: data.tenantName,
+          name: data.name,
+          email: data.email,
+          password: data.password,
+          passwordConfirm: data.passwordConfirm,
+        });
         window.location.href = returnTo || PATH_AFTER_LOGIN;
       } catch (error) {
         console.error(error);
-        reset();
-        setErrorMsg(typeof error === 'string' ? error : error.message);
+        setErrorMsg(getAuthFormErrorMessage(error, 'register'));
       }
     },
-    [register, reset, returnTo]
+    [registerMutation, returnTo]
   );
 
   const renderHead = (
@@ -117,12 +124,15 @@ export default function JwtRegisterView() {
   const renderForm = (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Stack spacing={2.5}>
-        {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
+        {!!errorMsg && (
+          <Alert severity="error" onClose={() => setErrorMsg('')}>
+            {errorMsg}
+          </Alert>
+        )}
 
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <RHFTextField name="firstName" label="First name" />
-          <RHFTextField name="lastName" label="Last name" />
-        </Stack>
+        <RHFTextField name="tenantName" label="Organization / tenant name" />
+
+        <RHFTextField name="name" label="Your full name" />
 
         <RHFTextField name="email" label="Email address" />
 
@@ -141,13 +151,19 @@ export default function JwtRegisterView() {
           }}
         />
 
+        <RHFTextField
+          name="passwordConfirm"
+          label="Confirm password"
+          type={password.value ? 'text' : 'password'}
+        />
+
         <LoadingButton
           fullWidth
           color="inherit"
           size="large"
           type="submit"
           variant="contained"
-          loading={isSubmitting}
+          loading={isSubmitting || registerMutation.isPending}
         >
           Create account
         </LoadingButton>

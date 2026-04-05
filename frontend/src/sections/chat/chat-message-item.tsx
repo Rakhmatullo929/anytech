@@ -6,7 +6,7 @@ import Avatar from '@mui/material/Avatar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 // hooks
-import { useMockedUser } from 'src/hooks/use-mocked-user';
+import { useAppUserProfile } from 'src/hooks/use-app-user-profile';
 // types
 import { IChatParticipant, IChatMessage } from 'src/types/chat';
 // components
@@ -23,7 +23,7 @@ type Props = {
 };
 
 export default function ChatMessageItem({ message, participants, onOpenLightbox }: Props) {
-  const { user } = useMockedUser();
+  const { user } = useAppUserProfile();
 
   const { me, senderDetails, hasImage } = useGetMessage({
     message,

@@ -1,5 +1,7 @@
 import { LogoutOptions, RedirectLoginOptions, PopupLoginOptions } from '@auth0/auth0-react';
 
+import type { LoginRequest, RegisterRequest, TenantUser, TokenPairResponse } from './api/types';
+
 // ----------------------------------------------------------------------
 
 export type ActionMapType<M extends { [index: string]: any }> = {
@@ -13,7 +15,8 @@ export type ActionMapType<M extends { [index: string]: any }> = {
       };
 };
 
-export type AuthUserType = null | Record<string, any>;
+/** JWT uses `TenantUser`; other auth providers may attach a wider object. */
+export type AuthUserType = TenantUser | Record<string, unknown> | null;
 
 export type AuthStateType = {
   status?: string;
@@ -24,14 +27,6 @@ export type AuthStateType = {
 // ----------------------------------------------------------------------
 
 type CanRemove = {
-  login?: (email: string, password: string) => Promise<void>;
-  register?: (
-    email: string,
-    password: string,
-    firstName: string,
-    lastName: string
-  ) => Promise<void>;
-  //
   loginWithGoogle?: () => Promise<void>;
   loginWithGithub?: () => Promise<void>;
   loginWithTwitter?: () => Promise<void>;
@@ -51,8 +46,10 @@ export type JWTContextType = CanRemove & {
   loading: boolean;
   authenticated: boolean;
   unauthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
+  /** Apply Django `{ access, refresh, user }` and sync React state + storage. */
+  syncSessionFromApiResponse: (payload: TokenPairResponse) => void;
+  login: (credentials: LoginRequest) => Promise<void>;
+  register: (data: RegisterRequest) => Promise<void>;
   logout: () => Promise<void>;
 };
 

@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'src/redux/store';
 import { sendMessage, addRecipients, createNewConversation } from 'src/redux/slices/chat';
 // hooks
-import { useMockedUser } from 'src/hooks/use-mocked-user';
+import { useAppUserProfile } from 'src/hooks/use-app-user-profile';
 // routes
 import { paths } from 'src/routes/paths';
 // types
@@ -20,7 +20,7 @@ export default function useChat() {
 
   const router = useRouter();
 
-  const { user } = useMockedUser();
+  const { user } = useAppUserProfile();
 
   const currentUserId = user.id;
 

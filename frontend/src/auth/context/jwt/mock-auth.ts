@@ -1,8 +1,6 @@
-import { _mock } from 'src/_mock';
+import type { TenantUser } from 'src/auth/api/types';
 
 // ----------------------------------------------------------------------
-
-export const MOCK_AUTH_USER_KEY = 'mockAuthUser';
 
 export const isJwtAuthMock = () => process.env.REACT_APP_AUTH_MOCK === 'true';
 
@@ -25,15 +23,16 @@ export function buildMockAuthUser(
   email: string,
   firstName?: string,
   lastName?: string
-): Record<string, unknown> {
-  const displayName =
-    firstName && lastName ? `${firstName} ${lastName}` : (email.split('@')[0] || 'User');
+): TenantUser {
+  const name =
+    firstName && lastName ? `${firstName} ${lastName}`.trim() : email.split('@')[0] || 'User';
 
   return {
-    id: 'mock-user',
-    displayName,
+    id: '00000000-0000-4000-8000-000000000001',
+    name,
     email,
-    photoURL: _mock.image.avatar(24),
     role: 'admin',
+    tenantId: null,
+    createdAt: new Date().toISOString(),
   };
 }

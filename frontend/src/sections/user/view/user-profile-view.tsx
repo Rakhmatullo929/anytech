@@ -7,7 +7,7 @@ import Tabs, { tabsClasses } from '@mui/material/Tabs';
 // routes
 import { paths } from 'src/routes/paths';
 // hooks
-import { useMockedUser } from 'src/hooks/use-mocked-user';
+import { useAppUserProfile } from 'src/hooks/use-app-user-profile';
 // _mock
 import { _userAbout, _userFeeds, _userFriends, _userGallery, _userFollowers } from 'src/_mock';
 // components
@@ -51,7 +51,7 @@ const TABS = [
 export default function UserProfileView() {
   const settings = useSettingsContext();
 
-  const { user } = useMockedUser();
+  const { user } = useAppUserProfile();
 
   const [searchFriends, setSearchFriends] = useState('');
 
@@ -88,7 +88,7 @@ export default function UserProfileView() {
         <ProfileCover
           role={_userAbout.role}
           name={user?.displayName}
-          avatarUrl={user?.photoURL}
+          avatarUrl={user?.photoURL ?? ''}
           coverUrl={_userAbout.coverUrl}
         />
 

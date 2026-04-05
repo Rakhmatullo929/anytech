@@ -12,6 +12,7 @@ import {
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  type User,
 } from 'firebase/auth';
 import { getFirestore, collection, doc, getDoc, setDoc } from 'firebase/firestore';
 // config
@@ -74,7 +75,7 @@ export function AuthProvider({ children }: Props) {
 
   const initialize = useCallback(() => {
     try {
-      onAuthStateChanged(AUTH, async (user) => {
+      onAuthStateChanged(AUTH, async (user: User | null) => {
         if (user) {
           if (user.emailVerified) {
             const userProfile = doc(DB, 'users', user.uid);
@@ -179,7 +180,8 @@ export function AuthProvider({ children }: Props) {
 
   // ----------------------------------------------------------------------
 
-  const checkAuthenticated = state.user?.emailVerified ? 'authenticated' : 'unauthenticated';
+  const firebaseProfile = state.user as { emailVerified?: boolean } | null;
+  const checkAuthenticated = firebaseProfile?.emailVerified ? 'authenticated' : 'unauthenticated';
 
   const status = state.loading ? 'loading' : checkAuthenticated;
 

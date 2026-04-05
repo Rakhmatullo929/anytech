@@ -12,9 +12,9 @@ import Typography from '@mui/material/Typography';
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hook';
 // hooks
-import { useMockedUser } from 'src/hooks/use-mocked-user';
+import { useAppUserProfile } from 'src/hooks/use-app-user-profile';
 // auth
-import { useAuthContext } from 'src/auth/hooks';
+import { useLogoutMutation } from 'src/auth/api';
 // components
 import { varHover } from 'src/components/animate';
 import { useSnackbar } from 'src/components/snackbar';
@@ -42,9 +42,9 @@ const OPTIONS = [
 export default function AccountPopover() {
   const router = useRouter();
 
-  const { user } = useMockedUser();
+  const { user } = useAppUserProfile();
 
-  const { logout } = useAuthContext();
+  const logoutMutation = useLogoutMutation();
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -52,7 +52,7 @@ export default function AccountPopover() {
 
   const handleLogout = async () => {
     try {
-      await logout();
+      await logoutMutation.mutateAsync();
       popover.onClose();
       router.replace('/');
     } catch (error) {
@@ -65,6 +65,11 @@ export default function AccountPopover() {
     popover.onClose();
     router.push(path);
   };
+
+  const avatarInitial =
+    user?.displayName?.trim()?.charAt(0)?.toUpperCase() ||
+    user?.email?.trim()?.charAt(0)?.toUpperCase() ||
+    '';
 
   return (
     <>
@@ -85,14 +90,16 @@ export default function AccountPopover() {
         }}
       >
         <Avatar
-          src={user?.photoURL}
+          src={user?.photoURL || undefined}
           alt={user?.displayName}
           sx={{
             width: 36,
             height: 36,
             border: (theme) => `solid 2px ${theme.palette.background.default}`,
           }}
-        />
+        >
+          {avatarInitial}
+        </Avatar>
       </IconButton>
 
       <CustomPopover open={popover.open} onClose={popover.onClose} sx={{ width: 200, p: 0 }}>
