@@ -239,11 +239,7 @@ export function getProduct(productId: string) {
   return async (dispatch: Dispatch) => {
     dispatch(slice.actions.getProductStart());
     try {
-      const response = await axios.get(API_ENDPOINTS.product.details, {
-        params: {
-          productId,
-        },
-      });
+      const response = await axios.get(API_ENDPOINTS.products.detail(productId));
       dispatch(slice.actions.getProductSuccess(response.data.product));
     } catch (error) {
       console.error(error);

@@ -18,7 +18,7 @@ import AvatarGroup, { avatarGroupClasses } from '@mui/material/AvatarGroup';
 // types
 import { IUserProfilePost } from 'src/types/user';
 // hooks
-import { useMockedUser } from 'src/hooks/use-mocked-user';
+import { useAppUserProfile } from 'src/hooks/use-app-user-profile';
 // utils
 import { fDate } from 'src/utils/format-time';
 import { fShortenNumber } from 'src/utils/format-number';
@@ -33,7 +33,7 @@ interface Props {
 }
 
 export default function ProfilePostItem({ post }: Props) {
-  const { user } = useMockedUser();
+  const { user } = useAppUserProfile();
 
   const commentRef = useRef<HTMLInputElement>(null);
 

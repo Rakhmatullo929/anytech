@@ -66,7 +66,10 @@ export default function AmplifyLoginView() {
   const onSubmit = useCallback(
     async (data: FormValuesProps) => {
       try {
-        await login?.(data.email, data.password);
+        await (login as unknown as (email: string, password: string) => Promise<void>)?.(
+          data.email,
+          data.password
+        );
 
         window.location.href = returnTo || PATH_AFTER_LOGIN;
       } catch (error) {

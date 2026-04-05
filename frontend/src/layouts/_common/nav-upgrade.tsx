@@ -5,7 +5,7 @@ import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 import Typography from '@mui/material/Typography';
 // hooks
-import { useMockedUser } from 'src/hooks/use-mocked-user';
+import { useAppUserProfile } from 'src/hooks/use-app-user-profile';
 // routes
 import { paths } from 'src/routes/paths';
 // locales
@@ -16,9 +16,14 @@ import Label from 'src/components/label';
 // ----------------------------------------------------------------------
 
 export default function NavUpgrade() {
-  const { user } = useMockedUser();
+  const { user } = useAppUserProfile();
 
   const { t } = useLocales();
+
+  const avatarInitial =
+    user?.displayName?.trim()?.charAt(0)?.toUpperCase() ||
+    user?.email?.trim()?.charAt(0)?.toUpperCase() ||
+    '';
 
   return (
     <Stack
@@ -30,7 +35,13 @@ export default function NavUpgrade() {
     >
       <Stack alignItems="center">
         <Box sx={{ position: 'relative' }}>
-          <Avatar src={user?.photoURL} alt={user?.displayName} sx={{ width: 48, height: 48 }} />
+          <Avatar
+            src={user?.photoURL || undefined}
+            alt={user?.displayName}
+            sx={{ width: 48, height: 48 }}
+          >
+            {avatarInitial}
+          </Avatar>
           <Label
             color="success"
             variant="filled"

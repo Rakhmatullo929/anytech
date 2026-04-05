@@ -1,22 +1,13 @@
 import { useEffect, useReducer, useCallback, useMemo } from 'react';
-// utils
-import axios, { API_ENDPOINTS } from 'src/utils/axios';
-//
+
+import { fetchCurrentUser, fetchLogin, fetchRegister } from 'src/auth/api/auth-requests';
+import { AUTH_USER_KEY, REFRESH_TOKEN_KEY } from 'src/auth/api/storage-keys';
+import type { LoginRequest, RegisterRequest, TokenPairResponse } from 'src/auth/api/types';
+
 import { AuthContext } from './auth-context';
 import { isValidToken, setSession } from './utils';
-import {
-  MOCK_AUTH_USER_KEY,
-  buildMockAuthUser,
-  createMockAccessToken,
-  isJwtAuthMock,
-} from './mock-auth';
+import { buildMockAuthUser, createMockAccessToken, isJwtAuthMock } from './mock-auth';
 import { ActionMapType, AuthStateType, AuthUserType } from '../../types';
-
-// ----------------------------------------------------------------------
-
-// NOTE:
-// We only build demo at basic level.
-// Customer will need to do some extra handling yourself if you want to extend the logic and other features...
 
 // ----------------------------------------------------------------------
 
@@ -88,6 +79,16 @@ type Props = {
 export function AuthProvider({ children }: Props) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
+  const syncSessionFromApiResponse = useCallback((payload: TokenPairResponse) => {
+    sessionStorage.setItem(REFRESH_TOKEN_KEY, payload.refresh);
+    sessionStorage.setItem(AUTH_USER_KEY, JSON.stringify(payload.user));
+    setSession(payload.access);
+    dispatch({
+      type: Types.LOGIN,
+      payload: { user: payload.user },
+    });
+  }, []);
+
   const initialize = useCallback(async () => {
     try {
       const accessToken = sessionStorage.getItem(STORAGE_KEY);
@@ -96,7 +97,7 @@ export function AuthProvider({ children }: Props) {
         setSession(accessToken);
 
         if (isJwtAuthMock()) {
-          const raw = sessionStorage.getItem(MOCK_AUTH_USER_KEY);
+          const raw = sessionStorage.getItem(AUTH_USER_KEY);
           const user = raw ? JSON.parse(raw) : null;
           dispatch({
             type: Types.INITIAL,
@@ -107,16 +108,24 @@ export function AuthProvider({ children }: Props) {
           return;
         }
 
-        const response = await axios.get(API_ENDPOINTS.auth.me);
-
-        const { user } = response.data;
-
-        dispatch({
-          type: Types.INITIAL,
-          payload: {
-            user,
-          },
-        });
+        try {
+          const { user } = await fetchCurrentUser();
+          dispatch({
+            type: Types.INITIAL,
+            payload: {
+              user,
+            },
+          });
+        } catch {
+          const raw = sessionStorage.getItem(AUTH_USER_KEY);
+          const user = raw ? JSON.parse(raw) : null;
+          dispatch({
+            type: Types.INITIAL,
+            payload: {
+              user,
+            },
+          });
+        }
       } else {
         dispatch({
           type: Types.INITIAL,
@@ -140,93 +149,53 @@ export function AuthProvider({ children }: Props) {
     initialize();
   }, [initialize]);
 
-  // LOGIN
-  const login = useCallback(async (email: string, password: string) => {
-    if (isJwtAuthMock()) {
-      const accessToken = createMockAccessToken();
-      const user = buildMockAuthUser(email);
-      sessionStorage.setItem(MOCK_AUTH_USER_KEY, JSON.stringify(user));
-      setSession(accessToken);
-      dispatch({
-        type: Types.LOGIN,
-        payload: {
-          user,
-        },
-      });
-      return;
-    }
-
-    const data = {
-      email,
-      password,
-    };
-
-    const response = await axios.post(API_ENDPOINTS.auth.login, data);
-
-    const { accessToken, user } = response.data;
-
-    setSession(accessToken);
-
-    dispatch({
-      type: Types.LOGIN,
-      payload: {
-        user,
-      },
-    });
-  }, []);
-
-  // REGISTER
-  const register = useCallback(
-    async (email: string, password: string, firstName: string, lastName: string) => {
+  const login = useCallback(
+    async (credentials: LoginRequest) => {
       if (isJwtAuthMock()) {
         const accessToken = createMockAccessToken();
-        const user = buildMockAuthUser(email, firstName, lastName);
-        sessionStorage.setItem(MOCK_AUTH_USER_KEY, JSON.stringify(user));
-        setSession(accessToken);
-        dispatch({
-          type: Types.REGISTER,
-          payload: {
-            user,
-          },
+        const user = buildMockAuthUser(credentials.email);
+        syncSessionFromApiResponse({
+          access: accessToken,
+          refresh: '',
+          user,
         });
         return;
       }
 
-      const data = {
-        email,
-        password,
-        firstName,
-        lastName,
-      };
-
-      const response = await axios.post(API_ENDPOINTS.auth.register, data);
-
-      const { accessToken, user } = response.data;
-
-      sessionStorage.setItem(STORAGE_KEY, accessToken);
-
-      dispatch({
-        type: Types.REGISTER,
-        payload: {
-          user,
-        },
-      });
+      const data = await fetchLogin(credentials);
+      syncSessionFromApiResponse(data);
     },
-    []
+    [syncSessionFromApiResponse]
   );
 
-  // LOGOUT
+  const register = useCallback(
+    async (data: RegisterRequest) => {
+      if (isJwtAuthMock()) {
+        const accessToken = createMockAccessToken();
+        const [first, ...rest] = data.name.split(' ');
+        const user = buildMockAuthUser(data.email, first, rest.join(' ') || undefined);
+        syncSessionFromApiResponse({
+          access: accessToken,
+          refresh: '',
+          user,
+        });
+        return;
+      }
+
+      const payload = await fetchRegister(data);
+      syncSessionFromApiResponse(payload);
+    },
+    [syncSessionFromApiResponse]
+  );
+
   const logout = useCallback(async () => {
-    if (isJwtAuthMock()) {
-      sessionStorage.removeItem(MOCK_AUTH_USER_KEY);
-    }
+    sessionStorage.removeItem(REFRESH_TOKEN_KEY);
+    sessionStorage.removeItem(AUTH_USER_KEY);
     setSession(null);
     dispatch({
       type: Types.LOGOUT,
     });
   }, []);
-
-  // ----------------------------------------------------------------------
 
   const checkAuthenticated = state.user ? 'authenticated' : 'unauthenticated';
 
@@ -239,12 +208,12 @@ export function AuthProvider({ children }: Props) {
       loading: status === 'loading',
       authenticated: status === 'authenticated',
       unauthenticated: status === 'unauthenticated',
-      //
+      syncSessionFromApiResponse,
       login,
       register,
       logout,
     }),
-    [login, logout, register, state.user, status]
+    [login, logout, register, state.user, status, syncSessionFromApiResponse]
   );
 
   return <AuthContext.Provider value={memoizedValue}>{children}</AuthContext.Provider>;

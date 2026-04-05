@@ -6,14 +6,14 @@ import Avatar from '@mui/material/Avatar';
 import InputBase from '@mui/material/InputBase';
 import IconButton from '@mui/material/IconButton';
 // hooks
-import { useMockedUser } from 'src/hooks/use-mocked-user';
+import { useAppUserProfile } from 'src/hooks/use-app-user-profile';
 // components
 import Iconify from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
 export default function KanbanDetailsCommentInput() {
-  const { user } = useMockedUser();
+  const { user } = useAppUserProfile();
 
   return (
     <Stack

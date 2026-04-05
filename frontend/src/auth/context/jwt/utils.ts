@@ -1,7 +1,6 @@
 // routes
 import { paths } from 'src/routes/paths';
-// utils
-import axios from 'src/utils/axios';
+import { AUTH_USER_KEY, REFRESH_TOKEN_KEY } from 'src/auth/api/storage-keys';
 
 // ----------------------------------------------------------------------
 
@@ -65,14 +64,12 @@ export const setSession = (accessToken: string | null) => {
   if (accessToken) {
     sessionStorage.setItem('accessToken', accessToken);
 
-    axios.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
-
     // This function below will handle when token is expired
     const { exp } = jwtDecode(accessToken); // ~3 days by minimals server
     tokenExpired(exp);
   } else {
     sessionStorage.removeItem('accessToken');
-
-    delete axios.defaults.headers.common.Authorization;
+    sessionStorage.removeItem(REFRESH_TOKEN_KEY);
+    sessionStorage.removeItem(AUTH_USER_KEY);
   }
 };

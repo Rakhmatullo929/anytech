@@ -68,7 +68,14 @@ export default function AmplifyRegisterView() {
   const onSubmit = useCallback(
     async (data: FormValuesProps) => {
       try {
-        await register?.(data.email, data.password, data.firstName, data.lastName);
+        await (
+          register as unknown as (
+            email: string,
+            password: string,
+            firstName: string,
+            lastName: string
+          ) => Promise<unknown>
+        )?.(data.email, data.password, data.firstName, data.lastName);
 
         const searchParams = new URLSearchParams({ email: data.email }).toString();
 

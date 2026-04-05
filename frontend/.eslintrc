@@ -83,6 +83,16 @@
         "ignoreCase": false
       }
     ],
+    "import/extensions": [
+      "error",
+      "ignorePackages",
+      {
+        "js": "never",
+        "jsx": "never",
+        "ts": "never",
+        "tsx": "never"
+      }
+    ],
     "unused-imports/no-unused-imports": 0,
     "unused-imports/no-unused-vars": [
       0,

@@ -18,12 +18,11 @@ import { RouterLink } from 'src/routes/components';
 import { PATH_AFTER_LOGIN } from 'src/config-global';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
-// auth
-import { useAuthContext } from 'src/auth/hooks';
+import { useLoginMutation } from 'src/auth/api';
 // components
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
-
+import { getAuthFormErrorMessage } from 'src/utils/api-error-messages';
 // ----------------------------------------------------------------------
 
 type FormValuesProps = {
@@ -32,7 +31,7 @@ type FormValuesProps = {
 };
 
 export default function JwtLoginView() {
-  const { login } = useAuthContext();
+  const loginMutation = useLoginMutation();
 
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -57,25 +56,20 @@ export default function JwtLoginView() {
     defaultValues,
   });
 
-  const {
-    reset,
-    handleSubmit,
-    formState: { isSubmitting },
-  } = methods;
+  const { handleSubmit, formState: { isSubmitting } } = methods;
 
   const onSubmit = useCallback(
     async (data: FormValuesProps) => {
       try {
-        await login?.(data.email, data.password);
-
+        setErrorMsg('');
+        await loginMutation.mutateAsync({ email: data.email, password: data.password });
         window.location.href = returnTo || PATH_AFTER_LOGIN;
       } catch (error) {
         console.error(error);
-        reset();
-        setErrorMsg(typeof error === 'string' ? error : error.message);
+        setErrorMsg(getAuthFormErrorMessage(error, 'login'));
       }
     },
-    [login, reset, returnTo]
+    [loginMutation, returnTo]
   );
 
   const renderHead = (
@@ -94,7 +88,11 @@ export default function JwtLoginView() {
 
   const renderForm = (
     <Stack spacing={2.5}>
-      {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
+      {!!errorMsg && (
+        <Alert severity="error" onClose={() => setErrorMsg('')}>
+          {errorMsg}
+        </Alert>
+      )}
 
       <RHFTextField name="email" label="Email address" />
 
@@ -123,7 +121,7 @@ export default function JwtLoginView() {
         size="large"
         type="submit"
         variant="contained"
-        loading={isSubmitting}
+        loading={isSubmitting || loginMutation.isPending}
       >
         Login
       </LoadingButton>

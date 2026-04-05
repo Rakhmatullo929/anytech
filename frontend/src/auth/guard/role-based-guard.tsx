@@ -4,7 +4,7 @@ import { Theme, SxProps } from '@mui/material/styles';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 // hooks
-import { useMockedUser } from 'src/hooks/use-mocked-user';
+import { useAppUserProfile } from 'src/hooks/use-app-user-profile';
 // assets
 import { ForbiddenIllustration } from 'src/assets/illustrations';
 // components
@@ -21,7 +21,7 @@ type RoleBasedGuardProp = {
 
 export default function RoleBasedGuard({ hasContent, roles, children, sx }: RoleBasedGuardProp) {
   // Logic here to get current user role
-  const { user } = useMockedUser();
+  const { user } = useAppUserProfile();
 
   // const currentRole = 'user';
   const currentRole = user?.role; // admin;

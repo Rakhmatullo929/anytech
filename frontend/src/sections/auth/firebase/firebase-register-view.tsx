@@ -69,7 +69,14 @@ export default function FirebaseRegisterView() {
   const onSubmit = useCallback(
     async (data: FormValuesProps) => {
       try {
-        await register?.(data.email, data.password, data.firstName, data.lastName);
+        await (
+          register as unknown as (
+            email: string,
+            password: string,
+            firstName: string,
+            lastName: string
+          ) => Promise<void>
+        )?.(data.email, data.password, data.firstName, data.lastName);
         const searchParams = new URLSearchParams({ email: data.email }).toString();
 
         const href = `${paths.auth.firebase.verify}?${searchParams}`;

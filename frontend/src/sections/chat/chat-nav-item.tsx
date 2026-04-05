@@ -9,7 +9,7 @@ import AvatarGroup from '@mui/material/AvatarGroup';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemButton from '@mui/material/ListItemButton';
 // hooks
-import { useMockedUser } from 'src/hooks/use-mocked-user';
+import { useAppUserProfile } from 'src/hooks/use-app-user-profile';
 // types
 import { IChatConversation } from 'src/types/chat';
 //
@@ -30,7 +30,7 @@ export default function ChatNavItem({
   conversation,
   onClickConversation,
 }: Props) {
-  const { user } = useMockedUser();
+  const { user } = useAppUserProfile();
 
   const {
     group,
