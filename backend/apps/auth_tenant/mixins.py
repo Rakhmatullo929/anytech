@@ -15,4 +15,4 @@ class TenantQuerySetMixin:
         serializer.save(tenant=self.request.user.tenant)
 
     def perform_update(self, serializer):
-        serializer.save()
+        serializer.save(tenant=self.request.user.tenant)
