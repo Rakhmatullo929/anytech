@@ -6,14 +6,33 @@ import { apiClient } from './http-client';
 
 type RequestConfig = AxiosRequestConfig & { skipAuth?: boolean };
 
+const SUPPORTED_API_LANG = new Set(['uz', 'ru']);
+
+/** Map localStorage / i18next values to backend `lang` (uz | ru). */
+function pickApiLang(raw: string | null | undefined): string | null {
+  if (!raw) {
+    return null;
+  }
+  const base = raw.split('-')[0].toLowerCase();
+  return SUPPORTED_API_LANG.has(base) ? base : null;
+}
+
 function resolveDefaultLang(): string {
   if (typeof localStorage !== 'undefined') {
-    const fromStorage = localStorage.getItem('language');
-    if (fromStorage) {
-      return fromStorage;
+    const fromI18n = pickApiLang(localStorage.getItem('i18nextLng'));
+    if (fromI18n) {
+      return fromI18n;
+    }
+    const fromLegacy = pickApiLang(localStorage.getItem('language'));
+    if (fromLegacy) {
+      return fromLegacy;
     }
   }
-  return process.env.REACT_APP_DEFAULT_API_LANG || 'uz';
+  const env = process.env.REACT_APP_DEFAULT_API_LANG;
+  if (env && SUPPORTED_API_LANG.has(env)) {
+    return env;
+  }
+  return 'uz';
 }
 
 /**

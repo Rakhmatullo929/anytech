@@ -34,10 +34,21 @@ i18n
     },
   });
 
-i18n.on('languageChanged', (nextLng) => {
-  if (localStorageAvailable()) {
-    localStorage.setItem('language', nextLng);
+function syncLanguageForApi(nextLng: string) {
+  if (!localStorageAvailable()) {
+    return;
   }
+  const base = nextLng.split('-')[0];
+  const normalized = supportedLngs.includes(base) ? base : defaultLang.value;
+  localStorage.setItem('language', normalized);
+}
+
+i18n.on('initialized', () => {
+  syncLanguageForApi(i18n.language);
+});
+
+i18n.on('languageChanged', (nextLng) => {
+  syncLanguageForApi(nextLng);
 });
 
 export default i18n;
