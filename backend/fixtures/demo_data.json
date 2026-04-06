@@ -1,0 +1,496 @@
+[
+  {
+    "model": "auth_tenant.tenant",
+    "pk": "a1000000-0000-0000-0000-000000000001",
+    "fields": {
+      "name": "TechShop",
+      "created_at": "2025-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "auth_tenant.tenant",
+    "pk": "a1000000-0000-0000-0000-000000000002",
+    "fields": {
+      "name": "MobileWorld",
+      "created_at": "2025-01-01T10:00:00Z"
+    }
+  },
+
+  {
+    "model": "auth_tenant.user",
+    "pk": "b1000000-0000-0000-0000-000000000001",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000001",
+      "email": "admin@techshop.com",
+      "name": "Admin TechShop",
+      "password": "pbkdf2_sha256$870000$test$test_hash_placeholder",
+      "role": "admin",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "created_at": "2025-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "auth_tenant.user",
+    "pk": "b1000000-0000-0000-0000-000000000002",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000001",
+      "email": "manager@techshop.com",
+      "name": "Manager TechShop",
+      "password": "pbkdf2_sha256$870000$test$test_hash_placeholder",
+      "role": "manager",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "created_at": "2025-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "auth_tenant.user",
+    "pk": "b1000000-0000-0000-0000-000000000003",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000001",
+      "email": "seller@techshop.com",
+      "name": "Seller TechShop",
+      "password": "pbkdf2_sha256$870000$test$test_hash_placeholder",
+      "role": "seller",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "created_at": "2025-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "auth_tenant.user",
+    "pk": "b1000000-0000-0000-0000-000000000004",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000002",
+      "email": "admin@mobileworld.com",
+      "name": "Admin MobileWorld",
+      "password": "pbkdf2_sha256$870000$test$test_hash_placeholder",
+      "role": "admin",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "created_at": "2025-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "auth_tenant.user",
+    "pk": "b1000000-0000-0000-0000-000000000005",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000002",
+      "email": "seller@mobileworld.com",
+      "name": "Seller MobileWorld",
+      "password": "pbkdf2_sha256$870000$test$test_hash_placeholder",
+      "role": "seller",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "created_at": "2025-01-01T10:00:00Z"
+    }
+  },
+
+  {
+    "model": "products.product",
+    "pk": "c1000000-0000-0000-0000-000000000001",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000001",
+      "name": "iPhone 15 Pro",
+      "sku": "IPH15PRO",
+      "purchase_price": "900.00",
+      "sale_price": "1100.00",
+      "stock": 25,
+      "created_at": "2025-01-15T10:00:00Z",
+      "updated_at": "2025-01-15T10:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": "c1000000-0000-0000-0000-000000000002",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000001",
+      "name": "Samsung Galaxy S24",
+      "sku": "SGS24",
+      "purchase_price": "750.00",
+      "sale_price": "950.00",
+      "stock": 18,
+      "created_at": "2025-01-15T10:00:00Z",
+      "updated_at": "2025-01-15T10:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": "c1000000-0000-0000-0000-000000000003",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000001",
+      "name": "AirPods Pro 2",
+      "sku": "APP2",
+      "purchase_price": "180.00",
+      "sale_price": "250.00",
+      "stock": 40,
+      "created_at": "2025-01-15T10:00:00Z",
+      "updated_at": "2025-01-15T10:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": "c1000000-0000-0000-0000-000000000004",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000001",
+      "name": "MacBook Air M3",
+      "sku": "MBA-M3",
+      "purchase_price": "1050.00",
+      "sale_price": "1300.00",
+      "stock": 10,
+      "created_at": "2025-01-15T10:00:00Z",
+      "updated_at": "2025-01-15T10:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": "c1000000-0000-0000-0000-000000000005",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000001",
+      "name": "Чехол силиконовый iPhone 15",
+      "sku": "CASE-IPH15",
+      "purchase_price": "5.00",
+      "sale_price": "15.00",
+      "stock": 100,
+      "created_at": "2025-01-15T10:00:00Z",
+      "updated_at": "2025-01-15T10:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": "c1000000-0000-0000-0000-000000000006",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000002",
+      "name": "Xiaomi 14 Ultra",
+      "sku": "XI14U",
+      "purchase_price": "600.00",
+      "sale_price": "800.00",
+      "stock": 15,
+      "created_at": "2025-01-15T10:00:00Z",
+      "updated_at": "2025-01-15T10:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": "c1000000-0000-0000-0000-000000000007",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000002",
+      "name": "Redmi Note 13 Pro",
+      "sku": "RN13PRO",
+      "purchase_price": "200.00",
+      "sale_price": "300.00",
+      "stock": 30,
+      "created_at": "2025-01-15T10:00:00Z",
+      "updated_at": "2025-01-15T10:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": "c1000000-0000-0000-0000-000000000008",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000002",
+      "name": "Защитное стекло универсальное",
+      "sku": "GLASS-UNI",
+      "purchase_price": "3.00",
+      "sale_price": "10.00",
+      "stock": 200,
+      "created_at": "2025-01-15T10:00:00Z",
+      "updated_at": "2025-01-15T10:00:00Z"
+    }
+  },
+
+  {
+    "model": "clients.client",
+    "pk": "d1000000-0000-0000-0000-000000000001",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000001",
+      "name": "Иванов Алексей",
+      "phone": "+998901234567",
+      "created_at": "2025-02-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "clients.client",
+    "pk": "d1000000-0000-0000-0000-000000000002",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000001",
+      "name": "Петрова Мария",
+      "phone": "+998937654321",
+      "created_at": "2025-02-05T14:30:00Z"
+    }
+  },
+  {
+    "model": "clients.client",
+    "pk": "d1000000-0000-0000-0000-000000000003",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000001",
+      "name": "Сидоров Дмитрий",
+      "phone": "+998911112233",
+      "created_at": "2025-02-10T09:15:00Z"
+    }
+  },
+  {
+    "model": "clients.client",
+    "pk": "d1000000-0000-0000-0000-000000000004",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000002",
+      "name": "Каримов Бахтиёр",
+      "phone": "+998944445566",
+      "created_at": "2025-02-03T11:00:00Z"
+    }
+  },
+  {
+    "model": "clients.client",
+    "pk": "d1000000-0000-0000-0000-000000000005",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000002",
+      "name": "Рахимова Нигора",
+      "phone": "+998977778899",
+      "created_at": "2025-02-08T16:45:00Z"
+    }
+  },
+
+  {
+    "model": "sales.sale",
+    "pk": "e1000000-0000-0000-0000-000000000001",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000001",
+      "client": "d1000000-0000-0000-0000-000000000001",
+      "total_amount": "1350.00",
+      "payment_type": "cash",
+      "created_at": "2025-03-01T12:00:00Z"
+    }
+  },
+  {
+    "model": "sales.sale",
+    "pk": "e1000000-0000-0000-0000-000000000002",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000001",
+      "client": "d1000000-0000-0000-0000-000000000001",
+      "total_amount": "1300.00",
+      "payment_type": "debt",
+      "created_at": "2025-03-10T15:30:00Z"
+    }
+  },
+  {
+    "model": "sales.sale",
+    "pk": "e1000000-0000-0000-0000-000000000003",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000001",
+      "client": "d1000000-0000-0000-0000-000000000002",
+      "total_amount": "950.00",
+      "payment_type": "card",
+      "created_at": "2025-03-05T10:00:00Z"
+    }
+  },
+  {
+    "model": "sales.sale",
+    "pk": "e1000000-0000-0000-0000-000000000004",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000001",
+      "client": "d1000000-0000-0000-0000-000000000003",
+      "total_amount": "265.00",
+      "payment_type": "debt",
+      "created_at": "2025-03-12T09:00:00Z"
+    }
+  },
+  {
+    "model": "sales.sale",
+    "pk": "e1000000-0000-0000-0000-000000000005",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000002",
+      "client": "d1000000-0000-0000-0000-000000000004",
+      "total_amount": "810.00",
+      "payment_type": "cash",
+      "created_at": "2025-03-02T14:00:00Z"
+    }
+  },
+  {
+    "model": "sales.sale",
+    "pk": "e1000000-0000-0000-0000-000000000006",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000002",
+      "client": "d1000000-0000-0000-0000-000000000004",
+      "total_amount": "300.00",
+      "payment_type": "debt",
+      "created_at": "2025-03-15T11:00:00Z"
+    }
+  },
+
+  {
+    "model": "sales.saleitem",
+    "pk": "f1000000-0000-0000-0000-000000000001",
+    "fields": {
+      "sale": "e1000000-0000-0000-0000-000000000001",
+      "product": "c1000000-0000-0000-0000-000000000001",
+      "quantity": 1,
+      "price": "1100.00"
+    }
+  },
+  {
+    "model": "sales.saleitem",
+    "pk": "f1000000-0000-0000-0000-000000000002",
+    "fields": {
+      "sale": "e1000000-0000-0000-0000-000000000001",
+      "product": "c1000000-0000-0000-0000-000000000003",
+      "quantity": 1,
+      "price": "250.00"
+    }
+  },
+  {
+    "model": "sales.saleitem",
+    "pk": "f1000000-0000-0000-0000-000000000003",
+    "fields": {
+      "sale": "e1000000-0000-0000-0000-000000000002",
+      "product": "c1000000-0000-0000-0000-000000000004",
+      "quantity": 1,
+      "price": "1300.00"
+    }
+  },
+  {
+    "model": "sales.saleitem",
+    "pk": "f1000000-0000-0000-0000-000000000004",
+    "fields": {
+      "sale": "e1000000-0000-0000-0000-000000000003",
+      "product": "c1000000-0000-0000-0000-000000000002",
+      "quantity": 1,
+      "price": "950.00"
+    }
+  },
+  {
+    "model": "sales.saleitem",
+    "pk": "f1000000-0000-0000-0000-000000000005",
+    "fields": {
+      "sale": "e1000000-0000-0000-0000-000000000004",
+      "product": "c1000000-0000-0000-0000-000000000003",
+      "quantity": 1,
+      "price": "250.00"
+    }
+  },
+  {
+    "model": "sales.saleitem",
+    "pk": "f1000000-0000-0000-0000-000000000006",
+    "fields": {
+      "sale": "e1000000-0000-0000-0000-000000000004",
+      "product": "c1000000-0000-0000-0000-000000000005",
+      "quantity": 1,
+      "price": "15.00"
+    }
+  },
+  {
+    "model": "sales.saleitem",
+    "pk": "f1000000-0000-0000-0000-000000000007",
+    "fields": {
+      "sale": "e1000000-0000-0000-0000-000000000005",
+      "product": "c1000000-0000-0000-0000-000000000006",
+      "quantity": 1,
+      "price": "800.00"
+    }
+  },
+  {
+    "model": "sales.saleitem",
+    "pk": "f1000000-0000-0000-0000-000000000008",
+    "fields": {
+      "sale": "e1000000-0000-0000-0000-000000000005",
+      "product": "c1000000-0000-0000-0000-000000000008",
+      "quantity": 1,
+      "price": "10.00"
+    }
+  },
+  {
+    "model": "sales.saleitem",
+    "pk": "f1000000-0000-0000-0000-000000000009",
+    "fields": {
+      "sale": "e1000000-0000-0000-0000-000000000006",
+      "product": "c1000000-0000-0000-0000-000000000007",
+      "quantity": 1,
+      "price": "300.00"
+    }
+  },
+
+  {
+    "model": "debts.debt",
+    "pk": "a2000000-0000-0000-0000-000000000001",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000001",
+      "client": "d1000000-0000-0000-0000-000000000001",
+      "sale": "e1000000-0000-0000-0000-000000000002",
+      "total_amount": "1300.00",
+      "paid_amount": "500.00",
+      "status": "active",
+      "created_at": "2025-03-10T15:30:00Z",
+      "updated_at": "2025-03-20T10:00:00Z"
+    }
+  },
+  {
+    "model": "debts.debt",
+    "pk": "a2000000-0000-0000-0000-000000000002",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000001",
+      "client": "d1000000-0000-0000-0000-000000000003",
+      "sale": "e1000000-0000-0000-0000-000000000004",
+      "total_amount": "265.00",
+      "paid_amount": "265.00",
+      "status": "closed",
+      "created_at": "2025-03-12T09:00:00Z",
+      "updated_at": "2025-03-25T14:00:00Z"
+    }
+  },
+  {
+    "model": "debts.debt",
+    "pk": "a2000000-0000-0000-0000-000000000003",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000002",
+      "client": "d1000000-0000-0000-0000-000000000004",
+      "sale": "e1000000-0000-0000-0000-000000000006",
+      "total_amount": "300.00",
+      "paid_amount": "100.00",
+      "status": "active",
+      "created_at": "2025-03-15T11:00:00Z",
+      "updated_at": "2025-03-22T16:00:00Z"
+    }
+  },
+
+  {
+    "model": "debts.payment",
+    "pk": "a3000000-0000-0000-0000-000000000001",
+    "fields": {
+      "debt": "a2000000-0000-0000-0000-000000000001",
+      "amount": "300.00",
+      "created_at": "2025-03-15T10:00:00Z"
+    }
+  },
+  {
+    "model": "debts.payment",
+    "pk": "a3000000-0000-0000-0000-000000000002",
+    "fields": {
+      "debt": "a2000000-0000-0000-0000-000000000001",
+      "amount": "200.00",
+      "created_at": "2025-03-20T10:00:00Z"
+    }
+  },
+  {
+    "model": "debts.payment",
+    "pk": "a3000000-0000-0000-0000-000000000003",
+    "fields": {
+      "debt": "a2000000-0000-0000-0000-000000000002",
+      "amount": "265.00",
+      "created_at": "2025-03-25T14:00:00Z"
+    }
+  },
+  {
+    "model": "debts.payment",
+    "pk": "a3000000-0000-0000-0000-000000000004",
+    "fields": {
+      "debt": "a2000000-0000-0000-0000-000000000003",
+      "amount": "100.00",
+      "created_at": "2025-03-22T16:00:00Z"
+    }
+  }
+]
