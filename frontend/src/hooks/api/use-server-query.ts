@@ -21,7 +21,7 @@ import { paths } from 'src/routes/paths';
 import { useAuthContext } from 'src/auth/hooks/use-auth-context';
 import { errorReader } from 'src/utils/error-reader';
 
-import { useIntersectionObserver } from '../use-intersection-observer';
+import { useIntersectionObserver } from 'src/hooks/use-intersection-observer';
 import {
   addToInfinite,
   addToList,
@@ -30,7 +30,7 @@ import {
   updateInfinite,
   updateList,
   updateObject,
-} from './query-cache-updaters';
+} from 'src/hooks/api/query-cache-updaters';
 import type { BaseError, ModelType, Pagination } from './types';
 
 export type { BaseError, ModelType, Pagination } from './types';

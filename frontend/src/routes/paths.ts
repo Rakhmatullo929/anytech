@@ -28,14 +28,10 @@ export const paths = {
   docs: 'https://docs.minimals.cc',
   changelog: 'https://docs.minimals.cc/changelog',
 
-  /** JWT provider uses `method: 'jwt'` and these URLs */
   auth: {
     jwt: {
       login: '/login',
       register: '/register',
     },
-    auth0: { login: '/login' },
-    amplify: { login: '/login' },
-    firebase: { login: '/login' },
   },
 };
