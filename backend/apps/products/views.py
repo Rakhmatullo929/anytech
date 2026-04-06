@@ -30,7 +30,7 @@ class ProductViewSet(TenantQuerySetMixin, ModelViewSet):
         return [IsManagerOrAbove()]
 
     def get_serializer_class(self):
-        if self.action == "update":
+        if self.action in ("update", "partial_update"):
             return ProductUpdateSerializer
         if self.action == "adjust_stock":
             return StockAdjustmentSerializer

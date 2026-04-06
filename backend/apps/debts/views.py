@@ -1,8 +1,10 @@
 from django.db import transaction
+from django.http import Http404
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import GenericViewSet
 
 from auth_tenant.mixins import TenantQuerySetMixin
 from auth_tenant.permissions import IsSellerOrAbove
@@ -11,10 +13,13 @@ from .models import Debt, Payment
 from .serializers import DebtDetailSerializer, DebtListSerializer, PaymentCreateSerializer
 
 
-class DebtViewSet(TenantQuerySetMixin, ModelViewSet):
+class DebtViewSet(TenantQuerySetMixin, ListModelMixin, RetrieveModelMixin, GenericViewSet):
+    """
+    Debts are created automatically via debt-type sales.
+    This ViewSet only allows listing, retrieving, and recording payments.
+    """
     queryset = Debt.objects.select_related("client").all()
     serializer_class = DebtListSerializer
-    http_method_names = ["get", "post", "head", "options"]
 
     filterset_fields = ["status"]
     ordering_fields = ["created_at", "total_amount"]
@@ -43,12 +48,15 @@ class DebtViewSet(TenantQuerySetMixin, ModelViewSet):
         amount = serializer.validated_data["amount"]
 
         with transaction.atomic():
-            debt = (
-                self.get_queryset()
-                .select_for_update()
-                .select_related("client")
-                .get(pk=pk)
-            )
+            try:
+                debt = (
+                    self.get_queryset()
+                    .select_for_update()
+                    .select_related("client")
+                    .get(pk=pk)
+                )
+            except Debt.DoesNotExist:
+                raise Http404
 
             if debt.status == Debt.Status.CLOSED:
                 raise ValidationError({"detail": "Debt is already closed."})
@@ -65,7 +73,6 @@ class DebtViewSet(TenantQuerySetMixin, ModelViewSet):
                 debt.status = Debt.Status.CLOSED
             debt.save(update_fields=["paid_amount", "status", "updated_at"])
 
-        # Prefetch payments for response (includes the newly created one)
         debt = (
             self.get_queryset()
             .select_related("client")

@@ -15,7 +15,10 @@ INSTALLED_APPS += ["debug_toolbar"]
 
 MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
 
-INTERNAL_IPS = ["127.0.0.1", "172.0.0.0/8"]
+INTERNAL_IPS = ["127.0.0.1"]
+
+# In Docker, the gateway IP is dynamic. Use django-debug-toolbar's
+# SHOW_TOOLBAR_CALLBACK for Docker environments if needed.
 
 # ---------------------------------------------------------------------------
 # Database — PostgreSQL via DATABASE_URL in Docker, SQLite locally
@@ -42,6 +45,9 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"] += [  # noqa: F405
     "rest_framework.renderers.BrowsableAPIRenderer",
 ]
+
+# Disable throttling in development / tests
+REST_FRAMEWORK["DEFAULT_THROTTLE_CLASSES"] = []  # noqa: F405
 
 # ---------------------------------------------------------------------------
 # CORS — allow all in dev
