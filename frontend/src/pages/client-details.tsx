@@ -1,11 +1,14 @@
 import { Helmet } from 'react-helmet-async';
+import { useLocales } from 'src/locales';
 import ClientDetailsView from 'src/sections/app/client-details-view';
 
 export default function ClientDetailsPage() {
+  const { tx } = useLocales();
+
   return (
     <>
       <Helmet>
-        <title> Клиент</title>
+        <title>{tx('pages.clients.detail_document_title')}</title>
       </Helmet>
       <ClientDetailsView />
     </>

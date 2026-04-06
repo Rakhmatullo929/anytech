@@ -3,6 +3,8 @@ import { useMemo } from 'react';
 import { paths } from 'src/routes/paths';
 // hooks
 import { useAppUserProfile } from 'src/hooks/use-app-user-profile';
+// locales
+import { useLocales } from 'src/locales';
 // components
 import SvgColor from 'src/components/svg-color';
 
@@ -26,38 +28,39 @@ const MANAGER_ROLES = ['admin', 'manager'];
 
 export function useNavData() {
   const { user } = useAppUserProfile();
+  const { tx } = useLocales();
 
   const canManage = MANAGER_ROLES.includes(user.role);
 
   const data = useMemo(
     () => [
       {
-        subheader: 'Магазин',
+        subheader: tx('layout.nav.group'),
         items: [
           {
-            title: 'POS',
+            title: tx('layout.nav.pos'),
             path: paths.pos,
             icon: ICONS.pos,
           },
           ...(canManage
             ? [
                 {
-                  title: 'Товары',
+                  title: tx('layout.nav.products'),
                   path: paths.products,
                   icon: ICONS.product,
                 },
                 {
-                  title: 'Клиенты',
+                  title: tx('layout.nav.clients'),
                   path: paths.clients.root,
                   icon: ICONS.user,
                 },
                 {
-                  title: 'Продажи',
+                  title: tx('layout.nav.sales'),
                   path: paths.sales.root,
                   icon: ICONS.order,
                 },
                 {
-                  title: 'Долги',
+                  title: tx('layout.nav.debts'),
                   path: paths.debts.root,
                   icon: ICONS.invoice,
                 },
@@ -66,7 +69,7 @@ export function useNavData() {
         ],
       },
     ],
-    [canManage]
+    [canManage, tx]
   );
 
   return data;

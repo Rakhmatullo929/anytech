@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+// locales
+import { useLocales } from 'src/locales';
 // @mui
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -29,13 +31,17 @@ import EmptyContent from 'src/components/empty-content';
 
 // ----------------------------------------------------------------------
 
-const PAY_HEAD = [
-  { id: 'amount', label: 'Сумма' },
-  { id: 'date', label: 'Дата' },
-];
-
 export default function DebtDetailsView() {
+  const { tx } = useLocales();
   const { id = '' } = useParams();
+
+  const payHead = useMemo(
+    () => [
+      { id: 'amount', label: tx('shared.table.amount') },
+      { id: 'date', label: tx('shared.table.date') },
+    ],
+    [tx]
+  );
   const [debt, setDebt] = useState<MockDebt | undefined>(() => MOCK_DEBTS.find((d) => d.id === id));
 
   const [payOpen, setPayOpen] = useState(false);
@@ -63,10 +69,10 @@ export default function DebtDetailsView() {
     return (
       <EmptyContent
         filled
-        title="Долг не найден"
+        title={tx('pages.debts.detail.not_found')}
         action={
           <Button component={RouterLink} href={paths.debts.root} variant="contained">
-            К списку
+            {tx('shared.actions.back_to_list')}
           </Button>
         }
       />
@@ -76,15 +82,15 @@ export default function DebtDetailsView() {
   return (
     <>
       <CustomBreadcrumbs
-        heading={`Долг · ${debt.clientName}`}
+        heading={tx('pages.debts.detail.heading_detail', { name: debt.clientName })}
         links={[
-          { name: 'Долги', href: paths.debts.root },
+          { name: tx('layout.nav.debts'), href: paths.debts.root },
           { name: debt.clientName, href: paths.debts.details(debt.id) },
         ]}
         action={
           debt.status === 'active' ? (
             <Button variant="contained" onClick={() => setPayOpen(true)}>
-              Добавить платёж
+              {tx('pages.debts.detail.add_payment')}
             </Button>
           ) : null
         }
@@ -94,20 +100,33 @@ export default function DebtDetailsView() {
       <Stack spacing={3}>
         <Card sx={{ p: 3 }}>
           <Stack spacing={1}>
-            <Typography>Клиент: {debt.clientName}</Typography>
-            <Typography>Всего: {fCurrency(debt.totalAmount)}</Typography>
-            <Typography>Оплачено: {fCurrency(debt.paidAmount)}</Typography>
-            <Typography>Остаток: {fCurrency(debt.remaining)}</Typography>
-            <Typography>Статус: {debt.status === 'active' ? 'Активен' : 'Закрыт'}</Typography>
+            <Typography>
+              {tx('pages.debts.detail.client_line')} {debt.clientName}
+            </Typography>
+            <Typography>
+              {tx('pages.debts.detail.total_line')} {fCurrency(debt.totalAmount)}
+            </Typography>
+            <Typography>
+              {tx('pages.debts.detail.paid_line')} {fCurrency(debt.paidAmount)}
+            </Typography>
+            <Typography>
+              {tx('pages.debts.detail.rem_line')} {fCurrency(debt.remaining)}
+            </Typography>
+            <Typography>
+              {tx('pages.debts.detail.status_line')}{' '}
+              {debt.status === 'active'
+                ? tx('shared.status.row_active')
+                : tx('shared.status.row_closed')}
+            </Typography>
           </Stack>
         </Card>
 
         <Card sx={{ p: 2 }}>
           <Typography variant="h6" sx={{ mb: 2 }}>
-            Платежи
+            {tx('pages.debts.detail.payments_section_title')}
           </Typography>
           <Table size="small">
-            <TableHeadCustom headLabel={PAY_HEAD} />
+            <TableHeadCustom headLabel={payHead} />
             <TableBody>
               {debt.payments.map((p, i) => (
                 <TableRow key={i}>
@@ -141,6 +160,7 @@ function PaymentDialog({
   onClose: () => void;
   onSubmit: (n: number) => void;
 }) {
+  const { tx } = useLocales();
   const [val, setVal] = useState('');
 
   useEffect(() => {
@@ -155,23 +175,23 @@ function PaymentDialog({
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-      <DialogTitle>Платёж</DialogTitle>
+      <DialogTitle>{tx('pages.debts.payment_dialog.title')}</DialogTitle>
       <DialogContent>
         <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 2 }}>
-          Максимум: {fCurrency(maxAmount)}
+          {tx('pages.debts.payment_dialog.max_amount')} {fCurrency(maxAmount)}
         </Typography>
         <TextField
           fullWidth
-          label="Сумма"
+          label={tx('shared.table.amount')}
           type="number"
           value={val}
           onChange={(e) => setVal(e.target.value)}
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Отмена</Button>
+        <Button onClick={onClose}>{tx('shared.actions.cancel')}</Button>
         <Button variant="contained" onClick={submit}>
-          Оплатить
+          {tx('pages.debts.payment_dialog.pay_button')}
         </Button>
       </DialogActions>
     </Dialog>

@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react';
+// locales
+import { useLocales } from 'src/locales';
 // @mui
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -27,23 +29,30 @@ import {
 
 // ----------------------------------------------------------------------
 
-const TABLE_HEAD = [
-  { id: 'id', label: 'Продажа' },
-  { id: 'client', label: 'Клиент' },
-  { id: 'total', label: 'Сумма' },
-  { id: 'pay', label: 'Оплата' },
-  { id: 'date', label: 'Дата' },
-];
-
-const PAY_LABEL: Record<string, string> = {
-  cash: 'Наличные',
-  card: 'Карта',
-  debt: 'В долг',
-};
-
 export default function SalesView() {
+  const { tx } = useLocales();
   const [rows] = useState(() => [...MOCK_SALES]);
   const table = useTable({ defaultRowsPerPage: 10 });
+
+  const tableHead = useMemo(
+    () => [
+      { id: 'id', label: tx('shared.table.sale_id') },
+      { id: 'client', label: tx('shared.table.client') },
+      { id: 'total', label: tx('shared.table.total') },
+      { id: 'pay', label: tx('shared.table.pay') },
+      { id: 'date', label: tx('shared.table.date') },
+    ],
+    [tx]
+  );
+
+  const payLabel = useMemo(
+    () => ({
+      cash: tx('shared.payment.cash'),
+      card: tx('shared.payment.card'),
+      debt: tx('shared.payment.debt'),
+    }),
+    [tx]
+  );
 
   const paginated = useMemo(
     () => rows.slice(table.page * table.rowsPerPage, table.page * table.rowsPerPage + table.rowsPerPage),
@@ -53,8 +62,8 @@ export default function SalesView() {
   return (
     <>
       <CustomBreadcrumbs
-        heading="История продаж"
-        links={[{ name: 'Продажи', href: paths.sales.root }]}
+        heading={tx('pages.sales.list_heading')}
+        links={[{ name: tx('layout.nav.sales'), href: paths.sales.root }]}
         sx={{ mb: { xs: 3, md: 5 } }}
       />
 
@@ -62,7 +71,7 @@ export default function SalesView() {
         <Stack spacing={2} sx={{ p: 2 }}>
           <Scrollbar>
             <Table size="small">
-              <TableHeadCustom headLabel={TABLE_HEAD} />
+              <TableHeadCustom headLabel={tableHead} />
               <TableBody>
                 {paginated.map((row) => (
                   <TableRow key={row.id}>
@@ -73,7 +82,7 @@ export default function SalesView() {
                     </TableCell>
                     <TableCell>{row.clientName}</TableCell>
                     <TableCell>{fCurrency(row.totalAmount)}</TableCell>
-                    <TableCell>{PAY_LABEL[row.paymentType]}</TableCell>
+                    <TableCell>{payLabel[row.paymentType as keyof typeof payLabel]}</TableCell>
                     <TableCell>{fDateTime(row.createdAt)}</TableCell>
                   </TableRow>
                 ))}

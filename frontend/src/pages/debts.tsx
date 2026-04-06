@@ -1,11 +1,14 @@
 import { Helmet } from 'react-helmet-async';
+import { useLocales } from 'src/locales';
 import DebtsView from 'src/sections/app/debts-view';
 
 export default function DebtsPage() {
+  const { tx } = useLocales();
+
   return (
     <>
       <Helmet>
-        <title> Долги</title>
+        <title>{tx('pages.debts.document_title')}</title>
       </Helmet>
       <DebtsView />
     </>

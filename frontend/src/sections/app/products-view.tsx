@@ -1,4 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
+// locales
+import { useLocales } from 'src/locales';
 // @mui
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -34,16 +36,21 @@ import {
 
 // ----------------------------------------------------------------------
 
-const TABLE_HEAD = [
-  { id: 'name', label: 'Название' },
-  { id: 'sku', label: 'SKU' },
-  { id: 'stock', label: 'Остаток' },
-  { id: 'purchase', label: 'Закупка' },
-  { id: 'sale', label: 'Продажа' },
-  { id: '', label: '' },
-];
-
 export default function ProductsView() {
+  const { tx } = useLocales();
+
+  const tableHead = useMemo(
+    () => [
+      { id: 'name', label: tx('shared.table.name') },
+      { id: 'sku', label: tx('shared.table.sku') },
+      { id: 'stock', label: tx('shared.table.stock') },
+      { id: 'purchase', label: tx('shared.table.purchase') },
+      { id: 'sale', label: tx('shared.table.sale_price') },
+      { id: '', label: '' },
+    ],
+    [tx]
+  );
+
   const [rows, setRows] = useState<MockCatalogProduct[]>(() => [...MOCK_CATALOG]);
   const [query, setQuery] = useState('');
 
@@ -71,15 +78,15 @@ export default function ProductsView() {
   return (
     <>
       <CustomBreadcrumbs
-        heading="Товары"
-        links={[{ name: 'Товары', href: paths.products }]}
+        heading={tx('layout.nav.products')}
+        links={[{ name: tx('layout.nav.products'), href: paths.products }]}
         action={
           <Button
             variant="contained"
             startIcon={<Iconify icon="mingcute:add-line" />}
             onClick={() => setCreateOpen(true)}
           >
-            Создать товар
+            {tx('pages.products.create_button')}
           </Button>
         }
         sx={{ mb: { xs: 3, md: 5 } }}
@@ -89,7 +96,7 @@ export default function ProductsView() {
         <Stack spacing={2} sx={{ p: 2 }}>
           <TextField
             size="small"
-            placeholder="Поиск по названию или SKU…"
+            placeholder={tx('pages.products.search_placeholder')}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             sx={{ maxWidth: 360 }}
@@ -97,7 +104,7 @@ export default function ProductsView() {
 
           <Scrollbar>
             <Table size="small">
-              <TableHeadCustom headLabel={TABLE_HEAD} />
+              <TableHeadCustom headLabel={tableHead} />
               <TableBody>
                 {paginated.map((row) => (
                   <TableRow key={row.id}>
@@ -171,6 +178,7 @@ function ProductCreateDialog({
   onClose: () => void;
   onSave: (p: MockCatalogProduct) => void;
 }) {
+  const { tx } = useLocales();
   const [name, setName] = useState('');
   const [sku, setSku] = useState('');
   const [purchase, setPurchase] = useState('0');
@@ -205,25 +213,40 @@ function ProductCreateDialog({
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>Новый товар</DialogTitle>
+      <DialogTitle>{tx('pages.products.dialogs.create.title')}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
-          <TextField label="Название" required value={name} onChange={(e) => setName(e.target.value)} />
-          <TextField label="SKU" value={sku} onChange={(e) => setSku(e.target.value)} />
           <TextField
-            label="Закупочная цена"
+            label={tx('shared.table.name')}
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <TextField label={tx('shared.table.sku')} value={sku} onChange={(e) => setSku(e.target.value)} />
+          <TextField
+            label={tx('pages.products.dialogs.create.purchase_price')}
             type="number"
             value={purchase}
             onChange={(e) => setPurchase(e.target.value)}
           />
-          <TextField label="Цена продажи" type="number" value={sale} onChange={(e) => setSale(e.target.value)} />
-          <TextField label="Начальный остаток" type="number" value={stock} onChange={(e) => setStock(e.target.value)} />
+          <TextField
+            label={tx('pages.products.dialogs.create.sale_price')}
+            type="number"
+            value={sale}
+            onChange={(e) => setSale(e.target.value)}
+          />
+          <TextField
+            label={tx('pages.products.dialogs.create.initial_stock')}
+            type="number"
+            value={stock}
+            onChange={(e) => setStock(e.target.value)}
+          />
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Отмена</Button>
+        <Button onClick={onClose}>{tx('shared.actions.cancel')}</Button>
         <Button variant="contained" onClick={submit}>
-          Сохранить
+          {tx('shared.actions.save')}
         </Button>
       </DialogActions>
     </Dialog>
@@ -239,6 +262,7 @@ function ProductEditDialog({
   onClose: () => void;
   onSave: (p: MockCatalogProduct) => void;
 }) {
+  const { tx } = useLocales();
   const open = !!row;
   const [name, setName] = useState('');
   const [sku, setSku] = useState('');
@@ -270,27 +294,37 @@ function ProductEditDialog({
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>Редактирование</DialogTitle>
+      <DialogTitle>{tx('pages.products.dialogs.edit.title')}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
-          <TextField label="Название" required value={name} onChange={(e) => setName(e.target.value)} />
-          <TextField label="SKU" value={sku} onChange={(e) => setSku(e.target.value)} />
           <TextField
-            label="Закупочная цена"
+            label={tx('shared.table.name')}
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <TextField label={tx('shared.table.sku')} value={sku} onChange={(e) => setSku(e.target.value)} />
+          <TextField
+            label={tx('pages.products.dialogs.create.purchase_price')}
             type="number"
             value={purchase}
             onChange={(e) => setPurchase(e.target.value)}
           />
-          <TextField label="Цена продажи" type="number" value={sale} onChange={(e) => setSale(e.target.value)} />
+          <TextField
+            label={tx('pages.products.dialogs.create.sale_price')}
+            type="number"
+            value={sale}
+            onChange={(e) => setSale(e.target.value)}
+          />
           <Typography variant="caption" color="text.secondary">
-            Остаток меняется только через «Изменить остаток».
+            {tx('pages.products.dialogs.edit.stock_hint')}
           </Typography>
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Отмена</Button>
+        <Button onClick={onClose}>{tx('shared.actions.cancel')}</Button>
         <Button variant="contained" onClick={submit}>
-          Сохранить
+          {tx('shared.actions.save')}
         </Button>
       </DialogActions>
     </Dialog>
@@ -306,6 +340,7 @@ function StockDialog({
   onClose: () => void;
   onApply: (id: string, nextStock: number) => void;
 }) {
+  const { tx } = useLocales();
   const open = !!row;
   const [mode, setMode] = useState<'set' | 'increment'>('set');
   const [value, setValue] = useState('0');
@@ -333,15 +368,24 @@ function StockDialog({
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-      <DialogTitle>Остаток</DialogTitle>
+      <DialogTitle>{tx('pages.products.dialogs.stock.title')}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
-          <TextField select label="Режим" value={mode} onChange={(e) => setMode(e.target.value as 'set' | 'increment')}>
-            <MenuItem value="set">Установить значение</MenuItem>
-            <MenuItem value="increment">Добавить / убавить</MenuItem>
+          <TextField
+            select
+            label={tx('pages.products.dialogs.stock.mode')}
+            value={mode}
+            onChange={(e) => setMode(e.target.value as 'set' | 'increment')}
+          >
+            <MenuItem value="set">{tx('pages.products.dialogs.stock.mode_set')}</MenuItem>
+            <MenuItem value="increment">{tx('pages.products.dialogs.stock.mode_increment')}</MenuItem>
           </TextField>
           <TextField
-            label={mode === 'set' ? 'Новый остаток' : 'Изменение (+/-)'}
+            label={
+              mode === 'set'
+                ? tx('pages.products.dialogs.stock.new_stock')
+                : tx('pages.products.dialogs.stock.delta')
+            }
             type="number"
             value={value}
             onChange={(e) => setValue(e.target.value)}
@@ -349,9 +393,9 @@ function StockDialog({
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Отмена</Button>
+        <Button onClick={onClose}>{tx('shared.actions.cancel')}</Button>
         <Button variant="contained" onClick={apply}>
-          Применить
+          {tx('shared.actions.apply')}
         </Button>
       </DialogActions>
     </Dialog>

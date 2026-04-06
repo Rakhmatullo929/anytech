@@ -1,4 +1,6 @@
 import { useMemo } from 'react';
+// locales
+import { useLocales } from 'src/locales';
 // @mui
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -25,14 +27,18 @@ import EmptyContent from 'src/components/empty-content';
 
 // ----------------------------------------------------------------------
 
-const SALE_HEAD = [
-  { id: 'id', label: 'Продажа' },
-  { id: 'total', label: 'Сумма' },
-  { id: 'date', label: 'Дата' },
-];
-
 export default function ClientDetailsView() {
+  const { tx } = useLocales();
   const { id = '' } = useParams();
+
+  const saleHead = useMemo(
+    () => [
+      { id: 'id', label: tx('shared.table.sale_id') },
+      { id: 'total', label: tx('shared.table.total') },
+      { id: 'date', label: tx('shared.table.date') },
+    ],
+    [tx]
+  );
 
   const client = useMemo(() => MOCK_CLIENTS.find((c) => c.id === id), [id]);
 
@@ -45,10 +51,10 @@ export default function ClientDetailsView() {
     return (
       <EmptyContent
         filled
-        title="Клиент не найден"
+        title={tx('pages.clients.detail.not_found')}
         action={
           <Button component={RouterLink} href={paths.clients.root} variant="contained">
-            К списку
+            {tx('shared.actions.back_to_list')}
           </Button>
         }
       />
@@ -60,7 +66,7 @@ export default function ClientDetailsView() {
       <CustomBreadcrumbs
         heading={client.name}
         links={[
-          { name: 'Клиенты', href: paths.clients.root },
+          { name: tx('layout.nav.clients'), href: paths.clients.root },
           { name: client.name, href: paths.clients.details(client.id) },
         ]}
         sx={{ mb: { xs: 3, md: 5 } }}
@@ -69,17 +75,17 @@ export default function ClientDetailsView() {
       <Stack spacing={3}>
         <Card sx={{ p: 3 }}>
           <Typography variant="subtitle2" color="text.secondary">
-            Телефон
+            {tx('pages.clients.detail.phone_label')}
           </Typography>
           <Typography variant="body1">{client.phone}</Typography>
         </Card>
 
         <Card sx={{ p: 2 }}>
           <Typography variant="h6" sx={{ mb: 2 }}>
-            История покупок
+            {tx('pages.clients.detail.purchase_history')}
           </Typography>
           <Table size="small">
-            <TableHeadCustom headLabel={SALE_HEAD} />
+            <TableHeadCustom headLabel={saleHead} />
             <TableBody>
               {sales.map((s) => (
                 <TableRow key={s.id}>

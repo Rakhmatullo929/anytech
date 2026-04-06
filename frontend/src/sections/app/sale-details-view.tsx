@@ -1,4 +1,6 @@
 import { useMemo } from 'react';
+// locales
+import { useLocales } from 'src/locales';
 // @mui
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -24,20 +26,27 @@ import EmptyContent from 'src/components/empty-content';
 
 // ----------------------------------------------------------------------
 
-const LINE_HEAD = [
-  { id: 'product', label: 'Товар' },
-  { id: 'qty', label: 'Кол-во' },
-  { id: 'price', label: 'Цена' },
-];
-
-const PAY_LABEL: Record<string, string> = {
-  cash: 'Наличные',
-  card: 'Карта',
-  debt: 'В долг',
-};
-
 export default function SaleDetailsView() {
+  const { tx } = useLocales();
   const { id = '' } = useParams();
+
+  const lineHead = useMemo(
+    () => [
+      { id: 'product', label: tx('shared.table.product') },
+      { id: 'qty', label: tx('shared.table.qty') },
+      { id: 'price', label: tx('shared.table.price') },
+    ],
+    [tx]
+  );
+
+  const payLabel = useMemo(
+    () => ({
+      cash: tx('shared.payment.cash'),
+      card: tx('shared.payment.card'),
+      debt: tx('shared.payment.debt'),
+    }),
+    [tx]
+  );
 
   const sale = useMemo(() => MOCK_SALES.find((s) => s.id === id), [id]);
 
@@ -45,10 +54,10 @@ export default function SaleDetailsView() {
     return (
       <EmptyContent
         filled
-        title="Продажа не найдена"
+        title={tx('pages.sales.detail.not_found')}
         action={
           <Button component={RouterLink} href={paths.sales.root} variant="contained">
-            К списку
+            {tx('shared.actions.back_to_list')}
           </Button>
         }
       />
@@ -58,9 +67,9 @@ export default function SaleDetailsView() {
   return (
     <>
       <CustomBreadcrumbs
-        heading={`Продажа ${sale.id}`}
+        heading={tx('pages.sales.detail.heading_detail', { id: sale.id })}
         links={[
-          { name: 'Продажи', href: paths.sales.root },
+          { name: tx('layout.nav.sales'), href: paths.sales.root },
           { name: sale.id, href: paths.sales.details(sale.id) },
         ]}
         sx={{ mb: { xs: 3, md: 5 } }}
@@ -70,24 +79,26 @@ export default function SaleDetailsView() {
         <Card sx={{ p: 3 }}>
           <Stack spacing={1}>
             <Typography variant="body2" color="text.secondary">
-              Клиент: <strong>{sale.clientName}</strong>
+              {tx('pages.sales.detail.client_line')} <strong>{sale.clientName}</strong>
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Дата: {fDateTime(sale.createdAt)}
+              {tx('pages.sales.detail.date_line')} {fDateTime(sale.createdAt)}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Оплата: {PAY_LABEL[sale.paymentType]}
+              {tx('pages.sales.detail.pay_line')} {payLabel[sale.paymentType]}
             </Typography>
-            <Typography variant="h6">Итого: {fCurrency(sale.totalAmount)}</Typography>
+            <Typography variant="h6">
+              {tx('shared.labels.total')}: {fCurrency(sale.totalAmount)}
+            </Typography>
           </Stack>
         </Card>
 
         <Card sx={{ p: 2 }}>
           <Typography variant="h6" sx={{ mb: 2 }}>
-            Состав
+            {tx('pages.sales.detail.lines_title')}
           </Typography>
           <Table size="small">
-            <TableHeadCustom headLabel={LINE_HEAD} />
+            <TableHeadCustom headLabel={lineHead} />
             <TableBody>
               {sale.lines.map((line, i) => (
                 <TableRow key={i}>

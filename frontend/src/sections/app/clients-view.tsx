@@ -1,4 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
+// locales
+import { useLocales } from 'src/locales';
 // @mui
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -33,14 +35,19 @@ import {
 
 // ----------------------------------------------------------------------
 
-const TABLE_HEAD = [
-  { id: 'name', label: 'Имя' },
-  { id: 'phone', label: 'Телефон' },
-  { id: 'created', label: 'Создан' },
-  { id: '', label: '' },
-];
-
 export default function ClientsView() {
+  const { tx } = useLocales();
+
+  const tableHead = useMemo(
+    () => [
+      { id: 'name', label: tx('pages.clients.dialogs.create.first_name_label') },
+      { id: 'phone', label: tx('shared.table.phone') },
+      { id: 'created', label: tx('shared.table.created') },
+      { id: '', label: '' },
+    ],
+    [tx]
+  );
+
   const [rows, setRows] = useState<MockClient[]>(() => [...MOCK_CLIENTS]);
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
@@ -67,11 +74,11 @@ export default function ClientsView() {
   return (
     <>
       <CustomBreadcrumbs
-        heading="Клиенты"
-        links={[{ name: 'Клиенты', href: paths.clients.root }]}
+        heading={tx('layout.nav.clients')}
+        links={[{ name: tx('layout.nav.clients'), href: paths.clients.root }]}
         action={
           <Button variant="contained" startIcon={<Iconify icon="mingcute:add-line" />} onClick={() => setOpen(true)}>
-            Добавить клиента
+            {tx('pages.clients.add_button')}
           </Button>
         }
         sx={{ mb: { xs: 3, md: 5 } }}
@@ -81,7 +88,7 @@ export default function ClientsView() {
         <Stack spacing={2} sx={{ p: 2 }}>
           <TextField
             size="small"
-            placeholder="Поиск по имени или телефону…"
+            placeholder={tx('pages.clients.search_placeholder')}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             sx={{ maxWidth: 360 }}
@@ -89,7 +96,7 @@ export default function ClientsView() {
 
           <Scrollbar>
             <Table size="small">
-              <TableHeadCustom headLabel={TABLE_HEAD} />
+              <TableHeadCustom headLabel={tableHead} />
               <TableBody>
                 {paginated.map((row) => (
                   <TableRow key={row.id}>
@@ -139,6 +146,7 @@ function ClientCreateDialog({
   onClose: () => void;
   onSave: (c: MockClient) => void;
 }) {
+  const { tx } = useLocales();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
 
@@ -163,17 +171,27 @@ function ClientCreateDialog({
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>Новый клиент</DialogTitle>
+      <DialogTitle>{tx('pages.clients.dialogs.create.title')}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
-          <TextField label="Имя" required value={name} onChange={(e) => setName(e.target.value)} />
-          <TextField label="Телефон" required value={phone} onChange={(e) => setPhone(e.target.value)} />
+          <TextField
+            label={tx('pages.clients.dialogs.create.first_name_label')}
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <TextField
+            label={tx('shared.table.phone')}
+            required
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+          />
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Отмена</Button>
+        <Button onClick={onClose}>{tx('shared.actions.cancel')}</Button>
         <Button variant="contained" onClick={submit}>
-          Сохранить
+          {tx('shared.actions.save')}
         </Button>
       </DialogActions>
     </Dialog>

@@ -1,54 +1,198 @@
 {
-  "app": "приложение",
-  "job": "вакансии",
-  "user": "пользователь",
-  "list": "список",
-  "edit": "изменить",
-  "shop": "магазин",
-  "blog": "блог",
-  "post": "пост",
-  "mail": "почта",
-  "chat": "чат",
-  "file": "файл",
-  "tour": "тур",
-  "cards": "карточки",
-  "blank": "пустая",
-  "order": "заказ",
-  "lists": "списки",
-  "create": "создать",
-  "kanban": "канбан",
-  "general": "общее",
-  "banking": "банкинг",
-  "booking": "бронирование",
-  "profile": "профиль",
+  "demo": {
+    "title": "Русский"
+  },
+  "layout": {
+    "nav": {
+      "clients": "Клиенты",
+      "debts": "Долги",
+      "group": "Магазин",
+      "pos": "POS",
+      "products": "Товары",
+      "sales": "Продажи"
+    }
+  },
+  "pages": {
+    "clients": {
+      "add_button": "Добавить клиента",
+      "detail": {
+        "not_found": "Клиент не найден",
+        "phone_label": "Телефон",
+        "purchase_history": "История покупок"
+      },
+      "detail_document_title": "Клиент",
+      "document_title": "Клиенты",
+      "dialogs": {
+        "create": {
+          "first_name_label": "Имя",
+          "title": "Новый клиент"
+        }
+      },
+      "search_placeholder": "Поиск по имени или телефону…"
+    },
+    "debts": {
+      "detail": {
+        "add_payment": "Добавить платёж",
+        "client_line": "Клиент:",
+        "heading_detail": "Долг · {{name}}",
+        "not_found": "Долг не найден",
+        "paid_line": "Оплачено:",
+        "payments_section_title": "Платежи",
+        "rem_line": "Остаток:",
+        "status_line": "Статус:",
+        "total_line": "Всего:"
+      },
+      "detail_document_title": "Долг",
+      "document_title": "Долги",
+      "payment_dialog": {
+        "max_amount": "Максимум:",
+        "pay_button": "Оплатить",
+        "title": "Платёж"
+      }
+    },
+    "pos": {
+      "cart": "Корзина",
+      "client": "Клиент",
+      "complete_sale": "Завершить продажу",
+      "document_title": "POS",
+      "empty_cart": "Добавьте товар из списка слева.",
+      "products_heading": "Товары",
+      "search_placeholder": "Поиск по названию или SKU…",
+      "stock_short": "остаток"
+    },
+    "products": {
+      "create_button": "Создать товар",
+      "document_title": "Товары",
+      "dialogs": {
+        "create": {
+          "initial_stock": "Начальный остаток",
+          "purchase_price": "Закупочная цена",
+          "sale_price": "Цена продажи",
+          "title": "Новый товар"
+        },
+        "edit": {
+          "stock_hint": "Остаток меняется только через «Изменить остаток».",
+          "title": "Редактирование"
+        },
+        "stock": {
+          "delta": "Изменение (+/-)",
+          "mode": "Режим",
+          "mode_increment": "Добавить / убавить",
+          "mode_set": "Установить значение",
+          "new_stock": "Новый остаток",
+          "title": "Остаток"
+        }
+      },
+      "search_placeholder": "Поиск по названию или SKU…"
+    },
+    "sales": {
+      "detail": {
+        "client_line": "Клиент:",
+        "date_line": "Дата:",
+        "heading_detail": "Продажа {{id}}",
+        "lines_title": "Состав",
+        "not_found": "Продажа не найдена",
+        "pay_line": "Оплата:"
+      },
+      "detail_document_title": "Продажа",
+      "document_title": "Продажи",
+      "list_heading": "История продаж"
+    }
+  },
+  "shared": {
+    "actions": {
+      "apply": "Применить",
+      "back_to_list": "К списку",
+      "cancel": "Отмена",
+      "save": "Сохранить"
+    },
+    "labels": {
+      "guest": "Гость",
+      "total": "Итого"
+    },
+    "payment": {
+      "card": "Карта",
+      "cash": "Наличные",
+      "debt": "В долг",
+      "method": "Оплата"
+    },
+    "status": {
+      "filter_active": "Активные",
+      "filter_all": "Все",
+      "filter_closed": "Закрытые",
+      "filter_label": "Статус",
+      "row_active": "Активен",
+      "row_closed": "Закрыт"
+    },
+    "table": {
+      "amount": "Сумма",
+      "client": "Клиент",
+      "created": "Создан",
+      "date": "Дата",
+      "name": "Название",
+      "paid": "Оплачено",
+      "pay": "Оплата",
+      "phone": "Телефон",
+      "price": "Цена",
+      "product": "Товар",
+      "purchase": "Закупка",
+      "qty": "Кол-во",
+      "rem": "Остаток",
+      "sale_id": "Продажа",
+      "sale_price": "Продажа",
+      "sku": "SKU",
+      "status": "Статус",
+      "stock": "Остаток",
+      "total": "Сумма"
+    }
+  },
   "account": "аккаунт",
-  "product": "товар",
-  "invoice": "счёт",
-  "details": "детали",
-  "checkout": "оформление",
-  "calendar": "календарь",
-  "overview": "обзор",
   "analytics": "аналитика",
+  "app": "приложение",
+  "banking": "банкинг",
+  "blank": "пустая",
+  "blog": "блог",
+  "booking": "бронирование",
+  "calendar": "календарь",
+  "cards": "карточки",
+  "chat": "чат",
+  "checkout": "оформление",
+  "create": "создать",
+  "description": "описание",
+  "details": "детали",
   "ecommerce": "e-commerce",
+  "edit": "изменить",
+  "file": "файл",
+  "file_manager": "файловый менеджер",
+  "general": "общее",
+  "invoice": "счёт",
+  "item_by_roles": "пункт по ролям",
+  "item_caption": "подпись пункта",
+  "item_disabled": "пункт отключён",
+  "item_external_link": "внешняя ссылка",
+  "item_label": "метка пункта",
+  "job": "вакансии",
+  "kanban": "канбан",
+  "list": "список",
+  "lists": "списки",
+  "mail": "почта",
   "management": "управление",
   "menu_level": "уровень меню",
-  "item_label": "метка пункта",
-  "description": "описание",
-  "other_cases": "другие случаи",
-  "item_caption": "подпись пункта",
-  "file_manager": "файловый менеджер",
   "menu_level_1a": "меню уровень 1a",
   "menu_level_1b": "меню уровень 1b",
   "menu_level_2a": "меню уровень 2a",
   "menu_level_2b": "меню уровень 2b",
   "menu_level_3a": "меню уровень 3a",
   "menu_level_3b": "меню уровень 3b",
-  "item_disabled": "пункт отключён",
-  "item_by_roles": "пункт по ролям",
-  "item_external_link": "внешняя ссылка",
   "only_admin_can_see_this_item": "Только администратор видит этот пункт",
+  "order": "заказ",
+  "other_cases": "другие случаи",
+  "overview": "обзор",
+  "post": "пост",
+  "product": "товар",
+  "profile": "профиль",
+  "shop": "магазин",
+  "tour": "тур",
   "upgrade_to_pro": "Перейти на Pro",
-  "demo": {
-    "title": "Русский"
-  }
+  "user": "пользователь"
 }

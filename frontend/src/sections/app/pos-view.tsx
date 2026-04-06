@@ -1,4 +1,6 @@
 import { useMemo, useState, useCallback } from 'react';
+// locales
+import { useLocales } from 'src/locales';
 // @mui
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -32,6 +34,7 @@ type CartLine = {
 };
 
 export default function PosView() {
+  const { tx } = useLocales();
   const settings = useSettingsContext();
 
   const [query, setQuery] = useState('');
@@ -72,6 +75,15 @@ export default function PosView() {
 
   const subtotal = cart.reduce((s, l) => s + l.quantity * l.unitPrice, 0);
 
+  const payLabels = useMemo(
+    () => ({
+      cash: tx('shared.payment.cash'),
+      card: tx('shared.payment.card'),
+      debt: tx('shared.payment.debt'),
+    }),
+    [tx]
+  );
+
   const completeSale = useCallback(() => {
     // Mock only — hook API here later
     setCart([]);
@@ -82,20 +94,20 @@ export default function PosView() {
   return (
     <>
       <CustomBreadcrumbs
-        heading="POS"
-        links={[{ name: 'POS', href: paths.pos }]}
+        heading={tx('layout.nav.pos')}
+        links={[{ name: tx('layout.nav.pos'), href: paths.pos }]}
         sx={{ mb: { xs: 3, md: 5 } }}
       />
 
       <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} alignItems="stretch">
         <Card sx={{ flex: 1, p: 2, minHeight: 480 }}>
           <Typography variant="h6" sx={{ mb: 2 }}>
-            Товары
+            {tx('pages.pos.products_heading')}
           </Typography>
           <TextField
             fullWidth
             size="small"
-            placeholder="Поиск по названию или SKU…"
+            placeholder={tx('pages.pos.search_placeholder')}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             sx={{ mb: 2 }}
@@ -114,7 +126,7 @@ export default function PosView() {
                   <Box sx={{ flexGrow: 1 }}>
                     <Typography variant="subtitle2">{p.name}</Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {p.sku} · остаток {p.stock}
+                      {p.sku} · {tx('pages.pos.stock_short')} {p.stock}
                     </Typography>
                   </Box>
                   <Typography variant="subtitle2">{fCurrency(p.salePrice)}</Typography>
@@ -134,12 +146,12 @@ export default function PosView() {
           }}
         >
           <Typography variant="h6" sx={{ mb: 2 }}>
-            Корзина
+            {tx('pages.pos.cart')}
           </Typography>
 
           {cart.length === 0 ? (
             <Typography color="text.secondary" variant="body2">
-              Добавьте товар из списка слева.
+              {tx('pages.pos.empty_cart')}
             </Typography>
           ) : (
             <Stack spacing={1.5} divider={<Divider flexItem />}>
@@ -175,11 +187,11 @@ export default function PosView() {
               select
               fullWidth
               size="small"
-              label="Клиент"
+              label={tx('pages.pos.client')}
               value={clientId}
               onChange={(e) => setClientId(e.target.value)}
             >
-              <MenuItem value="guest">Guest</MenuItem>
+              <MenuItem value="guest">{tx('shared.labels.guest')}</MenuItem>
               {MOCK_CLIENTS.map((c) => (
                 <MenuItem key={c.id} value={c.id}>
                   {c.name}
@@ -191,16 +203,18 @@ export default function PosView() {
               select
               fullWidth
               size="small"
-              label="Оплата"
+              label={tx('shared.payment.method')}
               value={paymentType}
               onChange={(e) => setPaymentType(e.target.value as 'cash' | 'card' | 'debt')}
             >
-              <MenuItem value="cash">Наличные</MenuItem>
-              <MenuItem value="card">Карта</MenuItem>
-              <MenuItem value="debt">В долг</MenuItem>
+              <MenuItem value="cash">{payLabels.cash}</MenuItem>
+              <MenuItem value="card">{payLabels.card}</MenuItem>
+              <MenuItem value="debt">{payLabels.debt}</MenuItem>
             </TextField>
 
-            <Typography variant="h6">Итого: {fCurrency(subtotal)}</Typography>
+            <Typography variant="h6">
+              {tx('shared.labels.total')}: {fCurrency(subtotal)}
+            </Typography>
 
             <Button
               fullWidth
@@ -209,7 +223,7 @@ export default function PosView() {
               disabled={!cart.length}
               onClick={completeSale}
             >
-              Завершить продажу
+              {tx('pages.pos.complete_sale')}
             </Button>
           </Stack>
         </Card>

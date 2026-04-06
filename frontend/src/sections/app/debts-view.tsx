@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react';
+// locales
+import { useLocales } from 'src/locales';
 // @mui
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -28,15 +30,20 @@ import {
 
 // ----------------------------------------------------------------------
 
-const TABLE_HEAD = [
-  { id: 'client', label: 'Клиент' },
-  { id: 'total', label: 'Сумма' },
-  { id: 'paid', label: 'Оплачено' },
-  { id: 'rem', label: 'Остаток' },
-  { id: 'status', label: 'Статус' },
-];
-
 export default function DebtsView() {
+  const { tx } = useLocales();
+
+  const tableHead = useMemo(
+    () => [
+      { id: 'client', label: tx('shared.table.client') },
+      { id: 'total', label: tx('shared.table.total') },
+      { id: 'paid', label: tx('shared.table.paid') },
+      { id: 'rem', label: tx('shared.table.rem') },
+      { id: 'status', label: tx('shared.table.status') },
+    ],
+    [tx]
+  );
+
   const [rows] = useState<MockDebt[]>(() => [...MOCK_DEBTS]);
   const [status, setStatus] = useState<'all' | 'active' | 'closed'>('all');
   const table = useTable({ defaultRowsPerPage: 10 });
@@ -58,8 +65,8 @@ export default function DebtsView() {
   return (
     <>
       <CustomBreadcrumbs
-        heading="Долги"
-        links={[{ name: 'Долги', href: paths.debts.root }]}
+        heading={tx('layout.nav.debts')}
+        links={[{ name: tx('layout.nav.debts'), href: paths.debts.root }]}
         sx={{ mb: { xs: 3, md: 5 } }}
       />
 
@@ -68,19 +75,19 @@ export default function DebtsView() {
           <TextField
             select
             size="small"
-            label="Статус"
+            label={tx('shared.status.filter_label')}
             value={status}
             onChange={(e) => setStatus(e.target.value as 'all' | 'active' | 'closed')}
             sx={{ maxWidth: 220 }}
           >
-            <MenuItem value="all">Все</MenuItem>
-            <MenuItem value="active">Активные</MenuItem>
-            <MenuItem value="closed">Закрытые</MenuItem>
+            <MenuItem value="all">{tx('shared.status.filter_all')}</MenuItem>
+            <MenuItem value="active">{tx('shared.status.filter_active')}</MenuItem>
+            <MenuItem value="closed">{tx('shared.status.filter_closed')}</MenuItem>
           </TextField>
 
           <Scrollbar>
             <Table size="small">
-              <TableHeadCustom headLabel={TABLE_HEAD} />
+              <TableHeadCustom headLabel={tableHead} />
               <TableBody>
                 {paginated.map((row) => (
                   <TableRow key={row.id}>
@@ -92,7 +99,11 @@ export default function DebtsView() {
                     <TableCell>{fCurrency(row.totalAmount)}</TableCell>
                     <TableCell>{fCurrency(row.paidAmount)}</TableCell>
                     <TableCell>{fCurrency(row.remaining)}</TableCell>
-                    <TableCell>{row.status === 'active' ? 'Активен' : 'Закрыт'}</TableCell>
+                    <TableCell>
+                      {row.status === 'active'
+                        ? tx('shared.status.row_active')
+                        : tx('shared.status.row_closed')}
+                    </TableCell>
                   </TableRow>
                 ))}
                 <TableNoData notFound={!paginated.length} />
