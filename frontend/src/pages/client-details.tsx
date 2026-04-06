@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 import { useLocales } from 'src/locales';
-import ClientDetailsView from 'src/sections/app/client-details-view';
+import ClientDetailsView from 'src/sections/app/clients/details/view';
 
 export default function ClientDetailsPage() {
   const { tx } = useLocales();

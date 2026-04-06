@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 import { useLocales } from 'src/locales';
-import DebtsView from 'src/sections/app/debts-view';
+import DebtsView from 'src/sections/app/depts/view';
 
 export default function DebtsPage() {
   const { tx } = useLocales();
