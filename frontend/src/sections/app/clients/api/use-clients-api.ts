@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 
-import { useFetchList } from 'src/hooks/api';
+import { useFetchList, useFetchOne } from 'src/hooks/api';
 
-import { fetchClientsList } from './clients-requests';
-import type { ClientListItem, FetchClientsListParams } from './types';
+import { fetchClientDetail, fetchClientsList } from './clients-requests';
+import type { ClientDetail, ClientListItem, FetchClientsListParams } from './types';
 
 export function useClientsListQuery(params: FetchClientsListParams) {
   const { page, pageSize, search, ordering } = params;
@@ -14,4 +14,12 @@ export function useClientsListQuery(params: FetchClientsListParams) {
   );
 
   return useFetchList<ClientListItem>(queryKey, () => fetchClientsList(params));
+}
+
+export function useClientDetailQuery(id: string) {
+  const queryKey = useMemo(() => ['clients', 'detail', id] as const, [id]);
+
+  return useFetchOne<ClientDetail>(queryKey, () => fetchClientDetail(id), {
+    enabled: Boolean(id),
+  });
 }

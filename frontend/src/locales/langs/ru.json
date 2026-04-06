@@ -17,6 +17,7 @@
       "add_button": "Добавить клиента",
       "detail": {
         "not_found": "Клиент не найден",
+        "no_purchases": "Покупок пока нет",
         "phone_label": "Телефон",
         "purchase_history": "История покупок"
       },

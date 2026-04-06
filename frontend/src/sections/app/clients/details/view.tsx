@@ -2,7 +2,11 @@ import { useMemo } from 'react';
 // locales
 import { useLocales } from 'src/locales';
 // @mui
+import Avatar from '@mui/material/Avatar';
+import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
+import Chip from '@mui/material/Chip';
+import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import TableRow from '@mui/material/TableRow';
@@ -14,38 +18,59 @@ import Link from '@mui/material/Link';
 // utils
 import { fCurrency } from 'src/utils/format-number';
 import { fDateTime } from 'src/utils/format-time';
-// mock
-import { MOCK_CLIENTS, MOCK_SALES } from 'src/_mock/pos-app';
 // routes
 import { paths } from 'src/routes/paths';
 import { useParams } from 'src/routes/hook';
 import { RouterLink } from 'src/routes/components';
 // components
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
-import { TableHeadCustom, TableNoData } from 'src/components/table';
+import { TableHeadCustom } from 'src/components/table';
 import EmptyContent from 'src/components/empty-content';
+import Iconify from 'src/components/iconify';
+import { useClientDetailQuery } from 'src/sections/app/clients/api/use-clients-api';
+import { ClientDetailsSkeleton } from 'src/sections/app/clients/skeleton';
 
 // ----------------------------------------------------------------------
 
 export default function ClientDetailsView() {
   const { tx } = useLocales();
   const { id = '' } = useParams();
+  const { data: client, isPending } = useClientDetailQuery(id);
 
   const saleHead = useMemo(
     () => [
       { id: 'id', label: tx('shared.table.sale_id') },
+      { id: 'pay', label: tx('shared.table.pay') },
       { id: 'total', label: tx('shared.table.total') },
       { id: 'date', label: tx('shared.table.date') },
     ],
     [tx]
   );
 
-  const client = useMemo(() => MOCK_CLIENTS.find((c) => c.id === id), [id]);
-
   const sales = useMemo(
-    () => MOCK_SALES.filter((s) => s.clientId === id).sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
-    [id]
+    () => [...(client?.sales ?? [])].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
+    [client?.sales]
   );
+  const payLabel = useMemo(
+    () => ({
+      cash: tx('shared.payment.cash'),
+      card: tx('shared.payment.card'),
+      debt: tx('shared.payment.debt'),
+    }),
+    [tx]
+  );
+  const totalSpent = useMemo(
+    () => sales.reduce((acc, sale) => acc + Number(sale.totalAmount || 0), 0),
+    [sales]
+  );
+
+  if (isPending) {
+    return (
+      <Box>
+        <ClientDetailsSkeleton headLabel={saleHead} />
+      </Box>
+    );
+  }
 
   if (!client) {
     return (
@@ -74,16 +99,57 @@ export default function ClientDetailsView() {
 
       <Stack spacing={3}>
         <Card sx={{ p: 3 }}>
-          <Typography variant="subtitle2" color="text.secondary">
-            {tx('pages.clients.detail.phone_label')}
-          </Typography>
-          <Typography variant="body1">{client.phone}</Typography>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2.5} alignItems={{ xs: 'flex-start', sm: 'center' }}>
+            <Avatar sx={{ width: 52, height: 52, bgcolor: 'primary.main', fontWeight: 700 }}>
+              {client.name.charAt(0).toUpperCase()}
+            </Avatar>
+            <Box sx={{ flexGrow: 1 }}>
+              <Typography variant="h6">{client.name}</Typography>
+              <Typography variant="body2" color="text.secondary">
+                {tx('pages.clients.detail.phone_label')}: {client.phone}
+              </Typography>
+            </Box>
+            <Chip
+              icon={<Iconify icon="solar:wallet-money-bold" />}
+              color={Number(client.totalDebt) > 0 ? 'warning' : 'success'}
+              label={`${tx('shared.labels.total')}: ${fCurrency(client.totalDebt || '0')}`}
+              variant="soft"
+            />
+          </Stack>
         </Card>
+
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+          <Card sx={{ p: 2.5, flex: 1 }}>
+            <Typography variant="caption" color="text.secondary">
+              {tx('layout.nav.sales')}
+            </Typography>
+            <Typography variant="h5" sx={{ mt: 0.5 }}>
+              {sales.length}
+            </Typography>
+          </Card>
+          <Card sx={{ p: 2.5, flex: 1 }}>
+            <Typography variant="caption" color="text.secondary">
+              {tx('shared.labels.total')}
+            </Typography>
+            <Typography variant="h5" sx={{ mt: 0.5 }}>
+              {fCurrency(String(totalSpent || 0))}
+            </Typography>
+          </Card>
+          <Card sx={{ p: 2.5, flex: 1 }}>
+            <Typography variant="caption" color="text.secondary">
+              {tx('shared.table.date')}
+            </Typography>
+            <Typography variant="subtitle1" sx={{ mt: 0.75 }}>
+              {sales[0] ? fDateTime(sales[0].createdAt) : '-'}
+            </Typography>
+          </Card>
+        </Stack>
 
         <Card sx={{ p: 2 }}>
           <Typography variant="h6" sx={{ mb: 2 }}>
             {tx('pages.clients.detail.purchase_history')}
           </Typography>
+          <Divider sx={{ mb: 2 }} />
           <Table size="small">
             <TableHeadCustom headLabel={saleHead} />
             <TableBody>
@@ -94,11 +160,28 @@ export default function ClientDetailsView() {
                       {s.id}
                     </Link>
                   </TableCell>
+                  <TableCell>
+                    <Chip
+                      size="small"
+                      variant="soft"
+                      label={payLabel[s.paymentType]}
+                      color={s.paymentType === 'debt' ? 'warning' : 'default'}
+                    />
+                  </TableCell>
                   <TableCell>{fCurrency(s.totalAmount)}</TableCell>
                   <TableCell>{fDateTime(s.createdAt)}</TableCell>
                 </TableRow>
               ))}
-              <TableNoData notFound={!sales.length} />
+              {!sales.length && (
+                <TableRow>
+                  <TableCell colSpan={4} sx={{ py: 6 }}>
+                    <EmptyContent
+                      title={tx('pages.clients.detail.purchase_history')}
+                      description={tx('pages.clients.detail.no_purchases')}
+                    />
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </Card>
