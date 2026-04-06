@@ -47,10 +47,11 @@ class ProductViewSet(TenantQuerySetMixin, ModelViewSet):
         serializer.is_valid(raise_exception=True)
 
         quantity = serializer.validated_data["quantity"]
+        mode = serializer.validated_data["mode"]
 
         with transaction.atomic():
             product = Product.objects.select_for_update().get(pk=product.pk)
-            new_stock = product.stock + quantity
+            new_stock = quantity if mode == "set" else product.stock + quantity
             if new_stock < 0:
                 raise ValidationError(
                     {

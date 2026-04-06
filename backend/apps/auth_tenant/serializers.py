@@ -18,8 +18,8 @@ class RegisterSerializer(serializers.Serializer):
     tenant_name = serializers.CharField(max_length=255)
     name = serializers.CharField(max_length=255)
     email = serializers.EmailField()
-    password = serializers.CharField(write_only=True, min_length=8)
-    password_confirm = serializers.CharField(write_only=True, min_length=8)
+    password = serializers.CharField(write_only=True, min_length=6)
+    password_confirm = serializers.CharField(write_only=True, min_length=6)
 
     def validate_email(self, value):
         if User.objects.filter(email__iexact=value).exists():
