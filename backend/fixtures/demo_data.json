@@ -23,7 +23,7 @@
       "tenant": "a1000000-0000-0000-0000-000000000001",
       "email": "admin@techshop.com",
       "name": "Admin TechShop",
-      "password": "pbkdf2_sha256$870000$test$test_hash_placeholder",
+      "password": "argon2$argon2id$v=19$m=102400,t=2,p=8$MFRDM1R1QTR1NEUzeGl0VG5BOUIxVA$3DuCgyQrfuF5O1qbqXRs2lmf9w1tuT66ZkkpPk2H0d8",
       "role": "admin",
       "is_active": true,
       "is_staff": false,
