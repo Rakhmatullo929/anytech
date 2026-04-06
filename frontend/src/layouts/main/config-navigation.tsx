@@ -11,7 +11,12 @@ export const navConfig = [
   {
     title: 'Login',
     icon: <Iconify icon="solar:home-2-bold-duotone" />,
-    path: paths.auth.jwt.login,
+    path: paths.login,
+  },
+  {
+    title: 'Register',
+    icon: <Iconify icon="solar:user-plus-bold-duotone" />,
+    path: paths.register,
   },
   {
     title: 'Components',
@@ -28,21 +33,6 @@ export const navConfig = [
         items: [{ title: 'Maintenance', path: paths.maintenance }],
       },
       {
-        subheader: 'Auth Demo',
-        items: [
-          { title: 'Login', path: paths.authDemo.classic.login },
-          { title: 'Register', path: paths.authDemo.classic.register },
-          { title: 'Forgot password', path: paths.authDemo.classic.forgotPassword },
-          { title: 'New password', path: paths.authDemo.classic.newPassword },
-          { title: 'Verify', path: paths.authDemo.classic.verify },
-          { title: 'Login (modern)', path: paths.authDemo.modern.login },
-          { title: 'Register (modern)', path: paths.authDemo.modern.register },
-          { title: 'Forgot password (modern)', path: paths.authDemo.modern.forgotPassword },
-          { title: 'New password (modern)', path: paths.authDemo.modern.newPassword },
-          { title: 'Verify (modern)', path: paths.authDemo.modern.verify },
-        ],
-      },
-      {
         subheader: 'Error',
         items: [
           { title: 'Page 403', path: paths.page403 },
@@ -51,8 +41,8 @@ export const navConfig = [
         ],
       },
       {
-        subheader: 'Dashboard',
-        items: [{ title: 'Dashboard', path: PATH_AFTER_LOGIN }],
+        subheader: 'App',
+        items: [{ title: 'POS (after login)', path: PATH_AFTER_LOGIN }],
       },
     ],
   },

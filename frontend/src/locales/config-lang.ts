@@ -1,44 +1,26 @@
 // @mui
-import { enUS, frFR, zhCN, viVN, arSA } from '@mui/material/locale';
+import { enUS, ruRU } from '@mui/material/locale';
 
 // PLEASE REMOVE `LOCAL STORAGE` WHEN YOU CHANGE SETTINGS.
 // ----------------------------------------------------------------------
 
+/** MUI does not ship `uz` locale; `enUS` is used for component strings (DatePicker, DataGrid, …). */
 export const allLangs = [
   {
-    label: 'English',
-    value: 'en',
+    label: 'Oʻzbekcha',
+    value: 'uz',
     systemValue: enUS,
-    icon: 'flagpack:gb-nir',
+    icon: 'flagpack:uz',
   },
   {
-    label: 'French',
-    value: 'fr',
-    systemValue: frFR,
-    icon: 'flagpack:fr',
-  },
-  {
-    label: 'Vietnamese',
-    value: 'vi',
-    systemValue: viVN,
-    icon: 'flagpack:vn',
-  },
-  {
-    label: 'Chinese',
-    value: 'cn',
-    systemValue: zhCN,
-    icon: 'flagpack:cn',
-  },
-  {
-    label: 'Arabic',
-    value: 'ar',
-    systemValue: arSA,
-    icon: 'flagpack:sa',
+    label: 'Русский',
+    value: 'ru',
+    systemValue: ruRU,
+    icon: 'flagpack:ru',
   },
 ];
 
-export const defaultLang = allLangs[0]; // English
+export const defaultLang = allLangs[0];
 
 // GET MORE COUNTRY FLAGS
 // https://icon-sets.iconify.design/flagpack/
-// https://www.dropbox.com/sh/nec1vwswr9lqbh9/AAB9ufC8iccxvtWi3rzZvndLa?dl=0

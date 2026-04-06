@@ -85,7 +85,7 @@ function useQueryErrorNotify(
 }
 
 function isPublicAuthPath(pathname: string) {
-  return pathname.startsWith('/auth') || pathname.startsWith('/auth-demo');
+  return pathname === '/login' || pathname === '/register';
 }
 
 function useErrorHandler(onError?: (err: BaseError) => void) {

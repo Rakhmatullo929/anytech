@@ -4,7 +4,6 @@ import { paths } from 'src/routes/paths';
 //
 import { mainRoutes } from './main';
 import { authRoutes } from './auth';
-import { authDemoRoutes } from './auth-demo';
 import { dashboardRoutes } from './dashboard';
 import { componentsRoutes } from './components';
 
@@ -16,14 +15,10 @@ export default function Router() {
   return useRoutes([
     {
       path: '/',
-      element: <Navigate to={paths.auth.jwt.login} replace />,
+      element: <Navigate to={paths.login} replace />,
     },
 
-    // Auth routes
     ...authRoutes,
-    ...authDemoRoutes,
-
-    // Dashboard routes
     ...dashboardRoutes,
 
     // Main routes
