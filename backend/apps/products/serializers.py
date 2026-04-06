@@ -9,6 +9,21 @@ class ProductSerializer(serializers.ModelSerializer):
             value = value.strip()
         return value or None
 
+    def validate_purchase_price(self, value):
+        if value < 0:
+            raise serializers.ValidationError("Purchase price must be >= 0.")
+        return value
+
+    def validate_sale_price(self, value):
+        if value < 0:
+            raise serializers.ValidationError("Sale price must be >= 0.")
+        return value
+
+    def validate_stock(self, value):
+        if value < 0:
+            raise serializers.ValidationError("Stock must be >= 0.")
+        return value
+
     class Meta:
         model = Product
         fields = (
@@ -33,11 +48,24 @@ class ProductUpdateSerializer(ProductSerializer):
 
 
 class StockAdjustmentSerializer(serializers.Serializer):
+    MODE_CHOICES = (("increment", "Increment"), ("set", "Set"))
+
     quantity = serializers.IntegerField(
-        help_text="Positive to add stock, negative to subtract."
+        help_text="Value to add/subtract (increment mode) or absolute value (set mode)."
+    )
+    mode = serializers.ChoiceField(
+        choices=MODE_CHOICES,
+        default="increment",
+        help_text="'increment' to add/subtract, 'set' to overwrite.",
     )
 
-    def validate_quantity(self, value):
-        if value == 0:
-            raise serializers.ValidationError("Quantity must not be zero.")
-        return value
+    def validate(self, attrs):
+        if attrs.get("mode", "increment") == "increment" and attrs["quantity"] == 0:
+            raise serializers.ValidationError(
+                {"quantity": "Quantity must not be zero."}
+            )
+        if attrs.get("mode") == "set" and attrs["quantity"] < 0:
+            raise serializers.ValidationError(
+                {"quantity": "Stock value must be >= 0."}
+            )
+        return attrs

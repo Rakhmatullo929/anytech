@@ -9,6 +9,12 @@ from .models import Client
 
 
 class ClientSerializer(serializers.ModelSerializer):
+    def validate_name(self, value):
+        value = value.strip()
+        if not value:
+            raise serializers.ValidationError("Name is required.")
+        return value
+
     def validate_phone(self, value):
         value = value.strip()
         if not value:
