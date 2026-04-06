@@ -12,7 +12,6 @@ import { paths } from 'src/routes/paths';
 import { useOffSetTop } from 'src/hooks/use-off-set-top';
 // components
 import Logo from 'src/components/logo';
-import { RouterLink } from 'src/routes/components';
 //
 import { HEADER } from '../config-layout';
 import HeaderShadow from './header-shadow';
@@ -54,8 +53,9 @@ export default function HeaderSimple() {
           <SettingsButton />
 
           <Link
-            href={paths.faqs}
-            component={RouterLink}
+            href={paths.docs}
+            target="_blank"
+            rel="noopener"
             color="inherit"
             sx={{ typography: 'subtitle2' }}
           >

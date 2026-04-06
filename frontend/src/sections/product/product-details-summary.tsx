@@ -108,7 +108,7 @@ export default function ProductDetailsSummary({
           });
         }
         onGotoStep(0);
-        router.push(paths.product.checkout);
+        router.push(paths.dashboard.product.root);
       } catch (error) {
         console.error(error);
       }

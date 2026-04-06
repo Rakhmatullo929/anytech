@@ -110,7 +110,7 @@ export default function useProduct() {
   const onResetAll = useCallback(() => {
     if (completed) {
       dispatch(resetCart());
-      router.replace(paths.product.root);
+      router.replace(paths.dashboard.product.root);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [completed]);

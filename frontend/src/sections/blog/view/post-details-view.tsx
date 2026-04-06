@@ -84,7 +84,7 @@ export default function PostDetailsView() {
       <PostDetailsToolbar
         backLink={paths.dashboard.post.root}
         editLink={paths.dashboard.post.edit(`${post?.title}`)}
-        liveLink={paths.post.details(`${post?.title}`)}
+        liveLink={paths.dashboard.post.details(`${post?.title}`)}
         publish={publish || ''}
         onChangePublish={handleChangePublish}
         publishOptions={POST_PUBLISH_OPTIONS}
