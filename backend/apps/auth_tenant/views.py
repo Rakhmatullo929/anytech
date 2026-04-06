@@ -1,9 +1,15 @@
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.throttling import AnonRateThrottle
 
 from .serializers import RegisterSerializer, UserSerializer
 from .tokens import CustomTokenObtainPairSerializer
+
+
+class AuthRateThrottle(AnonRateThrottle):
+    """Strict rate limit for authentication endpoints (login, register)."""
+    scope = "auth"
 
 
 class RegisterView(generics.CreateAPIView):

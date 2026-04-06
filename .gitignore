@@ -37,6 +37,7 @@ static_root/
 # Environment Variables
 # ========================
 .env
+.env.save
 .env.local
 .env.*.local
 

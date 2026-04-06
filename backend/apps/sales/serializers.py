@@ -34,6 +34,16 @@ class SaleCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {"client": "Client is required for debt sales."}
             )
+
+        # Validate client belongs to the same tenant as the authenticated user
+        client = attrs.get("client")
+        if client:
+            tenant = self.context["request"].user.tenant
+            if client.tenant_id != tenant.pk:
+                raise serializers.ValidationError(
+                    {"client": "Client not found."}
+                )
+
         return attrs
 
     def create(self, validated_data):
