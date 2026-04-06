@@ -17,6 +17,7 @@
       "add_button": "Mijoz qoʻshish",
       "detail": {
         "not_found": "Mijoz topilmadi",
+        "no_purchases": "Hozircha xaridlar yoʻq",
         "phone_label": "Telefon",
         "purchase_history": "Xaridlar tarixi"
       },
