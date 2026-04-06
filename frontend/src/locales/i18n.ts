@@ -2,33 +2,30 @@ import i18n from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import { initReactI18next } from 'react-i18next';
 // utils
-import { localStorageGetItem } from 'src/utils/storage-available';
+import { localStorageAvailable, localStorageGetItem } from 'src/utils/storage-available';
 //
-import { defaultLang } from './config-lang';
+import { defaultLang, allLangs } from './config-lang';
 //
-import translationEn from './langs/en.json';
-import translationFr from './langs/fr.json';
-import translationVi from './langs/vi.json';
-import translationCn from './langs/cn.json';
-import translationAr from './langs/ar.json';
+import translationRu from './langs/ru.json';
+import translationUz from './langs/uz.json';
 
 // ----------------------------------------------------------------------
 
-const lng = localStorageGetItem('i18nextLng', defaultLang.value);
+const supportedLngs = allLangs.map((l) => l.value);
+const stored = localStorageGetItem('i18nextLng', defaultLang.value) || defaultLang.value;
+const lng: string = supportedLngs.includes(stored) ? stored : defaultLang.value;
 
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources: {
-      en: { translations: translationEn },
-      fr: { translations: translationFr },
-      vi: { translations: translationVi },
-      cn: { translations: translationCn },
-      ar: { translations: translationAr },
+      ru: { translations: translationRu },
+      uz: { translations: translationUz },
     },
     lng,
-    fallbackLng: lng,
+    fallbackLng: defaultLang.value,
+    supportedLngs,
     debug: false,
     ns: ['translations'],
     defaultNS: 'translations',
@@ -36,5 +33,22 @@ i18n
       escapeValue: false,
     },
   });
+
+function syncLanguageForApi(nextLng: string) {
+  if (!localStorageAvailable()) {
+    return;
+  }
+  const base = nextLng.split('-')[0];
+  const normalized = supportedLngs.includes(base) ? base : defaultLang.value;
+  localStorage.setItem('language', normalized);
+}
+
+i18n.on('initialized', () => {
+  syncLanguageForApi(i18n.language);
+});
+
+i18n.on('languageChanged', (nextLng) => {
+  syncLanguageForApi(nextLng);
+});
 
 export default i18n;

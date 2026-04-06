@@ -10,7 +10,6 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 // routes
 import { paths } from 'src/routes/paths';
-import { usePathname } from 'src/routes/hook';
 import { RouterLink } from 'src/routes/components';
 // _mock
 import { _socials } from 'src/_mock';
@@ -24,9 +23,8 @@ const LINKS = [
   {
     headline: 'Minimal',
     children: [
-      { name: 'About us', href: paths.about },
-      { name: 'Contact us', href: paths.contact },
-      { name: 'FAQs', href: paths.faqs },
+      { name: 'Components', href: paths.components },
+      { name: 'Documentation', href: paths.docs },
     ],
   },
   {
@@ -45,32 +43,6 @@ const LINKS = [
 // ----------------------------------------------------------------------
 
 export default function Footer() {
-  const pathname = usePathname();
-
-  const isHome = pathname === '/';
-
-  const simpleFooter = (
-    <Box
-      component="footer"
-      sx={{
-        py: 5,
-        textAlign: 'center',
-        position: 'relative',
-        bgcolor: 'background.default',
-      }}
-    >
-      <Container>
-        <Logo sx={{ mb: 1, mx: 'auto' }} />
-
-        <Typography variant="caption" component="div">
-          © All rights reserved
-          <br /> made by
-          <Link href="https://minimals.cc/"> minimals.cc </Link>
-        </Typography>
-      </Container>
-    </Box>
-  );
-
   const mainFooter = (
     <Box
       component="footer"
@@ -148,8 +120,9 @@ export default function Footer() {
                   {list.children.map((link) => (
                     <Link
                       key={link.name}
-                      component={RouterLink}
-                      href={link.href}
+                      {...(link.href.startsWith('http')
+                        ? { href: link.href, target: '_blank', rel: 'noopener' }
+                        : { component: RouterLink, href: link.href })}
                       color="inherit"
                       variant="body2"
                     >
@@ -169,5 +142,5 @@ export default function Footer() {
     </Box>
   );
 
-  return isHome ? simpleFooter : mainFooter;
+  return mainFooter;
 }

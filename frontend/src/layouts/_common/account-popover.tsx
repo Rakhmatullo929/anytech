@@ -24,16 +24,8 @@ import CustomPopover, { usePopover } from 'src/components/custom-popover';
 
 const OPTIONS = [
   {
-    label: 'Home',
-    linkTo: '/',
-  },
-  {
-    label: 'Profile',
-    linkTo: paths.dashboard.user.profile,
-  },
-  {
-    label: 'Settings',
-    linkTo: paths.dashboard.user.account,
+    label: 'POS',
+    linkTo: paths.pos,
   },
 ];
 
@@ -54,7 +46,7 @@ export default function AccountPopover() {
     try {
       await logoutMutation.mutateAsync();
       popover.onClose();
-      router.replace('/');
+      router.replace(paths.login);
     } catch (error) {
       console.error(error);
       enqueueSnackbar('Unable to logout!', { variant: 'error' });

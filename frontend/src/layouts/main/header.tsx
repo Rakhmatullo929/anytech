@@ -88,8 +88,8 @@ export default function Header() {
           {mdUp && <NavDesktop offsetTop={offsetTop} data={navConfig} />}
 
           <Stack alignItems="center" direction={{ xs: 'row', md: 'row-reverse' }}>
-            <Button variant="contained" target="_blank" rel="noopener" href={paths.minimalUI}>
-              Purchase Now
+            <Button variant="contained" target="_blank" rel="noopener" href={paths.docs}>
+              Docs
             </Button>
 
             {mdUp && <LoginButton />}

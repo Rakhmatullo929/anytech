@@ -7,13 +7,6 @@ import { useAuthContext } from '../hooks';
 
 // ----------------------------------------------------------------------
 
-const loginPaths: Record<string, string> = {
-  jwt: paths.auth.jwt.login,
-  auth0: paths.auth.auth0.login,
-  amplify: paths.auth.amplify.login,
-  firebase: paths.auth.firebase.login,
-};
-
 // ----------------------------------------------------------------------
 
 type AuthGuardProps = {
@@ -23,7 +16,7 @@ type AuthGuardProps = {
 export default function AuthGuard({ children }: AuthGuardProps) {
   const router = useRouter();
 
-  const { authenticated, method } = useAuthContext();
+  const { authenticated } = useAuthContext();
 
   const [checked, setChecked] = useState(false);
 
@@ -31,7 +24,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
     if (!authenticated) {
       const searchParams = new URLSearchParams({ returnTo: window.location.href }).toString();
 
-      const loginPath = loginPaths[method];
+      const loginPath = paths.auth.jwt.login;
 
       const href = `${loginPath}?${searchParams}`;
 
@@ -39,7 +32,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
     } else {
       setChecked(true);
     }
-  }, [authenticated, method, router]);
+  }, [authenticated, router]);
 
   useEffect(() => {
     check();

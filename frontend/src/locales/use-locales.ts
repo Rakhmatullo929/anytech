@@ -12,6 +12,12 @@ import { allLangs, defaultLang } from './config-lang';
 export default function useLocales() {
   const { i18n, t } = useTranslation();
 
+  const tx = useCallback(
+    (key: string, options?: Record<string, string | number>) =>
+      options ? String(t(key, options)) : String(t(key)),
+    [t]
+  );
+
   const settings = useSettingsContext();
 
   const langStorage = localStorageGetItem('i18nextLng');
@@ -29,6 +35,7 @@ export default function useLocales() {
   return {
     allLangs,
     t,
+    tx,
     currentLang,
     onChangeLang,
   };
