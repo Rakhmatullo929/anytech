@@ -2,7 +2,8 @@ from django.db.models import F, Sum
 from rest_framework import serializers
 
 from debts.models import Debt
-from sales.models import Sale, SaleItem
+from sales.models import Sale
+from sales.serializers import SaleItemReadSerializer
 
 from .models import Client
 
@@ -42,16 +43,8 @@ class DebtInlineSerializer(serializers.ModelSerializer):
         fields = ("total_amount", "paid_amount", "remaining", "status")
 
 
-class SaleItemInlineSerializer(serializers.ModelSerializer):
-    product_name = serializers.CharField(source="product.name", read_only=True)
-
-    class Meta:
-        model = SaleItem
-        fields = ("id", "product", "product_name", "quantity", "price")
-
-
 class SaleInlineSerializer(serializers.ModelSerializer):
-    items = SaleItemInlineSerializer(many=True, read_only=True)
+    items = SaleItemReadSerializer(many=True, read_only=True)
     debt = DebtInlineSerializer(read_only=True, allow_null=True, default=None)
 
     class Meta:

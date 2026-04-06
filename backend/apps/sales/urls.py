@@ -1,7 +1,8 @@
 from django.urls import path
 
+from .views import SaleViewSet
+
 urlpatterns = [
-    # POST /api/v1/sales/
-    # GET  /api/v1/sales/
-    # GET  /api/v1/sales/:id/
+    path("", SaleViewSet.as_view({"get": "list", "post": "create"}), name="sale-list"),
+    path("<uuid:pk>/", SaleViewSet.as_view({"get": "retrieve"}), name="sale-detail"),
 ]
