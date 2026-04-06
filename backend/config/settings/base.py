@@ -40,6 +40,7 @@ THIRD_PARTY_APPS = [
     "django_filters",
     "corsheaders",
     "django_celery_beat",
+    "drf_spectacular",
 ]
 
 LOCAL_APPS = [
@@ -150,6 +151,20 @@ REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [
         "rest_framework.renderers.JSONRenderer",
     ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+# ---------------------------------------------------------------------------
+# drf-spectacular (OpenAPI / Swagger)
+# ---------------------------------------------------------------------------
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "AnyTech ERP/POS API",
+    "DESCRIPTION": "Multi-tenant ERP/POS system API documentation",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "COMPONENT_SPLIT_REQUEST": True,
+    "SCHEMA_PATH_PREFIX": "/api/v1/",
 }
 
 # ---------------------------------------------------------------------------

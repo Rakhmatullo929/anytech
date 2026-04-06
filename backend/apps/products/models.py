@@ -18,6 +18,16 @@ class Product(models.Model):
 
     class Meta:
         db_table = "products"
+        indexes = [
+            models.Index(fields=["tenant", "-created_at"]),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["tenant", "sku"],
+                name="unique_sku_per_tenant",
+                condition=models.Q(sku__isnull=False),
+            ),
+        ]
 
     def __str__(self):
         return self.name
