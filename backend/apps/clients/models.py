@@ -14,6 +14,15 @@ class Client(models.Model):
 
     class Meta:
         db_table = "clients"
+        indexes = [
+            models.Index(fields=["tenant", "-created_at"]),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["tenant", "phone"],
+                name="unique_phone_per_tenant",
+            ),
+        ]
 
     def __str__(self):
         return self.name
