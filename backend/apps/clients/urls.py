@@ -15,7 +15,9 @@ urlpatterns = [
     ),
     path(
         "<uuid:pk>/",
-        ClientViewSet.as_view({"get": "retrieve", "put": "update", "patch": "partial_update"}),
+        ClientViewSet.as_view(
+            {"get": "retrieve", "put": "update", "patch": "partial_update", "delete": "destroy"}
+        ),
         name="client-detail",
     ),
 ]

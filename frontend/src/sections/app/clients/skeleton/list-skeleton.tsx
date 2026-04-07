@@ -31,7 +31,8 @@ export default function ClientsListSkeleton({ headLabel }: Props) {
         <TablePaginationCustom
           count={0}
           page={0}
-          rowsPerPage={20}
+          rowsPerPage={15}
+          rowsPerPageOptions={[5, 10, 15, 25]}
           onPageChange={() => {}}
           onRowsPerPageChange={() => {}}
         />

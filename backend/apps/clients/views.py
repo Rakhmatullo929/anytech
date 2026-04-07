@@ -11,7 +11,7 @@ from .serializers import ClientDetailSerializer, ClientSerializer
 class ClientViewSet(TenantQuerySetMixin, ModelViewSet):
     queryset = Client.objects.all()
     serializer_class = ClientSerializer
-    http_method_names = ["get", "post", "put", "patch", "head", "options"]
+    http_method_names = ["get", "post", "put", "patch", "delete", "head", "options"]
 
     search_fields = ["name", "phone"]
     ordering_fields = ["name", "created_at"]

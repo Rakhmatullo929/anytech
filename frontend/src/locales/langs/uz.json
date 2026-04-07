@@ -27,9 +27,25 @@
         "create": {
           "first_name_label": "Ism",
           "title": "Yangi mijoz"
+        },
+        "edit": {
+          "title": "Mijozni tahrirlash"
+        },
+        "delete": {
+          "bulk_description": "Tanlangan mijozlarni o‘chirishni tasdiqlaysizmi? Soni: {{count}}",
+          "bulk_title": "Mijozlarni ommaviy o‘chirish",
+          "description": "Mijozni o‘chirishni tasdiqlaysizmi?",
+          "title": "Mijozni o‘chirish"
         }
       },
-      "search_placeholder": "Ism yoki telefon boʻyicha qidiruv…"
+      "search_placeholder": "Ism yoki telefon boʻyicha qidiruv…",
+      "toasts": {
+        "bulk_deleted": "O‘chirilgan mijozlar soni: {{count}}",
+        "created": "Mijoz muvaffaqiyatli yaratildi",
+        "deleted": "Mijoz o‘chirildi",
+        "required_fields": "Ism va telefon majburiy",
+        "updated": "Mijoz yangilandi"
+      }
     },
     "debts": {
       "detail": {
@@ -105,7 +121,10 @@
       "apply": "Qoʻllash",
       "back_to_list": "Roʻyxatga",
       "cancel": "Bekor qilish",
-      "save": "Saqlash"
+      "delete": "O‘chirish",
+      "edit": "Tahrirlash",
+      "save": "Saqlash",
+      "view": "Ko‘rish"
     },
     "labels": {
       "guest": "Mehmon",

@@ -7,5 +7,6 @@ export type ConfirmDialogProps = Omit<DialogProps, 'title' | 'content'> & {
   title: React.ReactNode;
   content?: React.ReactNode;
   action: React.ReactNode;
+  cancelText?: React.ReactNode;
   onClose: VoidFunction;
 };

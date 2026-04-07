@@ -23,7 +23,11 @@ alwaysApply: false
 
 - Типы тел и ответов — в `types` рядом с API фичи.
 - **`queryKey`**: стабильные массивы, включайте идентификаторы сущности (`['products', 'list', filters]`, `['clients', id]`).
-- После успешных мутаций — `queryClient.invalidateQueries` / обновление кэша по паттернам проекта.
+- После успешных мутаций сначала обновляй кэш локально по паттернам проекта (`addToList`, `deleteFromList`, `updateList`, `updateObject`) через `queryClient.setQueryData`/`setQueriesData`.
+- Для CRUD в списках (create/update/delete) не делать лишний `invalidateQueries` и refetch, если состояние можно корректно обновить локально.
+- Для `update` обязательно обновляй кэш и списка, и детали сущности: `updateList(...)` для `['<entity>', 'list', ...]` + `updateObject(...)` для `['<entity>', 'detail', id]`.
+- Для bulk-delete/ bulk-update используй отдельную мутацию и один локальный апдейт кэша всех list-query ключей через `setQueriesData`, без refetch.
+- `invalidateQueries` используй только когда локальный апдейт кэша невозможен или ненадёжен для конкретного кейса.
 - Язык для бэкенда задаётся автоматически через `request()`; не дублировать `lang` без причины (если нужен другой — явный `params`).
 
 ## Пример формы
