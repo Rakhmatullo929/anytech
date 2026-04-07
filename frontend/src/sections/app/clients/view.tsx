@@ -23,6 +23,7 @@ import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hook';
 import { RouterLink } from 'src/routes/components';
 import { useDebounce } from 'src/hooks/use-debounce';
+import { useUrlListState, useSyncTableWithUrlListState } from 'src/hooks/use-url-query-state';
 // components
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
@@ -74,8 +75,25 @@ export default function ClientsView() {
     [tx]
   );
 
-  const [query, setQuery] = useState('');
-  const debouncedSearch = useDebounce(query.trim(), 400);
+  const {
+    page: pageParam,
+    rowsPerPage,
+    search: searchValue,
+    ordering,
+    setSearch,
+    setValues: setQueryState,
+    handlePageChange,
+    handleRowsPerPageChange,
+  } = useUrlListState({
+    pageKey: 'page',
+    pageSizeKey: 'page_size',
+    searchKey: 'search',
+    orderingKey: 'ordering',
+    defaultPage: 1,
+    defaultPageSize: 15,
+    defaultOrdering: '-created_at',
+  });
+  const debouncedSearch = useDebounce(searchValue.trim(), 400);
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [upsertOpen, setUpsertOpen] = useState(false);
   const [upsertMode, setUpsertMode] = useState<'create' | 'edit'>('create');
@@ -83,17 +101,18 @@ export default function ClientsView() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
 
-  const table = useTable({ defaultRowsPerPage: 15 });
-  const { onResetPage, page, rowsPerPage, onChangePage, onChangeRowsPerPage } = table;
-
-  useEffect(() => {
-    onResetPage();
-  }, [debouncedSearch, onResetPage]);
+  const table = useTable({
+    defaultCurrentPage: Math.max(0, pageParam - 1),
+    defaultRowsPerPage: rowsPerPage,
+  });
+  const { setPage, setRowsPerPage } = table;
+  const page = Math.max(0, pageParam - 1);
 
   const { data, isPending, isFetching } = useClientsListQuery({
     page: page + 1,
     pageSize: rowsPerPage,
     search: debouncedSearch || undefined,
+    ordering,
   });
 
   const rows = useMemo(() => data?.results ?? [], [data?.results]);
@@ -109,6 +128,15 @@ export default function ClientsView() {
       setSelected(nextSelected);
     }
   }, [rows, selectedIds, setSelected]);
+
+  useSyncTableWithUrlListState({
+    page: pageParam,
+    rowsPerPage,
+    tablePage: table.page,
+    tableRowsPerPage: table.rowsPerPage,
+    setTablePage: setPage,
+    setTableRowsPerPage: setRowsPerPage,
+  });
 
   const closeActions = (clearSelected = true) => {
     actionsPopover.onClose();
@@ -242,8 +270,8 @@ export default function ClientsView() {
         enqueueSnackbar(tx('pages.clients.toasts.updated'), { variant: 'success' });
       }
       handleCloseUpsert();
-      onResetPage();
-      setQuery('');
+      setPage(0);
+      setQueryState({ page: 1, search: '' });
     } catch (error) {
       console.error(error);
     }
@@ -310,8 +338,8 @@ export default function ClientsView() {
             <TextField
               size="small"
               placeholder={tx('pages.clients.search_placeholder')}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              value={searchValue}
+              onChange={(e) => setSearch(e.target.value)}
               sx={{ maxWidth: 360 }}
             />
 
@@ -356,8 +384,8 @@ export default function ClientsView() {
               page={page}
               rowsPerPage={rowsPerPage}
               rowsPerPageOptions={[5, 10, 15, 25]}
-              onPageChange={onChangePage}
-              onRowsPerPageChange={onChangeRowsPerPage}
+              onPageChange={handlePageChange}
+              onRowsPerPageChange={handleRowsPerPageChange}
             />
           </Stack>
         </Card>

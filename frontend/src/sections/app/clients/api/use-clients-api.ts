@@ -59,7 +59,11 @@ export function useClientsListQuery(params: FetchClientsListParams) {
     [page, pageSize, search, ordering]
   );
 
-  return useFetchList<ClientListItem>(queryKey, () => fetchClientsList(params));
+  return useFetchList<ClientListItem>(queryKey, () => fetchClientsList(params), {
+    // Keep previous page data while new search params are loading
+    // so list UI doesn't unmount (search input keeps focus).
+    placeholderData: (previousData) => previousData,
+  });
 }
 
 export function useClientDetailQuery(id: string) {
