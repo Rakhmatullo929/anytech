@@ -15,6 +15,7 @@
   "pages": {
     "clients": {
       "add_button": "Mijoz qoʻshish",
+      "import_excel_button": "Excel import",
       "detail": {
         "not_found": "Mijoz topilmadi",
         "no_purchases": "Hozircha xaridlar yoʻq",
@@ -41,6 +42,7 @@
       "search_placeholder": "Ism yoki telefon boʻyicha qidiruv…",
       "toasts": {
         "bulk_deleted": "O‘chirilgan mijozlar soni: {{count}}",
+        "bulk_created": "Import qilingan mijozlar soni: {{count}}",
         "created": "Mijoz muvaffaqiyatli yaratildi",
         "deleted": "Mijoz o‘chirildi",
         "required_fields": "Ism va telefon majburiy",

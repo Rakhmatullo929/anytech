@@ -3,6 +3,7 @@ import { request, API_ENDPOINTS } from 'src/utils/axios';
 import type { Pagination } from 'src/hooks/api';
 
 import type {
+  BulkCreateClientsResult,
   ClientDetail,
   ClientListItem,
   CreateClientPayload,
@@ -44,6 +45,25 @@ export async function deleteClient(id: string): Promise<void> {
   await request<void>({
     method: 'DELETE',
     url: API_ENDPOINTS.clients.detail(id),
+  });
+}
+
+export async function bulkDeleteClients(ids: string[]): Promise<void> {
+  await request<void>({
+    method: 'POST',
+    url: API_ENDPOINTS.clients.bulkDelete,
+    data: { ids },
+  });
+}
+
+export async function bulkCreateClientsFromExcel(file: File): Promise<BulkCreateClientsResult> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  return request<BulkCreateClientsResult>({
+    method: 'POST',
+    url: API_ENDPOINTS.clients.bulkCreateExcel,
+    data: formData,
   });
 }
 

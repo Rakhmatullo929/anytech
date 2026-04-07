@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, type MouseEvent } from 'react';
+import { useMemo, useRef, useState, useEffect, type MouseEvent } from 'react';
 // locales
 import { useLocales } from 'src/locales';
 // @mui
@@ -41,6 +41,7 @@ import {
 import {
   useClientsListQuery,
   useBulkDeleteClientsMutation,
+  useBulkCreateClientsMutation,
   useCreateClientMutation,
   useDeleteClientMutation,
   useUpdateClientMutation,
@@ -59,7 +60,9 @@ export default function ClientsView() {
   const createMutation = useCreateClientMutation();
   const deleteMutation = useDeleteClientMutation();
   const bulkDeleteMutation = useBulkDeleteClientsMutation();
+  const bulkCreateMutation = useBulkCreateClientsMutation();
   const updateMutation = useUpdateClientMutation();
+  const excelInputRef = useRef<HTMLInputElement | null>(null);
 
   const tableHead = useMemo(
     () => [
@@ -194,6 +197,25 @@ export default function ClientsView() {
     setUpsertOpen(true);
   };
 
+  const handleOpenExcelPicker = () => {
+    excelInputRef.current?.click();
+  };
+
+  const handleExcelFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+
+    try {
+      const result = await bulkCreateMutation.mutateAsync(file);
+      enqueueSnackbar(tx('pages.clients.toasts.bulk_created', { count: result.created }), {
+        variant: 'success',
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const handleCloseUpsert = () => {
     setUpsertOpen(false);
     setEditingClient(null);
@@ -240,11 +262,28 @@ export default function ClientsView() {
         heading={tx('layout.nav.clients')}
         links={[{ name: tx('layout.nav.clients'), href: paths.clients.root }]}
         action={
-          <Button variant="contained" startIcon={<Iconify icon="mingcute:add-line" />} onClick={handleOpenCreate}>
-            {tx('pages.clients.add_button')}
-          </Button>
+          <Stack direction="row" spacing={1}>
+            <Button
+              variant="outlined"
+              startIcon={<Iconify icon="eva:cloud-upload-fill" />}
+              onClick={handleOpenExcelPicker}
+              disabled={bulkCreateMutation.isPending}
+            >
+              {tx('pages.clients.import_excel_button')}
+            </Button>
+            <Button variant="contained" startIcon={<Iconify icon="mingcute:add-line" />} onClick={handleOpenCreate}>
+              {tx('pages.clients.add_button')}
+            </Button>
+          </Stack>
         }
         sx={{ mb: { xs: 3, md: 5 } }}
+      />
+      <input
+        ref={excelInputRef}
+        type="file"
+        accept=".xlsx,.xls"
+        onChange={handleExcelFileChange}
+        style={{ display: 'none' }}
       />
 
       {showInitialLoader ? (

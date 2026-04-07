@@ -25,6 +25,11 @@ export type UpdateClientPayload = {
   phone: string;
 };
 
+export type BulkCreateClientsResult = {
+  created: number;
+  results: ClientListItem[];
+};
+
 export type ClientSaleItem = {
   id: string;
   productName: string;

@@ -15,6 +15,7 @@
   "pages": {
     "clients": {
       "add_button": "Добавить клиента",
+      "import_excel_button": "Импорт Excel",
       "detail": {
         "not_found": "Клиент не найден",
         "no_purchases": "Покупок пока нет",
@@ -41,6 +42,7 @@
       "search_placeholder": "Поиск по имени или телефону…",
       "toasts": {
         "bulk_deleted": "Удалено клиентов: {{count}}",
+        "bulk_created": "Импортировано клиентов: {{count}}",
         "created": "Клиент успешно создан",
         "deleted": "Клиент удалён",
         "required_fields": "Имя и телефон обязательны",

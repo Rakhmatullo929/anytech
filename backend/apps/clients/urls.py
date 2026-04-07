@@ -14,6 +14,16 @@ urlpatterns = [
         name="client-search",
     ),
     path(
+        "bulk-delete/",
+        ClientViewSet.as_view({"post": "bulk_delete"}),
+        name="client-bulk-delete",
+    ),
+    path(
+        "bulk-create-excel/",
+        ClientViewSet.as_view({"post": "bulk_create_excel"}),
+        name="client-bulk-create-excel",
+    ),
+    path(
         "<uuid:pk>/",
         ClientViewSet.as_view(
             {"get": "retrieve", "put": "update", "patch": "partial_update", "delete": "destroy"}
