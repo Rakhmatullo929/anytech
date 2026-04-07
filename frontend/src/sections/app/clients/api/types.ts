@@ -14,6 +14,22 @@ export type FetchClientsListParams = {
   ordering?: string;
 };
 
+export type CreateClientPayload = {
+  name: string;
+  phone: string;
+};
+
+export type UpdateClientPayload = {
+  id: string;
+  name: string;
+  phone: string;
+};
+
+export type BulkCreateClientsResult = {
+  created: number;
+  results: ClientListItem[];
+};
+
 export type ClientSaleItem = {
   id: string;
   productName: string;

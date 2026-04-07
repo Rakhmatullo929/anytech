@@ -2,7 +2,14 @@ import { request, API_ENDPOINTS } from 'src/utils/axios';
 
 import type { Pagination } from 'src/hooks/api';
 
-import type { ClientDetail, ClientListItem, FetchClientsListParams } from './types';
+import type {
+  BulkCreateClientsResult,
+  ClientDetail,
+  ClientListItem,
+  CreateClientPayload,
+  FetchClientsListParams,
+  UpdateClientPayload,
+} from './types';
 
 export async function fetchClientsList(
   params: FetchClientsListParams
@@ -23,5 +30,50 @@ export async function fetchClientDetail(id: string): Promise<ClientDetail> {
   return request<ClientDetail>({
     method: 'GET',
     url: API_ENDPOINTS.clients.detail(id),
+  });
+}
+
+export async function createClient(payload: CreateClientPayload): Promise<ClientListItem> {
+  return request<ClientListItem>({
+    method: 'POST',
+    url: API_ENDPOINTS.clients.list,
+    data: payload,
+  });
+}
+
+export async function deleteClient(id: string): Promise<void> {
+  await request<void>({
+    method: 'DELETE',
+    url: API_ENDPOINTS.clients.detail(id),
+  });
+}
+
+export async function bulkDeleteClients(ids: string[]): Promise<void> {
+  await request<void>({
+    method: 'POST',
+    url: API_ENDPOINTS.clients.bulkDelete,
+    data: { ids },
+  });
+}
+
+export async function bulkCreateClientsFromExcel(file: File): Promise<BulkCreateClientsResult> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  return request<BulkCreateClientsResult>({
+    method: 'POST',
+    url: API_ENDPOINTS.clients.bulkCreateExcel,
+    data: formData,
+  });
+}
+
+export async function updateClient(payload: UpdateClientPayload): Promise<ClientListItem> {
+  return request<ClientListItem>({
+    method: 'PATCH',
+    url: API_ENDPOINTS.clients.detail(payload.id),
+    data: {
+      name: payload.name,
+      phone: payload.phone,
+    },
   });
 }

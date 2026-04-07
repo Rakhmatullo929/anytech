@@ -70,3 +70,14 @@ class ClientDetailSerializer(ClientSerializer):
 
     class Meta(ClientSerializer.Meta):
         fields = ClientSerializer.Meta.fields + ("sales", "total_debt")
+
+
+class ClientBulkDeleteSerializer(serializers.Serializer):
+    ids = serializers.ListField(
+        child=serializers.UUIDField(),
+        allow_empty=False,
+    )
+
+
+class ClientBulkCreateExcelSerializer(serializers.Serializer):
+    file = serializers.FileField()
