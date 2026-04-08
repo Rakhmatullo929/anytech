@@ -12,6 +12,7 @@ import { LoadingScreen } from 'src/components/loading-screen';
 
 const PosPage = lazy(() => import('../../pages/pos'));
 const ProductsPage = lazy(() => import('../../pages/products'));
+const ProductDetailsPage = lazy(() => import('../../pages/product-details'));
 const ClientsListPage = lazy(() => import('../../pages/clients'));
 const ClientDetailsPage = lazy(() => import('../../pages/client-details'));
 const SalesListPage = lazy(() => import('../../pages/sales'));
@@ -38,11 +39,24 @@ export const dashboardRoutes = [
       { path: 'pos', element: <PosPage /> },
       {
         path: 'products',
-        element: (
-          <RoleBasedGuard roles={MANAGER_ROLES} hasContent>
-            <ProductsPage />
-          </RoleBasedGuard>
-        ),
+        children: [
+          {
+            index: true,
+            element: (
+              <RoleBasedGuard roles={MANAGER_ROLES} hasContent>
+                <ProductsPage />
+              </RoleBasedGuard>
+            ),
+          },
+          {
+            path: ':id',
+            element: (
+              <RoleBasedGuard roles={MANAGER_ROLES} hasContent>
+                <ProductDetailsPage />
+              </RoleBasedGuard>
+            ),
+          },
+        ],
       },
       {
         path: 'clients',

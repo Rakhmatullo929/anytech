@@ -46,7 +46,7 @@ export function useNavData() {
             ? [
                 {
                   title: tx('layout.nav.products'),
-                  path: paths.products,
+                  path: paths.products.root,
                   icon: ICONS.product,
                 },
                 {

@@ -80,7 +80,12 @@
       "stock_short": "остаток"
     },
     "products": {
+      "add_button": "Добавить товар",
       "create_button": "Создать товар",
+      "detail": {
+        "not_found": "Товар не найден"
+      },
+      "detail_document_title": "Товар",
       "document_title": "Товары",
       "dialogs": {
         "create": {
@@ -93,6 +98,12 @@
           "stock_hint": "Остаток меняется только через «Изменить остаток».",
           "title": "Редактирование"
         },
+        "delete": {
+          "bulk_description": "Вы точно хотите удалить выбранные товары? Количество: {{count}}",
+          "bulk_title": "Массовое удаление товаров",
+          "description": "Вы точно хотите удалить товар?",
+          "title": "Удаление товара"
+        },
         "stock": {
           "delta": "Изменение (+/-)",
           "mode": "Режим",
@@ -102,7 +113,16 @@
           "title": "Остаток"
         }
       },
-      "search_placeholder": "Поиск по названию или SKU…"
+      "search_placeholder": "Поиск по названию или SKU…",
+      "toasts": {
+        "bulk_deleted": "Удалено товаров: {{count}}",
+        "created": "Товар успешно создан",
+        "deleted": "Товар удалён",
+        "invalid_prices": "Проверьте цены: значения должны быть числами >= 0",
+        "invalid_stock": "Проверьте остаток: значение должно быть числом >= 0",
+        "required_fields": "Название, закупка и продажа обязательны",
+        "updated": "Товар обновлён"
+      }
     },
     "sales": {
       "detail": {
@@ -216,5 +236,15 @@
   "shop": "магазин",
   "tour": "тур",
   "upgrade_to_pro": "Перейти на Pro",
-  "user": "пользователь"
+  "user": "пользователь",
+  "validation": {
+    "client_name_required": "Имя клиента обязательно",
+    "number_invalid": "Введите корректное число",
+    "number_min_zero": "Значение должно быть не меньше 0",
+    "phone_required": "Телефон обязателен",
+    "product_name_required": "Название товара обязательно",
+    "purchase_price_required": "Закупочная цена обязательна",
+    "sale_price_required": "Цена продажи обязательна",
+    "stock_required": "Начальный остаток обязателен"
+  }
 }

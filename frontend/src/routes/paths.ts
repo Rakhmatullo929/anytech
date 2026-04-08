@@ -5,7 +5,10 @@ export const paths = {
   register: '/register',
 
   pos: '/pos',
-  products: '/products',
+  products: {
+    root: '/products',
+    details: (id: string) => `/products/${id}`,
+  },
   clients: {
     root: '/clients',
     details: (id: string) => `/clients/${id}`,

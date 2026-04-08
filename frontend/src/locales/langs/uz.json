@@ -80,7 +80,12 @@
       "stock_short": "qoldiq"
     },
     "products": {
+      "add_button": "Mahsulot qoʻshish",
       "create_button": "Mahsulot yaratish",
+      "detail": {
+        "not_found": "Mahsulot topilmadi"
+      },
+      "detail_document_title": "Mahsulot",
       "document_title": "Mahsulotlar",
       "dialogs": {
         "create": {
@@ -93,6 +98,12 @@
           "stock_hint": "Qoldiq faqat qoldiqni oʻzgartirish orqali yangilanadi.",
           "title": "Tahrirlash"
         },
+        "delete": {
+          "bulk_description": "Tanlangan mahsulotlarni o‘chirishni tasdiqlaysizmi? Soni: {{count}}",
+          "bulk_title": "Mahsulotlarni ommaviy o‘chirish",
+          "description": "Mahsulotni o‘chirishni tasdiqlaysizmi?",
+          "title": "Mahsulotni o‘chirish"
+        },
         "stock": {
           "delta": "Oʻzgarish (+/-)",
           "mode": "Rejim",
@@ -102,7 +113,16 @@
           "title": "Qoldiq"
         }
       },
-      "search_placeholder": "Nom yoki SKU boʻyicha qidiruv…"
+      "search_placeholder": "Nom yoki SKU boʻyicha qidiruv…",
+      "toasts": {
+        "bulk_deleted": "O‘chirilgan mahsulotlar soni: {{count}}",
+        "created": "Mahsulot muvaffaqiyatli yaratildi",
+        "deleted": "Mahsulot o‘chirildi",
+        "invalid_prices": "Narxlarni tekshiring: qiymatlar 0 dan katta yoki teng son bo'lishi kerak",
+        "invalid_stock": "Qoldiqni tekshiring: qiymat 0 dan katta yoki teng son bo'lishi kerak",
+        "required_fields": "Nomi, xarid narxi va sotuv narxi majburiy",
+        "updated": "Mahsulot yangilandi"
+      }
     },
     "sales": {
       "detail": {
@@ -216,5 +236,15 @@
   "shop": "doʻkon",
   "tour": "tur",
   "upgrade_to_pro": "Pro ga oʻtish",
-  "user": "foydalanuvchi"
+  "user": "foydalanuvchi",
+  "validation": {
+    "client_name_required": "Mijoz ismi majburiy",
+    "number_invalid": "Toʻgʻri son kiriting",
+    "number_min_zero": "Qiymat 0 dan kichik bo'lmasligi kerak",
+    "phone_required": "Telefon majburiy",
+    "product_name_required": "Mahsulot nomi majburiy",
+    "purchase_price_required": "Xarid narxi majburiy",
+    "sale_price_required": "Sotuv narxi majburiy",
+    "stock_required": "Boshlangʻich qoldiq majburiy"
+  }
 }

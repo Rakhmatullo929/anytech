@@ -9,6 +9,7 @@ from auth_tenant.permissions import IsManagerOrAbove, IsSellerOrAbove
 
 from .models import Product
 from .serializers import (
+    ProductBulkDeleteSerializer,
     ProductSerializer,
     ProductUpdateSerializer,
     StockAdjustmentSerializer,
@@ -18,7 +19,7 @@ from .serializers import (
 class ProductViewSet(TenantQuerySetMixin, ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    http_method_names = ["get", "post", "put", "patch", "head", "options"]
+    http_method_names = ["get", "post", "put", "patch", "delete", "head", "options"]
 
     search_fields = ["name", "sku"]
     ordering_fields = ["name", "created_at", "sale_price", "stock"]
@@ -39,6 +40,15 @@ class ProductViewSet(TenantQuerySetMixin, ModelViewSet):
     @action(detail=False, methods=["get"], url_path="search")
     def search(self, request):
         return self.list(request)
+
+    @action(detail=False, methods=["post"], url_path="bulk-delete")
+    def bulk_delete(self, request):
+        serializer = ProductBulkDeleteSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        ids = serializer.validated_data["ids"]
+        deleted_count, _ = self.get_queryset().filter(id__in=ids).delete()
+        return Response({"deleted": deleted_count})
 
     @action(detail=True, methods=["patch"], url_path="stock")
     def adjust_stock(self, request, pk=None):
