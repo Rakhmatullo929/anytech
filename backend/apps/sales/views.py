@@ -28,6 +28,13 @@ class SaleViewSet(TenantQuerySetMixin, ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
+        payment_type = self.request.query_params.get("payment_type")
+        if payment_type in {
+            Sale.PaymentType.CASH,
+            Sale.PaymentType.CARD,
+            Sale.PaymentType.DEBT,
+        }:
+            qs = qs.filter(payment_type=payment_type)
         if self.action == "retrieve":
             qs = qs.prefetch_related("items__product")
         return qs

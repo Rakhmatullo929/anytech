@@ -135,6 +135,10 @@
       },
       "detail_document_title": "Savdo",
       "document_title": "Savdolar",
+      "filters": {
+        "all_option": "Barchasi",
+        "payment_label": "Toʻlov turi"
+      },
       "list_heading": "Savdolar tarixi"
     }
   },
