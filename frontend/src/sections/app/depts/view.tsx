@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 // locales
 import { useLocales } from 'src/locales';
 // @mui
+import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
@@ -11,10 +12,10 @@ import TableCell from '@mui/material/TableCell';
 import Link from '@mui/material/Link';
 import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
+import LinearProgress from '@mui/material/LinearProgress';
 // utils
 import { fCurrency } from 'src/utils/format-number';
-// mock
-import { MOCK_DEBTS, type MockDebt } from 'src/_mock/pos-app';
+import { intParam, stringParam, useSyncTableWithUrlListState, useUrlQueryState } from 'src/hooks/use-url-query-state';
 // routes
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
@@ -27,6 +28,8 @@ import {
   TableHeadCustom,
   TablePaginationCustom,
 } from 'src/components/table';
+import { useDebtsListQuery, type DebtStatus } from 'src/sections/app/depts/api';
+import { DebtsListSkeleton } from 'src/sections/app/depts/skeleton';
 
 // ----------------------------------------------------------------------
 
@@ -44,23 +47,56 @@ export default function DebtsView() {
     [tx]
   );
 
-  const [rows] = useState<MockDebt[]>(() => [...MOCK_DEBTS]);
-  const [status, setStatus] = useState<'all' | 'active' | 'closed'>('all');
-  const table = useTable({ defaultRowsPerPage: 10 });
+  const { values, setValues } = useUrlQueryState({
+    page: intParam(1),
+    page_size: intParam(15),
+    ordering: stringParam('-created_at'),
+    status: stringParam(''),
+  });
+  const pageParam = values.page as number;
+  const rowsPerPage = values.page_size as number;
+  const ordering = values.ordering as string;
+  const status = values.status as '' | DebtStatus;
 
-  const filtered = useMemo(() => {
-    if (status === 'all') return rows;
-    return rows.filter((r) => r.status === status);
-  }, [rows, status]);
+  const table = useTable({
+    defaultCurrentPage: Math.max(0, pageParam - 1),
+    defaultRowsPerPage: rowsPerPage,
+  });
+  const { setPage, setRowsPerPage } = table;
+  const page = Math.max(0, pageParam - 1);
 
-  const paginated = useMemo(
-    () =>
-      filtered.slice(
-        table.page * table.rowsPerPage,
-        table.page * table.rowsPerPage + table.rowsPerPage
-      ),
-    [filtered, table.page, table.rowsPerPage]
-  );
+  const { data, isPending, isFetching } = useDebtsListQuery({
+    page: page + 1,
+    pageSize: rowsPerPage,
+    ordering,
+    status: status || undefined,
+  });
+  const rows = useMemo(() => data?.results ?? [], [data?.results]);
+  const total = data?.count ?? 0;
+  const showInitialLoader = isPending && !data;
+
+  useSyncTableWithUrlListState({
+    page: pageParam,
+    rowsPerPage,
+    tablePage: table.page,
+    tableRowsPerPage: table.rowsPerPage,
+    setTablePage: setPage,
+    setTableRowsPerPage: setRowsPerPage,
+  });
+
+  const handleStatusChange = (nextStatus: '' | DebtStatus) => {
+    setValues({ status: nextStatus, page: 1 });
+  };
+
+  const handlePageChange = (_event: unknown, newPage: number) => {
+    setValues({ page: newPage + 1 });
+  };
+
+  const handleRowsPerPageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const nextRowsPerPage = parseInt(event.target.value, 10);
+    if (!Number.isInteger(nextRowsPerPage) || nextRowsPerPage <= 0) return;
+    setValues({ page_size: nextRowsPerPage, page: 1 });
+  };
 
   return (
     <>
@@ -70,56 +106,67 @@ export default function DebtsView() {
         sx={{ mb: { xs: 3, md: 5 } }}
       />
 
-      <Card>
-        <Stack spacing={2} sx={{ p: 2 }}>
-          <TextField
-            select
-            size="small"
-            label={tx('shared.status.filter_label')}
-            value={status}
-            onChange={(e) => setStatus(e.target.value as 'all' | 'active' | 'closed')}
-            sx={{ maxWidth: 220 }}
-          >
-            <MenuItem value="all">{tx('shared.status.filter_all')}</MenuItem>
-            <MenuItem value="active">{tx('shared.status.filter_active')}</MenuItem>
-            <MenuItem value="closed">{tx('shared.status.filter_closed')}</MenuItem>
-          </TextField>
+      {showInitialLoader ? (
+        <DebtsListSkeleton headLabel={tableHead} />
+      ) : (
+        <Card>
+          {isFetching && data ? (
+            <LinearProgress sx={{ borderRadius: 1 }} color="inherit" />
+          ) : (
+            <Box sx={{ height: 4 }} />
+          )}
 
-          <Scrollbar>
-            <Table size="small">
-              <TableHeadCustom headLabel={tableHead} />
-              <TableBody>
-                {paginated.map((row) => (
-                  <TableRow key={row.id}>
-                    <TableCell>
-                      <Link component={RouterLink} href={paths.debts.details(row.id)} variant="subtitle2">
-                        {row.clientName}
-                      </Link>
-                    </TableCell>
-                    <TableCell>{fCurrency(row.totalAmount)}</TableCell>
-                    <TableCell>{fCurrency(row.paidAmount)}</TableCell>
-                    <TableCell>{fCurrency(row.remaining)}</TableCell>
-                    <TableCell>
-                      {row.status === 'active'
-                        ? tx('shared.status.row_active')
-                        : tx('shared.status.row_closed')}
-                    </TableCell>
-                  </TableRow>
-                ))}
-                <TableNoData notFound={!paginated.length} />
-              </TableBody>
-            </Table>
-          </Scrollbar>
+          <Stack spacing={2} sx={{ p: 2 }}>
+            <TextField
+              select
+              size="small"
+              label={tx('shared.status.filter_label')}
+              value={status}
+              onChange={(event) => handleStatusChange(event.target.value as '' | DebtStatus)}
+              sx={{ maxWidth: 220 }}
+            >
+              <MenuItem value="">{tx('shared.status.filter_all')}</MenuItem>
+              <MenuItem value="active">{tx('shared.status.filter_active')}</MenuItem>
+              <MenuItem value="closed">{tx('shared.status.filter_closed')}</MenuItem>
+            </TextField>
 
-          <TablePaginationCustom
-            count={filtered.length}
-            page={table.page}
-            rowsPerPage={table.rowsPerPage}
-            onPageChange={table.onChangePage}
-            onRowsPerPageChange={table.onChangeRowsPerPage}
-          />
-        </Stack>
-      </Card>
+            <Scrollbar>
+              <Table size="small">
+                <TableHeadCustom headLabel={tableHead} />
+                <TableBody>
+                  {rows.map((row) => (
+                    <TableRow key={row.id} hover>
+                      <TableCell>
+                        <Link component={RouterLink} href={paths.debts.details(row.id)} variant="subtitle2">
+                          {row.clientName}
+                        </Link>
+                      </TableCell>
+                      <TableCell>{fCurrency(row.totalAmount)}</TableCell>
+                      <TableCell>{fCurrency(row.paidAmount)}</TableCell>
+                      <TableCell>{fCurrency(row.remaining)}</TableCell>
+                      <TableCell>
+                        {row.status === 'active'
+                          ? tx('shared.status.row_active')
+                          : tx('shared.status.row_closed')}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  <TableNoData notFound={!rows.length} title={tx('shared.table.no_data')} />
+                </TableBody>
+              </Table>
+            </Scrollbar>
+
+            <TablePaginationCustom
+              count={total}
+              page={page}
+              rowsPerPage={rowsPerPage}
+              rowsPerPageOptions={[5, 10, 15, 25]}
+              onPageChange={handlePageChange}
+              onRowsPerPageChange={handleRowsPerPageChange}
+            />
+          </Stack>
+        </Card>
+      )}
     </>
   );
 }

@@ -374,7 +374,7 @@ export default function ClientsView() {
                       </TableCell>
                     </TableRow>
                   ))}
-                  <TableNoData notFound={!rows.length} />
+                  <TableNoData notFound={!rows.length} title={tx('shared.table.no_data')} />
                 </TableBody>
               </Table>
             </Scrollbar>

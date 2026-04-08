@@ -37,6 +37,9 @@ class DebtViewSet(TenantQuerySetMixin, ListModelMixin, RetrieveModelMixin, Gener
 
     def get_queryset(self):
         qs = super().get_queryset()
+        status = self.request.query_params.get("status")
+        if status in {Debt.Status.ACTIVE, Debt.Status.CLOSED}:
+            qs = qs.filter(status=status)
         if self.action == "retrieve":
             qs = qs.prefetch_related("payments")
         return qs
