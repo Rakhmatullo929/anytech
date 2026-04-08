@@ -69,3 +69,10 @@ class StockAdjustmentSerializer(serializers.Serializer):
                 {"quantity": "Stock value must be >= 0."}
             )
         return attrs
+
+
+class ProductBulkDeleteSerializer(serializers.Serializer):
+    ids = serializers.ListField(
+        child=serializers.UUIDField(),
+        allow_empty=False,
+    )
