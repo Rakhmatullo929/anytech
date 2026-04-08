@@ -362,7 +362,7 @@ export default function ProductsView() {
                     </TableRow>
                   ))}
 
-                  <TableNoData notFound={!rows.length} />
+                  <TableNoData notFound={!rows.length} title={tx('shared.table.no_data')} />
                 </TableBody>
               </Table>
             </Scrollbar>

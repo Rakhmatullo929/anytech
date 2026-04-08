@@ -91,6 +91,7 @@ src/sections/app/<entity>/
 - Для destructive-действий (например, `delete`) обязателен confirm-dialog с переводами (`pages.<экран>.dialogs.<action>.*`).
 - Для таблиц с удалением нескольких записей добавляй bulk-режим через selection (checkbox + selected action bar), confirm-dialog и переведённые toasts.
 - Для confirm-диалогов используй общий компонент `src/components/custom-dialog/ConfirmDialog` (не дублируй `DialogTitle/DialogContent/DialogActions` в фичах).
+- Для empty-state не оставляй дефолтные/английские заглушки типа `No Data`; всегда задавай локализованный текст через `tx` (`TableNoData`/`EmptyContent`) с понятным пользовательским сообщением.
 
 ## Читаемость и масштаб
 
