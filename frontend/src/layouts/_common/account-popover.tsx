@@ -13,6 +13,7 @@ import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hook';
 // hooks
 import { useAppUserProfile } from 'src/hooks/use-app-user-profile';
+import { useLocales } from 'src/locales';
 // auth
 import { useLogoutMutation } from 'src/auth/api';
 // components
@@ -24,8 +25,8 @@ import CustomPopover, { usePopover } from 'src/components/custom-popover';
 
 const OPTIONS = [
   {
-    label: 'POS',
-    linkTo: paths.pos,
+    label: 'Profile',
+    linkTo: paths.profile,
   },
 ];
 
@@ -33,6 +34,7 @@ const OPTIONS = [
 
 export default function AccountPopover() {
   const router = useRouter();
+  const { tx } = useLocales();
 
   const { user } = useAppUserProfile();
 
@@ -110,7 +112,7 @@ export default function AccountPopover() {
         <Stack sx={{ p: 1 }}>
           {OPTIONS.map((option) => (
             <MenuItem key={option.label} onClick={() => handleClickItem(option.linkTo)}>
-              {option.label}
+              {tx('pages.profile.menu_label')}
             </MenuItem>
           ))}
         </Stack>

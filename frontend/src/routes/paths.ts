@@ -2,6 +2,7 @@
 
 export const paths = {
   login: '/login',
+  profile: '/profile',
 
   pos: '/pos',
   products: {
@@ -19,6 +20,16 @@ export const paths = {
   debts: {
     root: '/debts',
     details: (id: string) => `/debts/${id}`,
+  },
+  admin: {
+    root: '/admin',
+    users: {
+      root: '/admin/users',
+      details: (id: string) => `/admin/users/${id}`,
+      create: '/admin/users/new',
+      edit: (id: string) => `/admin/users/${id}/edit`,
+    },
+    roles: '/admin/roles',
   },
 
   components: '/components',

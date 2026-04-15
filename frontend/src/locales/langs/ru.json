@@ -9,7 +9,9 @@
       "group": "Магазин",
       "pos": "POS",
       "products": "Товары",
-      "sales": "Продажи"
+      "sales": "Продажи",
+      "admin": "Админ",
+      "users": "Пользователи"
     }
   },
   "pages": {
@@ -140,6 +142,74 @@
         "payment_label": "Тип оплаты"
       },
       "list_heading": "История продаж"
+    },
+    "admin": {
+      "tabs": {
+        "users": "Пользователи",
+        "roles": "Роли"
+      },
+      "roles": {
+        "document_title": "Роли админа",
+        "empty": "Раздел ролей пока пустой"
+      }
+    },
+    "profile": {
+      "menu_label": "Профиль",
+      "heading": "Мой профиль",
+      "document_title": "Профиль",
+      "personal_info": "Личные данные"
+    },
+    "users": {
+      "add_button": "Добавить пользователя",
+      "create_document_title": "Создать пользователя",
+      "detail_document_title": "Пользователь",
+      "document_title": "Пользователи",
+      "edit_document_title": "Редактировать пользователя",
+      "actions": {
+        "login_as": "Войти от имени"
+      },
+      "detail": {
+        "info_title": "Данные пользователя",
+        "not_found": "Пользователь не найден"
+      },
+      "dialogs": {
+        "create": {
+          "title": "Новый пользователь",
+          "confirm_password": "Подтвердите пароль"
+        },
+        "edit": {
+          "title": "Редактировать пользователя",
+          "new_password": "Новый пароль",
+          "confirm_new_password": "Подтвердите новый пароль"
+        },
+        "delete": {
+          "title": "Удаление пользователя",
+          "description": "Вы точно хотите удалить пользователя?"
+        }
+      },
+      "search_placeholder": "Поиск по имени, телефону или email…",
+      "roles": {
+        "admin": "Админ",
+        "manager": "Менеджер",
+        "seller": "Продавец"
+      },
+      "genders": {
+        "male": "Мужской",
+        "female": "Женский"
+      },
+      "table": {
+        "role": "Роль"
+      },
+      "form": {
+        "passport_prefix": "Серия паспорта (буквы)",
+        "passport_number": "Серия паспорта (цифры)"
+      },
+      "toasts": {
+        "login_as_success": "Вы вошли от имени пользователя",
+        "created": "Пользователь создан",
+        "updated": "Пользователь обновлён",
+        "deleted": "Пользователь удалён"
+      }
     }
   },
   "shared": {
@@ -175,11 +245,13 @@
       "client": "Клиент",
       "created": "Создан",
       "date": "Дата",
+      "email": "Email",
       "name": "Название",
       "no_data": "Данные не найдены",
       "paid": "Оплачено",
       "pay": "Оплата",
       "phone": "Телефон",
+      "gender": "Пол",
       "price": "Цена",
       "product": "Товар",
       "purchase": "Закупка",
@@ -190,7 +262,10 @@
       "sku": "SKU",
       "status": "Статус",
       "stock": "Остаток",
-      "total": "Сумма"
+      "total": "Сумма",
+      "password": "Пароль"
+      ,
+      "passport_series": "Серия паспорта"
     }
   },
   "account": "аккаунт",
@@ -244,13 +319,22 @@
   "user": "пользователь",
   "validation": {
     "client_name_required": "Имя клиента обязательно",
+    "email_invalid": "Некорректный формат email",
     "number_invalid": "Введите корректное число",
     "number_min_zero": "Значение должно быть не меньше 0",
+    "password_confirm_required": "Подтверждение пароля обязательно",
+    "password_min": "Пароль должен быть минимум 6 символов",
     "password_required": "Пароль обязателен",
+    "passwords_must_match": "Пароли должны совпадать",
     "phone_invalid_format": "Телефон должен быть в формате {{example}}",
     "phone_required": "Телефон обязателен",
+    "gender_required": "Выберите пол",
+    "passport_prefix_invalid": "Буквенная часть серии паспорта должна содержать 2 латинские буквы",
+    "passport_number_invalid": "Цифровая часть серии паспорта должна содержать 7 цифр",
+    "passport_series_required_pair": "Введите серию паспорта полностью (например: AB1231212)",
     "product_name_required": "Название товара обязательно",
     "purchase_price_required": "Закупочная цена обязательна",
+    "role_required": "Роль обязательна",
     "sale_price_required": "Цена продажи обязательна",
     "stock_required": "Начальный остаток обязателен"
   }
