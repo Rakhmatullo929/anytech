@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from auth_tenant.mixins import TenantQuerySetMixin
-from auth_tenant.permissions import IsSellerOrAbove
+from auth_tenant.permissions import page_action_permission
 
 from .models import Debt, Payment
 from .serializers import DebtDetailSerializer, DebtListSerializer, PaymentCreateSerializer
@@ -26,7 +26,11 @@ class DebtViewSet(TenantQuerySetMixin, ListModelMixin, RetrieveModelMixin, Gener
     ordering = ["-created_at"]
 
     def get_permissions(self):
-        return [IsSellerOrAbove()]
+        if self.action == "retrieve":
+            return [page_action_permission("debts", "detail")()]
+        if self.action == "list":
+            return [page_action_permission("debts", "read")()]
+        return [page_action_permission("debts", "write")()]
 
     def get_serializer_class(self):
         if self.action == "retrieve":

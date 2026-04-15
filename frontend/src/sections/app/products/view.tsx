@@ -47,6 +47,7 @@ import {
 } from 'src/sections/app/products/api';
 import { ProductUpsertDialog } from 'src/sections/app/products/components';
 import { ProductsListSkeleton } from 'src/sections/app/products/skeleton';
+import View403 from 'src/sections/error/403-view';
 
 // ----------------------------------------------------------------------
 
@@ -98,7 +99,7 @@ export default function ProductsView() {
   const { setPage, setRowsPerPage } = table;
   const page = Math.max(0, pageParam - 1);
 
-  const { data, isPending, isFetching } = useProductsListQuery({
+  const { data, isPending, isFetching, isError, error: queryError } = useProductsListQuery({
     page: page + 1,
     pageSize: rowsPerPage,
     search: debouncedSearch || undefined,
@@ -113,8 +114,7 @@ export default function ProductsView() {
   const [editingProduct, setEditingProduct] = useState<ProductListItem | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
-  const selectedIds = table.selected;
-  const setSelected = table.setSelected;
+  const { selected: selectedIds, setSelected } = table;
 
   useEffect(() => {
     const rowIdSet = new Set(rows.map((row) => row.id));
@@ -288,6 +288,10 @@ export default function ProductsView() {
     selectedProductId !== null &&
     deleteMutation.variables === selectedProductId;
   const deletingBulk = bulkDeleteMutation.isPending;
+
+  if (isError && queryError?.response?.status === 403) {
+    return <View403 />;
+  }
 
   return (
     <>

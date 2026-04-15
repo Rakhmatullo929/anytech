@@ -2,7 +2,8 @@ from django.contrib.auth import password_validation
 from django.db import transaction
 from rest_framework import serializers
 
-from .models import Tenant, User
+from .models import RolePermission, Tenant, User
+from .permission_catalog import ALL_PERMISSIONS
 from .phone import get_phone_rule, is_phone_valid, normalize_phone
 
 
@@ -214,3 +215,39 @@ class TenantUserUpdateSerializer(serializers.Serializer):
 
         instance.save(update_fields=["name", "phone", "email", "passport_series", "gender", "role"])
         return instance
+
+
+class TenantRolePermissionsUpdateSerializer(serializers.Serializer):
+    permissions = serializers.ListField(
+        child=serializers.CharField(max_length=100),
+        allow_empty=True,
+    )
+
+    def validate_permissions(self, value):
+        normalized = []
+        seen = set()
+        for item in value:
+            permission = str(item or "").strip()
+            if permission == "":
+                continue
+            if permission not in ALL_PERMISSIONS:
+                raise serializers.ValidationError(f"Unsupported permission: {permission}")
+            if permission in seen:
+                continue
+            normalized.append(permission)
+            seen.add(permission)
+        return normalized
+
+    def save(self, **kwargs):
+        request = self.context["request"]
+        role = self.context["role"]
+        permissions = self.validated_data["permissions"]
+
+        RolePermission.objects.filter(tenant=request.user.tenant, role=role).delete()
+        RolePermission.objects.bulk_create(
+            [
+                RolePermission(tenant=request.user.tenant, role=role, permission=permission)
+                for permission in permissions
+            ]
+        )
+        return permissions

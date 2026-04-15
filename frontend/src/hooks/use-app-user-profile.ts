@@ -1,6 +1,6 @@
 import type { TenantUser } from 'src/auth/api/types';
 import type { AuthUserType } from 'src/auth/types';
-import { useAuthContext } from 'src/auth/hooks';
+import { useAuthContext } from 'src/auth/hooks/use-auth-context';
 
 /**
  * Minimals dashboard expects displayName, photoURL, address fields, etc.
@@ -20,6 +20,7 @@ export type AppUserProfile = {
   zipCode: string;
   about: string;
   role: string;
+  permissions: string[];
   isPublic: boolean;
 };
 
@@ -49,6 +50,7 @@ function emptyProfile(partial: Partial<AppUserProfile> = {}): AppUserProfile {
     zipCode: '',
     about: '',
     role: 'admin',
+    permissions: [],
     isPublic: false,
     ...partial,
   };
@@ -62,6 +64,7 @@ function mapAuthUserToProfile(u: NonNullable<AuthUserType>): AppUserProfile {
       email: u.email || '',
       photoURL: undefined,
       role: u.role,
+      permissions: Array.isArray(u.permissions) ? u.permissions : [],
       phoneNumber: u.phone || '',
     });
   }
@@ -77,6 +80,9 @@ function mapAuthUserToProfile(u: NonNullable<AuthUserType>): AppUserProfile {
   const email = typeof rec.email === 'string' ? rec.email : '';
   const id = typeof rec.id === 'string' ? rec.id : '';
   const role = typeof rec.role === 'string' ? rec.role : 'admin';
+  const permissions = Array.isArray(rec.permissions)
+    ? rec.permissions.filter((item): item is string => typeof item === 'string')
+    : [];
   const photoURL = typeof rec.photoURL === 'string' ? rec.photoURL : undefined;
 
   return emptyProfile({
@@ -85,6 +91,7 @@ function mapAuthUserToProfile(u: NonNullable<AuthUserType>): AppUserProfile {
     email,
     photoURL,
     role,
+    permissions,
     phoneNumber: typeof rec.phoneNumber === 'string' ? rec.phoneNumber : '',
     country: typeof rec.country === 'string' ? rec.country : '',
     address: typeof rec.address === 'string' ? rec.address : '',

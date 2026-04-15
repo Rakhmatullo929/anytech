@@ -50,6 +50,7 @@ import {
 import type { ClientListItem } from 'src/sections/app/clients/api/types';
 import { ClientUpsertDialog } from 'src/sections/app/clients/components';
 import { ClientsListSkeleton } from 'src/sections/app/clients/skeleton';
+import View403 from 'src/sections/error/403-view';
 
 // ----------------------------------------------------------------------
 
@@ -108,7 +109,7 @@ export default function ClientsView() {
   const { setPage, setRowsPerPage } = table;
   const page = Math.max(0, pageParam - 1);
 
-  const { data, isPending, isFetching } = useClientsListQuery({
+  const { data, isPending, isFetching, isError, error: queryError } = useClientsListQuery({
     page: page + 1,
     pageSize: rowsPerPage,
     search: debouncedSearch || undefined,
@@ -118,8 +119,7 @@ export default function ClientsView() {
   const rows = useMemo(() => data?.results ?? [], [data?.results]);
   const total = data?.count ?? 0;
   const showInitialLoader = isPending && !data;
-  const selectedIds = table.selected;
-  const setSelected = table.setSelected;
+  const { selected: selectedIds, setSelected } = table;
 
   useEffect(() => {
     const rowIdSet = new Set(rows.map((row) => row.id));
@@ -283,6 +283,10 @@ export default function ClientsView() {
     deleteMutation.variables === selectedClientId;
   const deletingBulk = bulkDeleteMutation.isPending;
   const upsertLoading = createMutation.isPending || updateMutation.isPending;
+
+  if (isError && queryError?.response?.status === 403) {
+    return <View403 />;
+  }
 
   return (
     <>

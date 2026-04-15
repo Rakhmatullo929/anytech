@@ -48,8 +48,8 @@ class TestClientModel:
 
 
 class TestClientList:
-    def test_list(self, seller_client, client_obj):
-        resp = seller_client.get(LIST_URL)
+    def test_list(self, manager_client, client_obj):
+        resp = manager_client.get(LIST_URL)
         assert resp.status_code == status.HTTP_200_OK
         assert resp.data["count"] == 1
 
@@ -57,8 +57,8 @@ class TestClientList:
         resp = anon_client.get(LIST_URL)
         assert resp.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_retrieve_detail(self, seller_client, client_obj):
-        resp = seller_client.get(detail_url(client_obj.pk))
+    def test_retrieve_detail(self, manager_client, client_obj):
+        resp = manager_client.get(detail_url(client_obj.pk))
         assert resp.status_code == status.HTTP_200_OK
         assert resp.data["name"] == "Test Client"
         assert "sales" in resp.data
@@ -76,9 +76,9 @@ class TestClientCreate:
         assert resp.status_code == status.HTTP_201_CREATED
         assert str(resp.data["tenant"]) == str(tenant.pk)
 
-    def test_manager_can_create(self, manager_client):
+    def test_manager_cannot_create(self, manager_client):
         resp = manager_client.post(LIST_URL, self.PAYLOAD, format="json")
-        assert resp.status_code == status.HTTP_201_CREATED
+        assert resp.status_code == status.HTTP_403_FORBIDDEN
 
     def test_seller_cannot_create(self, seller_client):
         resp = seller_client.post(LIST_URL, self.PAYLOAD, format="json")
@@ -147,16 +147,16 @@ class TestClientTenantIsolation:
 
 
 class TestClientSearch:
-    def test_search_by_name(self, seller_client, client_obj):
-        resp = seller_client.get(SEARCH_URL, {"search": "Test"})
+    def test_search_by_name(self, manager_client, client_obj):
+        resp = manager_client.get(SEARCH_URL, {"search": "Test"})
         assert resp.status_code == status.HTTP_200_OK
         assert resp.data["count"] == 1
 
-    def test_search_by_phone(self, seller_client, client_obj):
-        resp = seller_client.get(SEARCH_URL, {"search": "9012345"})
+    def test_search_by_phone(self, manager_client, client_obj):
+        resp = manager_client.get(SEARCH_URL, {"search": "9012345"})
         assert resp.status_code == status.HTTP_200_OK
         assert resp.data["count"] == 1
 
-    def test_search_no_match(self, seller_client, client_obj):
-        resp = seller_client.get(SEARCH_URL, {"search": "ZZZ"})
+    def test_search_no_match(self, manager_client, client_obj):
+        resp = manager_client.get(SEARCH_URL, {"search": "ZZZ"})
         assert resp.data["count"] == 0

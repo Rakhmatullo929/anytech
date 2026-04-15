@@ -30,6 +30,7 @@ import {
 } from 'src/components/table';
 import { useDebtsListQuery, type DebtStatus } from 'src/sections/app/depts/api';
 import { DebtsListSkeleton } from 'src/sections/app/depts/skeleton';
+import View403 from 'src/sections/error/403-view';
 
 // ----------------------------------------------------------------------
 
@@ -65,7 +66,7 @@ export default function DebtsView() {
   const { setPage, setRowsPerPage } = table;
   const page = Math.max(0, pageParam - 1);
 
-  const { data, isPending, isFetching } = useDebtsListQuery({
+  const { data, isPending, isFetching, isError, error: queryError } = useDebtsListQuery({
     page: page + 1,
     pageSize: rowsPerPage,
     ordering,
@@ -97,6 +98,10 @@ export default function DebtsView() {
     if (!Number.isInteger(nextRowsPerPage) || nextRowsPerPage <= 0) return;
     setValues({ page_size: nextRowsPerPage, page: 1 });
   };
+
+  if (isError && queryError?.response?.status === 403) {
+    return <View403 />;
+  }
 
   return (
     <>

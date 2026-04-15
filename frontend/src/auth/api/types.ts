@@ -8,6 +8,7 @@ export type TenantUser = {
   phone: string | null;
   email: string | null;
   role: UserRole;
+  permissions?: string[];
   tenantId: string | null;
   createdAt: string;
 };

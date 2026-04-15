@@ -6,8 +6,10 @@ from .views import (
     MeView,
     RegisterView,
     TenantImpersonateView,
+    TenantRolePermissionsUpdateView,
     TenantUserDetailView,
     TenantUsersListView,
+    TenantRolesListView,
 )
 
 
@@ -22,5 +24,7 @@ urlpatterns = [
     path("me/", MeView.as_view(), name="auth-me"),
     path("users/", TenantUsersListView.as_view(), name="auth-users"),
     path("users/<uuid:pk>/", TenantUserDetailView.as_view(), name="auth-user-detail"),
+    path("roles/", TenantRolesListView.as_view(), name="auth-roles"),
+    path("roles/<str:role>/permissions/", TenantRolePermissionsUpdateView.as_view(), name="auth-role-permissions"),
     path("impersonate/", TenantImpersonateView.as_view(), name="auth-impersonate"),
 ]

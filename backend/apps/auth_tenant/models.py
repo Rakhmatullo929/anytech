@@ -68,3 +68,18 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.phone or self.email or str(self.id)
+
+
+class RolePermission(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, related_name="role_permissions")
+    role = models.CharField(max_length=20, choices=User.Role.choices)
+    permission = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "role_permissions"
+        unique_together = ("tenant", "role", "permission")
+
+    def __str__(self):
+        return f"{self.tenant_id}:{self.role}:{self.permission}"

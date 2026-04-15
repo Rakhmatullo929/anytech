@@ -37,6 +37,7 @@ import Iconify from 'src/components/iconify';
 import { useSnackbar } from 'src/components/snackbar';
 import { useAppUserProfile } from 'src/hooks/use-app-user-profile';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
+import View403 from 'src/sections/error/403-view';
 
 import {
   useDeleteTenantUserMutation,
@@ -95,7 +96,7 @@ export default function UsersView() {
   });
   const page = Math.max(0, pageParam - 1);
 
-  const { data, isPending, isFetching } = useTenantUsersListQuery({
+  const { data, isPending, isFetching, isError, error: queryError } = useTenantUsersListQuery({
     page: page + 1,
     pageSize: rowsPerPage,
     search: debouncedSearch || undefined,
@@ -167,6 +168,10 @@ export default function UsersView() {
 
   const deletingCurrent =
     deleteMutation.isPending && selectedUserId !== null && deleteMutation.variables === selectedUserId;
+
+  if (isError && queryError?.response?.status === 403) {
+    return <View403 />;
+  }
 
   return (
     <>

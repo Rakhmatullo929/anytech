@@ -2,7 +2,6 @@ import { Suspense, lazy } from 'react';
 import { Outlet } from 'react-router-dom';
 // auth
 import { AuthGuard } from 'src/auth/guard';
-import RoleBasedGuard from 'src/auth/guard/role-based-guard';
 // layouts
 import DashboardLayout from 'src/layouts/dashboard';
 // components
@@ -26,11 +25,6 @@ const AdminUserCreatePage = lazy(() => import('../../pages/admin-users-create'))
 const AdminUserEditPage = lazy(() => import('../../pages/admin-user-edit'));
 const AdminRolesPage = lazy(() => import('../../pages/admin-roles'));
 
-const MANAGER_ROLES = ['admin', 'manager'];
-const ADMIN_ROLES = ['admin'];
-
-// ----------------------------------------------------------------------
-
 export const dashboardRoutes = [
   {
     element: (
@@ -50,19 +44,11 @@ export const dashboardRoutes = [
         children: [
           {
             index: true,
-            element: (
-              <RoleBasedGuard roles={MANAGER_ROLES} hasContent>
-                <ProductsPage />
-              </RoleBasedGuard>
-            ),
+            element: <ProductsPage />,
           },
           {
             path: ':id',
-            element: (
-              <RoleBasedGuard roles={MANAGER_ROLES} hasContent>
-                <ProductDetailsPage />
-              </RoleBasedGuard>
-            ),
+            element: <ProductDetailsPage />,
           },
         ],
       },
@@ -71,19 +57,11 @@ export const dashboardRoutes = [
         children: [
           {
             index: true,
-            element: (
-              <RoleBasedGuard roles={MANAGER_ROLES} hasContent>
-                <ClientsListPage />
-              </RoleBasedGuard>
-            ),
+            element: <ClientsListPage />,
           },
           {
             path: ':id',
-            element: (
-              <RoleBasedGuard roles={MANAGER_ROLES} hasContent>
-                <ClientDetailsPage />
-              </RoleBasedGuard>
-            ),
+            element: <ClientDetailsPage />,
           },
         ],
       },
@@ -92,19 +70,11 @@ export const dashboardRoutes = [
         children: [
           {
             index: true,
-            element: (
-              <RoleBasedGuard roles={MANAGER_ROLES} hasContent>
-                <SalesListPage />
-              </RoleBasedGuard>
-            ),
+            element: <SalesListPage />,
           },
           {
             path: ':id',
-            element: (
-              <RoleBasedGuard roles={MANAGER_ROLES} hasContent>
-                <SaleDetailsPage />
-              </RoleBasedGuard>
-            ),
+            element: <SaleDetailsPage />,
           },
         ],
       },
@@ -113,19 +83,11 @@ export const dashboardRoutes = [
         children: [
           {
             index: true,
-            element: (
-              <RoleBasedGuard roles={MANAGER_ROLES} hasContent>
-                <DebtsListPage />
-              </RoleBasedGuard>
-            ),
+            element: <DebtsListPage />,
           },
           {
             path: ':id',
-            element: (
-              <RoleBasedGuard roles={MANAGER_ROLES} hasContent>
-                <DebtDetailsPage />
-              </RoleBasedGuard>
-            ),
+            element: <DebtDetailsPage />,
           },
         ],
       },
@@ -134,51 +96,27 @@ export const dashboardRoutes = [
         children: [
           {
             index: true,
-            element: (
-              <RoleBasedGuard roles={ADMIN_ROLES} hasContent>
-                <AdminUsersPage />
-              </RoleBasedGuard>
-            ),
+            element: <AdminUsersPage />,
           },
           {
             path: 'users',
-            element: (
-              <RoleBasedGuard roles={ADMIN_ROLES} hasContent>
-                <AdminUsersPage />
-              </RoleBasedGuard>
-            ),
+            element: <AdminUsersPage />,
           },
           {
             path: 'users/new',
-            element: (
-              <RoleBasedGuard roles={ADMIN_ROLES} hasContent>
-                <AdminUserCreatePage />
-              </RoleBasedGuard>
-            ),
+            element: <AdminUserCreatePage />,
           },
           {
             path: 'users/:id/edit',
-            element: (
-              <RoleBasedGuard roles={ADMIN_ROLES} hasContent>
-                <AdminUserEditPage />
-              </RoleBasedGuard>
-            ),
+            element: <AdminUserEditPage />,
           },
           {
             path: 'users/:id',
-            element: (
-              <RoleBasedGuard roles={ADMIN_ROLES} hasContent>
-                <AdminUserDetailsPage />
-              </RoleBasedGuard>
-            ),
+            element: <AdminUserDetailsPage />,
           },
           {
             path: 'roles',
-            element: (
-              <RoleBasedGuard roles={ADMIN_ROLES} hasContent>
-                <AdminRolesPage />
-              </RoleBasedGuard>
-            ),
+            element: <AdminRolesPage />,
           },
         ],
       },

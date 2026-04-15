@@ -1,0 +1,43 @@
+from .models import User
+
+PERMISSION_ACTIONS_BY_PAGE = {
+    "admin": ("read", "write"),
+    "roles": ("read", "write"),
+    "users": ("read", "detail", "write"),
+    "pos": ("read", "write"),
+    "products": ("read", "detail", "write"),
+    "clients": ("read", "detail", "write"),
+    "sales": ("read", "detail", "write"),
+    "debts": ("read", "detail", "write"),
+}
+
+
+def permission_key(page: str, action: str) -> str:
+    return f"{page}:{action}"
+
+
+ALL_PERMISSIONS = [
+    permission_key(page, action)
+    for page, actions in PERMISSION_ACTIONS_BY_PAGE.items()
+    for action in actions
+]
+
+
+DEFAULT_ROLE_PERMISSIONS = {
+    User.Role.ADMIN: [
+        permission_key(page, action)
+        for page, actions in PERMISSION_ACTIONS_BY_PAGE.items()
+        for action in actions
+    ],
+    User.Role.MANAGER: [
+        permission_key(page, action)
+        for page, actions in PERMISSION_ACTIONS_BY_PAGE.items()
+        if page not in {"admin", "roles", "users"}
+        for action in actions
+        if action in {"read", "detail"}
+    ],
+    User.Role.SELLER: [
+        permission_key("pos", "read"),
+        permission_key("pos", "write"),
+    ],
+}

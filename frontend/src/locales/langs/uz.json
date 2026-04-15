@@ -150,7 +150,30 @@
       },
       "roles": {
         "document_title": "Admin rollari",
-        "empty": "Roles bo'limi tez orada qo'shiladi"
+        "empty": "Roles bo'limi tez orada qo'shiladi",
+        "list_title": "Rollar ro'yxati",
+        "list_hint": "Tizimda hozir mavjud bo'lgan rollar",
+        "read": "O'qish",
+        "detail": "Detallar",
+        "write": "Yozish",
+        "toasts": {
+          "saved": "Rol ruxsatlari yangilandi"
+        },
+        "pages": {
+          "admin": "Admin",
+          "roles": "Rollar",
+          "users": "Foydalanuvchilar",
+          "pos": "POS",
+          "products": "Mahsulotlar",
+          "clients": "Mijozlar",
+          "sales": "Savdolar",
+          "debts": "Qarzlar"
+        },
+        "items": {
+          "admin": "Tizim va sozlamalarni to'liq boshqarish huquqi",
+          "manager": "Asosiy bo'limlarni boshqarish va nazorat qilish",
+          "seller": "Sotuvlar va kundalik jarayonlar bilan ishlash"
+        }
       }
     },
     "profile": {

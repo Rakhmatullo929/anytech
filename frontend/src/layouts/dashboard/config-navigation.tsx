@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { paths } from 'src/routes/paths';
 // hooks
 import { useAppUserProfile } from 'src/hooks/use-app-user-profile';
+import { canReadPage } from 'src/auth/utils/permissions';
 // locales
 import { useLocales } from 'src/locales';
 // components
@@ -22,23 +23,27 @@ const ICONS = {
   invoice: icon('ic_invoice'),
 };
 
-const MANAGER_ROLES = ['admin', 'manager'];
-
 // ----------------------------------------------------------------------
 
 export function useNavData() {
   const { user } = useAppUserProfile();
   const { tx } = useLocales();
 
-  const canManage = MANAGER_ROLES.includes(user.role);
-  const isAdmin = user.role === 'admin';
+  const { permissions } = user;
+
+  const canReadAdmin = canReadPage(permissions, 'admin');
+  const canReadPos = canReadPage(permissions, 'pos');
+  const canReadProducts = canReadPage(permissions, 'products');
+  const canReadClients = canReadPage(permissions, 'clients');
+  const canReadSales = canReadPage(permissions, 'sales');
+  const canReadDebts = canReadPage(permissions, 'debts');
 
   const data = useMemo(
     () => [
       {
         subheader: tx('layout.nav.group'),
         items: [
-          ...(isAdmin
+          ...(canReadAdmin
             ? [
                 {
                   title: tx('layout.nav.admin'),
@@ -47,28 +52,44 @@ export function useNavData() {
                 },
               ]
             : []),
-          {
-            title: tx('layout.nav.pos'),
-            path: paths.pos,
-            icon: ICONS.pos,
-          },
-          ...(canManage
+          ...(canReadPos
+            ? [
+                {
+                  title: tx('layout.nav.pos'),
+                  path: paths.pos,
+                  icon: ICONS.pos,
+                },
+              ]
+            : []),
+          ...(canReadProducts
             ? [
                 {
                   title: tx('layout.nav.products'),
                   path: paths.products.root,
                   icon: ICONS.product,
                 },
+              ]
+            : []),
+          ...(canReadClients
+            ? [
                 {
                   title: tx('layout.nav.clients'),
                   path: paths.clients.root,
                   icon: ICONS.user,
                 },
+              ]
+            : []),
+          ...(canReadSales
+            ? [
                 {
                   title: tx('layout.nav.sales'),
                   path: paths.sales.root,
                   icon: ICONS.order,
                 },
+              ]
+            : []),
+          ...(canReadDebts
+            ? [
                 {
                   title: tx('layout.nav.debts'),
                   path: paths.debts.root,
@@ -79,7 +100,7 @@ export function useNavData() {
         ],
       },
     ],
-    [canManage, isAdmin, tx]
+    [canReadAdmin, canReadClients, canReadDebts, canReadPos, canReadProducts, canReadSales, tx]
   );
 
   return data;

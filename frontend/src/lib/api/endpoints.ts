@@ -12,6 +12,8 @@ export const API_ENDPOINTS = {
     me: `${API_V1}/auth/me/`,
     users: `${API_V1}/auth/users/`,
     userDetail: (id: string) => `${API_V1}/auth/users/${id}/`,
+    roles: `${API_V1}/auth/roles/`,
+    rolePermissions: (role: string) => `${API_V1}/auth/roles/${role}/permissions/`,
     impersonate: `${API_V1}/auth/impersonate/`,
   },
   products: {
