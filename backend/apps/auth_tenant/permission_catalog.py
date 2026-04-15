@@ -22,6 +22,17 @@ ALL_PERMISSIONS = [
     for action in actions
 ]
 
+ADMIN_REQUIRED_PERMISSIONS = [
+    permission_key("admin", action)
+    for action in PERMISSION_ACTIONS_BY_PAGE["admin"]
+] + [
+    permission_key("roles", action)
+    for action in PERMISSION_ACTIONS_BY_PAGE["roles"]
+] + [
+    permission_key("users", action)
+    for action in PERMISSION_ACTIONS_BY_PAGE["users"]
+]
+
 
 DEFAULT_ROLE_PERMISSIONS = {
     User.Role.ADMIN: [

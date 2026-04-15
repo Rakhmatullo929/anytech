@@ -153,6 +153,7 @@
         "empty": "Раздел ролей пока пустой",
         "list_title": "Список ролей",
         "list_hint": "Текущие роли, доступные в системе",
+        "all_permissions": "Все permissions роли",
         "unsaved_changes": "Есть изменения",
         "read": "Чтение",
         "detail": "Деталь",
@@ -272,6 +273,7 @@
       "row_closed": "Закрыт"
     },
     "table": {
+      "all_option": "Все",
       "amount": "Сумма",
       "client": "Клиент",
       "created": "Создан",

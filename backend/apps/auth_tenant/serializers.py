@@ -3,7 +3,7 @@ from django.db import transaction
 from rest_framework import serializers
 
 from .models import RolePermission, Tenant, User
-from .permission_catalog import ALL_PERMISSIONS
+from .permission_catalog import ADMIN_REQUIRED_PERMISSIONS, ALL_PERMISSIONS
 from .phone import get_phone_rule, is_phone_valid, normalize_phone
 
 
@@ -224,6 +224,7 @@ class TenantRolePermissionsUpdateSerializer(serializers.Serializer):
     )
 
     def validate_permissions(self, value):
+        role = self.context.get("role")
         normalized = []
         seen = set()
         for item in value:
@@ -236,6 +237,13 @@ class TenantRolePermissionsUpdateSerializer(serializers.Serializer):
                 continue
             normalized.append(permission)
             seen.add(permission)
+
+        if role == User.Role.ADMIN:
+            for permission in ADMIN_REQUIRED_PERMISSIONS:
+                if permission not in seen:
+                    normalized.append(permission)
+                    seen.add(permission)
+
         return normalized
 
     def save(self, **kwargs):

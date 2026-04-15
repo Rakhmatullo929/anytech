@@ -12,6 +12,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
+import Divider from '@mui/material/Divider';
 
 import { useLocales } from 'src/locales';
 import { paths } from 'src/routes/paths';
@@ -30,6 +31,8 @@ function getRoleColor(role: 'admin' | 'manager' | 'seller'): 'error' | 'warning'
   if (role === 'manager') return 'warning';
   return 'info';
 }
+
+const ADMIN_LOCKED_PAGES = new Set(['admin', 'roles', 'users']);
 
 export default function AdminRolesView() {
   const { tx } = useLocales();
@@ -58,6 +61,11 @@ export default function AdminRolesView() {
   const [draftPermissions, setDraftPermissions] = useState<Record<string, Set<string>>>({});
   const [expandedRole, setExpandedRole] = useState<string | false>(false);
   const canWriteRoles = canWritePage('roles');
+  const isLockedAdminPermission = (role: 'admin' | 'manager' | 'seller', permission: string) => {
+    if (role !== 'admin') return false;
+    const [page] = permission.split(':');
+    return ADMIN_LOCKED_PAGES.has(page);
+  };
 
   useEffect(() => {
     const next: Record<string, Set<string>> = {};
@@ -74,6 +82,34 @@ export default function AdminRolesView() {
       if (enabled) current.add(permission);
       else current.delete(permission);
       return { ...prev, [role]: current };
+    });
+  };
+
+  const togglePagePermissions = (
+    role: 'admin' | 'manager' | 'seller',
+    permissions: string[],
+    enabled: boolean
+  ) => {
+    setDraftPermissions((prev) => {
+      const current = new Set(prev[role] || []);
+      permissions.forEach((permission) => {
+        if (enabled) current.add(permission);
+        else current.delete(permission);
+      });
+      return { ...prev, [role]: current };
+    });
+  };
+
+  const toggleAllRolePermissions = (role: 'admin' | 'manager' | 'seller', enabled: boolean) => {
+    setDraftPermissions((prev) => {
+      if (enabled) return { ...prev, [role]: new Set(availablePermissions) };
+      if (role === 'admin') {
+        const preserved = availablePermissions.filter((permission) =>
+          isLockedAdminPermission(role, permission)
+        );
+        return { ...prev, [role]: new Set(preserved) };
+      }
+      return { ...prev, [role]: new Set<string>() };
     });
   };
 
@@ -166,10 +202,57 @@ export default function AdminRolesView() {
 
                 <AccordionDetails sx={{ pt: 0.5 }}>
                   <Stack spacing={1}>
+                    <Stack
+                      direction={{ xs: 'column', sm: 'row' }}
+                      alignItems={{ sm: 'center' }}
+                      justifyContent="space-between"
+                      sx={{
+                        border: (theme) => `1px solid ${theme.palette.divider}`,
+                        borderRadius: 1,
+                        px: 1.5,
+                        py: 0.75,
+                      }}
+                    >
+                      <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                        {tx('pages.admin.roles.all_permissions')}
+                      </Typography>
+                      {(() => {
+                        const roleAllDisabled = !canWriteRoles || availablePermissions.length === 0;
+                        const selectedCount = availablePermissions.filter((permission) =>
+                          (draftPermissions[role.value] || new Set()).has(permission)
+                        ).length;
+                        const allChecked =
+                          availablePermissions.length > 0 && selectedCount === availablePermissions.length;
+                        const partiallyChecked = selectedCount > 0 && selectedCount < availablePermissions.length;
+
+                        return (
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                size="small"
+                                checked={allChecked}
+                                indeterminate={partiallyChecked}
+                                disabled={roleAllDisabled}
+                                onChange={(_, enabled) => toggleAllRolePermissions(role.value, enabled)}
+                              />
+                            }
+                            label={tx('shared.table.all_option')}
+                          />
+                        );
+                      })()}
+                    </Stack>
+
                     {pageKeys.map((page) => {
                       const actions = ['read', 'detail', 'write'].filter((action) =>
                         (pageActions[page] || new Set()).has(action)
                       );
+                      const pagePermissions = actions.map((action) => `${page}:${action}`);
+                      const isLockedPage = role.value === 'admin' && ADMIN_LOCKED_PAGES.has(page);
+                      const selectedInPage = pagePermissions.filter((permission) =>
+                        (draftPermissions[role.value] || new Set()).has(permission)
+                      ).length;
+                      const allPageChecked = pagePermissions.length > 0 && selectedInPage === pagePermissions.length;
+                      const partiallyPageChecked = selectedInPage > 0 && selectedInPage < pagePermissions.length;
 
                       return (
                         <Stack
@@ -187,26 +270,47 @@ export default function AdminRolesView() {
                           <Typography variant="body2" sx={{ fontWeight: 600 }}>
                             {tx(`pages.admin.roles.pages.${page}`)}
                           </Typography>
-                          <Stack direction="row" spacing={2}>
-                            {actions.map((action) => {
-                              const permission = `${page}:${action}`;
-                              const checked = (draftPermissions[role.value] || new Set()).has(permission);
+                          <Stack
+                            direction={{ xs: 'column', sm: 'row' }}
+                            spacing={1.5}
+                            alignItems={{ sm: 'center' }}
+                          >
+                            <Stack direction="row" spacing={2}>
+                              {actions.map((action) => {
+                                const permission = `${page}:${action}`;
+                                const checked = (draftPermissions[role.value] || new Set()).has(permission);
 
-                              return (
-                                <FormControlLabel
-                                  key={`${role.value}-${permission}`}
-                                  control={
-                                    <Checkbox
-                                      size="small"
-                                      checked={checked}
-                                      disabled={!canWriteRoles}
-                                      onChange={(_, enabled) => togglePermission(role.value, permission, enabled)}
-                                    />
+                                return (
+                                  <FormControlLabel
+                                    key={`${role.value}-${permission}`}
+                                    control={
+                                      <Checkbox
+                                        size="small"
+                                        checked={checked}
+                                        disabled={!canWriteRoles || isLockedAdminPermission(role.value, permission)}
+                                        onChange={(_, enabled) => togglePermission(role.value, permission, enabled)}
+                                      />
+                                    }
+                                    label={tx(`pages.admin.roles.${action}`)}
+                                  />
+                                );
+                              })}
+                            </Stack>
+                            <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', sm: 'block' } }} />
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  size="small"
+                                  checked={allPageChecked}
+                                  indeterminate={partiallyPageChecked}
+                                  disabled={!canWriteRoles || pagePermissions.length === 0 || isLockedPage}
+                                  onChange={(_, enabled) =>
+                                    togglePagePermissions(role.value, pagePermissions, enabled)
                                   }
-                                  label={tx(`pages.admin.roles.${action}`)}
                                 />
-                              );
-                            })}
+                              }
+                              label={tx('shared.table.all_option')}
+                            />
                           </Stack>
                         </Stack>
                       );
