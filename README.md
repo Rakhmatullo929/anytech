@@ -40,7 +40,7 @@ Multi-tenant ERP/POS система с Django REST API бэкендом и React
 
 ### Аутентификация
 - `POST /api/v1/auth/register/` — регистрация тенанта и администратора
-- `POST /api/v1/auth/login/` — вход (возвращает JWT с `tenant_id`, `role`, `name`)
+- `POST /api/v1/auth/login/` — вход по телефону (возвращает JWT с `tenant_id`, `role`, `name`)
 
 ### Товары
 - `GET /api/v1/products/` — список товаров
@@ -97,13 +97,14 @@ yarn start    # Dev сервер на :3000
 
 ### Демо-данные
 ```bash
-python manage.py loaddata fixtures/demo_data.json
+python manage.py migrate
+python manage.py loaddata fixtures/01-auth.yaml fixtures/02-products.yaml fixtures/03-clients.yaml fixtures/04-sales.yaml fixtures/05-debts.yaml
 ```
-Загружает: 2 тенанта, 5 пользователей, 8 товаров, 5 клиентов, 6 продаж, 9 позиций продаж, 3 долга, 4 платежа.
+Загружает: 2 тенанта, 5 пользователей, 8 товаров, 5 клиентов, 8 продаж, 9 позиций продаж, 5 долгов, 5 платежей.
 
 ## Что реализовано
 
-- [x] **Этап 1** — Аутентификация и тенанты: кастомная модель пользователя (email-based, UUID PK), JWT с кастомными claims, регистрация/логин
+- [x] **Этап 1** — Аутентификация и тенанты: кастомная модель пользователя (phone-based login, UUID PK), JWT с кастомными claims, регистрация/логин
 - [x] **Этап 2** — Управление товарами: CRUD товаров с SKU, ценами закупки/продажи, остатками на складе
 - [x] **Этап 3** — Управление клиентами: CRUD клиентов с уникальными телефонами в рамках тенанта
 - [x] **Этап 4** — Клиентская часть: детальные сериализаторы, вьюсеты, миграции

@@ -53,7 +53,7 @@ export default function NavUpgrade() {
           </Typography>
 
           <Typography variant="body2" noWrap sx={{ color: 'text.disabled' }}>
-            {user?.email || '-'}
+            {user?.email || user?.phoneNumber || '-'}
           </Typography>
         </Stack>
 

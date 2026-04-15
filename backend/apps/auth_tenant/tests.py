@@ -29,31 +29,37 @@ class TestTenantModel:
 class TestUserModel:
     def test_create_user(self, tenant):
         user = User.objects.create_user(
-            email="new@test.com", password="StrongPass123!", tenant=tenant
+            phone="+998901110001",
+            email="new@test.com",
+            password="StrongPass123!",
+            tenant=tenant,
         )
-        assert user.email == "new@test.com"
+        assert user.phone == "+998901110001"
         assert user.check_password("StrongPass123!")
         assert user.role == User.Role.SELLER  # default
         assert user.is_active is True
         assert user.is_staff is False
 
-    def test_create_user_without_email_raises(self):
-        with pytest.raises(ValueError, match="Email is required"):
-            User.objects.create_user(email="", password="StrongPass123!")
+    def test_create_user_without_phone_raises(self):
+        with pytest.raises(ValueError, match="Phone is required"):
+            User.objects.create_user(phone="", password="StrongPass123!")
 
     def test_create_superuser(self, tenant):
         su = User.objects.create_superuser(
-            email="super@test.com", password="StrongPass123!", tenant=tenant
+            phone="+998901110002",
+            email="super@test.com",
+            password="StrongPass123!",
+            tenant=tenant,
         )
         assert su.role == User.Role.ADMIN
         assert su.is_staff is True
         assert su.is_superuser is True
 
-    def test_email_is_username_field(self):
-        assert User.USERNAME_FIELD == "email"
+    def test_phone_is_username_field(self):
+        assert User.USERNAME_FIELD == "phone"
 
     def test_str(self, admin_user):
-        assert str(admin_user) == "admin@test.com"
+        assert str(admin_user) == admin_user.phone
 
 
 # ── Registration tests ────────────────────────────────────────────────
@@ -67,6 +73,7 @@ class TestRegistration:
         data = {
             "tenant_name": "New Company",
             "name": "John Doe",
+            "phone": "+998901110003",
             "email": "john@example.com",
             "password": "StrongPass123!",
             "password_confirm": "StrongPass123!",
@@ -75,18 +82,19 @@ class TestRegistration:
         assert resp.status_code == status.HTTP_201_CREATED
         assert "access" in resp.data
         assert "refresh" in resp.data
-        assert resp.data["user"]["email"] == "john@example.com"
+        assert resp.data["user"]["phone"] == "+998901110003"
         assert resp.data["user"]["role"] == "admin"
 
         # Tenant and user were created
         assert Tenant.objects.filter(name="New Company").exists()
         assert User.objects.filter(email="john@example.com").exists()
 
-    def test_register_duplicate_email(self, anon_client, admin_user):
+    def test_register_duplicate_phone(self, anon_client, admin_user):
         data = {
             "tenant_name": "Dup Co",
             "name": "Dup",
-            "email": admin_user.email,
+            "phone": admin_user.phone,
+            "email": "dup@test.com",
             "password": "StrongPass123!",
             "password_confirm": "StrongPass123!",
         }
@@ -97,6 +105,7 @@ class TestRegistration:
         data = {
             "tenant_name": "Mis Co",
             "name": "Mis",
+            "phone": "+998901110004",
             "email": "mis@test.com",
             "password": "StrongPass123!",
             "password_confirm": "DifferentPass123!",
@@ -108,6 +117,7 @@ class TestRegistration:
         data = {
             "tenant_name": "Weak Co",
             "name": "Weak",
+            "phone": "+998901110005",
             "email": "weak@test.com",
             "password": "123",
             "password_confirm": "123",
@@ -130,20 +140,20 @@ class TestLogin:
     def test_login_success(self, anon_client, admin_user):
         resp = anon_client.post(
             LOGIN_URL,
-            {"email": "admin@test.com", "password": "StrongPass123!"},
+            {"phone": admin_user.phone, "password": "StrongPass123!"},
             format="json",
         )
         assert resp.status_code == status.HTTP_200_OK
         assert "access" in resp.data
         assert "refresh" in resp.data
-        assert resp.data["user"]["email"] == "admin@test.com"
+        assert resp.data["user"]["phone"] == admin_user.phone
         assert resp.data["user"]["role"] == "admin"
         assert resp.data["user"]["tenant_id"] == str(admin_user.tenant_id)
 
     def test_login_wrong_password(self, anon_client, admin_user):
         resp = anon_client.post(
             LOGIN_URL,
-            {"email": "admin@test.com", "password": "WrongPass123!"},
+            {"phone": admin_user.phone, "password": "WrongPass123!"},
             format="json",
         )
         assert resp.status_code == status.HTTP_401_UNAUTHORIZED
@@ -151,7 +161,7 @@ class TestLogin:
     def test_login_nonexistent_user(self, anon_client):
         resp = anon_client.post(
             LOGIN_URL,
-            {"email": "ghost@test.com", "password": "StrongPass123!"},
+            {"phone": "+998901119999", "password": "StrongPass123!"},
             format="json",
         )
         assert resp.status_code == status.HTTP_401_UNAUTHORIZED
@@ -167,7 +177,7 @@ class TestTokenRefresh:
     def test_refresh_success(self, anon_client, admin_user):
         login_resp = anon_client.post(
             LOGIN_URL,
-            {"email": "admin@test.com", "password": "StrongPass123!"},
+            {"phone": admin_user.phone, "password": "StrongPass123!"},
             format="json",
         )
         refresh_token = login_resp.data["refresh"]
@@ -195,7 +205,7 @@ class TestMeEndpoint:
     def test_me_authenticated(self, admin_client, admin_user):
         resp = admin_client.get(ME_URL)
         assert resp.status_code == status.HTTP_200_OK
-        assert resp.data["user"]["email"] == admin_user.email
+        assert resp.data["user"]["phone"] == admin_user.phone
         assert resp.data["user"]["name"] == admin_user.name
         assert resp.data["user"]["role"] == admin_user.role
 

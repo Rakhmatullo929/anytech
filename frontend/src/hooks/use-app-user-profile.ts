@@ -29,7 +29,8 @@ function isTenantUser(u: unknown): u is TenantUser {
     typeof u === 'object' &&
     typeof (u as TenantUser).id === 'string' &&
     typeof (u as TenantUser).name === 'string' &&
-    typeof (u as TenantUser).email === 'string' &&
+    ((u as TenantUser).email === null || typeof (u as TenantUser).email === 'string') &&
+    ((u as TenantUser).phone === null || typeof (u as TenantUser).phone === 'string') &&
     typeof (u as TenantUser).role === 'string'
   );
 }
@@ -58,9 +59,10 @@ function mapAuthUserToProfile(u: NonNullable<AuthUserType>): AppUserProfile {
     return emptyProfile({
       id: u.id,
       displayName: u.name,
-      email: u.email,
+      email: u.email || '',
       photoURL: undefined,
       role: u.role,
+      phoneNumber: u.phone || '',
     });
   }
 

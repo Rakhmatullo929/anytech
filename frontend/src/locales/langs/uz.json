@@ -246,6 +246,8 @@
     "client_name_required": "Mijoz ismi majburiy",
     "number_invalid": "Toʻgʻri son kiriting",
     "number_min_zero": "Qiymat 0 dan kichik bo'lmasligi kerak",
+    "password_required": "Parol majburiy",
+    "phone_invalid_format": "Telefon formati {{example}} ko‘rinishida bo‘lishi kerak",
     "phone_required": "Telefon majburiy",
     "product_name_required": "Mahsulot nomi majburiy",
     "purchase_price_required": "Xarid narxi majburiy",

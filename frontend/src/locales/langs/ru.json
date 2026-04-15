@@ -246,6 +246,8 @@
     "client_name_required": "Имя клиента обязательно",
     "number_invalid": "Введите корректное число",
     "number_min_zero": "Значение должно быть не меньше 0",
+    "password_required": "Пароль обязателен",
+    "phone_invalid_format": "Телефон должен быть в формате {{example}}",
     "phone_required": "Телефон обязателен",
     "product_name_required": "Название товара обязательно",
     "purchase_price_required": "Закупочная цена обязательна",

@@ -26,9 +26,9 @@ export function getAuthFormErrorMessage(error: unknown, context: AuthFormContext
         ? String((data as { detail: unknown }).detail).toLowerCase()
         : '';
     if (detail.includes('no active account') || detail.includes('credentials') || detail.includes('authentication')) {
-      return 'Неверный email или пароль. Проверьте данные и попробуйте снова.';
+      return 'Неверный номер телефона или пароль. Проверьте данные и попробуйте снова.';
     }
-    return 'Неверный email или пароль. Если забыли пароль — воспользуйтесь восстановлением (когда будет доступно).';
+    return 'Неверный номер телефона или пароль. Если забыли пароль — воспользуйтесь восстановлением (когда будет доступно).';
   }
 
   if (status === 401 && context === 'register') {
