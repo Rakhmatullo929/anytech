@@ -1,10 +1,10 @@
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 
+import { useCheckPermission } from 'src/auth/hooks/use-check-permission';
 import { useLocales } from 'src/locales';
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
-import Can from 'src/auth/components/can';
 
 type AdminTabValue = 'users' | 'roles';
 
@@ -14,15 +14,19 @@ type Props = {
 
 export default function AdminTabs({ value }: Props) {
   const { tx } = useLocales();
+  const { canReadPage } = useCheckPermission();
+  const showUsers = canReadPage('users');
+  const showRoles = canReadPage('roles');
+  const resolvedValue = (value === 'users' && showUsers) || (value === 'roles' && showRoles) ? value : false;
 
   return (
-    <Tabs value={value} aria-label="admin section tabs" sx={{ mb: 3 }}>
-      <Can page="users" action="read">
+    <Tabs value={resolvedValue} aria-label="admin section tabs" sx={{ mb: 3 }}>
+      {showUsers ? (
         <Tab component={RouterLink} href={paths.admin.users.root} label={tx('pages.admin.tabs.users')} value="users" />
-      </Can>
-      <Can page="roles" action="read">
+      ) : null}
+      {showRoles ? (
         <Tab component={RouterLink} href={paths.admin.roles} label={tx('pages.admin.tabs.roles')} value="roles" />
-      </Can>
+      ) : null}
     </Tabs>
   );
 }

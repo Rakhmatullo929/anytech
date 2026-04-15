@@ -153,6 +153,7 @@
         "empty": "Roles bo'limi tez orada qo'shiladi",
         "list_title": "Rollar ro'yxati",
         "list_hint": "Tizimda hozir mavjud bo'lgan rollar",
+        "unsaved_changes": "O'zgarishlar bor",
         "read": "O'qish",
         "detail": "Detallar",
         "write": "Yozish",
