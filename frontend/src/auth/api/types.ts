@@ -7,6 +7,8 @@ export type TenantUser = {
   name: string;
   phone: string | null;
   email: string | null;
+  passportSeries?: string | null;
+  gender?: 'male' | 'female' | null;
   role: UserRole;
   permissions?: string[];
   tenantId: string | null;

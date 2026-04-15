@@ -1,7 +1,7 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, type ReactElement } from 'react';
 import { Outlet } from 'react-router-dom';
 // auth
-import { AuthGuard } from 'src/auth/guard';
+import { AuthGuard, PermissionGuard } from 'src/auth/guard';
 // layouts
 import DashboardLayout from 'src/layouts/dashboard';
 // components
@@ -25,6 +25,18 @@ const AdminUserCreatePage = lazy(() => import('../../pages/admin-users-create'))
 const AdminUserEditPage = lazy(() => import('../../pages/admin-user-edit'));
 const AdminRolesPage = lazy(() => import('../../pages/admin-roles'));
 
+function withPermission(
+  page: 'admin' | 'roles' | 'users' | 'pos' | 'products' | 'clients' | 'sales' | 'debts',
+  action: 'read' | 'detail' | 'write',
+  element: ReactElement
+) {
+  return (
+    <PermissionGuard page={page} action={action}>
+      {element}
+    </PermissionGuard>
+  );
+}
+
 export const dashboardRoutes = [
   {
     element: (
@@ -37,18 +49,18 @@ export const dashboardRoutes = [
       </AuthGuard>
     ),
     children: [
-      { path: 'pos', element: <PosPage /> },
+      { path: 'pos', element: withPermission('pos', 'read', <PosPage />) },
       { path: 'profile', element: <ProfilePage /> },
       {
         path: 'products',
         children: [
           {
             index: true,
-            element: <ProductsPage />,
+            element: withPermission('products', 'read', <ProductsPage />),
           },
           {
             path: ':id',
-            element: <ProductDetailsPage />,
+            element: withPermission('products', 'detail', <ProductDetailsPage />),
           },
         ],
       },
@@ -57,11 +69,11 @@ export const dashboardRoutes = [
         children: [
           {
             index: true,
-            element: <ClientsListPage />,
+            element: withPermission('clients', 'read', <ClientsListPage />),
           },
           {
             path: ':id',
-            element: <ClientDetailsPage />,
+            element: withPermission('clients', 'detail', <ClientDetailsPage />),
           },
         ],
       },
@@ -70,11 +82,11 @@ export const dashboardRoutes = [
         children: [
           {
             index: true,
-            element: <SalesListPage />,
+            element: withPermission('sales', 'read', <SalesListPage />),
           },
           {
             path: ':id',
-            element: <SaleDetailsPage />,
+            element: withPermission('sales', 'detail', <SaleDetailsPage />),
           },
         ],
       },
@@ -83,11 +95,11 @@ export const dashboardRoutes = [
         children: [
           {
             index: true,
-            element: <DebtsListPage />,
+            element: withPermission('debts', 'read', <DebtsListPage />),
           },
           {
             path: ':id',
-            element: <DebtDetailsPage />,
+            element: withPermission('debts', 'detail', <DebtDetailsPage />),
           },
         ],
       },
@@ -96,27 +108,27 @@ export const dashboardRoutes = [
         children: [
           {
             index: true,
-            element: <AdminUsersPage />,
+            element: withPermission('users', 'read', <AdminUsersPage />),
           },
           {
             path: 'users',
-            element: <AdminUsersPage />,
+            element: withPermission('users', 'read', <AdminUsersPage />),
           },
           {
             path: 'users/new',
-            element: <AdminUserCreatePage />,
+            element: withPermission('users', 'write', <AdminUserCreatePage />),
           },
           {
             path: 'users/:id/edit',
-            element: <AdminUserEditPage />,
+            element: withPermission('users', 'write', <AdminUserEditPage />),
           },
           {
             path: 'users/:id',
-            element: <AdminUserDetailsPage />,
+            element: withPermission('users', 'detail', <AdminUserDetailsPage />),
           },
           {
             path: 'roles',
-            element: <AdminRolesPage />,
+            element: withPermission('roles', 'read', <AdminRolesPage />),
           },
         ],
       },

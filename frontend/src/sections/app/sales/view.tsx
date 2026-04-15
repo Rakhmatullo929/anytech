@@ -36,7 +36,6 @@ import {
 } from 'src/components/table';
 import { useSalesListQuery, type SalePaymentType } from 'src/sections/app/sales/api';
 import { SalesListSkeleton } from 'src/sections/app/sales/skeleton';
-import View403 from 'src/sections/error/403-view';
 
 // ----------------------------------------------------------------------
 
@@ -71,7 +70,7 @@ export default function SalesView() {
     [tx]
   );
 
-  const { data, isPending, isFetching, isError, error: queryError } = useSalesListQuery({
+  const { data, isPending, isFetching } = useSalesListQuery({
     page: page + 1,
     pageSize: rowsPerPage,
     ordering,
@@ -121,10 +120,6 @@ export default function SalesView() {
     if (!Number.isInteger(nextRowsPerPage) || nextRowsPerPage <= 0) return;
     setValues({ page_size: nextRowsPerPage, page: 1 });
   };
-
-  if (isError && queryError?.response?.status === 403) {
-    return <View403 />;
-  }
 
   return (
     <>

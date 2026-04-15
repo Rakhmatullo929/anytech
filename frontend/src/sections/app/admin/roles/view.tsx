@@ -15,7 +15,6 @@ import { paths } from 'src/routes/paths';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import EmptyContent from 'src/components/empty-content';
 import { useSnackbar } from 'src/components/snackbar';
-import View403 from 'src/sections/error/403-view';
 
 import AdminTabs from '../users/components/admin-tabs';
 import { useTenantRolesQuery, useUpdateTenantRolePermissionsMutation } from './api';
@@ -29,7 +28,7 @@ function getRoleColor(role: 'admin' | 'manager' | 'seller'): 'error' | 'warning'
 export default function AdminRolesView() {
   const { tx } = useLocales();
   const { enqueueSnackbar } = useSnackbar();
-  const { data, isPending, isError, error: queryError } = useTenantRolesQuery();
+  const { data, isPending } = useTenantRolesQuery();
   const updateMutation = useUpdateTenantRolePermissionsMutation();
   const roles = useMemo(() => data?.results ?? [], [data]);
   const availablePermissions = useMemo(() => data?.availablePermissions ?? [], [data]);
@@ -77,10 +76,6 @@ export default function AdminRolesView() {
       console.error(error);
     }
   };
-
-  if (isError && queryError?.response?.status === 403) {
-    return <View403 />;
-  }
 
   return (
     <>

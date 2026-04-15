@@ -149,7 +149,10 @@ class TenantImpersonateView(generics.GenericAPIView):
             {
                 "access": str(refresh.access_token),
                 "refresh": str(refresh),
-                "user": UserSerializer(target_user).data,
+                "user": {
+                    **UserSerializer(target_user).data,
+                    "permissions": sorted(get_user_permissions(target_user)),
+                },
             },
             status=status.HTTP_200_OK,
         )

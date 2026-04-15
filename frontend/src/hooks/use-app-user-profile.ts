@@ -21,6 +21,10 @@ export type AppUserProfile = {
   about: string;
   role: string;
   permissions: string[];
+  passportSeries: string;
+  gender: 'male' | 'female' | '';
+  tenantId: string;
+  createdAt: string;
   isPublic: boolean;
 };
 
@@ -51,6 +55,10 @@ function emptyProfile(partial: Partial<AppUserProfile> = {}): AppUserProfile {
     about: '',
     role: 'admin',
     permissions: [],
+    passportSeries: '',
+    gender: '',
+    tenantId: '',
+    createdAt: '',
     isPublic: false,
     ...partial,
   };
@@ -66,6 +74,10 @@ function mapAuthUserToProfile(u: NonNullable<AuthUserType>): AppUserProfile {
       role: u.role,
       permissions: Array.isArray(u.permissions) ? u.permissions : [],
       phoneNumber: u.phone || '',
+      passportSeries: u.passportSeries || '',
+      gender: u.gender || '',
+      tenantId: u.tenantId || '',
+      createdAt: u.createdAt || '',
     });
   }
 
@@ -99,6 +111,10 @@ function mapAuthUserToProfile(u: NonNullable<AuthUserType>): AppUserProfile {
     city: typeof rec.city === 'string' ? rec.city : '',
     zipCode: typeof rec.zipCode === 'string' ? rec.zipCode : '',
     about: typeof rec.about === 'string' ? rec.about : '',
+    passportSeries: typeof rec.passportSeries === 'string' ? rec.passportSeries : '',
+    gender: rec.gender === 'male' || rec.gender === 'female' ? rec.gender : '',
+    tenantId: typeof rec.tenantId === 'string' ? rec.tenantId : '',
+    createdAt: typeof rec.createdAt === 'string' ? rec.createdAt : '',
     isPublic: typeof rec.isPublic === 'boolean' ? rec.isPublic : false,
   });
 }

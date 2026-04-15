@@ -11,22 +11,17 @@ import { useAppUserProfile } from 'src/hooks/use-app-user-profile';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import { fDateTime } from 'src/utils/format-time';
 
-import { useTenantUserDetailQuery } from 'src/sections/app/admin/users/api';
-
 export default function ProfileView() {
   const { tx } = useLocales();
   const { user } = useAppUserProfile();
+  const { role } = user;
 
-  const detailQuery = useTenantUserDetailQuery(user.id);
-  const detail = detailQuery.data;
-
-  const displayName = detail?.name || user.displayName || '-';
-  const email = detail?.email || user.email || '-';
-  const phone = detail?.phone || user.phoneNumber || '-';
-  const role = detail?.role || user.role;
-  const gender = detail?.gender ? tx(`pages.users.genders.${detail.gender}`) : '-';
-  const passportSeries = detail?.passportSeries || '-';
-  const createdAt = detail?.createdAt ? fDateTime(detail.createdAt) : '';
+  const displayName = user.displayName || '-';
+  const email = user.email || '-';
+  const phone = user.phoneNumber || '-';
+  const gender = user.gender ? tx(`pages.users.genders.${user.gender}`) : '-';
+  const passportSeries = user.passportSeries || '-';
+  const createdAt = user.createdAt ? fDateTime(user.createdAt) : '';
 
   const avatarInitial = displayName.trim().charAt(0).toUpperCase() || 'U';
 

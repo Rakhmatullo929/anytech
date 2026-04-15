@@ -10,6 +10,7 @@ import {
   useMutate,
 } from 'src/hooks/api';
 import { useAuthContext } from 'src/auth/hooks/use-auth-context';
+import { fetchCurrentUser } from 'src/auth/api/auth-requests';
 import type { TokenPairResponse } from 'src/auth/api/types';
 
 import {
@@ -47,8 +48,16 @@ export function useImpersonateTenantUserMutation() {
 
   return useMutate<TokenPairResponse, string>(impersonateTenantUser, {
     skipGlobalErrorNotification: true,
-    onSuccess: (payload) => {
+    onSuccess: async (payload) => {
+      // 1) Immediately switch session to impersonated token/user payload.
+      // 2) Then hydrate from /auth/me using the new token to get authoritative permissions/profile.
       syncSessionFromApiResponse(payload);
+      try {
+        const { user } = await fetchCurrentUser();
+        syncSessionFromApiResponse({ ...payload, user });
+      } catch (error) {
+        console.error(error);
+      }
       queryClient.clear();
     },
   });

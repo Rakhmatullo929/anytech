@@ -182,6 +182,13 @@
       "document_title": "Profil",
       "personal_info": "Shaxsiy ma'lumotlar"
     },
+    "errors": {
+      "403": {
+        "title": "Kirish taqiqlangan",
+        "description": "Bu sahifani ochish uchun sizda ruxsat yo'q. Administratorga murojaat qiling yoki ruxsat berilgan bo'limga qayting.",
+        "back_to_pos": "POS sahifasiga o'tish"
+      }
+    },
     "users": {
       "add_button": "Foydalanuvchi qoʻshish",
       "create_document_title": "Foydalanuvchi yaratish",
