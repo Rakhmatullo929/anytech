@@ -31,12 +31,22 @@ export function useNavData() {
   const { tx } = useLocales();
 
   const canManage = MANAGER_ROLES.includes(user.role);
+  const isAdmin = user.role === 'admin';
 
   const data = useMemo(
     () => [
       {
         subheader: tx('layout.nav.group'),
         items: [
+          ...(isAdmin
+            ? [
+                {
+                  title: tx('layout.nav.admin'),
+                  path: paths.admin.root,
+                  icon: ICONS.user,
+                },
+              ]
+            : []),
           {
             title: tx('layout.nav.pos'),
             path: paths.pos,
@@ -69,7 +79,7 @@ export function useNavData() {
         ],
       },
     ],
-    [canManage, tx]
+    [canManage, isAdmin, tx]
   );
 
   return data;

@@ -9,7 +9,9 @@
       "group": "Doʻkon",
       "pos": "POS",
       "products": "Mahsulotlar",
-      "sales": "Savdolar"
+      "sales": "Savdolar",
+      "admin": "Admin",
+      "users": "Foydalanuvchilar"
     }
   },
   "pages": {
@@ -140,6 +142,74 @@
         "payment_label": "Toʻlov turi"
       },
       "list_heading": "Savdolar tarixi"
+    },
+    "admin": {
+      "tabs": {
+        "users": "Foydalanuvchilar",
+        "roles": "Rollar"
+      },
+      "roles": {
+        "document_title": "Admin rollari",
+        "empty": "Roles bo'limi tez orada qo'shiladi"
+      }
+    },
+    "profile": {
+      "menu_label": "Profil",
+      "heading": "Mening profilim",
+      "document_title": "Profil",
+      "personal_info": "Shaxsiy ma'lumotlar"
+    },
+    "users": {
+      "add_button": "Foydalanuvchi qoʻshish",
+      "create_document_title": "Foydalanuvchi yaratish",
+      "detail_document_title": "Foydalanuvchi",
+      "document_title": "Foydalanuvchilar",
+      "edit_document_title": "Foydalanuvchini tahrirlash",
+      "actions": {
+        "login_as": "Nomidan kirish"
+      },
+      "detail": {
+        "info_title": "Foydalanuvchi ma'lumotlari",
+        "not_found": "Foydalanuvchi topilmadi"
+      },
+      "dialogs": {
+        "create": {
+          "title": "Yangi foydalanuvchi",
+          "confirm_password": "Parolni tasdiqlash"
+        },
+        "edit": {
+          "title": "Foydalanuvchini tahrirlash",
+          "new_password": "Yangi parol",
+          "confirm_new_password": "Yangi parolni tasdiqlash"
+        },
+        "delete": {
+          "title": "Foydalanuvchini o‘chirish",
+          "description": "Ushbu foydalanuvchini o‘chirishni tasdiqlaysizmi?"
+        }
+      },
+      "search_placeholder": "Ism, telefon yoki email boʻyicha qidiruv…",
+      "roles": {
+        "admin": "Admin",
+        "manager": "Manager",
+        "seller": "Sotuvchi"
+      },
+      "genders": {
+        "male": "Erkak",
+        "female": "Ayol"
+      },
+      "table": {
+        "role": "Rol"
+      },
+      "form": {
+        "passport_prefix": "Pasport seriyasi (harf)",
+        "passport_number": "Pasport seriyasi (raqam)"
+      },
+      "toasts": {
+        "login_as_success": "Foydalanuvchi nomidan tizimga kirildi",
+        "created": "Foydalanuvchi yaratildi",
+        "updated": "Foydalanuvchi yangilandi",
+        "deleted": "Foydalanuvchi o‘chirildi"
+      }
     }
   },
   "shared": {
@@ -175,11 +245,13 @@
       "client": "Mijoz",
       "created": "Yaratilgan",
       "date": "Sana",
+      "email": "Email",
       "name": "Nomi",
       "no_data": "Ma'lumot topilmadi",
       "paid": "Toʻlangan",
       "pay": "Toʻlov",
       "phone": "Telefon",
+      "gender": "Jins",
       "price": "Narx",
       "product": "Mahsulot",
       "purchase": "Xarid",
@@ -190,7 +262,10 @@
       "sku": "SKU",
       "status": "Holat",
       "stock": "Qoldiq",
-      "total": "Summa"
+      "total": "Summa",
+      "password": "Parol"
+      ,
+      "passport_series": "Pasport seriyasi"
     }
   },
   "account": "akkaunt",
@@ -244,13 +319,22 @@
   "user": "foydalanuvchi",
   "validation": {
     "client_name_required": "Mijoz ismi majburiy",
+    "email_invalid": "Email noto‘g‘ri formatda",
     "number_invalid": "Toʻgʻri son kiriting",
     "number_min_zero": "Qiymat 0 dan kichik bo'lmasligi kerak",
+    "password_confirm_required": "Parol tasdiqlash majburiy",
+    "password_min": "Parol kamida 6 ta belgidan iborat bo‘lishi kerak",
     "password_required": "Parol majburiy",
+    "passwords_must_match": "Parollar mos kelmadi",
     "phone_invalid_format": "Telefon formati {{example}} ko‘rinishida bo‘lishi kerak",
     "phone_required": "Telefon majburiy",
+    "gender_required": "Jinsni tanlang",
+    "passport_prefix_invalid": "Pasport seriyasi harf qismi 2 ta lotin harfi bo‘lishi kerak",
+    "passport_number_invalid": "Pasport seriyasi raqam qismi 7 ta raqam bo‘lishi kerak",
+    "passport_series_required_pair": "Pasport seriyasini to‘liq kiriting (masalan: AB1231212)",
     "product_name_required": "Mahsulot nomi majburiy",
     "purchase_price_required": "Xarid narxi majburiy",
+    "role_required": "Rolni tanlang",
     "sale_price_required": "Sotuv narxi majburiy",
     "stock_required": "Boshlangʻich qoldiq majburiy"
   }

@@ -40,6 +40,10 @@ class User(AbstractBaseUser, PermissionsMixin):
         MANAGER = "manager", "Manager"
         SELLER = "seller", "Seller"
 
+    class Gender(models.TextChoices):
+        MALE = "male", "Male"
+        FEMALE = "female", "Female"
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     tenant = models.ForeignKey(
         Tenant, on_delete=models.CASCADE, related_name="users", null=True, blank=True
@@ -47,6 +51,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     name = models.CharField(max_length=255, blank=True, default="")
     phone = models.CharField(max_length=20, unique=True, null=True, blank=True)
     email = models.EmailField(unique=True, null=True, blank=True)
+    passport_series = models.CharField(max_length=9, null=True, blank=True)
+    gender = models.CharField(max_length=10, choices=Gender.choices, null=True, blank=True)
     role = models.CharField(max_length=20, choices=Role.choices, default=Role.SELLER)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)

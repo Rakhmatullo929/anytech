@@ -9,8 +9,10 @@ export const API_ENDPOINTS = {
     register: `${API_V1}/auth/register/`,
     login: `${API_V1}/auth/login/`,
     refresh: `${API_V1}/auth/token/refresh/`,
-    /** Add on backend when you expose a current-user endpoint */
     me: `${API_V1}/auth/me/`,
+    users: `${API_V1}/auth/users/`,
+    userDetail: (id: string) => `${API_V1}/auth/users/${id}/`,
+    impersonate: `${API_V1}/auth/impersonate/`,
   },
   products: {
     list: `${API_V1}/products/`,
