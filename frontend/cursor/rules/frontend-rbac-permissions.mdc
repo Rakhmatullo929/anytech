@@ -19,6 +19,10 @@ alwaysApply: false
 - Не дублировать JSX-условия в каждом месте: предпочтительно общий helper/компонент (`Can`/`PermissionSlot`) и переиспользование.
 - При impersonate сразу синхронизировать новую сессию и затем обновлять `/auth/me`, чтобы permissions применялись без refresh.
 - Backend остается source of truth: фронт скрывает UI, сервер окончательно валидирует доступ.
+- При добавлении новой страницы (module/page) обязательно добавить соответствующие permission-ключи в backend catalog (`read` минимум, при необходимости `detail`/`write`).
+- При добавлении нового действия (create/edit/delete/import/pay/approve и т.д.) обязательно связать его с существующим action-типом permission (`write`/`detail`) и проверить серверный доступ в backend view/endpoint.
+- Любой новый permission сразу интегрировать end-to-end: backend `permission_catalog` + DRF permission checks + `/auth/me`/login payload + frontend `PermissionPage`/`PermissionAction`/`checkPermission` + roles management UI (чекбоксы) + навигация/кнопки/роутинг.
+- Не мерджить feature, если страница или действие добавлены без соответствующего permission в backend и без отражения в `admin/roles`.
 
 ## Минимальный паттерн
 
