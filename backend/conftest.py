@@ -34,6 +34,7 @@ def other_tenant(db):
 @pytest.fixture
 def admin_user(tenant):
     return User.objects.create_user(
+        phone="+998901111111",
         email="admin@test.com",
         password="StrongPass123!",
         name="Admin User",
@@ -45,6 +46,7 @@ def admin_user(tenant):
 @pytest.fixture
 def manager_user(tenant):
     return User.objects.create_user(
+        phone="+998901111112",
         email="manager@test.com",
         password="StrongPass123!",
         name="Manager User",
@@ -56,6 +58,7 @@ def manager_user(tenant):
 @pytest.fixture
 def seller_user(tenant):
     return User.objects.create_user(
+        phone="+998901111113",
         email="seller@test.com",
         password="StrongPass123!",
         name="Seller User",
@@ -68,6 +71,7 @@ def seller_user(tenant):
 def other_tenant_user(other_tenant):
     """User belonging to a different tenant."""
     return User.objects.create_user(
+        phone="+998901111114",
         email="other@test.com",
         password="StrongPass123!",
         name="Other User",

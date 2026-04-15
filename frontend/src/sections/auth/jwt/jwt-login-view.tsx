@@ -1,11 +1,11 @@
-import * as Yup from 'yup';
 import { useForm } from 'react-hook-form';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import LoadingButton from '@mui/lab/LoadingButton';
 import Link from '@mui/material/Link';
 import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
@@ -16,19 +16,23 @@ import { PATH_AFTER_LOGIN } from 'src/config-global';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useLoginMutation } from 'src/auth/api';
+import { useLocales } from 'src/locales';
 // components
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
 import { getAuthFormErrorMessage } from 'src/utils/api-error-messages';
+import { getPhonePrefix } from 'src/auth/utils/phone-rules';
+import { formatUzPhoneInput, getLoginSchema, normalizeLoginPayload } from './utils/login-schema';
 // ----------------------------------------------------------------------
 
 type FormValuesProps = {
-  email: string;
+  phone: string;
   password: string;
 };
 
 export default function JwtLoginView() {
   const loginMutation = useLoginMutation();
+  const { tx } = useLocales();
 
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -38,28 +42,34 @@ export default function JwtLoginView() {
 
   const password = useBoolean();
 
-  const LoginSchema = Yup.object().shape({
-    email: Yup.string().required('Email is required').email('Email must be a valid email address'),
-    password: Yup.string().required('Password is required'),
-  });
+  const loginSchema = getLoginSchema(tx);
+  const phonePrefix = getPhonePrefix();
 
   const defaultValues = {
-    email: '',
+    phone: '',
     password: '',
   };
 
   const methods = useForm<FormValuesProps>({
-    resolver: yupResolver(LoginSchema),
+    resolver: yupResolver(loginSchema),
     defaultValues,
   });
 
-  const { handleSubmit, formState: { isSubmitting } } = methods;
+  const { handleSubmit, formState: { isSubmitting }, watch, setValue } = methods;
+  const watchedPhone = watch('phone');
+
+  useEffect(() => {
+    const formatted = formatUzPhoneInput(watchedPhone || '');
+    if (watchedPhone !== formatted) {
+      setValue('phone', formatted, { shouldValidate: true });
+    }
+  }, [setValue, watchedPhone]);
 
   const onSubmit = useCallback(
     async (data: FormValuesProps) => {
       try {
         setErrorMsg('');
-        await loginMutation.mutateAsync({ email: data.email, password: data.password });
+        await loginMutation.mutateAsync(normalizeLoginPayload(data));
         window.location.href = returnTo || PATH_AFTER_LOGIN;
       } catch (error) {
         console.error(error);
@@ -83,7 +93,44 @@ export default function JwtLoginView() {
         </Alert>
       )}
 
-      <RHFTextField name="email" label="Email address" />
+      <RHFTextField
+        name="phone"
+        label={`${tx('shared.table.phone')} *`}
+        placeholder="90 123 45 67"
+        inputProps={{ inputMode: 'tel' }}
+        sx={{
+          '& .MuiInputBase-root': { height: 54 },
+          '& input': { letterSpacing: '0.03em' },
+        }}
+        onChange={(event) => {
+          setValue('phone', formatUzPhoneInput(event.target.value), {
+            shouldDirty: true,
+            shouldValidate: true,
+          });
+        }}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.75,
+                  pr: 1,
+                }}
+              >
+                <Iconify width={18} icon="flagpack:uz" />
+                <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary' }}>
+                  UZ
+                </Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                  {phonePrefix}
+                </Typography>
+              </Box>
+            </InputAdornment>
+          ),
+        }}
+      />
 
       <RHFTextField
         name="password"

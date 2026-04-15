@@ -16,6 +16,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         data["user"] = {
             "id": str(self.user.id),
             "name": self.user.name,
+            "phone": self.user.phone,
             "email": self.user.email,
             "role": self.user.role,
             "tenant_id": str(self.user.tenant_id) if self.user.tenant_id else None,

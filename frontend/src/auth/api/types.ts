@@ -5,7 +5,8 @@ export type UserRole = 'admin' | 'manager' | 'seller';
 export type TenantUser = {
   id: string;
   name: string;
-  email: string;
+  phone: string | null;
+  email: string | null;
   role: UserRole;
   tenantId: string | null;
   createdAt: string;
@@ -19,7 +20,7 @@ export type TokenPairResponse = {
 };
 
 export type LoginRequest = {
-  email: string;
+  phone: string;
   password: string;
 };
 
@@ -27,7 +28,8 @@ export type LoginRequest = {
 export type RegisterRequest = {
   tenantName: string;
   name: string;
-  email: string;
+  phone: string;
+  email?: string | null;
   password: string;
   passwordConfirm: string;
 };

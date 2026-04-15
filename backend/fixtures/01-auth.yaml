@@ -1,0 +1,98 @@
+[
+  {
+    "model": "auth_tenant.tenant",
+    "pk": "a1000000-0000-0000-0000-000000000001",
+    "fields": {
+      "name": "TechShop",
+      "created_at": "2025-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "auth_tenant.tenant",
+    "pk": "a1000000-0000-0000-0000-000000000002",
+    "fields": {
+      "name": "MobileWorld",
+      "created_at": "2025-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "auth_tenant.user",
+    "pk": "b1000000-0000-0000-0000-000000000001",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000001",
+      "phone": "+998901111001",
+      "email": "admin@techshop.com",
+      "name": "Admin TechShop",
+      "password": "argon2$argon2id$v=19$m=102400,t=2,p=8$MFRDM1R1QTR1NEUzeGl0VG5BOUIxVA$3DuCgyQrfuF5O1qbqXRs2lmf9w1tuT66ZkkpPk2H0d8",
+      "role": "admin",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "created_at": "2025-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "auth_tenant.user",
+    "pk": "b1000000-0000-0000-0000-000000000002",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000001",
+      "phone": "+998901111002",
+      "email": "manager@techshop.com",
+      "name": "Manager TechShop",
+      "password": "pbkdf2_sha256$870000$test$test_hash_placeholder",
+      "role": "manager",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "created_at": "2025-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "auth_tenant.user",
+    "pk": "b1000000-0000-0000-0000-000000000003",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000001",
+      "phone": "+998901111003",
+      "email": "seller@techshop.com",
+      "name": "Seller TechShop",
+      "password": "pbkdf2_sha256$870000$test$test_hash_placeholder",
+      "role": "seller",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "created_at": "2025-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "auth_tenant.user",
+    "pk": "b1000000-0000-0000-0000-000000000004",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000002",
+      "phone": "+998901111004",
+      "email": "admin@mobileworld.com",
+      "name": "Admin MobileWorld",
+      "password": "pbkdf2_sha256$870000$test$test_hash_placeholder",
+      "role": "admin",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "created_at": "2025-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "auth_tenant.user",
+    "pk": "b1000000-0000-0000-0000-000000000005",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000002",
+      "phone": "+998901111005",
+      "email": "seller@mobileworld.com",
+      "name": "Seller MobileWorld",
+      "password": "pbkdf2_sha256$870000$test$test_hash_placeholder",
+      "role": "seller",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "created_at": "2025-01-01T10:00:00Z"
+    }
+  }
+]

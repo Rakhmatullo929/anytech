@@ -17,7 +17,7 @@ export function useLoginMutation() {
     async (data) => {
       if (isJwtAuthMock()) {
         const access = createMockAccessToken();
-        const user = buildMockAuthUser(data.email);
+        const user = buildMockAuthUser(data.phone);
         return { access, refresh: '', user };
       }
       return fetchLogin(data);
@@ -41,7 +41,7 @@ export function useRegisterMutation() {
       if (isJwtAuthMock()) {
         const access = createMockAccessToken();
         const [first, ...rest] = data.name.split(' ');
-        const user = buildMockAuthUser(data.email, first, rest.join(' ') || undefined);
+        const user = buildMockAuthUser(data.phone, first, rest.join(' ') || undefined);
         return { access, refresh: '', user };
       }
       return fetchRegister(data);
