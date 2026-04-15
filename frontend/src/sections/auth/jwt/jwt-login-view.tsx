@@ -10,10 +10,7 @@ import Stack from '@mui/material/Stack';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import InputAdornment from '@mui/material/InputAdornment';
-// routes
-import { paths } from 'src/routes/paths';
 import { useSearchParams } from 'src/routes/hook';
-import { RouterLink } from 'src/routes/components';
 // config
 import { PATH_AFTER_LOGIN } from 'src/config-global';
 // hooks
@@ -47,8 +44,8 @@ export default function JwtLoginView() {
   });
 
   const defaultValues = {
-    email: 'demo@minimals.cc',
-    password: 'demo1234',
+    email: '',
+    password: '',
   };
 
   const methods = useForm<FormValuesProps>({
@@ -75,14 +72,6 @@ export default function JwtLoginView() {
   const renderHead = (
     <Stack spacing={2} sx={{ mb: 5 }}>
       <Typography variant="h4">Sign in to Minimal</Typography>
-
-      <Stack direction="row" spacing={0.5}>
-        <Typography variant="body2">New user?</Typography>
-
-        <Link component={RouterLink} href={paths.register} variant="subtitle2">
-          Create an account
-        </Link>
-      </Stack>
     </Stack>
   );
 
@@ -131,10 +120,6 @@ export default function JwtLoginView() {
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       {renderHead}
-
-      <Alert severity="info" sx={{ mb: 3 }}>
-        Use email : <strong>demo@minimals.cc</strong> / password :<strong> demo1234</strong>
-      </Alert>
 
       {renderForm}
     </FormProvider>

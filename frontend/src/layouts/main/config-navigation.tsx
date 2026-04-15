@@ -14,11 +14,6 @@ export const navConfig = [
     path: paths.login,
   },
   {
-    title: 'Register',
-    icon: <Iconify icon="solar:user-plus-bold-duotone" />,
-    path: paths.register,
-  },
-  {
     title: 'Components',
     icon: <Iconify icon="solar:atom-bold-duotone" />,
     path: paths.components,

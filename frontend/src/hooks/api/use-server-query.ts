@@ -85,7 +85,7 @@ function useQueryErrorNotify(
 }
 
 function isPublicAuthPath(pathname: string) {
-  return pathname === '/login' || pathname === '/register';
+  return pathname === '/login';
 }
 
 function useErrorHandler(onError?: (err: BaseError) => void) {
@@ -112,12 +112,9 @@ function useErrorHandler(onError?: (err: BaseError) => void) {
       }
 
       if (status === 401) {
-        // На экранах входа/регистрации 401 — неверные данные, а не «сессия истекла»
+        // На экране входа 401 — неверные данные, а не «сессия истекла»
         if (isPublicAuthPath(location.pathname)) {
-          enqueueSnackbar(
-            'Неверный email или пароль. Проверьте данные или зарегистрируйтесь.',
-            { variant: 'error' }
-          );
+          enqueueSnackbar('Неверный email или пароль. Проверьте данные.', { variant: 'error' });
           return;
         }
         logout();

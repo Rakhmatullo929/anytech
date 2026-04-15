@@ -2,7 +2,6 @@
 
 export const paths = {
   login: '/login',
-  register: '/register',
 
   pos: '/pos',
   products: {
@@ -34,7 +33,6 @@ export const paths = {
   auth: {
     jwt: {
       login: '/login',
-      register: '/register',
     },
   },
 };

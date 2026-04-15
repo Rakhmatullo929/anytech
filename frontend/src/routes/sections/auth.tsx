@@ -7,7 +7,6 @@ import AuthClassicLayout from 'src/layouts/auth/classic';
 // ----------------------------------------------------------------------
 
 const JwtLoginPage = lazy(() => import('src/pages/auth/jwt/login'));
-const JwtRegisterPage = lazy(() => import('src/pages/auth/jwt/register'));
 
 // ----------------------------------------------------------------------
 
@@ -18,16 +17,6 @@ export const authRoutes = [
       <GuestGuard>
         <AuthClassicLayout>
           <JwtLoginPage />
-        </AuthClassicLayout>
-      </GuestGuard>
-    ),
-  },
-  {
-    path: 'register',
-    element: (
-      <GuestGuard>
-        <AuthClassicLayout title="Create your store">
-          <JwtRegisterPage />
         </AuthClassicLayout>
       </GuestGuard>
     ),
