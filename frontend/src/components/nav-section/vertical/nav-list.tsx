@@ -20,7 +20,8 @@ type NavListRootProps = {
 export default function NavList({ data, depth, hasChild, config }: NavListRootProps) {
   const pathname = usePathname();
 
-  const active = useActiveLink(data.path, hasChild);
+  // Keep parent section active on nested detail routes (e.g. /products/:id/*).
+  const active = useActiveLink(data.path);
 
   const externalLink = data.path.includes('http');
 

@@ -1,15 +1,11 @@
 // @mui
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
+import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 // hooks
 import { useAppUserProfile } from 'src/hooks/use-app-user-profile';
-// routes
-import { paths } from 'src/routes/paths';
-// locales
-import { useLocales } from 'src/locales';
 // components
 import Label from 'src/components/label';
 
@@ -18,60 +14,55 @@ import Label from 'src/components/label';
 export default function NavUpgrade() {
   const { user } = useAppUserProfile();
 
-  const { t } = useLocales();
-
   const avatarInitial =
     user?.displayName?.trim()?.charAt(0)?.toUpperCase() ||
     user?.email?.trim()?.charAt(0)?.toUpperCase() ||
-    '';
+    'U';
+
+  const roleLabel = (user?.role || 'user')
+    .toString()
+    .replace(/[_-]/g, ' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase());
 
   return (
-    <Stack
+    <Box
       sx={{
+        mx: 2,
+        mb: 3,
         px: 2,
-        py: 5,
-        textAlign: 'center',
+        py: 2.5,
+        borderRadius: 2,
+        border: (theme) => `1px dashed ${theme.palette.divider}`,
+        bgcolor: 'background.neutral',
       }}
     >
-      <Stack alignItems="center">
-        <Box sx={{ position: 'relative' }}>
+      <Stack spacing={1.5} alignItems="center">
+        <Box>
           <Avatar
             src={user?.photoURL || undefined}
             alt={user?.displayName}
-            sx={{ width: 48, height: 48 }}
+            sx={{ width: 56, height: 56, fontSize: 24 }}
           >
             {avatarInitial}
           </Avatar>
-          <Label
-            color="success"
-            variant="filled"
-            sx={{
-              top: -6,
-              px: 0.5,
-              left: 40,
-              height: 20,
-              position: 'absolute',
-              borderBottomLeftRadius: 2,
-            }}
-          >
-            Free
-          </Label>
         </Box>
 
-        <Stack spacing={0.5} sx={{ mt: 1.5, mb: 2 }}>
+        <Stack spacing={0.5} sx={{ width: 1, textAlign: 'center' }}>
           <Typography variant="subtitle2" noWrap>
-            {user?.displayName}
+            {user?.displayName || 'Unknown user'}
           </Typography>
 
           <Typography variant="body2" noWrap sx={{ color: 'text.disabled' }}>
-            {user?.email}
+            {user?.email || '-'}
           </Typography>
         </Stack>
 
-        <Button variant="contained" href={paths.docs} target="_blank" rel="noopener">
-          {t('upgrade_to_pro')}
-        </Button>
+        <Divider flexItem sx={{ borderStyle: 'dashed' }} />
+
+        <Label color="primary" variant="soft" sx={{ px: 1.2 }}>
+          {roleLabel}
+        </Label>
       </Stack>
-    </Stack>
+    </Box>
   );
 }
