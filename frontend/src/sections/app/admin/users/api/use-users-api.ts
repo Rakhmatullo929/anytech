@@ -12,6 +12,8 @@ import {
 import { useAuthContext } from 'src/auth/hooks/use-auth-context';
 import { fetchCurrentUser } from 'src/auth/api/auth-requests';
 import type { TokenPairResponse } from 'src/auth/api/types';
+import { useLocales } from 'src/locales';
+import { useSnackbar } from 'src/components/snackbar';
 
 import {
   createTenantUser,
@@ -45,6 +47,8 @@ export function useTenantUsersListQuery(params: FetchTenantUsersParams) {
 export function useImpersonateTenantUserMutation() {
   const { syncSessionFromApiResponse } = useAuthContext();
   const queryClient = useQueryClient();
+  const { tx } = useLocales();
+  const { enqueueSnackbar } = useSnackbar();
 
   return useMutate<TokenPairResponse, string>(impersonateTenantUser, {
     skipGlobalErrorNotification: true,
@@ -55,8 +59,8 @@ export function useImpersonateTenantUserMutation() {
       try {
         const { user } = await fetchCurrentUser();
         syncSessionFromApiResponse({ ...payload, user });
-      } catch (error) {
-        console.error(error);
+      } catch {
+        enqueueSnackbar(tx('pages.users.toasts.login_as_profile_sync_failed'), { variant: 'error' });
       }
       queryClient.clear();
     },

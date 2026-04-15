@@ -238,6 +238,7 @@
       },
       "toasts": {
         "login_as_success": "Foydalanuvchi nomidan tizimga kirildi",
+        "login_as_profile_sync_failed": "Foydalanuvchi nomidan kirilgandan so'ng profilni yangilab bo'lmadi",
         "created": "Foydalanuvchi yaratildi",
         "updated": "Foydalanuvchi yangilandi",
         "deleted": "Foydalanuvchi o‘chirildi"

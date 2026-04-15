@@ -9,6 +9,7 @@ from django.urls import reverse
 from rest_framework import status
 
 from auth_tenant.models import Tenant, User
+from auth_tenant.permission_catalog import ADMIN_REQUIRED_PERMISSIONS
 from auth_tenant.permissions import IsAdmin, IsManagerOrAbove, IsSellerOrAbove
 
 pytestmark = pytest.mark.django_db
@@ -356,6 +357,32 @@ class TestTenantUsersEndpoint:
             format="json",
         )
         assert resp.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_role_permissions_update_admin_preserves_critical_permissions(self, admin_client):
+        payload = {"permissions": ["products:read", "clients:read"]}
+        resp = admin_client.patch(ROLE_PERMISSIONS_URL("admin"), payload, format="json")
+        assert resp.status_code == status.HTTP_200_OK
+
+        response_permissions = set(resp.data["permissions"])
+        assert response_permissions.issuperset(set(ADMIN_REQUIRED_PERMISSIONS))
+        assert {"products:read", "clients:read"}.issubset(response_permissions)
+
+        roles_resp = admin_client.get(ROLES_URL)
+        assert roles_resp.status_code == status.HTTP_200_OK
+        admin_row = next(row for row in roles_resp.data["results"] if row["value"] == "admin")
+        assert set(admin_row["permissions"]).issuperset(set(ADMIN_REQUIRED_PERMISSIONS))
+
+    def test_role_permissions_update_admin_clear_keeps_critical_permissions(self, admin_client):
+        resp = admin_client.patch(ROLE_PERMISSIONS_URL("admin"), {"permissions": []}, format="json")
+        assert resp.status_code == status.HTTP_200_OK
+
+        response_permissions = set(resp.data["permissions"])
+        assert response_permissions == set(ADMIN_REQUIRED_PERMISSIONS)
+
+        roles_resp = admin_client.get(ROLES_URL)
+        assert roles_resp.status_code == status.HTTP_200_OK
+        admin_row = next(row for row in roles_resp.data["results"] if row["value"] == "admin")
+        assert set(admin_row["permissions"]) == set(ADMIN_REQUIRED_PERMISSIONS)
 
 
 class TestImpersonateEndpoint:
