@@ -13,6 +13,7 @@ import { useParams } from 'src/routes/hook';
 import { RouterLink } from 'src/routes/components';
 import { fDateTime } from 'src/utils/format-time';
 import { useLocales } from 'src/locales';
+import { useCheckPermission } from 'src/auth/hooks/use-check-permission';
 
 import { useTenantUserDetailQuery } from '../api';
 import { UserRoleLabel } from '../components';
@@ -20,8 +21,10 @@ import { UserDetailsSkeleton } from '../skeleton';
 
 export default function UserDetailsView() {
   const { tx } = useLocales();
+  const { canWritePage } = useCheckPermission();
   const { id = '' } = useParams();
   const { data: user, isPending } = useTenantUserDetailQuery(id);
+  const canWriteUsers = canWritePage('users');
 
   if (isPending) {
     return (
@@ -55,9 +58,11 @@ export default function UserDetailsView() {
           { name: user.name || user.phone || '-', href: paths.admin.users.details(user.id) },
         ]}
         action={
-          <Button component={RouterLink} href={paths.admin.users.edit(user.id)} variant="contained">
-            {tx('shared.actions.edit')}
-          </Button>
+          canWriteUsers ? (
+            <Button component={RouterLink} href={paths.admin.users.edit(user.id)} variant="contained">
+              {tx('shared.actions.edit')}
+            </Button>
+          ) : null
         }
         sx={{ mb: { xs: 3, md: 5 } }}
       />

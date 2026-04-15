@@ -22,6 +22,7 @@ import {
   useSyncTableWithUrlListState,
   useUrlQueryState,
 } from 'src/hooks/use-url-query-state';
+import { useCheckPermission } from 'src/auth/hooks/use-check-permission';
 // routes
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
@@ -41,6 +42,7 @@ import { SalesListSkeleton } from 'src/sections/app/sales/skeleton';
 
 export default function SalesView() {
   const { tx } = useLocales();
+  const { canDetailPage } = useCheckPermission();
   const { values, setValues } = useUrlQueryState({
     page: intParam(1),
     page_size: intParam(15),
@@ -79,6 +81,7 @@ export default function SalesView() {
   const rows = useMemo(() => data?.results ?? [], [data?.results]);
   const total = data?.count ?? 0;
   const showInitialLoader = isPending && !data;
+  const canDetailSales = canDetailPage('sales');
 
   useSyncTableWithUrlListState({
     page: pageParam,
@@ -162,9 +165,13 @@ export default function SalesView() {
                   {rows.map((row) => (
                     <TableRow key={row.id} hover>
                       <TableCell>
-                        <Link component={RouterLink} href={paths.sales.details(row.id)} variant="subtitle2">
-                          {row.id}
-                        </Link>
+                        {canDetailSales ? (
+                          <Link component={RouterLink} href={paths.sales.details(row.id)} variant="subtitle2">
+                            {row.id}
+                          </Link>
+                        ) : (
+                          row.id
+                        )}
                       </TableCell>
                       <TableCell>{row.clientName || '-'}</TableCell>
                       <TableCell>{fCurrency(row.totalAmount)}</TableCell>

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
-import { useCheckPermission } from 'src/auth/hooks/use-check-permission';
 import type { PermissionAction, PermissionPage } from 'src/auth/utils/permissions';
+import Can from 'src/auth/components/can';
 import View403 from 'src/sections/error/403-view';
 
 type PermissionGuardProps = {
@@ -11,12 +11,9 @@ type PermissionGuardProps = {
 };
 
 export default function PermissionGuard({ page, action, children }: PermissionGuardProps) {
-  const { cp } = useCheckPermission();
-  const allowed = cp(page, action);
-
-  if (!allowed) {
-    return <View403 />;
-  }
-
-  return <>{children}</>;
+  return (
+    <Can page={page} action={action} fallback={<View403 />}>
+      {children}
+    </Can>
+  );
 }

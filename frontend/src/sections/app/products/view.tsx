@@ -16,10 +16,13 @@ import IconButton from '@mui/material/IconButton';
 import MenuItem from '@mui/material/MenuItem';
 import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
+import Typography from '@mui/material/Typography';
 // utils
 import { fCurrency } from 'src/utils/format-number';
 import { useDebounce } from 'src/hooks/use-debounce';
 import { useUrlListState, useSyncTableWithUrlListState } from 'src/hooks/use-url-query-state';
+import { useCheckPermission } from 'src/auth/hooks/use-check-permission';
+import Can from 'src/auth/components/can';
 // routes
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
@@ -52,6 +55,7 @@ import { ProductsListSkeleton } from 'src/sections/app/products/skeleton';
 
 export default function ProductsView() {
   const { tx } = useLocales();
+  const { canWritePage } = useCheckPermission();
   const { enqueueSnackbar } = useSnackbar();
   const actionsPopover = usePopover();
   const createMutation = useCreateProductMutation();
@@ -287,6 +291,7 @@ export default function ProductsView() {
     selectedProductId !== null &&
     deleteMutation.variables === selectedProductId;
   const deletingBulk = bulkDeleteMutation.isPending;
+  const canWriteProducts = canWritePage('products');
 
   return (
     <>
@@ -294,9 +299,11 @@ export default function ProductsView() {
         heading={tx('layout.nav.products')}
         links={[{ name: tx('layout.nav.products'), href: paths.products.root }]}
         action={
-          <Button variant="contained" startIcon={<Iconify icon="mingcute:add-line" />} onClick={handleOpenCreate}>
-            {tx('pages.products.add_button')}
-          </Button>
+          <Can page="products" action="write">
+            <Button variant="contained" startIcon={<Iconify icon="mingcute:add-line" />} onClick={handleOpenCreate}>
+              {tx('pages.products.add_button')}
+            </Button>
+          </Can>
         }
         sx={{ mb: { xs: 3, md: 5 } }}
       />
@@ -312,16 +319,18 @@ export default function ProductsView() {
           )}
 
           <Stack spacing={2} sx={{ p: 2 }}>
-            <TableSelectedAction
-              numSelected={selectedIds.length}
-              rowCount={rows.length}
-              onSelectAllRows={(checked) => table.onSelectAllRows(checked, rows.map((row) => row.id))}
-              action={
-                <Button color="error" onClick={handleOpenBulkDelete}>
-                  {tx('shared.actions.delete')}
-                </Button>
-              }
-            />
+            <Can page="products" action="write">
+              <TableSelectedAction
+                numSelected={selectedIds.length}
+                rowCount={rows.length}
+                onSelectAllRows={(checked) => table.onSelectAllRows(checked, rows.map((row) => row.id))}
+                action={
+                  <Button color="error" onClick={handleOpenBulkDelete}>
+                    {tx('shared.actions.delete')}
+                  </Button>
+                }
+              />
+            </Can>
             <TextField
               size="small"
               placeholder={tx('pages.products.search_placeholder')}
@@ -342,21 +351,33 @@ export default function ProductsView() {
                   {rows.map((row) => (
                     <TableRow key={row.id} hover selected={selectedIds.includes(row.id)}>
                       <TableCell padding="checkbox">
-                        <Checkbox checked={selectedIds.includes(row.id)} onClick={() => table.onSelectRow(row.id)} />
+                        <Checkbox
+                          checked={selectedIds.includes(row.id)}
+                          onClick={() => table.onSelectRow(row.id)}
+                          disabled={!canWriteProducts}
+                        />
                       </TableCell>
                       <TableCell>
-                        <Link component={RouterLink} href={paths.products.details(row.id)} variant="subtitle2">
-                          {row.name}
-                        </Link>
+                        <Can
+                          page="products"
+                          action="detail"
+                          fallback={<Typography variant="subtitle2">{row.name}</Typography>}
+                        >
+                          <Link component={RouterLink} href={paths.products.details(row.id)} variant="subtitle2">
+                            {row.name}
+                          </Link>
+                        </Can>
                       </TableCell>
                       <TableCell>{row.sku || '-'}</TableCell>
                       <TableCell>{row.stock}</TableCell>
                       <TableCell>{fCurrency(row.purchasePrice)}</TableCell>
                       <TableCell>{fCurrency(row.salePrice)}</TableCell>
                       <TableCell align="right">
-                        <IconButton color="default" onClick={(event) => openActions(event, row.id)}>
-                          <Iconify icon="eva:more-vertical-fill" />
-                        </IconButton>
+                        {canWriteProducts ? (
+                          <IconButton color="default" onClick={(event) => openActions(event, row.id)}>
+                            <Iconify icon="eva:more-vertical-fill" />
+                          </IconButton>
+                        ) : null}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -379,60 +400,70 @@ export default function ProductsView() {
       )}
 
       <CustomPopover open={actionsPopover.open} onClose={handleCloseActions} sx={{ width: 180, p: 1 }}>
-        <MenuItem onClick={handleEdit}>
-          <Iconify icon="solar:pen-bold" />
-          {tx('shared.actions.edit')}
-        </MenuItem>
-        <MenuItem onClick={handleAskDelete} sx={{ color: 'error.main' }} disabled={deletingCurrent}>
-          <Iconify icon="solar:trash-bin-trash-bold" />
-          {tx('shared.actions.delete')}
-        </MenuItem>
+        <Can page="products" action="write">
+          <MenuItem onClick={handleEdit}>
+            <Iconify icon="solar:pen-bold" />
+            {tx('shared.actions.edit')}
+          </MenuItem>
+        </Can>
+        <Can page="products" action="write">
+          <MenuItem onClick={handleAskDelete} sx={{ color: 'error.main' }} disabled={deletingCurrent}>
+            <Iconify icon="solar:trash-bin-trash-bold" />
+            {tx('shared.actions.delete')}
+          </MenuItem>
+        </Can>
       </CustomPopover>
 
-      <ProductUpsertDialog
-        open={upsertOpen}
-        mode={upsertMode}
-        loading={upsertLoading}
-        initialValues={
-          upsertMode === 'edit' && editingProduct
-            ? {
-                name: editingProduct.name,
-                sku: editingProduct.sku ?? '',
-                purchasePrice: editingProduct.purchasePrice,
-                salePrice: editingProduct.salePrice,
-                stock: String(editingProduct.stock),
-              }
-            : undefined
-        }
-        onClose={handleCloseUpsert}
-        onSubmit={handleSubmitUpsert}
-      />
+      <Can page="products" action="write">
+        <ProductUpsertDialog
+          open={upsertOpen}
+          mode={upsertMode}
+          loading={upsertLoading}
+          initialValues={
+            upsertMode === 'edit' && editingProduct
+              ? {
+                  name: editingProduct.name,
+                  sku: editingProduct.sku ?? '',
+                  purchasePrice: editingProduct.purchasePrice,
+                  salePrice: editingProduct.salePrice,
+                  stock: String(editingProduct.stock),
+                }
+              : undefined
+          }
+          onClose={handleCloseUpsert}
+          onSubmit={handleSubmitUpsert}
+        />
+      </Can>
 
-      <ConfirmDialog
-        open={deleteOpen}
-        onClose={handleCloseDelete}
-        title={tx('pages.products.dialogs.delete.title')}
-        content={tx('pages.products.dialogs.delete.description')}
-        cancelText={tx('shared.actions.cancel')}
-        action={
-          <Button color="error" variant="contained" onClick={handleDelete} disabled={deletingCurrent}>
-            {tx('shared.actions.delete')}
-          </Button>
-        }
-      />
+      <Can page="products" action="write">
+        <ConfirmDialog
+          open={deleteOpen}
+          onClose={handleCloseDelete}
+          title={tx('pages.products.dialogs.delete.title')}
+          content={tx('pages.products.dialogs.delete.description')}
+          cancelText={tx('shared.actions.cancel')}
+          action={
+            <Button color="error" variant="contained" onClick={handleDelete} disabled={deletingCurrent}>
+              {tx('shared.actions.delete')}
+            </Button>
+          }
+        />
+      </Can>
 
-      <ConfirmDialog
-        open={bulkDeleteOpen}
-        onClose={handleCloseBulkDelete}
-        title={tx('pages.products.dialogs.delete.bulk_title')}
-        content={tx('pages.products.dialogs.delete.bulk_description', { count: selectedIds.length })}
-        cancelText={tx('shared.actions.cancel')}
-        action={
-          <Button color="error" variant="contained" onClick={handleBulkDelete} disabled={deletingBulk}>
-            {tx('shared.actions.delete')}
-          </Button>
-        }
-      />
+      <Can page="products" action="write">
+        <ConfirmDialog
+          open={bulkDeleteOpen}
+          onClose={handleCloseBulkDelete}
+          title={tx('pages.products.dialogs.delete.bulk_title')}
+          content={tx('pages.products.dialogs.delete.bulk_description', { count: selectedIds.length })}
+          cancelText={tx('shared.actions.cancel')}
+          action={
+            <Button color="error" variant="contained" onClick={handleBulkDelete} disabled={deletingBulk}>
+              {tx('shared.actions.delete')}
+            </Button>
+          }
+        />
+      </Can>
     </>
   );
 }

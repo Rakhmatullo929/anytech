@@ -24,6 +24,7 @@ import { MOCK_DEBTS, type MockDebt, type MockDebtPayment } from 'src/_mock/pos-a
 import { paths } from 'src/routes/paths';
 import { useParams } from 'src/routes/hook';
 import { RouterLink } from 'src/routes/components';
+import { useCheckPermission } from 'src/auth/hooks/use-check-permission';
 // components
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import { TableHeadCustom } from 'src/components/table';
@@ -33,7 +34,9 @@ import EmptyContent from 'src/components/empty-content';
 
 export default function DebtDetailsView() {
   const { tx } = useLocales();
+  const { canWritePage } = useCheckPermission();
   const { id = '' } = useParams();
+  const canWriteDebts = canWritePage('debts');
 
   const payHead = useMemo(
     () => [
@@ -88,7 +91,7 @@ export default function DebtDetailsView() {
           { name: debt.clientName, href: paths.debts.details(debt.id) },
         ]}
         action={
-          debt.status === 'active' ? (
+          debt.status === 'active' && canWriteDebts ? (
             <Button variant="contained" onClick={() => setPayOpen(true)}>
               {tx('pages.debts.detail.add_payment')}
             </Button>
@@ -139,12 +142,14 @@ export default function DebtDetailsView() {
         </Card>
       </Stack>
 
-      <PaymentDialog
-        open={payOpen}
-        maxAmount={debt.remaining}
-        onClose={() => setPayOpen(false)}
-        onSubmit={applyPayment}
-      />
+      {canWriteDebts ? (
+        <PaymentDialog
+          open={payOpen}
+          maxAmount={debt.remaining}
+          onClose={() => setPayOpen(false)}
+          onSubmit={applyPayment}
+        />
+      ) : null}
     </>
   );
 }

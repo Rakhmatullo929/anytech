@@ -12,6 +12,8 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 
 import { useLocales } from 'src/locales';
 import { paths } from 'src/routes/paths';
+import { useCheckPermission } from 'src/auth/hooks/use-check-permission';
+import Can from 'src/auth/components/can';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import EmptyContent from 'src/components/empty-content';
 import { useSnackbar } from 'src/components/snackbar';
@@ -27,6 +29,7 @@ function getRoleColor(role: 'admin' | 'manager' | 'seller'): 'error' | 'warning'
 
 export default function AdminRolesView() {
   const { tx } = useLocales();
+  const { canWritePage } = useCheckPermission();
   const { enqueueSnackbar } = useSnackbar();
   const { data, isPending } = useTenantRolesQuery();
   const updateMutation = useUpdateTenantRolePermissionsMutation();
@@ -49,6 +52,7 @@ export default function AdminRolesView() {
   }, [availablePermissions]);
 
   const [draftPermissions, setDraftPermissions] = useState<Record<string, Set<string>>>({});
+  const canWriteRoles = canWritePage('roles');
 
   useEffect(() => {
     const next: Record<string, Set<string>> = {};
@@ -154,6 +158,7 @@ export default function AdminRolesView() {
                                   <Checkbox
                                     size="small"
                                     checked={checked}
+                                    disabled={!canWriteRoles}
                                     onChange={(_, enabled) =>
                                       togglePermission(role.value, permission, enabled)
                                     }
@@ -169,15 +174,17 @@ export default function AdminRolesView() {
                   })}
                 </Stack>
 
-                <Stack direction="row" justifyContent="flex-end">
-                  <Button
-                    variant="contained"
-                    onClick={() => saveRolePermissions(role.value)}
-                    disabled={updateMutation.isPending}
-                  >
-                    {tx('shared.actions.save')}
-                  </Button>
-                </Stack>
+                <Can page="roles" action="write">
+                  <Stack direction="row" justifyContent="flex-end">
+                    <Button
+                      variant="contained"
+                      onClick={() => saveRolePermissions(role.value)}
+                      disabled={updateMutation.isPending}
+                    >
+                      {tx('shared.actions.save')}
+                    </Button>
+                  </Stack>
+                </Can>
               </Stack>
             ))}
           </Stack>
