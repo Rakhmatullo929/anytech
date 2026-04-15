@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from auth_tenant.mixins import TenantQuerySetMixin
-from auth_tenant.permissions import IsManagerOrAbove, IsSellerOrAbove
+from auth_tenant.permissions import page_action_permission
 
 from .models import Product
 from .serializers import (
@@ -26,9 +26,11 @@ class ProductViewSet(TenantQuerySetMixin, ModelViewSet):
     ordering = ["-created_at"]
 
     def get_permissions(self):
-        if self.action in ("list", "retrieve", "search"):
-            return [IsSellerOrAbove()]
-        return [IsManagerOrAbove()]
+        if self.action in ("list", "search"):
+            return [page_action_permission("products", "read")()]
+        if self.action == "retrieve":
+            return [page_action_permission("products", "detail")()]
+        return [page_action_permission("products", "write")()]
 
     def get_serializer_class(self):
         if self.action in ("update", "partial_update"):

@@ -37,6 +37,8 @@ import Iconify from 'src/components/iconify';
 import { useSnackbar } from 'src/components/snackbar';
 import { useAppUserProfile } from 'src/hooks/use-app-user-profile';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
+import { useCheckPermission } from 'src/auth/hooks/use-check-permission';
+import Can from 'src/auth/components/can';
 
 import {
   useDeleteTenantUserMutation,
@@ -50,6 +52,7 @@ import { UsersListSkeleton } from './skeleton';
 export default function UsersView() {
   const { tx } = useLocales();
   const router = useRouter();
+  const { canWritePage, canDetailPage } = useCheckPermission();
   const { enqueueSnackbar } = useSnackbar();
   const { user: currentUser } = useAppUserProfile();
   const actionsPopover = usePopover();
@@ -167,6 +170,8 @@ export default function UsersView() {
 
   const deletingCurrent =
     deleteMutation.isPending && selectedUserId !== null && deleteMutation.variables === selectedUserId;
+  const canWriteUsers = canWritePage('users');
+  const canDetailUsers = canDetailPage('users');
 
   return (
     <>
@@ -177,13 +182,15 @@ export default function UsersView() {
           { name: tx('pages.admin.tabs.users'), href: paths.admin.users.root },
         ]}
         action={
-          <Button
-            variant="contained"
-            startIcon={<Iconify icon="mingcute:add-line" />}
-            onClick={() => router.push(paths.admin.users.create)}
-          >
-            {tx('pages.users.add_button')}
-          </Button>
+          <Can page="users" action="write">
+            <Button
+              variant="contained"
+              startIcon={<Iconify icon="mingcute:add-line" />}
+              onClick={() => router.push(paths.admin.users.create)}
+            >
+              {tx('pages.users.add_button')}
+            </Button>
+          </Can>
         }
         sx={{ mb: { xs: 3, md: 5 } }}
       />
@@ -215,9 +222,11 @@ export default function UsersView() {
                   {rows.map((row) => (
                     <TableRow key={row.id} hover>
                       <TableCell>
-                        <Link component={RouterLink} href={paths.admin.users.details(row.id)} variant="subtitle2">
-                          {row.name || '-'}
-                        </Link>
+                        <Can page="users" action="detail" fallback={row.name || '-'}>
+                          <Link component={RouterLink} href={paths.admin.users.details(row.id)} variant="subtitle2">
+                            {row.name || '-'}
+                          </Link>
+                        </Can>
                       </TableCell>
                       <TableCell>{row.phone || '-'}</TableCell>
                       <TableCell>{row.email || '-'}</TableCell>
@@ -226,9 +235,11 @@ export default function UsersView() {
                       </TableCell>
                       <TableCell>{fDateTime(row.createdAt)}</TableCell>
                       <TableCell align="right">
-                        <IconButton color="default" onClick={(event) => openActions(event, row.id)}>
-                          <Iconify icon="eva:more-vertical-fill" />
-                        </IconButton>
+                        {canDetailUsers || canWriteUsers ? (
+                          <IconButton color="default" onClick={(event) => openActions(event, row.id)}>
+                            <Iconify icon="eva:more-vertical-fill" />
+                          </IconButton>
+                        ) : null}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -250,18 +261,20 @@ export default function UsersView() {
       )}
 
       <CustomPopover open={actionsPopover.open} onClose={() => closeActions()} sx={{ width: 220, p: 1 }}>
-        <MenuItem
-          onClick={() => {
-            if (selectedUserId) {
-              router.push(paths.admin.users.details(selectedUserId));
-            }
-            closeActions();
-          }}
-        >
-          <Iconify icon="solar:eye-bold" />
-          {tx('shared.actions.view')}
-        </MenuItem>
-        {selectedUserId !== currentUser.id && (
+        <Can page="users" action="detail">
+          <MenuItem
+            onClick={() => {
+              if (selectedUserId) {
+                router.push(paths.admin.users.details(selectedUserId));
+              }
+              closeActions();
+            }}
+          >
+            <Iconify icon="solar:eye-bold" />
+            {tx('shared.actions.view')}
+          </MenuItem>
+        </Can>
+        {canWriteUsers && selectedUserId !== currentUser.id && (
           <MenuItem
             onClick={() => {
               if (selectedUserId) {
@@ -275,28 +288,38 @@ export default function UsersView() {
             {tx('pages.users.actions.login_as')}
           </MenuItem>
         )}
-        <MenuItem onClick={handleEdit}>
-          <Iconify icon="solar:pen-bold" />
-          {tx('shared.actions.edit')}
-        </MenuItem>
-        <MenuItem onClick={handleAskDelete} sx={{ color: 'error.main' }} disabled={selectedUserId === currentUser.id}>
-          <Iconify icon="solar:trash-bin-trash-bold" />
-          {tx('shared.actions.delete')}
-        </MenuItem>
+        <Can page="users" action="write">
+          <MenuItem onClick={handleEdit}>
+            <Iconify icon="solar:pen-bold" />
+            {tx('shared.actions.edit')}
+          </MenuItem>
+        </Can>
+        <Can page="users" action="write">
+          <MenuItem
+            onClick={handleAskDelete}
+            sx={{ color: 'error.main' }}
+            disabled={selectedUserId === currentUser.id}
+          >
+            <Iconify icon="solar:trash-bin-trash-bold" />
+            {tx('shared.actions.delete')}
+          </MenuItem>
+        </Can>
       </CustomPopover>
 
-      <ConfirmDialog
-        open={deleteOpen}
-        onClose={handleCloseDelete}
-        title={tx('pages.users.dialogs.delete.title')}
-        content={tx('pages.users.dialogs.delete.description')}
-        cancelText={tx('shared.actions.cancel')}
-        action={
-          <Button color="error" variant="contained" onClick={handleDelete} disabled={deletingCurrent}>
-            {tx('shared.actions.delete')}
-          </Button>
-        }
-      />
+      <Can page="users" action="write">
+        <ConfirmDialog
+          open={deleteOpen}
+          onClose={handleCloseDelete}
+          title={tx('pages.users.dialogs.delete.title')}
+          content={tx('pages.users.dialogs.delete.description')}
+          cancelText={tx('shared.actions.cancel')}
+          action={
+            <Button color="error" variant="contained" onClick={handleDelete} disabled={deletingCurrent}>
+              {tx('shared.actions.delete')}
+            </Button>
+          }
+        />
+      </Can>
     </>
   );
 }

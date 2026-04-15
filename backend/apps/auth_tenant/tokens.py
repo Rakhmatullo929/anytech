@@ -1,5 +1,7 @@
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
+from .permissions import get_user_permissions
+
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
@@ -20,5 +22,6 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             "email": self.user.email,
             "role": self.user.role,
             "tenant_id": str(self.user.tenant_id) if self.user.tenant_id else None,
+            "permissions": sorted(get_user_permissions(self.user)),
         }
         return data

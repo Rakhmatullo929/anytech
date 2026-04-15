@@ -1,7 +1,7 @@
 from rest_framework.viewsets import ModelViewSet
 
 from auth_tenant.mixins import TenantQuerySetMixin
-from auth_tenant.permissions import IsSellerOrAbove
+from auth_tenant.permissions import page_action_permission
 
 from .models import Sale
 from .serializers import SaleCreateSerializer, SaleDetailSerializer, SaleListSerializer
@@ -17,7 +17,11 @@ class SaleViewSet(TenantQuerySetMixin, ModelViewSet):
     ordering = ["-created_at"]
 
     def get_permissions(self):
-        return [IsSellerOrAbove()]
+        if self.action == "retrieve":
+            return [page_action_permission("sales", "detail")()]
+        if self.action == "list":
+            return [page_action_permission("sales", "read")()]
+        return [page_action_permission("sales", "write")()]
 
     def get_serializer_class(self):
         if self.action == "create":

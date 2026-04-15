@@ -202,11 +202,11 @@ class TestSaleListDetail:
 
 
 class TestSalePermissions:
-    def test_seller_can_create_sale(self, seller_client, product):
+    def test_seller_cannot_create_sale(self, seller_client, product):
         resp = seller_client.post(
             LIST_URL, make_sale_payload(product), format="json"
         )
-        assert resp.status_code == status.HTTP_201_CREATED
+        assert resp.status_code == status.HTTP_403_FORBIDDEN
 
     def test_unauthenticated_cannot_create(self, anon_client, product):
         resp = anon_client.post(

@@ -1,6 +1,6 @@
 import type { TenantUser } from 'src/auth/api/types';
 import type { AuthUserType } from 'src/auth/types';
-import { useAuthContext } from 'src/auth/hooks';
+import { useAuthContext } from 'src/auth/hooks/use-auth-context';
 
 /**
  * Minimals dashboard expects displayName, photoURL, address fields, etc.
@@ -20,6 +20,11 @@ export type AppUserProfile = {
   zipCode: string;
   about: string;
   role: string;
+  permissions: string[];
+  passportSeries: string;
+  gender: 'male' | 'female' | '';
+  tenantId: string;
+  createdAt: string;
   isPublic: boolean;
 };
 
@@ -49,6 +54,11 @@ function emptyProfile(partial: Partial<AppUserProfile> = {}): AppUserProfile {
     zipCode: '',
     about: '',
     role: 'admin',
+    permissions: [],
+    passportSeries: '',
+    gender: '',
+    tenantId: '',
+    createdAt: '',
     isPublic: false,
     ...partial,
   };
@@ -62,7 +72,12 @@ function mapAuthUserToProfile(u: NonNullable<AuthUserType>): AppUserProfile {
       email: u.email || '',
       photoURL: undefined,
       role: u.role,
+      permissions: Array.isArray(u.permissions) ? u.permissions : [],
       phoneNumber: u.phone || '',
+      passportSeries: u.passportSeries || '',
+      gender: u.gender || '',
+      tenantId: u.tenantId || '',
+      createdAt: u.createdAt || '',
     });
   }
 
@@ -77,6 +92,9 @@ function mapAuthUserToProfile(u: NonNullable<AuthUserType>): AppUserProfile {
   const email = typeof rec.email === 'string' ? rec.email : '';
   const id = typeof rec.id === 'string' ? rec.id : '';
   const role = typeof rec.role === 'string' ? rec.role : 'admin';
+  const permissions = Array.isArray(rec.permissions)
+    ? rec.permissions.filter((item): item is string => typeof item === 'string')
+    : [];
   const photoURL = typeof rec.photoURL === 'string' ? rec.photoURL : undefined;
 
   return emptyProfile({
@@ -85,6 +103,7 @@ function mapAuthUserToProfile(u: NonNullable<AuthUserType>): AppUserProfile {
     email,
     photoURL,
     role,
+    permissions,
     phoneNumber: typeof rec.phoneNumber === 'string' ? rec.phoneNumber : '',
     country: typeof rec.country === 'string' ? rec.country : '',
     address: typeof rec.address === 'string' ? rec.address : '',
@@ -92,6 +111,10 @@ function mapAuthUserToProfile(u: NonNullable<AuthUserType>): AppUserProfile {
     city: typeof rec.city === 'string' ? rec.city : '',
     zipCode: typeof rec.zipCode === 'string' ? rec.zipCode : '',
     about: typeof rec.about === 'string' ? rec.about : '',
+    passportSeries: typeof rec.passportSeries === 'string' ? rec.passportSeries : '',
+    gender: rec.gender === 'male' || rec.gender === 'female' ? rec.gender : '',
+    tenantId: typeof rec.tenantId === 'string' ? rec.tenantId : '',
+    createdAt: typeof rec.createdAt === 'string' ? rec.createdAt : '',
     isPublic: typeof rec.isPublic === 'boolean' ? rec.isPublic : false,
   });
 }

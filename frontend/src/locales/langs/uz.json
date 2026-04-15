@@ -150,7 +150,32 @@
       },
       "roles": {
         "document_title": "Admin rollari",
-        "empty": "Roles bo'limi tez orada qo'shiladi"
+        "empty": "Roles bo'limi tez orada qo'shiladi",
+        "list_title": "Rollar ro'yxati",
+        "list_hint": "Tizimda hozir mavjud bo'lgan rollar",
+        "all_permissions": "Rol uchun barcha permissions",
+        "unsaved_changes": "O'zgarishlar bor",
+        "read": "O'qish",
+        "detail": "Detallar",
+        "write": "Yozish",
+        "toasts": {
+          "saved": "Rol ruxsatlari yangilandi"
+        },
+        "pages": {
+          "admin": "Admin",
+          "roles": "Rollar",
+          "users": "Foydalanuvchilar",
+          "pos": "POS",
+          "products": "Mahsulotlar",
+          "clients": "Mijozlar",
+          "sales": "Savdolar",
+          "debts": "Qarzlar"
+        },
+        "items": {
+          "admin": "Tizim va sozlamalarni to'liq boshqarish huquqi",
+          "manager": "Asosiy bo'limlarni boshqarish va nazorat qilish",
+          "seller": "Sotuvlar va kundalik jarayonlar bilan ishlash"
+        }
       }
     },
     "profile": {
@@ -158,6 +183,13 @@
       "heading": "Mening profilim",
       "document_title": "Profil",
       "personal_info": "Shaxsiy ma'lumotlar"
+    },
+    "errors": {
+      "403": {
+        "title": "Kirish taqiqlangan",
+        "description": "Bu sahifani ochish uchun sizda ruxsat yo'q. Administratorga murojaat qiling yoki ruxsat berilgan bo'limga qayting.",
+        "back_to_pos": "POS sahifasiga o'tish"
+      }
     },
     "users": {
       "add_button": "Foydalanuvchi qoʻshish",
@@ -206,6 +238,7 @@
       },
       "toasts": {
         "login_as_success": "Foydalanuvchi nomidan tizimga kirildi",
+        "login_as_profile_sync_failed": "Foydalanuvchi nomidan kirilgandan so'ng profilni yangilab bo'lmadi",
         "created": "Foydalanuvchi yaratildi",
         "updated": "Foydalanuvchi yangilandi",
         "deleted": "Foydalanuvchi o‘chirildi"
@@ -241,6 +274,7 @@
       "row_closed": "Yopiq"
     },
     "table": {
+      "all_option": "Barchasi",
       "amount": "Summa",
       "client": "Mijoz",
       "created": "Yaratilgan",

@@ -1,8 +1,7 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, type ReactElement } from 'react';
 import { Outlet } from 'react-router-dom';
 // auth
-import { AuthGuard } from 'src/auth/guard';
-import RoleBasedGuard from 'src/auth/guard/role-based-guard';
+import { AuthGuard, PermissionGuard } from 'src/auth/guard';
 // layouts
 import DashboardLayout from 'src/layouts/dashboard';
 // components
@@ -26,10 +25,17 @@ const AdminUserCreatePage = lazy(() => import('../../pages/admin-users-create'))
 const AdminUserEditPage = lazy(() => import('../../pages/admin-user-edit'));
 const AdminRolesPage = lazy(() => import('../../pages/admin-roles'));
 
-const MANAGER_ROLES = ['admin', 'manager'];
-const ADMIN_ROLES = ['admin'];
-
-// ----------------------------------------------------------------------
+function withPermission(
+  page: 'admin' | 'roles' | 'users' | 'pos' | 'products' | 'clients' | 'sales' | 'debts',
+  action: 'read' | 'detail' | 'write',
+  element: ReactElement
+) {
+  return (
+    <PermissionGuard page={page} action={action}>
+      {element}
+    </PermissionGuard>
+  );
+}
 
 export const dashboardRoutes = [
   {
@@ -43,26 +49,18 @@ export const dashboardRoutes = [
       </AuthGuard>
     ),
     children: [
-      { path: 'pos', element: <PosPage /> },
+      { path: 'pos', element: withPermission('pos', 'read', <PosPage />) },
       { path: 'profile', element: <ProfilePage /> },
       {
         path: 'products',
         children: [
           {
             index: true,
-            element: (
-              <RoleBasedGuard roles={MANAGER_ROLES} hasContent>
-                <ProductsPage />
-              </RoleBasedGuard>
-            ),
+            element: withPermission('products', 'read', <ProductsPage />),
           },
           {
             path: ':id',
-            element: (
-              <RoleBasedGuard roles={MANAGER_ROLES} hasContent>
-                <ProductDetailsPage />
-              </RoleBasedGuard>
-            ),
+            element: withPermission('products', 'detail', <ProductDetailsPage />),
           },
         ],
       },
@@ -71,19 +69,11 @@ export const dashboardRoutes = [
         children: [
           {
             index: true,
-            element: (
-              <RoleBasedGuard roles={MANAGER_ROLES} hasContent>
-                <ClientsListPage />
-              </RoleBasedGuard>
-            ),
+            element: withPermission('clients', 'read', <ClientsListPage />),
           },
           {
             path: ':id',
-            element: (
-              <RoleBasedGuard roles={MANAGER_ROLES} hasContent>
-                <ClientDetailsPage />
-              </RoleBasedGuard>
-            ),
+            element: withPermission('clients', 'detail', <ClientDetailsPage />),
           },
         ],
       },
@@ -92,19 +82,11 @@ export const dashboardRoutes = [
         children: [
           {
             index: true,
-            element: (
-              <RoleBasedGuard roles={MANAGER_ROLES} hasContent>
-                <SalesListPage />
-              </RoleBasedGuard>
-            ),
+            element: withPermission('sales', 'read', <SalesListPage />),
           },
           {
             path: ':id',
-            element: (
-              <RoleBasedGuard roles={MANAGER_ROLES} hasContent>
-                <SaleDetailsPage />
-              </RoleBasedGuard>
-            ),
+            element: withPermission('sales', 'detail', <SaleDetailsPage />),
           },
         ],
       },
@@ -113,19 +95,11 @@ export const dashboardRoutes = [
         children: [
           {
             index: true,
-            element: (
-              <RoleBasedGuard roles={MANAGER_ROLES} hasContent>
-                <DebtsListPage />
-              </RoleBasedGuard>
-            ),
+            element: withPermission('debts', 'read', <DebtsListPage />),
           },
           {
             path: ':id',
-            element: (
-              <RoleBasedGuard roles={MANAGER_ROLES} hasContent>
-                <DebtDetailsPage />
-              </RoleBasedGuard>
-            ),
+            element: withPermission('debts', 'detail', <DebtDetailsPage />),
           },
         ],
       },
@@ -134,51 +108,27 @@ export const dashboardRoutes = [
         children: [
           {
             index: true,
-            element: (
-              <RoleBasedGuard roles={ADMIN_ROLES} hasContent>
-                <AdminUsersPage />
-              </RoleBasedGuard>
-            ),
+            element: withPermission('users', 'read', <AdminUsersPage />),
           },
           {
             path: 'users',
-            element: (
-              <RoleBasedGuard roles={ADMIN_ROLES} hasContent>
-                <AdminUsersPage />
-              </RoleBasedGuard>
-            ),
+            element: withPermission('users', 'read', <AdminUsersPage />),
           },
           {
             path: 'users/new',
-            element: (
-              <RoleBasedGuard roles={ADMIN_ROLES} hasContent>
-                <AdminUserCreatePage />
-              </RoleBasedGuard>
-            ),
+            element: withPermission('users', 'write', <AdminUserCreatePage />),
           },
           {
             path: 'users/:id/edit',
-            element: (
-              <RoleBasedGuard roles={ADMIN_ROLES} hasContent>
-                <AdminUserEditPage />
-              </RoleBasedGuard>
-            ),
+            element: withPermission('users', 'write', <AdminUserEditPage />),
           },
           {
             path: 'users/:id',
-            element: (
-              <RoleBasedGuard roles={ADMIN_ROLES} hasContent>
-                <AdminUserDetailsPage />
-              </RoleBasedGuard>
-            ),
+            element: withPermission('users', 'detail', <AdminUserDetailsPage />),
           },
           {
             path: 'roles',
-            element: (
-              <RoleBasedGuard roles={ADMIN_ROLES} hasContent>
-                <AdminRolesPage />
-              </RoleBasedGuard>
-            ),
+            element: withPermission('roles', 'read', <AdminRolesPage />),
           },
         ],
       },

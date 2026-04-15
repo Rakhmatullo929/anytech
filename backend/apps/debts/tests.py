@@ -166,15 +166,15 @@ class TestPayment:
 
 
 class TestDebtPermissions:
-    def test_seller_can_view(self, seller_client, debt_sale):
+    def test_seller_cannot_view(self, seller_client, debt_sale):
         resp = seller_client.get(LIST_URL)
-        assert resp.status_code == status.HTTP_200_OK
+        assert resp.status_code == status.HTTP_403_FORBIDDEN
 
-    def test_seller_can_pay(self, seller_client, debt_sale):
+    def test_seller_cannot_pay(self, seller_client, debt_sale):
         resp = seller_client.post(
             pay_url(debt_sale.pk), {"amount": "10.00"}, format="json"
         )
-        assert resp.status_code == status.HTTP_200_OK
+        assert resp.status_code == status.HTTP_403_FORBIDDEN
 
 
 # ── Tenant isolation ─────────────────────────────────────────────────

@@ -9,6 +9,7 @@ from django.urls import reverse
 from rest_framework import status
 
 from auth_tenant.models import Tenant, User
+from auth_tenant.permission_catalog import ADMIN_REQUIRED_PERMISSIONS
 from auth_tenant.permissions import IsAdmin, IsManagerOrAbove, IsSellerOrAbove
 
 pytestmark = pytest.mark.django_db
@@ -202,6 +203,8 @@ ME_URL = reverse("auth-me")
 USERS_URL = reverse("auth-users")
 USER_DETAIL_URL = lambda user_id: reverse("auth-user-detail", kwargs={"pk": user_id})
 IMPERSONATE_URL = reverse("auth-impersonate")
+ROLES_URL = reverse("auth-roles")
+ROLE_PERMISSIONS_URL = lambda role: reverse("auth-role-permissions", kwargs={"role": role})
 
 
 class TestMeEndpoint:
@@ -211,6 +214,8 @@ class TestMeEndpoint:
         assert resp.data["user"]["phone"] == admin_user.phone
         assert resp.data["user"]["name"] == admin_user.name
         assert resp.data["user"]["role"] == admin_user.role
+        assert "permissions" in resp.data["user"]
+        assert isinstance(resp.data["user"]["permissions"], list)
 
     def test_me_unauthenticated(self, anon_client):
         resp = anon_client.get(ME_URL)
@@ -317,6 +322,67 @@ class TestTenantUsersEndpoint:
     def test_users_delete_self_rejected(self, admin_client, admin_user):
         resp = admin_client.delete(USER_DETAIL_URL(admin_user.id))
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_roles_list_admin_success(self, admin_client):
+        resp = admin_client.get(ROLES_URL)
+        assert resp.status_code == status.HTTP_200_OK
+        assert "results" in resp.data
+        values = {row["value"] for row in resp.data["results"]}
+        assert values == {"admin", "manager", "seller"}
+        for row in resp.data["results"]:
+            assert "permissions" in row
+            assert isinstance(row["permissions"], list)
+            assert "label" in row
+
+    def test_roles_list_forbidden_for_manager(self, manager_client):
+        resp = manager_client.get(ROLES_URL)
+        assert resp.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_role_permissions_update_admin_success(self, admin_client):
+        payload = {"permissions": ["products:read", "products:write", "clients:read"]}
+        resp = admin_client.patch(ROLE_PERMISSIONS_URL("manager"), payload, format="json")
+        assert resp.status_code == status.HTTP_200_OK
+        assert resp.data["value"] == "manager"
+        assert sorted(resp.data["permissions"]) == sorted(payload["permissions"])
+
+        roles_resp = admin_client.get(ROLES_URL)
+        assert roles_resp.status_code == status.HTTP_200_OK
+        manager_row = next(row for row in roles_resp.data["results"] if row["value"] == "manager")
+        assert sorted(manager_row["permissions"]) == sorted(payload["permissions"])
+
+    def test_role_permissions_update_forbidden_for_manager(self, manager_client):
+        resp = manager_client.patch(
+            ROLE_PERMISSIONS_URL("seller"),
+            {"permissions": ["pos:read"]},
+            format="json",
+        )
+        assert resp.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_role_permissions_update_admin_preserves_critical_permissions(self, admin_client):
+        payload = {"permissions": ["products:read", "clients:read"]}
+        resp = admin_client.patch(ROLE_PERMISSIONS_URL("admin"), payload, format="json")
+        assert resp.status_code == status.HTTP_200_OK
+
+        response_permissions = set(resp.data["permissions"])
+        assert response_permissions.issuperset(set(ADMIN_REQUIRED_PERMISSIONS))
+        assert {"products:read", "clients:read"}.issubset(response_permissions)
+
+        roles_resp = admin_client.get(ROLES_URL)
+        assert roles_resp.status_code == status.HTTP_200_OK
+        admin_row = next(row for row in roles_resp.data["results"] if row["value"] == "admin")
+        assert set(admin_row["permissions"]).issuperset(set(ADMIN_REQUIRED_PERMISSIONS))
+
+    def test_role_permissions_update_admin_clear_keeps_critical_permissions(self, admin_client):
+        resp = admin_client.patch(ROLE_PERMISSIONS_URL("admin"), {"permissions": []}, format="json")
+        assert resp.status_code == status.HTTP_200_OK
+
+        response_permissions = set(resp.data["permissions"])
+        assert response_permissions == set(ADMIN_REQUIRED_PERMISSIONS)
+
+        roles_resp = admin_client.get(ROLES_URL)
+        assert roles_resp.status_code == status.HTTP_200_OK
+        admin_row = next(row for row in roles_resp.data["results"] if row["value"] == "admin")
+        assert set(admin_row["permissions"]) == set(ADMIN_REQUIRED_PERMISSIONS)
 
 
 class TestImpersonateEndpoint:

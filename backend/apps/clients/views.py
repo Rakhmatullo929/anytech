@@ -7,7 +7,7 @@ from rest_framework.viewsets import ModelViewSet
 from django.db import transaction
 
 from auth_tenant.mixins import TenantQuerySetMixin
-from auth_tenant.permissions import IsManagerOrAbove, IsSellerOrAbove
+from auth_tenant.permissions import page_action_permission
 
 from .models import Client
 from .serializers import (
@@ -28,9 +28,11 @@ class ClientViewSet(TenantQuerySetMixin, ModelViewSet):
     ordering = ["-created_at"]
 
     def get_permissions(self):
-        if self.action in ("list", "retrieve", "search"):
-            return [IsSellerOrAbove()]
-        return [IsManagerOrAbove()]
+        if self.action in ("list", "search"):
+            return [page_action_permission("clients", "read")()]
+        if self.action == "retrieve":
+            return [page_action_permission("clients", "detail")()]
+        return [page_action_permission("clients", "write")()]
 
     def get_serializer_class(self):
         if self.action == "retrieve":

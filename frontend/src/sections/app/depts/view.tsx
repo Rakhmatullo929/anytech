@@ -16,6 +16,7 @@ import LinearProgress from '@mui/material/LinearProgress';
 // utils
 import { fCurrency } from 'src/utils/format-number';
 import { intParam, stringParam, useSyncTableWithUrlListState, useUrlQueryState } from 'src/hooks/use-url-query-state';
+import { useCheckPermission } from 'src/auth/hooks/use-check-permission';
 // routes
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
@@ -35,6 +36,7 @@ import { DebtsListSkeleton } from 'src/sections/app/depts/skeleton';
 
 export default function DebtsView() {
   const { tx } = useLocales();
+  const { canDetailPage } = useCheckPermission();
 
   const tableHead = useMemo(
     () => [
@@ -74,6 +76,7 @@ export default function DebtsView() {
   const rows = useMemo(() => data?.results ?? [], [data?.results]);
   const total = data?.count ?? 0;
   const showInitialLoader = isPending && !data;
+  const canDetailDebts = canDetailPage('debts');
 
   useSyncTableWithUrlListState({
     page: pageParam,
@@ -137,9 +140,13 @@ export default function DebtsView() {
                   {rows.map((row) => (
                     <TableRow key={row.id} hover>
                       <TableCell>
-                        <Link component={RouterLink} href={paths.debts.details(row.id)} variant="subtitle2">
-                          {row.clientName}
-                        </Link>
+                        {canDetailDebts ? (
+                          <Link component={RouterLink} href={paths.debts.details(row.id)} variant="subtitle2">
+                            {row.clientName}
+                          </Link>
+                        ) : (
+                          row.clientName
+                        )}
                       </TableCell>
                       <TableCell>{fCurrency(row.totalAmount)}</TableCell>
                       <TableCell>{fCurrency(row.paidAmount)}</TableCell>

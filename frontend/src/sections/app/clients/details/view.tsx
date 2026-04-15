@@ -22,6 +22,7 @@ import { fDateTime } from 'src/utils/format-time';
 import { paths } from 'src/routes/paths';
 import { useParams } from 'src/routes/hook';
 import { RouterLink } from 'src/routes/components';
+import { useCheckPermission } from 'src/auth/hooks/use-check-permission';
 // components
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import { TableHeadCustom } from 'src/components/table';
@@ -34,8 +35,10 @@ import { ClientDetailsSkeleton } from 'src/sections/app/clients/skeleton';
 
 export default function ClientDetailsView() {
   const { tx } = useLocales();
+  const { canDetailPage } = useCheckPermission();
   const { id = '' } = useParams();
   const { data: client, isPending } = useClientDetailQuery(id);
+  const canDetailSales = canDetailPage('sales');
 
   const saleHead = useMemo(
     () => [
@@ -156,9 +159,13 @@ export default function ClientDetailsView() {
               {sales.map((s) => (
                 <TableRow key={s.id}>
                   <TableCell>
-                    <Link component={RouterLink} href={paths.sales.details(s.id)} variant="subtitle2">
-                      {s.id}
-                    </Link>
+                    {canDetailSales ? (
+                      <Link component={RouterLink} href={paths.sales.details(s.id)} variant="subtitle2">
+                        {s.id}
+                      </Link>
+                    ) : (
+                      s.id
+                    )}
                   </TableCell>
                   <TableCell>
                     <Chip

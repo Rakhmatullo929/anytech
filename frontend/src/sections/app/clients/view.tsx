@@ -16,6 +16,7 @@ import Link from '@mui/material/Link';
 import MenuItem from '@mui/material/MenuItem';
 import Checkbox from '@mui/material/Checkbox';
 import LinearProgress from '@mui/material/LinearProgress';
+import Typography from '@mui/material/Typography';
 // utils
 import { fDateTime } from 'src/utils/format-time';
 // routes
@@ -24,6 +25,8 @@ import { useRouter } from 'src/routes/hook';
 import { RouterLink } from 'src/routes/components';
 import { useDebounce } from 'src/hooks/use-debounce';
 import { useUrlListState, useSyncTableWithUrlListState } from 'src/hooks/use-url-query-state';
+import { useCheckPermission } from 'src/auth/hooks/use-check-permission';
+import Can from 'src/auth/components/can';
 // components
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
@@ -56,6 +59,7 @@ import { ClientsListSkeleton } from 'src/sections/app/clients/skeleton';
 export default function ClientsView() {
   const { tx } = useLocales();
   const router = useRouter();
+  const { canWritePage, canDetailPage } = useCheckPermission();
   const { enqueueSnackbar } = useSnackbar();
   const actionsPopover = usePopover();
   const createMutation = useCreateClientMutation();
@@ -118,8 +122,7 @@ export default function ClientsView() {
   const rows = useMemo(() => data?.results ?? [], [data?.results]);
   const total = data?.count ?? 0;
   const showInitialLoader = isPending && !data;
-  const selectedIds = table.selected;
-  const setSelected = table.setSelected;
+  const { selected: selectedIds, setSelected } = table;
 
   useEffect(() => {
     const rowIdSet = new Set(rows.map((row) => row.id));
@@ -283,26 +286,29 @@ export default function ClientsView() {
     deleteMutation.variables === selectedClientId;
   const deletingBulk = bulkDeleteMutation.isPending;
   const upsertLoading = createMutation.isPending || updateMutation.isPending;
-
+  const canWriteClients = canWritePage('clients');
+  const canDetailClients = canDetailPage('clients');
   return (
     <>
       <CustomBreadcrumbs
         heading={tx('layout.nav.clients')}
         links={[{ name: tx('layout.nav.clients'), href: paths.clients.root }]}
         action={
-          <Stack direction="row" spacing={1}>
-            <Button
-              variant="outlined"
-              startIcon={<Iconify icon="eva:cloud-upload-fill" />}
-              onClick={handleOpenExcelPicker}
-              disabled={bulkCreateMutation.isPending}
-            >
-              {tx('pages.clients.import_excel_button')}
-            </Button>
-            <Button variant="contained" startIcon={<Iconify icon="mingcute:add-line" />} onClick={handleOpenCreate}>
-              {tx('pages.clients.add_button')}
-            </Button>
-          </Stack>
+          <Can page="clients" action="write">
+            <Stack direction="row" spacing={1}>
+              <Button
+                variant="outlined"
+                startIcon={<Iconify icon="eva:cloud-upload-fill" />}
+                onClick={handleOpenExcelPicker}
+                disabled={bulkCreateMutation.isPending}
+              >
+                {tx('pages.clients.import_excel_button')}
+              </Button>
+              <Button variant="contained" startIcon={<Iconify icon="mingcute:add-line" />} onClick={handleOpenCreate}>
+                {tx('pages.clients.add_button')}
+              </Button>
+            </Stack>
+          </Can>
         }
         sx={{ mb: { xs: 3, md: 5 } }}
       />
@@ -325,16 +331,18 @@ export default function ClientsView() {
           )}
 
           <Stack spacing={2} sx={{ p: 2 }}>
-            <TableSelectedAction
-              numSelected={selectedIds.length}
-              rowCount={rows.length}
-              onSelectAllRows={(checked) => table.onSelectAllRows(checked, rows.map((row) => row.id))}
-              action={
-                <Button color="error" onClick={handleOpenBulkDelete}>
-                  {tx('shared.actions.delete')}
-                </Button>
-              }
-            />
+            <Can page="clients" action="write">
+              <TableSelectedAction
+                numSelected={selectedIds.length}
+                rowCount={rows.length}
+                onSelectAllRows={(checked) => table.onSelectAllRows(checked, rows.map((row) => row.id))}
+                action={
+                  <Button color="error" onClick={handleOpenBulkDelete}>
+                    {tx('shared.actions.delete')}
+                  </Button>
+                }
+              />
+            </Can>
             <TextField
               size="small"
               placeholder={tx('pages.clients.search_placeholder')}
@@ -358,19 +366,28 @@ export default function ClientsView() {
                         <Checkbox
                           checked={selectedIds.includes(row.id)}
                           onClick={() => table.onSelectRow(row.id)}
+                          disabled={!canWriteClients}
                         />
                       </TableCell>
                       <TableCell>
-                        <Link component={RouterLink} href={paths.clients.details(row.id)} variant="subtitle2">
-                          {row.name}
-                        </Link>
+                        <Can
+                          page="clients"
+                          action="detail"
+                          fallback={<Typography variant="subtitle2">{row.name}</Typography>}
+                        >
+                          <Link component={RouterLink} href={paths.clients.details(row.id)} variant="subtitle2">
+                            {row.name}
+                          </Link>
+                        </Can>
                       </TableCell>
                       <TableCell>{row.phone}</TableCell>
                       <TableCell>{fDateTime(row.createdAt)}</TableCell>
                       <TableCell align="right">
-                        <IconButton color="default" onClick={(event) => openActions(event, row.id)}>
-                          <Iconify icon="eva:more-vertical-fill" />
-                        </IconButton>
+                        {canDetailClients || canWriteClients ? (
+                          <IconButton color="default" onClick={(event) => openActions(event, row.id)}>
+                            <Iconify icon="eva:more-vertical-fill" />
+                          </IconButton>
+                        ) : null}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -392,61 +409,73 @@ export default function ClientsView() {
       )}
 
       <CustomPopover open={actionsPopover.open} onClose={handleCloseActions} sx={{ width: 180, p: 1 }}>
-        <MenuItem onClick={handleView}>
-          <Iconify icon="solar:eye-bold" />
-          {tx('shared.actions.view')}
-        </MenuItem>
-        <MenuItem onClick={handleEdit}>
-          <Iconify icon="solar:pen-bold" />
-          {tx('shared.actions.edit')}
-        </MenuItem>
-        <MenuItem onClick={handleAskDelete} sx={{ color: 'error.main' }} disabled={deletingCurrent}>
-          <Iconify icon="solar:trash-bin-trash-bold" />
-          {tx('shared.actions.delete')}
-        </MenuItem>
+        <Can page="clients" action="detail">
+          <MenuItem onClick={handleView}>
+            <Iconify icon="solar:eye-bold" />
+            {tx('shared.actions.view')}
+          </MenuItem>
+        </Can>
+        <Can page="clients" action="write">
+          <MenuItem onClick={handleEdit}>
+            <Iconify icon="solar:pen-bold" />
+            {tx('shared.actions.edit')}
+          </MenuItem>
+        </Can>
+        <Can page="clients" action="write">
+          <MenuItem onClick={handleAskDelete} sx={{ color: 'error.main' }} disabled={deletingCurrent}>
+            <Iconify icon="solar:trash-bin-trash-bold" />
+            {tx('shared.actions.delete')}
+          </MenuItem>
+        </Can>
       </CustomPopover>
 
-      <ClientUpsertDialog
-        open={upsertOpen}
-        mode={upsertMode}
-        loading={upsertLoading}
-        initialValues={
-          upsertMode === 'edit' && editingClient
-            ? {
-                name: editingClient.name,
-                phone: editingClient.phone,
-              }
-            : undefined
-        }
-        onClose={handleCloseUpsert}
-        onSubmit={handleSubmitUpsert}
-      />
+      <Can page="clients" action="write">
+        <ClientUpsertDialog
+          open={upsertOpen}
+          mode={upsertMode}
+          loading={upsertLoading}
+          initialValues={
+            upsertMode === 'edit' && editingClient
+              ? {
+                  name: editingClient.name,
+                  phone: editingClient.phone,
+                }
+              : undefined
+          }
+          onClose={handleCloseUpsert}
+          onSubmit={handleSubmitUpsert}
+        />
+      </Can>
 
-      <ConfirmDialog
-        open={deleteOpen}
-        onClose={handleCloseDelete}
-        title={tx('pages.clients.dialogs.delete.title')}
-        content={tx('pages.clients.dialogs.delete.description')}
-        cancelText={tx('shared.actions.cancel')}
-        action={
-          <Button color="error" variant="contained" onClick={handleDelete} disabled={deletingCurrent}>
-            {tx('shared.actions.delete')}
-          </Button>
-        }
-      />
+      <Can page="clients" action="write">
+        <ConfirmDialog
+          open={deleteOpen}
+          onClose={handleCloseDelete}
+          title={tx('pages.clients.dialogs.delete.title')}
+          content={tx('pages.clients.dialogs.delete.description')}
+          cancelText={tx('shared.actions.cancel')}
+          action={
+            <Button color="error" variant="contained" onClick={handleDelete} disabled={deletingCurrent}>
+              {tx('shared.actions.delete')}
+            </Button>
+          }
+        />
+      </Can>
 
-      <ConfirmDialog
-        open={bulkDeleteOpen}
-        onClose={handleCloseBulkDelete}
-        title={tx('pages.clients.dialogs.delete.bulk_title')}
-        content={tx('pages.clients.dialogs.delete.bulk_description', { count: selectedIds.length })}
-        cancelText={tx('shared.actions.cancel')}
-        action={
-          <Button color="error" variant="contained" onClick={handleBulkDelete} disabled={deletingBulk}>
-            {tx('shared.actions.delete')}
-          </Button>
-        }
-      />
+      <Can page="clients" action="write">
+        <ConfirmDialog
+          open={bulkDeleteOpen}
+          onClose={handleCloseBulkDelete}
+          title={tx('pages.clients.dialogs.delete.bulk_title')}
+          content={tx('pages.clients.dialogs.delete.bulk_description', { count: selectedIds.length })}
+          cancelText={tx('shared.actions.cancel')}
+          action={
+            <Button color="error" variant="contained" onClick={handleBulkDelete} disabled={deletingBulk}>
+              {tx('shared.actions.delete')}
+            </Button>
+          }
+        />
+      </Can>
     </>
   );
 }

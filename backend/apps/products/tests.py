@@ -60,8 +60,8 @@ class TestProductModel:
 
 
 class TestProductList:
-    def test_list_products(self, seller_client, product):
-        resp = seller_client.get(LIST_URL)
+    def test_list_products(self, manager_client, product):
+        resp = manager_client.get(LIST_URL)
         assert resp.status_code == status.HTTP_200_OK
         assert resp.data["count"] == 1
         assert resp.data["results"][0]["name"] == "Test Product"
@@ -70,8 +70,8 @@ class TestProductList:
         resp = anon_client.get(LIST_URL)
         assert resp.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_retrieve_product(self, seller_client, product):
-        resp = seller_client.get(detail_url(product.pk))
+    def test_retrieve_product(self, manager_client, product):
+        resp = manager_client.get(detail_url(product.pk))
         assert resp.status_code == status.HTTP_200_OK
         assert resp.data["id"] == str(product.pk)
         assert Decimal(resp.data["sale_price"]) == Decimal("100.00")
@@ -95,9 +95,9 @@ class TestProductCreate:
         assert resp.data["name"] == "New Product"
         assert str(resp.data["tenant"]) == str(tenant.pk)
 
-    def test_manager_can_create(self, manager_client):
+    def test_manager_cannot_create(self, manager_client):
         resp = manager_client.post(LIST_URL, self.PAYLOAD, format="json")
-        assert resp.status_code == status.HTTP_201_CREATED
+        assert resp.status_code == status.HTTP_403_FORBIDDEN
 
     def test_seller_cannot_create(self, seller_client):
         resp = seller_client.post(LIST_URL, self.PAYLOAD, format="json")
@@ -234,12 +234,12 @@ class TestProductTenantIsolation:
 
 
 class TestProductSearch:
-    def test_search_by_name(self, seller_client, product):
-        resp = seller_client.get(SEARCH_URL, {"search": "Test"})
+    def test_search_by_name(self, manager_client, product):
+        resp = manager_client.get(SEARCH_URL, {"search": "Test"})
         assert resp.status_code == status.HTTP_200_OK
         assert resp.data["count"] == 1
 
-    def test_search_no_match(self, seller_client, product):
-        resp = seller_client.get(SEARCH_URL, {"search": "NonExistent"})
+    def test_search_no_match(self, manager_client, product):
+        resp = manager_client.get(SEARCH_URL, {"search": "NonExistent"})
         assert resp.status_code == status.HTTP_200_OK
         assert resp.data["count"] == 0

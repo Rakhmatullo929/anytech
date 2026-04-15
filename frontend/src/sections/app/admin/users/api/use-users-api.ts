@@ -10,7 +10,10 @@ import {
   useMutate,
 } from 'src/hooks/api';
 import { useAuthContext } from 'src/auth/hooks/use-auth-context';
+import { fetchCurrentUser } from 'src/auth/api/auth-requests';
 import type { TokenPairResponse } from 'src/auth/api/types';
+import { useLocales } from 'src/locales';
+import { useSnackbar } from 'src/components/snackbar';
 
 import {
   createTenantUser,
@@ -44,11 +47,21 @@ export function useTenantUsersListQuery(params: FetchTenantUsersParams) {
 export function useImpersonateTenantUserMutation() {
   const { syncSessionFromApiResponse } = useAuthContext();
   const queryClient = useQueryClient();
+  const { tx } = useLocales();
+  const { enqueueSnackbar } = useSnackbar();
 
   return useMutate<TokenPairResponse, string>(impersonateTenantUser, {
     skipGlobalErrorNotification: true,
-    onSuccess: (payload) => {
+    onSuccess: async (payload) => {
+      // 1) Immediately switch session to impersonated token/user payload.
+      // 2) Then hydrate from /auth/me using the new token to get authoritative permissions/profile.
       syncSessionFromApiResponse(payload);
+      try {
+        const { user } = await fetchCurrentUser();
+        syncSessionFromApiResponse({ ...payload, user });
+      } catch {
+        enqueueSnackbar(tx('pages.users.toasts.login_as_profile_sync_failed'), { variant: 'error' });
+      }
       queryClient.clear();
     },
   });
