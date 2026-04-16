@@ -1,0 +1,17 @@
+{
+  "detail": {
+    "clientLine": "Mijoz:",
+    "dateLine": "Sana:",
+    "headingDetail": "Savdo {{id}}",
+    "linesTitle": "Tarkib",
+    "notFound": "Savdo topilmadi",
+    "payLine": "Toʻlov:"
+  },
+  "detailDocumentTitle": "Savdo",
+  "documentTitle": "Savdolar",
+  "filters": {
+    "allOption": "Barchasi",
+    "paymentLabel": "Toʻlov turi"
+  },
+  "listHeading": "Savdolar tarixi"
+}

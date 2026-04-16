@@ -9,7 +9,7 @@ export default function ClientCreatePage() {
   return (
     <>
       <Helmet>
-        <title>{tx('pages.clients.create_document_title')}</title>
+        <title>{tx('clients.createDocumentTitle')}</title>
       </Helmet>
       <ClientFormView mode="create" />
     </>

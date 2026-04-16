@@ -28,7 +28,7 @@ import {
 
 export default function ClientDetailsView() {
   const { tx } = useLocales();
-  const notSetLabel = tx('pages.clients.detail.not_set');
+  const notSetLabel = tx('clients.detail.notSet');
   const { canDetailPage, canWritePage } = useCheckPermission();
   const { id = '' } = useParams();
   const { data: client, isPending } = useClientDetailQuery(id);
@@ -54,22 +54,22 @@ export default function ClientDetailsView() {
   const languageLabel = useMemo(() => {
     if (!client?.communicationLanguage) return '';
     const map: Record<string, string> = {
-      uz: tx('pages.clients.form.languages.uz'),
-      ru: tx('pages.clients.form.languages.ru'),
-      en: tx('pages.clients.form.languages.en'),
+      uz: tx('clients.form.languages.uz'),
+      ru: tx('clients.form.languages.ru'),
+      en: tx('clients.form.languages.en'),
     };
     return map[client.communicationLanguage] || client.communicationLanguage;
   }, [client?.communicationLanguage, tx]);
 
   const genderLabel = useMemo(() => {
-    if (client?.gender === 'male') return tx('pages.users.genders.male');
-    if (client?.gender === 'female') return tx('pages.users.genders.female');
+    if (client?.gender === 'male') return tx('users.genders.male');
+    if (client?.gender === 'female') return tx('users.genders.female');
     return '';
   }, [client?.gender, tx]);
 
   const maritalLabel = useMemo(() => {
-    if (client?.maritalStatus === 'married') return tx('pages.clients.form.marital.married');
-    if (client?.maritalStatus === 'single') return tx('pages.clients.form.marital.single');
+    if (client?.maritalStatus === 'married') return tx('clients.form.marital.married');
+    if (client?.maritalStatus === 'single') return tx('clients.form.marital.single');
     return '';
   }, [client?.maritalStatus, tx]);
 
@@ -94,10 +94,10 @@ export default function ClientDetailsView() {
 
   const socialItems = useMemo(
     () => [
-      { key: 'email', icon: 'solar:letter-bold', label: tx('shared.table.email'), value: client?.socialNetworks?.email || '' },
-      { key: 'telegram', icon: 'logos:telegram', label: tx('pages.clients.form.fields.telegram'), value: client?.socialNetworks?.telegram || '' },
-      { key: 'instagram', icon: 'skill-icons:instagram', label: tx('pages.clients.form.fields.instagram'), value: client?.socialNetworks?.instagram || '' },
-      { key: 'facebook', icon: 'logos:facebook', label: tx('pages.clients.form.fields.facebook'), value: client?.socialNetworks?.facebook || '' },
+      { key: 'email', icon: 'solar:letter-bold', label: tx('common.table.email'), value: client?.socialNetworks?.email || '' },
+      { key: 'telegram', icon: 'logos:telegram', label: tx('clients.form.fields.telegram'), value: client?.socialNetworks?.telegram || '' },
+      { key: 'instagram', icon: 'skill-icons:instagram', label: tx('clients.form.fields.instagram'), value: client?.socialNetworks?.instagram || '' },
+      { key: 'facebook', icon: 'logos:facebook', label: tx('clients.form.fields.facebook'), value: client?.socialNetworks?.facebook || '' },
     ],
     [client?.socialNetworks, tx]
   );
@@ -114,28 +114,28 @@ export default function ClientDetailsView() {
 
   const saleHead = useMemo(
     () => [
-      { id: 'id', label: tx('shared.table.sale_id') },
-      { id: 'pay', label: tx('shared.table.pay') },
-      { id: 'total', label: tx('shared.table.total') },
-      { id: 'date', label: tx('shared.table.date') },
+      { id: 'id', label: tx('common.table.saleId') },
+      { id: 'pay', label: tx('common.table.pay') },
+      { id: 'total', label: tx('common.table.total') },
+      { id: 'date', label: tx('common.table.date') },
     ],
     [tx]
   );
 
   const payLabel = useMemo(
     () => ({
-      cash: tx('shared.payment.cash'),
-      card: tx('shared.payment.card'),
-      debt: tx('shared.payment.debt'),
+      cash: tx('common.payment.cash'),
+      card: tx('common.payment.card'),
+      debt: tx('common.payment.debt'),
     }),
     [tx]
   );
 
   const tabLabels: Record<ClientDetailsTabValue, string> = {
-    overview: tx('pages.clients.detail.tabs.overview'),
-    contacts: tx('pages.clients.detail.tabs.contacts'),
-    addresses: tx('pages.clients.detail.tabs.addresses'),
-    purchases: tx('pages.clients.detail.tabs.purchases'),
+    overview: tx('clients.detail.tabs.overview'),
+    contacts: tx('clients.detail.tabs.contacts'),
+    addresses: tx('clients.detail.tabs.addresses'),
+    purchases: tx('clients.detail.tabs.purchases'),
   };
 
   const activeTab = ((): ClientDetailsTabValue => {
@@ -158,10 +158,10 @@ export default function ClientDetailsView() {
     return (
       <EmptyContent
         filled
-        title={tx('pages.clients.detail.not_found')}
+        title={tx('clients.detail.notFound')}
         action={
           <Button component={RouterLink} href={paths.clients.root} variant="contained">
-            {tx('shared.actions.back_to_list')}
+            {tx('common.actions.backToList')}
           </Button>
         }
       />
@@ -176,7 +176,7 @@ export default function ClientDetailsView() {
       <CustomBreadcrumbs
         heading={fullNameResolved}
         links={[
-          { name: tx('layout.nav.clients'), href: paths.clients.root },
+          { name: tx('common.navigation.clients'), href: paths.clients.root },
           { name: fullNameResolved, href: paths.clients.details(client.id) },
         ]}
         sx={{ mb: { xs: 3, md: 4 } }}
@@ -189,7 +189,7 @@ export default function ClientDetailsView() {
           editHref={paths.clients.edit(client.id)}
           canEdit={canEditClient}
           metadataChips={metadataChips}
-          editLabel={tx('shared.actions.edit')}
+        editLabel={tx('common.actions.edit')}
           emptyLabel={notSetLabel}
         />
 
@@ -197,31 +197,31 @@ export default function ClientDetailsView() {
 
         {activeTab === 'overview' ? (
           <OverviewTabPanel
-            title={tx('pages.clients.detail.sections.personal')}
+            title={tx('clients.detail.sections.personal')}
             emptyLabel={notSetLabel}
             stats={[
-              { label: tx('layout.nav.sales'), value: sales.length },
-              { label: tx('shared.labels.total'), value: fCurrency(String(totalSpent || 0)) },
-              { label: tx('shared.table.created'), value: fDateTime(client.createdAt) },
+              { label: tx('common.navigation.sales'), value: sales.length },
+              { label: tx('common.labels.total'), value: fCurrency(String(totalSpent || 0)) },
+              { label: tx('common.table.created'), value: fDateTime(client.createdAt) },
             ]}
             infoItems={[
-              { label: tx('pages.clients.form.fields.name'), value: client.name || '' },
-              { label: tx('pages.clients.form.fields.last_name'), value: client.lastName || '' },
-              { label: tx('pages.clients.form.fields.middle_name'), value: client.middleName || '' },
-              { label: tx('pages.clients.form.fields.birth_date'), value: client.birthDate ? fDate(client.birthDate) : '' },
-              { label: tx('pages.clients.form.fields.communication_language'), value: languageLabel },
-              { label: tx('pages.clients.form.fields.gender'), value: genderLabel },
-              { label: tx('pages.clients.form.fields.marital_status'), value: maritalLabel },
-              { label: tx('pages.clients.detail.first_purchase'), value: firstSaleDate },
-              { label: tx('pages.clients.detail.last_purchase'), value: lastSaleDate },
+              { label: tx('clients.form.fields.name'), value: client.name || '' },
+              { label: tx('clients.form.fields.lastName'), value: client.lastName || '' },
+              { label: tx('clients.form.fields.middleName'), value: client.middleName || '' },
+              { label: tx('clients.form.fields.birthDate'), value: client.birthDate ? fDate(client.birthDate) : '' },
+              { label: tx('clients.form.fields.communicationLanguage'), value: languageLabel },
+              { label: tx('clients.form.fields.gender'), value: genderLabel },
+              { label: tx('clients.form.fields.maritalStatus'), value: maritalLabel },
+              { label: tx('clients.detail.firstPurchase'), value: firstSaleDate },
+              { label: tx('clients.detail.lastPurchase'), value: lastSaleDate },
             ]}
           />
         ) : null}
 
         {activeTab === 'contacts' ? (
           <ContactsTabPanel
-            phoneTitle={tx('pages.clients.detail.sections.phones')}
-            socialTitle={tx('pages.clients.detail.sections.social_networks')}
+            phoneTitle={tx('clients.detail.sections.phones')}
+            socialTitle={tx('clients.detail.sections.socialNetworks')}
             phones={client.phones || []}
             socialItems={socialItems}
             emptyLabel={notSetLabel}
@@ -230,23 +230,23 @@ export default function ClientDetailsView() {
 
         {activeTab === 'addresses' ? (
           <AddressesTabPanel
-            title={tx('pages.clients.detail.sections.addresses')}
+            title={tx('clients.detail.sections.addresses')}
             addresses={client.addresses || []}
             emptyLabel={notSetLabel}
             labels={{
-              country: tx('pages.clients.form.fields.country'),
-              city: tx('pages.clients.form.fields.city'),
-              address: tx('pages.clients.form.fields.address'),
-              postalCode: tx('pages.clients.form.fields.postal_code'),
-              note: tx('pages.clients.form.fields.note'),
+              country: tx('clients.form.fields.country'),
+              city: tx('clients.form.fields.city'),
+              address: tx('clients.form.fields.address'),
+              postalCode: tx('clients.form.fields.postalCode'),
+              note: tx('clients.form.fields.note'),
             }}
           />
         ) : null}
 
         {activeTab === 'purchases' ? (
           <PurchasesTabPanel
-            title={tx('pages.clients.detail.purchase_history')}
-            emptyDescription={tx('pages.clients.detail.no_purchases')}
+            title={tx('clients.detail.purchaseHistory')}
+            emptyDescription={tx('clients.detail.noPurchases')}
             headLabel={saleHead}
             sales={sales}
             canDetailSales={canDetailSales}

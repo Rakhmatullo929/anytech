@@ -9,7 +9,7 @@ export default function AdminUserCreatePage() {
   return (
     <>
       <Helmet>
-        <title>{tx('pages.users.create_document_title')}</title>
+        <title>{tx('users.createDocumentTitle')}</title>
       </Helmet>
       <AdminUserFormView mode="create" />
     </>

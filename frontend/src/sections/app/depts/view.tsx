@@ -40,11 +40,11 @@ export default function DebtsView() {
 
   const tableHead = useMemo(
     () => [
-      { id: 'client', label: tx('shared.table.client') },
-      { id: 'total', label: tx('shared.table.total') },
-      { id: 'paid', label: tx('shared.table.paid') },
-      { id: 'rem', label: tx('shared.table.rem') },
-      { id: 'status', label: tx('shared.table.status') },
+      { id: 'client', label: tx('common.table.client') },
+      { id: 'total', label: tx('common.table.total') },
+      { id: 'paid', label: tx('common.table.paid') },
+      { id: 'rem', label: tx('common.table.rem') },
+      { id: 'status', label: tx('common.table.status') },
     ],
     [tx]
   );
@@ -104,8 +104,8 @@ export default function DebtsView() {
   return (
     <>
       <CustomBreadcrumbs
-        heading={tx('layout.nav.debts')}
-        links={[{ name: tx('layout.nav.debts'), href: paths.debts.root }]}
+        heading={tx('common.navigation.debts')}
+        links={[{ name: tx('common.navigation.debts'), href: paths.debts.root }]}
         sx={{ mb: { xs: 3, md: 5 } }}
       />
 
@@ -123,14 +123,14 @@ export default function DebtsView() {
             <TextField
               select
               size="small"
-              label={tx('shared.status.filter_label')}
+              label={tx('common.status.filterLabel')}
               value={status}
               onChange={(event) => handleStatusChange(event.target.value as '' | DebtStatus)}
               sx={{ maxWidth: 220 }}
             >
-              <MenuItem value="">{tx('shared.status.filter_all')}</MenuItem>
-              <MenuItem value="active">{tx('shared.status.filter_active')}</MenuItem>
-              <MenuItem value="closed">{tx('shared.status.filter_closed')}</MenuItem>
+              <MenuItem value="">{tx('common.status.filterAll')}</MenuItem>
+              <MenuItem value="active">{tx('common.status.filterActive')}</MenuItem>
+              <MenuItem value="closed">{tx('common.status.filterClosed')}</MenuItem>
             </TextField>
 
             <Scrollbar>
@@ -153,12 +153,12 @@ export default function DebtsView() {
                       <TableCell>{fCurrency(row.remaining)}</TableCell>
                       <TableCell>
                         {row.status === 'active'
-                          ? tx('shared.status.row_active')
-                          : tx('shared.status.row_closed')}
+                          ? tx('common.status.rowActive')
+                          : tx('common.status.rowClosed')}
                       </TableCell>
                     </TableRow>
                   ))}
-                  <TableNoData notFound={!rows.length} title={tx('shared.table.no_data')} />
+                  <TableNoData notFound={!rows.length} title={tx('common.table.noData')} />
                 </TableBody>
               </Table>
             </Scrollbar>

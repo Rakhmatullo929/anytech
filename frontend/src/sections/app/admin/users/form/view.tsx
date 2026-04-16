@@ -133,7 +133,7 @@ export default function UserFormView({ mode }: Props) {
           password,
           passwordConfirm,
         });
-        enqueueSnackbar(tx('pages.users.toasts.created'), { variant: 'success' });
+        enqueueSnackbar(tx('users.toasts.created'), { variant: 'success' });
       } else {
         await updateMutation.mutateAsync({
           id,
@@ -150,7 +150,7 @@ export default function UserFormView({ mode }: Props) {
               }
             : {}),
         });
-        enqueueSnackbar(tx('pages.users.toasts.updated'), { variant: 'success' });
+        enqueueSnackbar(tx('users.toasts.updated'), { variant: 'success' });
       }
 
       router.push(paths.admin.users.root);
@@ -171,10 +171,10 @@ export default function UserFormView({ mode }: Props) {
     return (
       <EmptyContent
         filled
-        title={tx('pages.users.detail.not_found')}
+        title={tx('users.detail.notFound')}
         action={
           <Button onClick={() => router.push(paths.admin.users.root)} variant="contained">
-            {tx('shared.actions.back_to_list')}
+            {tx('common.actions.backToList')}
           </Button>
         }
       />
@@ -184,12 +184,12 @@ export default function UserFormView({ mode }: Props) {
   return (
     <>
       <CustomBreadcrumbs
-        heading={mode === 'create' ? tx('pages.users.dialogs.create.title') : tx('pages.users.dialogs.edit.title')}
+        heading={mode === 'create' ? tx('users.dialogs.create.title') : tx('users.dialogs.edit.title')}
         links={[
-          { name: tx('layout.nav.admin'), href: paths.admin.users.root },
-          { name: tx('pages.admin.tabs.users'), href: paths.admin.users.root },
+          { name: tx('common.navigation.admin'), href: paths.admin.users.root },
+          { name: tx('admin.tabs.users'), href: paths.admin.users.root },
           {
-            name: mode === 'create' ? tx('pages.users.dialogs.create.title') : tx('pages.users.dialogs.edit.title'),
+            name: mode === 'create' ? tx('users.dialogs.create.title') : tx('users.dialogs.edit.title'),
             href: mode === 'create' ? paths.admin.users.create : paths.admin.users.edit(id),
           },
         ]}
@@ -199,18 +199,18 @@ export default function UserFormView({ mode }: Props) {
       <FormProvider methods={methods} onSubmit={onSubmit}>
         <Card sx={{ p: 3 }}>
           <Stack spacing={2}>
-            <RHFTextField name="name" label={`${tx('shared.table.name')} *`} />
-            <RHFTextField name="phone" label={`${tx('shared.table.phone')} *`} />
-            <RHFTextField name="email" label={tx('shared.table.email')} />
-            <RHFTextField name="gender" label={`${tx('shared.table.gender')} *`} select>
-              <MenuItem value="male">{tx('pages.users.genders.male')}</MenuItem>
-              <MenuItem value="female">{tx('pages.users.genders.female')}</MenuItem>
+            <RHFTextField name="name" label={`${tx('common.table.name')} *`} />
+            <RHFTextField name="phone" label={`${tx('common.table.phone')} *`} />
+            <RHFTextField name="email" label={tx('common.table.email')} />
+            <RHFTextField name="gender" label={`${tx('common.table.gender')} *`} select>
+              <MenuItem value="male">{tx('users.genders.male')}</MenuItem>
+              <MenuItem value="female">{tx('users.genders.female')}</MenuItem>
             </RHFTextField>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
               <Box sx={{ width: { xs: 1, sm: '34%' } }}>
                 <RHFTextField
                   name="passportSeriesPrefix"
-                  label={tx('pages.users.form.passport_prefix')}
+                  label={tx('users.form.passportPrefix')}
                   inputProps={{ maxLength: 2 }}
                   onChange={(event) => {
                     methods.setValue(
@@ -227,7 +227,7 @@ export default function UserFormView({ mode }: Props) {
               <Box sx={{ width: { xs: 1, sm: '66%' } }}>
                 <RHFTextField
                   name="passportSeriesNumber"
-                  label={tx('pages.users.form.passport_number')}
+                  label={tx('users.form.passportNumber')}
                   inputProps={{ maxLength: 7, inputMode: 'numeric' }}
                   onChange={(event) => {
                     methods.setValue(
@@ -241,15 +241,15 @@ export default function UserFormView({ mode }: Props) {
                 />
               </Box>
             </Stack>
-            <RHFTextField name="role" label={`${tx('pages.users.table.role')} *`} select>
-              <MenuItem value="admin">{tx('pages.users.roles.admin')}</MenuItem>
-              <MenuItem value="manager">{tx('pages.users.roles.manager')}</MenuItem>
-              <MenuItem value="seller">{tx('pages.users.roles.seller')}</MenuItem>
+            <RHFTextField name="role" label={`${tx('users.table.role')} *`} select>
+              <MenuItem value="admin">{tx('users.roles.admin')}</MenuItem>
+              <MenuItem value="manager">{tx('users.roles.manager')}</MenuItem>
+              <MenuItem value="seller">{tx('users.roles.seller')}</MenuItem>
             </RHFTextField>
             <RHFTextField
               name="password"
               type={passwordVisible.value ? 'text' : 'password'}
-              label={mode === 'create' ? `${tx('shared.table.password')} *` : tx('pages.users.dialogs.edit.new_password')}
+              label={mode === 'create' ? `${tx('common.table.password')} *` : tx('users.dialogs.edit.newPassword')}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
@@ -267,8 +267,8 @@ export default function UserFormView({ mode }: Props) {
               type={passwordConfirmVisible.value ? 'text' : 'password'}
               label={
                 mode === 'create'
-                  ? `${tx('pages.users.dialogs.create.confirm_password')} *`
-                  : tx('pages.users.dialogs.edit.confirm_new_password')
+                  ? `${tx('users.dialogs.create.confirmPassword')} *`
+                  : tx('users.dialogs.edit.confirmNewPassword')
               }
               InputProps={{
                 endAdornment: (
@@ -284,9 +284,9 @@ export default function UserFormView({ mode }: Props) {
             />
 
             <Stack direction="row" spacing={1.5} justifyContent="flex-end" sx={{ pt: 1 }}>
-              <Button onClick={() => router.push(paths.admin.users.root)}>{tx('shared.actions.cancel')}</Button>
+              <Button onClick={() => router.push(paths.admin.users.root)}>{tx('common.actions.cancel')}</Button>
               <Button variant="contained" type="submit" disabled={loading}>
-                {tx('shared.actions.save')}
+                {tx('common.actions.save')}
               </Button>
             </Stack>
           </Stack>

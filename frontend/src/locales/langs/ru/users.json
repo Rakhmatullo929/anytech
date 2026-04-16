@@ -1,0 +1,53 @@
+{
+  "addButton": "Добавить пользователя",
+  "createDocumentTitle": "Создать пользователя",
+  "detailDocumentTitle": "Пользователь",
+  "documentTitle": "Пользователи",
+  "editDocumentTitle": "Редактировать пользователя",
+  "actions": {
+    "loginAs": "Войти от имени"
+  },
+  "detail": {
+    "infoTitle": "Данные пользователя",
+    "notFound": "Пользователь не найден"
+  },
+  "dialogs": {
+    "create": {
+      "title": "Новый пользователь",
+      "confirmPassword": "Подтвердите пароль"
+    },
+    "edit": {
+      "title": "Редактировать пользователя",
+      "newPassword": "Новый пароль",
+      "confirmNewPassword": "Подтвердите новый пароль"
+    },
+    "delete": {
+      "title": "Удаление пользователя",
+      "description": "Вы точно хотите удалить пользователя?"
+    }
+  },
+  "searchPlaceholder": "Поиск по имени, телефону или email…",
+  "roles": {
+    "admin": "Админ",
+    "manager": "Менеджер",
+    "seller": "Продавец"
+  },
+  "genders": {
+    "male": "Мужской",
+    "female": "Женский"
+  },
+  "table": {
+    "role": "Роль"
+  },
+  "form": {
+    "passportPrefix": "Серия паспорта (буквы)",
+    "passportNumber": "Серия паспорта (цифры)"
+  },
+  "toasts": {
+    "loginAsSuccess": "Вы вошли от имени пользователя",
+    "loginAsProfileSyncFailed": "Не удалось обновить профиль после входа от имени пользователя",
+    "created": "Пользователь создан",
+    "updated": "Пользователь обновлён",
+    "deleted": "Пользователь удалён"
+  }
+}

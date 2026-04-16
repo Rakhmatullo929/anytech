@@ -9,7 +9,7 @@ export default function AdminUserDetailsPage() {
   return (
     <>
       <Helmet>
-        <title>{tx('pages.users.detail_document_title')}</title>
+        <title>{tx('users.detailDocumentTitle')}</title>
       </Helmet>
       <AdminUserDetailsView />
     </>

@@ -1,0 +1,35 @@
+{
+  "tabs": {
+    "users": "Foydalanuvchilar",
+    "roles": "Rollar"
+  },
+  "roles": {
+    "documentTitle": "Admin rollari",
+    "empty": "Roles bo'limi tez orada qo'shiladi",
+    "listTitle": "Rollar ro'yxati",
+    "listHint": "Tizimda hozir mavjud bo'lgan rollar",
+    "allPermissions": "Rol uchun barcha permissions",
+    "unsavedChanges": "O'zgarishlar bor",
+    "read": "O'qish",
+    "detail": "Detallar",
+    "write": "Yozish",
+    "toasts": {
+      "saved": "Rol ruxsatlari yangilandi"
+    },
+    "pages": {
+      "admin": "Admin",
+      "roles": "Rollar",
+      "users": "Foydalanuvchilar",
+      "pos": "POS",
+      "products": "Mahsulotlar",
+      "clients": "Mijozlar",
+      "sales": "Savdolar",
+      "debts": "Qarzlar"
+    },
+    "items": {
+      "admin": "Tizim va sozlamalarni to'liq boshqarish huquqi",
+      "manager": "Asosiy bo'limlarni boshqarish va nazorat qilish",
+      "seller": "Sotuvlar va kundalik jarayonlar bilan ishlash"
+    }
+  }
+}

@@ -38,10 +38,10 @@ export default function UserDetailsView() {
     return (
       <EmptyContent
         filled
-        title={tx('pages.users.detail.not_found')}
+        title={tx('users.detail.notFound')}
         action={
           <Button component={RouterLink} href={paths.admin.users.root} variant="contained">
-            {tx('shared.actions.back_to_list')}
+            {tx('common.actions.backToList')}
           </Button>
         }
       />
@@ -53,14 +53,14 @@ export default function UserDetailsView() {
       <CustomBreadcrumbs
         heading={user.name || user.phone || '-'}
         links={[
-          { name: tx('layout.nav.admin'), href: paths.admin.users.root },
-          { name: tx('pages.admin.tabs.users'), href: paths.admin.users.root },
+          { name: tx('common.navigation.admin'), href: paths.admin.users.root },
+          { name: tx('admin.tabs.users'), href: paths.admin.users.root },
           { name: user.name || user.phone || '-', href: paths.admin.users.details(user.id) },
         ]}
         action={
           canWriteUsers ? (
             <Button component={RouterLink} href={paths.admin.users.edit(user.id)} variant="contained">
-              {tx('shared.actions.edit')}
+              {tx('common.actions.edit')}
             </Button>
           ) : null
         }
@@ -79,12 +79,12 @@ export default function UserDetailsView() {
                 {user.phone || '-'}
               </Typography>
             </Box>
-            <UserRoleLabel role={user.role} label={tx(`pages.users.roles.${user.role}`)} />
+            <UserRoleLabel role={user.role} label={tx(`users.roles.${user.role}`)} />
           </Stack>
         </Card>
 
         <Card sx={{ p: 3 }}>
-          <Typography variant="subtitle1">{tx('pages.users.detail.info_title')}</Typography>
+          <Typography variant="subtitle1">{tx('users.detail.infoTitle')}</Typography>
           <Divider sx={{ my: 2 }} />
           <Box
             sx={{
@@ -96,7 +96,7 @@ export default function UserDetailsView() {
             <Box>
               <Stack spacing={0.5}>
                 <Typography variant="caption" color="text.secondary">
-                  {tx('shared.table.email')}
+                  {tx('common.table.email')}
                 </Typography>
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
                   {user.email || '-'}
@@ -106,17 +106,17 @@ export default function UserDetailsView() {
             <Box>
               <Stack spacing={0.5}>
                 <Typography variant="caption" color="text.secondary">
-                  {tx('shared.table.gender')}
+                  {tx('common.table.gender')}
                 </Typography>
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {user.gender ? tx(`pages.users.genders.${user.gender}`) : '-'}
+                  {user.gender ? tx(`users.genders.${user.gender}`) : '-'}
                 </Typography>
               </Stack>
             </Box>
             <Box>
               <Stack spacing={0.5}>
                 <Typography variant="caption" color="text.secondary">
-                  {tx('shared.table.passport_series')}
+                  {tx('common.table.passportSeries')}
                 </Typography>
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
                   {user.passportSeries || '-'}
@@ -136,7 +136,7 @@ export default function UserDetailsView() {
             <Box sx={{ gridColumn: { md: '1 / -1' } }}>
               <Stack spacing={0.5}>
                 <Typography variant="caption" color="text.secondary">
-                  {tx('shared.table.created')}
+                  {tx('common.table.created')}
                 </Typography>
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
                   {fDateTime(user.createdAt)}

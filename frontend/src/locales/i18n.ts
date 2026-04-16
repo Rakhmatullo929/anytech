@@ -6,8 +6,8 @@ import { localStorageAvailable, localStorageGetItem } from 'src/utils/storage-av
 //
 import { defaultLang, allLangs } from './config-lang';
 //
-import translationRu from './langs/ru.json';
-import translationUz from './langs/uz.json';
+import translationRu from './langs/ru';
+import translationUz from './langs/uz';
 
 // ----------------------------------------------------------------------
 

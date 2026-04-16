@@ -22,12 +22,12 @@ export default function View403() {
     <Container component={MotionContainer} maxWidth="md" sx={{ py: { xs: 4, md: 8 } }}>
       <Stack spacing={2.5} alignItems="center" textAlign="center" sx={{ mx: 'auto' }}>
         <m.div variants={varBounce().in}>
-          <Typography variant="h3">{tx('pages.errors.403.title')}</Typography>
+          <Typography variant="h3">{tx('errors.forbidden.title')}</Typography>
         </m.div>
 
         <m.div variants={varBounce().in}>
           <Typography sx={{ color: 'text.secondary', maxWidth: 560 }}>
-            {tx('pages.errors.403.description')}
+            {tx('errors.forbidden.description')}
           </Typography>
         </m.div>
 
@@ -39,7 +39,7 @@ export default function View403() {
 
         <m.div variants={varBounce().in}>
           <Button component={RouterLink} href={paths.pos} size="large" variant="contained">
-            {tx('pages.errors.403.back_to_pos')}
+            {tx('errors.forbidden.backToPos')}
           </Button>
         </m.div>
       </Stack>

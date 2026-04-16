@@ -11,8 +11,7 @@ export const allLangs = [
     value: 'uz',
     systemValue: enUS,
     icon: 'flagpack:uz',
-  },
-  {
+  },{
     label: 'Русский',
     value: 'ru',
     systemValue: ruRU,

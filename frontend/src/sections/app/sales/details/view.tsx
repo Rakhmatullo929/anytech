@@ -36,18 +36,18 @@ export default function SaleDetailsView() {
 
   const lineHead = useMemo(
     () => [
-      { id: 'product', label: tx('shared.table.product') },
-      { id: 'qty', label: tx('shared.table.qty') },
-      { id: 'price', label: tx('shared.table.price') },
+      { id: 'product', label: tx('common.table.product') },
+      { id: 'qty', label: tx('common.table.qty') },
+      { id: 'price', label: tx('common.table.price') },
     ],
     [tx]
   );
 
   const payLabel = useMemo(
     () => ({
-      cash: tx('shared.payment.cash'),
-      card: tx('shared.payment.card'),
-      debt: tx('shared.payment.debt'),
+      cash: tx('common.payment.cash'),
+      card: tx('common.payment.card'),
+      debt: tx('common.payment.debt'),
     }),
     [tx]
   );
@@ -65,10 +65,10 @@ export default function SaleDetailsView() {
     return (
       <EmptyContent
         filled
-        title={tx('pages.sales.detail.not_found')}
+        title={tx('sales.detail.notFound')}
         action={
           <Button component={RouterLink} href={paths.sales.root} variant="contained">
-            {tx('shared.actions.back_to_list')}
+            {tx('common.actions.backToList')}
           </Button>
         }
       />
@@ -78,9 +78,9 @@ export default function SaleDetailsView() {
   return (
     <>
       <CustomBreadcrumbs
-        heading={tx('pages.sales.detail.heading_detail', { id: sale.id })}
+        heading={tx('sales.detail.headingDetail', { id: sale.id })}
         links={[
-          { name: tx('layout.nav.sales'), href: paths.sales.root },
+          { name: tx('common.navigation.sales'), href: paths.sales.root },
           { name: sale.id, href: paths.sales.details(sale.id) },
         ]}
         sx={{ mb: { xs: 3, md: 5 } }}
@@ -91,16 +91,16 @@ export default function SaleDetailsView() {
           <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems={{ md: 'center' }}>
             <Stack spacing={1} sx={{ flexGrow: 1 }}>
               <Typography variant="body2" color="text.secondary">
-                {tx('pages.sales.detail.client_line')} <strong>{sale.clientName || '-'}</strong>
+                {tx('sales.detail.clientLine')} <strong>{sale.clientName || '-'}</strong>
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {tx('pages.sales.detail.date_line')} {fDateTime(sale.createdAt)}
+                {tx('sales.detail.dateLine')} {fDateTime(sale.createdAt)}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {tx('pages.sales.detail.pay_line')} {payLabel[sale.paymentType]}
+                {tx('sales.detail.payLine')} {payLabel[sale.paymentType]}
               </Typography>
               <Typography variant="h6">
-                {tx('shared.labels.total')}: {fCurrency(sale.totalAmount)}
+                {tx('common.labels.total')}: {fCurrency(sale.totalAmount)}
               </Typography>
             </Stack>
             <Chip
@@ -115,7 +115,7 @@ export default function SaleDetailsView() {
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
           <Card sx={{ p: 2.5, flex: 1 }}>
             <Typography variant="caption" color="text.secondary">
-              {tx('shared.table.qty')}
+              {tx('common.table.qty')}
             </Typography>
             <Typography variant="h5" sx={{ mt: 0.5 }}>
               {itemCount}
@@ -123,7 +123,7 @@ export default function SaleDetailsView() {
           </Card>
           <Card sx={{ p: 2.5, flex: 1 }}>
             <Typography variant="caption" color="text.secondary">
-              {tx('shared.table.date')}
+              {tx('common.table.date')}
             </Typography>
             <Typography variant="subtitle1" sx={{ mt: 0.75 }}>
               {fDateTime(sale.createdAt)}
@@ -133,7 +133,7 @@ export default function SaleDetailsView() {
 
         <Card sx={{ p: 2 }}>
           <Typography variant="h6" sx={{ mb: 2 }}>
-            {tx('pages.sales.detail.lines_title')}
+            {tx('sales.detail.linesTitle')}
           </Typography>
           <Divider sx={{ mb: 2 }} />
           <Table size="small">
@@ -149,7 +149,7 @@ export default function SaleDetailsView() {
               {!sale.items.length && (
                 <TableRow>
                   <TableCell colSpan={3} sx={{ py: 6 }}>
-                    <EmptyContent title={tx('pages.sales.detail.lines_title')} />
+                    <EmptyContent title={tx('sales.detail.linesTitle')} />
                   </TableCell>
                 </TableRow>
               )}

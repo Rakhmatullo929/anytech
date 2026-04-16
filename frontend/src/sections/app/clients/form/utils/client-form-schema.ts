@@ -5,7 +5,7 @@ type Translate = (key: string, options?: Record<string, string | number>) => str
 
 export function getClientFormSchema(tx: Translate) {
   return Yup.object({
-    name: Yup.string().trim().required(tx('validation.client_name_required')),
+    name: Yup.string().trim().required(tx('common.validation.clientNameRequired')),
     lastName: Yup.string().trim(),
     middleName: Yup.string().trim(),
     birthDate: Yup.string().nullable(),
@@ -17,8 +17,8 @@ export function getClientFormSchema(tx: Translate) {
         Yup.object({
           country: Yup.mixed<ClientPhoneCountry>().oneOf(['uz', 'ru', 'us']).required(),
           number: Yup.string()
-            .required(tx('validation.phone_required'))
-            .test('phone-local-format', tx('validation.phone_invalid_format', { example: '+998901234567' }), (value, context) => {
+            .required(tx('common.validation.phoneRequired'))
+            .test('phone-local-format', tx('common.validation.phoneInvalidFormat', { example: '+998901234567' }), (value, context) => {
               const parent = context.parent as { country?: ClientPhoneCountry };
               const country = parent.country || 'uz';
               const rule = getClientPhoneRule(country);
@@ -26,8 +26,8 @@ export function getClientFormSchema(tx: Translate) {
             }),
         })
       )
-      .min(1, tx('validation.phone_required'))
-      .test('first-phone-required', tx('validation.phone_required'), (value) => Boolean(value?.[0]?.number?.trim())),
+      .min(1, tx('common.validation.phoneRequired'))
+      .test('first-phone-required', tx('common.validation.phoneRequired'), (value) => Boolean(value?.[0]?.number?.trim())),
     addresses: Yup.array().of(
       Yup.object({
         country: Yup.string().trim(),
@@ -38,7 +38,7 @@ export function getClientFormSchema(tx: Translate) {
       })
     ),
     socialNetworks: Yup.object({
-      email: Yup.string().trim().email(tx('validation.email_invalid')).nullable(),
+      email: Yup.string().trim().email(tx('common.validation.emailInvalid')).nullable(),
       telegram: Yup.string().trim(),
       instagram: Yup.string().trim(),
       facebook: Yup.string().trim(),

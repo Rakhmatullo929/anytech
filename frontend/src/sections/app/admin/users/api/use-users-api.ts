@@ -60,7 +60,7 @@ export function useImpersonateTenantUserMutation() {
         const { user } = await fetchCurrentUser();
         syncSessionFromApiResponse({ ...payload, user });
       } catch {
-        enqueueSnackbar(tx('pages.users.toasts.login_as_profile_sync_failed'), { variant: 'error' });
+        enqueueSnackbar(tx('users.toasts.loginAsProfileSyncFailed'), { variant: 'error' });
       }
       queryClient.clear();
     },

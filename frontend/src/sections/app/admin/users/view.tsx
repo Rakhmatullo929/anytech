@@ -63,11 +63,11 @@ export default function UsersView() {
 
   const tableHead = useMemo(
     () => [
-      { id: 'name', label: tx('shared.table.name') },
-      { id: 'phone', label: tx('shared.table.phone') },
-      { id: 'email', label: tx('shared.table.email') },
-      { id: 'role', label: tx('pages.users.table.role') },
-      { id: 'created', label: tx('shared.table.created') },
+      { id: 'name', label: tx('common.table.name') },
+      { id: 'phone', label: tx('common.table.phone') },
+      { id: 'email', label: tx('common.table.email') },
+      { id: 'role', label: tx('users.table.role') },
+      { id: 'created', label: tx('common.table.created') },
       { id: '', label: '' },
     ],
     [tx]
@@ -121,7 +121,7 @@ export default function UsersView() {
   const handleImpersonate = async (targetUserId: string) => {
     try {
       await impersonateMutation.mutateAsync(targetUserId);
-      enqueueSnackbar(tx('pages.users.toasts.login_as_success'), { variant: 'success' });
+      enqueueSnackbar(tx('users.toasts.loginAsSuccess'), { variant: 'success' });
       router.replace(paths.pos);
     } catch (error) {
       console.error(error);
@@ -160,7 +160,7 @@ export default function UsersView() {
     if (!selectedUserId) return;
     try {
       await deleteMutation.mutateAsync(selectedUserId);
-      enqueueSnackbar(tx('pages.users.toasts.deleted'), { variant: 'success' });
+      enqueueSnackbar(tx('users.toasts.deleted'), { variant: 'success' });
     } catch (error) {
       console.error(error);
     } finally {
@@ -176,10 +176,10 @@ export default function UsersView() {
   return (
     <>
       <CustomBreadcrumbs
-        heading={tx('layout.nav.admin')}
+        heading={tx('common.navigation.admin')}
         links={[
-          { name: tx('layout.nav.admin'), href: paths.admin.users.root },
-          { name: tx('pages.admin.tabs.users'), href: paths.admin.users.root },
+          { name: tx('common.navigation.admin'), href: paths.admin.users.root },
+          { name: tx('admin.tabs.users'), href: paths.admin.users.root },
         ]}
         action={
           <Can page="users" action="write">
@@ -188,7 +188,7 @@ export default function UsersView() {
               startIcon={<Iconify icon="mingcute:add-line" />}
               onClick={() => router.push(paths.admin.users.create)}
             >
-              {tx('pages.users.add_button')}
+              {tx('users.addButton')}
             </Button>
           </Can>
         }
@@ -209,7 +209,7 @@ export default function UsersView() {
           <Stack spacing={2} sx={{ p: 2 }}>
             <TextField
               size="small"
-              placeholder={tx('pages.users.search_placeholder')}
+              placeholder={tx('users.searchPlaceholder')}
               value={searchValue}
               onChange={(e) => setSearch(e.target.value)}
               sx={{ maxWidth: 360 }}
@@ -231,7 +231,7 @@ export default function UsersView() {
                       <TableCell>{row.phone || '-'}</TableCell>
                       <TableCell>{row.email || '-'}</TableCell>
                       <TableCell>
-                        <UserRoleLabel role={row.role} label={tx(`pages.users.roles.${row.role}`)} />
+                        <UserRoleLabel role={row.role} label={tx(`users.roles.${row.role}`)} />
                       </TableCell>
                       <TableCell>{fDateTime(row.createdAt)}</TableCell>
                       <TableCell align="right">
@@ -243,7 +243,7 @@ export default function UsersView() {
                       </TableCell>
                     </TableRow>
                   ))}
-                  <TableNoData notFound={!rows.length} title={tx('shared.table.no_data')} />
+                  <TableNoData notFound={!rows.length} title={tx('common.table.noData')} />
                 </TableBody>
               </Table>
             </Scrollbar>
@@ -271,7 +271,7 @@ export default function UsersView() {
             }}
           >
             <Iconify icon="solar:eye-bold" />
-            {tx('shared.actions.view')}
+            {tx('common.actions.view')}
           </MenuItem>
         </Can>
         {canWriteUsers && selectedUserId !== currentUser.id && (
@@ -285,13 +285,13 @@ export default function UsersView() {
             disabled={impersonateMutation.isPending}
           >
             <Iconify icon="solar:login-3-bold" />
-            {tx('pages.users.actions.login_as')}
+            {tx('users.actions.loginAs')}
           </MenuItem>
         )}
         <Can page="users" action="write">
           <MenuItem onClick={handleEdit}>
             <Iconify icon="solar:pen-bold" />
-            {tx('shared.actions.edit')}
+            {tx('common.actions.edit')}
           </MenuItem>
         </Can>
         <Can page="users" action="write">
@@ -301,7 +301,7 @@ export default function UsersView() {
             disabled={selectedUserId === currentUser.id}
           >
             <Iconify icon="solar:trash-bin-trash-bold" />
-            {tx('shared.actions.delete')}
+            {tx('common.actions.delete')}
           </MenuItem>
         </Can>
       </CustomPopover>
@@ -310,12 +310,12 @@ export default function UsersView() {
         <ConfirmDialog
           open={deleteOpen}
           onClose={handleCloseDelete}
-          title={tx('pages.users.dialogs.delete.title')}
-          content={tx('pages.users.dialogs.delete.description')}
-          cancelText={tx('shared.actions.cancel')}
+          title={tx('users.dialogs.delete.title')}
+          content={tx('users.dialogs.delete.description')}
+          cancelText={tx('common.actions.cancel')}
           action={
             <Button color="error" variant="contained" onClick={handleDelete} disabled={deletingCurrent}>
-              {tx('shared.actions.delete')}
+              {tx('common.actions.delete')}
             </Button>
           }
         />

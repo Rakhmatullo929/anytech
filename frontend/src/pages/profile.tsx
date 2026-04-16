@@ -10,7 +10,7 @@ export default function ProfilePage() {
   return (
     <>
       <Helmet>
-        <title>{tx('pages.profile.document_title')}</title>
+        <title>{tx('profile.documentTitle')}</title>
       </Helmet>
       <ProfileView />
     </>

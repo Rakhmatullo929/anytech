@@ -1,0 +1,17 @@
+{
+  "detail": {
+    "clientLine": "Клиент:",
+    "dateLine": "Дата:",
+    "headingDetail": "Продажа {{id}}",
+    "linesTitle": "Состав",
+    "notFound": "Продажа не найдена",
+    "payLine": "Оплата:"
+  },
+  "detailDocumentTitle": "Продажа",
+  "documentTitle": "Продажи",
+  "filters": {
+    "allOption": "Все",
+    "paymentLabel": "Тип оплаты"
+  },
+  "listHeading": "История продаж"
+}

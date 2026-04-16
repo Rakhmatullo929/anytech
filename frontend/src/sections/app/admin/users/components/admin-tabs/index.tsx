@@ -22,10 +22,10 @@ export default function AdminTabs({ value }: Props) {
   return (
     <Tabs value={resolvedValue} aria-label="admin section tabs" sx={{ mb: 3 }}>
       {showUsers ? (
-        <Tab component={RouterLink} href={paths.admin.users.root} label={tx('pages.admin.tabs.users')} value="users" />
+        <Tab component={RouterLink} href={paths.admin.users.root} label={tx('admin.tabs.users')} value="users" />
       ) : null}
       {showRoles ? (
-        <Tab component={RouterLink} href={paths.admin.roles} label={tx('pages.admin.tabs.roles')} value="roles" />
+        <Tab component={RouterLink} href={paths.admin.roles} label={tx('admin.tabs.roles')} value="roles" />
       ) : null}
     </Tabs>
   );

@@ -1,0 +1,89 @@
+{
+  "addButton": "Mijoz qoʻshish",
+  "createDocumentTitle": "Mijoz yaratish",
+  "editDocumentTitle": "Mijozni tahrirlash",
+  "importExcelButton": "Excel import",
+  "detail": {
+    "notFound": "Mijoz topilmadi",
+    "noPurchases": "Hozircha xaridlar yoʻq",
+    "firstPurchase": "Birinchi xarid",
+    "lastPurchase": "Soʻnggi xarid",
+    "notSet": "Kiritilmagan",
+    "phoneLabel": "Telefon",
+    "purchaseHistory": "Xaridlar tarixi",
+    "sections": {
+      "personal": "Shaxsiy ma'lumotlar",
+      "phones": "Telefonlar",
+      "addresses": "Manzillar",
+      "socialNetworks": "Ijtimoiy tarmoqlar"
+    },
+    "tabs": {
+      "overview": "Umumiy",
+      "contacts": "Kontaktlar",
+      "addresses": "Manzillar",
+      "purchases": "Xaridlar"
+    }
+  },
+  "detailDocumentTitle": "Mijoz",
+  "documentTitle": "Mijozlar",
+  "dialogs": {
+    "delete": {
+      "bulkDescription": "Tanlangan mijozlarni o‘chirishni tasdiqlaysizmi? Soni: {{count}}",
+      "bulkTitle": "Mijozlarni ommaviy o‘chirish",
+      "description": "Mijozni o‘chirishni tasdiqlaysizmi?",
+      "title": "Mijozni o‘chirish"
+    }
+  },
+  "searchPlaceholder": "Ism yoki telefon boʻyicha qidiruv…",
+  "form": {
+    "createTitle": "Yangi mijoz",
+    "editTitle": "Mijozni tahrirlash",
+    "addPhone": "Telefon qoʻshish",
+    "addAddress": "Manzil qoʻshish",
+    "sections": {
+      "personal": "Shaxsiy ma'lumotlar",
+      "phones": "Telefonlar",
+      "addresses": "Manzillar",
+      "socialNetworks": "Ijtimoiy tarmoqlar"
+    },
+    "fields": {
+      "name": "Ism",
+      "lastName": "Familiya",
+      "middleName": "Otasining ismi",
+      "birthDate": "Tugʻilgan sana",
+      "communicationLanguage": "Muloqot tili",
+      "phoneCountry": "Mamlakat",
+      "gender": "Jins",
+      "maritalStatus": "Oilaviy holat",
+      "country": "Mamlakat",
+      "city": "Shahar",
+      "address": "Manzil",
+      "postalCode": "Pochta indeksi",
+      "note": "Izoh",
+      "telegram": "Telegram",
+      "instagram": "Instagram",
+      "facebook": "Facebook"
+    },
+    "countries": {
+      "uz": "O'zbekiston",
+      "ru": "Rossiya",
+      "us": "AQSH"
+    },
+    "marital": {
+      "married": "Turmush qurgan",
+      "single": "Turmush qurmagan"
+    },
+    "languages": {
+      "uz": "O'zbekcha",
+      "ru": "Русский",
+      "en": "English"
+    }
+  },
+  "toasts": {
+    "bulkDeleted": "O‘chirilgan mijozlar soni: {{count}}",
+    "bulkCreated": "Import qilingan mijozlar soni: {{count}}",
+    "created": "Mijoz muvaffaqiyatli yaratildi",
+    "deleted": "Mijoz o‘chirildi",
+    "updated": "Mijoz yangilandi"
+  }
+}

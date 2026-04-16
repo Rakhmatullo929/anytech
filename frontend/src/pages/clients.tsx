@@ -8,7 +8,7 @@ export default function ClientsPage() {
   return (
     <>
       <Helmet>
-        <title>{tx('pages.clients.document_title')}</title>
+        <title>{tx('clients.documentTitle')}</title>
       </Helmet>
       <ClientsView />
     </>

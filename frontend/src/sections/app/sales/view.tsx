@@ -63,11 +63,11 @@ export default function SalesView() {
 
   const tableHead = useMemo(
     () => [
-      { id: 'id', label: tx('shared.table.sale_id') },
-      { id: 'client', label: tx('shared.table.client') },
-      { id: 'total', label: tx('shared.table.total') },
-      { id: 'pay', label: tx('shared.table.pay') },
-      { id: 'date', label: tx('shared.table.date') },
+      { id: 'id', label: tx('common.table.saleId') },
+      { id: 'client', label: tx('common.table.client') },
+      { id: 'total', label: tx('common.table.total') },
+      { id: 'pay', label: tx('common.table.pay') },
+      { id: 'date', label: tx('common.table.date') },
     ],
     [tx]
   );
@@ -94,18 +94,18 @@ export default function SalesView() {
 
   const payLabel = useMemo(
     () => ({
-      cash: tx('shared.payment.cash'),
-      card: tx('shared.payment.card'),
-      debt: tx('shared.payment.debt'),
+      cash: tx('common.payment.cash'),
+      card: tx('common.payment.card'),
+      debt: tx('common.payment.debt'),
     }),
     [tx]
   );
   const paymentOptions = useMemo(
     () => [
-      { value: '', label: tx('pages.sales.filters.all_option') },
-      { value: 'cash', label: tx('shared.payment.cash') },
-      { value: 'card', label: tx('shared.payment.card') },
-      { value: 'debt', label: tx('shared.payment.debt') },
+      { value: '', label: tx('sales.filters.allOption') },
+      { value: 'cash', label: tx('common.payment.cash') },
+      { value: 'card', label: tx('common.payment.card') },
+      { value: 'debt', label: tx('common.payment.debt') },
     ],
     [tx]
   );
@@ -127,8 +127,8 @@ export default function SalesView() {
   return (
     <>
       <CustomBreadcrumbs
-        heading={tx('pages.sales.list_heading')}
-        links={[{ name: tx('layout.nav.sales'), href: paths.sales.root }]}
+        heading={tx('sales.listHeading')}
+        links={[{ name: tx('common.navigation.sales'), href: paths.sales.root }]}
         sx={{ mb: { xs: 3, md: 5 } }}
       />
 
@@ -146,7 +146,7 @@ export default function SalesView() {
             <TextField
               select
               size="small"
-              label={tx('pages.sales.filters.payment_label')}
+              label={tx('sales.filters.paymentLabel')}
               value={paymentType}
               onChange={(event) => handlePaymentTypeChange(event.target.value as '' | SalePaymentType)}
               sx={{ maxWidth: 260 }}
@@ -179,7 +179,7 @@ export default function SalesView() {
                       <TableCell>{fDateTime(row.createdAt)}</TableCell>
                     </TableRow>
                   ))}
-                  <TableNoData notFound={!rows.length} title={tx('shared.table.no_data')} />
+                  <TableNoData notFound={!rows.length} title={tx('common.table.noData')} />
                 </TableBody>
               </Table>
             </Scrollbar>

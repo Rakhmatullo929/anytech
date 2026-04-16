@@ -8,7 +8,7 @@ export default function SalesPage() {
   return (
     <>
       <Helmet>
-        <title>{tx('pages.sales.document_title')}</title>
+        <title>{tx('sales.documentTitle')}</title>
       </Helmet>
       <SalesView />
     </>

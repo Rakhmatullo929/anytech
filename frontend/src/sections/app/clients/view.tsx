@@ -65,9 +65,9 @@ export default function ClientsView() {
 
   const tableHead = useMemo(
     () => [
-      { id: 'name', label: tx('shared.table.client') },
-      { id: 'phone', label: tx('shared.table.phone') },
-      { id: 'created', label: tx('shared.table.created') },
+      { id: 'name', label: tx('common.table.client') },
+      { id: 'phone', label: tx('common.table.phone') },
+      { id: 'created', label: tx('common.table.created') },
       { id: '', label: '' },
     ],
     [tx]
@@ -178,7 +178,7 @@ export default function ClientsView() {
     if (!selectedClientId) return;
     try {
       await deleteMutation.mutateAsync(selectedClientId);
-      enqueueSnackbar(tx('pages.clients.toasts.deleted'), { variant: 'success' });
+      enqueueSnackbar(tx('clients.toasts.deleted'), { variant: 'success' });
     } catch (error) {
       console.error(error);
     } finally {
@@ -190,7 +190,7 @@ export default function ClientsView() {
     if (!selectedIds.length) return;
     try {
       await bulkDeleteMutation.mutateAsync(selectedIds);
-      enqueueSnackbar(tx('pages.clients.toasts.bulk_deleted', { count: selectedIds.length }), {
+      enqueueSnackbar(tx('clients.toasts.bulkDeleted', { count: selectedIds.length }), {
         variant: 'success',
       });
       table.onUpdatePageDeleteRows({
@@ -220,7 +220,7 @@ export default function ClientsView() {
 
     try {
       const result = await bulkCreateMutation.mutateAsync(file);
-      enqueueSnackbar(tx('pages.clients.toasts.bulk_created', { count: result.created }), {
+      enqueueSnackbar(tx('clients.toasts.bulkCreated', { count: result.created }), {
         variant: 'success',
       });
     } catch (error) {
@@ -239,8 +239,8 @@ export default function ClientsView() {
   return (
     <>
       <CustomBreadcrumbs
-        heading={tx('layout.nav.clients')}
-        links={[{ name: tx('layout.nav.clients'), href: paths.clients.root }]}
+        heading={tx('common.navigation.clients')}
+        links={[{ name: tx('common.navigation.clients'), href: paths.clients.root }]}
         action={
           <Can page="clients" action="write">
             <Stack direction="row" spacing={1}>
@@ -250,10 +250,10 @@ export default function ClientsView() {
                 onClick={handleOpenExcelPicker}
                 disabled={bulkCreateMutation.isPending}
               >
-                {tx('pages.clients.import_excel_button')}
+                {tx('clients.importExcelButton')}
               </Button>
               <Button variant="contained" startIcon={<Iconify icon="mingcute:add-line" />} onClick={handleOpenCreate}>
-                {tx('pages.clients.add_button')}
+                {tx('clients.addButton')}
               </Button>
             </Stack>
           </Can>
@@ -286,14 +286,14 @@ export default function ClientsView() {
                 onSelectAllRows={(checked) => table.onSelectAllRows(checked, rows.map((row) => row.id))}
                 action={
                   <Button color="error" onClick={handleOpenBulkDelete}>
-                    {tx('shared.actions.delete')}
+                    {tx('common.actions.delete')}
                   </Button>
                 }
               />
             </Can>
             <TextField
               size="small"
-              placeholder={tx('pages.clients.search_placeholder')}
+              placeholder={tx('clients.searchPlaceholder')}
               value={searchValue}
               onChange={(e) => setSearch(e.target.value)}
               sx={{ maxWidth: 360 }}
@@ -339,7 +339,7 @@ export default function ClientsView() {
                       </TableCell>
                     </TableRow>
                   ))}
-                  <TableNoData notFound={!rows.length} title={tx('shared.table.no_data')} />
+                  <TableNoData notFound={!rows.length} title={tx('common.table.noData')} />
                 </TableBody>
               </Table>
             </Scrollbar>
@@ -360,19 +360,19 @@ export default function ClientsView() {
         <Can page="clients" action="detail">
           <MenuItem onClick={handleView}>
             <Iconify icon="solar:eye-bold" />
-            {tx('shared.actions.view')}
+            {tx('common.actions.view')}
           </MenuItem>
         </Can>
         <Can page="clients" action="write">
           <MenuItem onClick={handleEdit}>
             <Iconify icon="solar:pen-bold" />
-            {tx('shared.actions.edit')}
+            {tx('common.actions.edit')}
           </MenuItem>
         </Can>
         <Can page="clients" action="write">
           <MenuItem onClick={handleAskDelete} sx={{ color: 'error.main' }} disabled={deletingCurrent}>
             <Iconify icon="solar:trash-bin-trash-bold" />
-            {tx('shared.actions.delete')}
+            {tx('common.actions.delete')}
           </MenuItem>
         </Can>
       </CustomPopover>
@@ -381,12 +381,12 @@ export default function ClientsView() {
         <ConfirmDialog
           open={deleteOpen}
           onClose={handleCloseDelete}
-          title={tx('pages.clients.dialogs.delete.title')}
-          content={tx('pages.clients.dialogs.delete.description')}
-          cancelText={tx('shared.actions.cancel')}
+          title={tx('clients.dialogs.delete.title')}
+          content={tx('clients.dialogs.delete.description')}
+          cancelText={tx('common.actions.cancel')}
           action={
             <Button color="error" variant="contained" onClick={handleDelete} disabled={deletingCurrent}>
-              {tx('shared.actions.delete')}
+              {tx('common.actions.delete')}
             </Button>
           }
         />
@@ -396,12 +396,12 @@ export default function ClientsView() {
         <ConfirmDialog
           open={bulkDeleteOpen}
           onClose={handleCloseBulkDelete}
-          title={tx('pages.clients.dialogs.delete.bulk_title')}
-          content={tx('pages.clients.dialogs.delete.bulk_description', { count: selectedIds.length })}
-          cancelText={tx('shared.actions.cancel')}
+          title={tx('clients.dialogs.delete.bulkTitle')}
+          content={tx('clients.dialogs.delete.bulkDescription', { count: selectedIds.length })}
+          cancelText={tx('common.actions.cancel')}
           action={
             <Button color="error" variant="contained" onClick={handleBulkDelete} disabled={deletingBulk}>
-              {tx('shared.actions.delete')}
+              {tx('common.actions.delete')}
             </Button>
           }
         />

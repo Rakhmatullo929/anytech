@@ -76,24 +76,24 @@ export default function ProductUpsertDialog({
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
       <DialogTitle>
-        {mode === 'create' ? tx('pages.products.dialogs.create.title') : tx('pages.products.dialogs.edit.title')}
+        {mode === 'create' ? tx('products.dialogs.create.title') : tx('products.dialogs.edit.title')}
       </DialogTitle>
       <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
-            <RHFTextField name="name" label={`${tx('shared.table.name')} *`} />
-            <RHFTextField name="sku" label={tx('shared.table.sku')} />
-            <RHFTextField name="purchasePrice" label={`${tx('pages.products.dialogs.create.purchase_price')} *`} />
-            <RHFTextField name="salePrice" label={`${tx('pages.products.dialogs.create.sale_price')} *`} />
+            <RHFTextField name="name" label={`${tx('common.table.name')} *`} />
+            <RHFTextField name="sku" label={tx('common.table.sku')} />
+            <RHFTextField name="purchasePrice" label={`${tx('products.dialogs.create.purchasePrice')} *`} />
+            <RHFTextField name="salePrice" label={`${tx('products.dialogs.create.salePrice')} *`} />
             {mode === 'create' ? (
-              <RHFTextField name="stock" label={`${tx('pages.products.dialogs.create.initial_stock')} *`} />
+              <RHFTextField name="stock" label={`${tx('products.dialogs.create.initialStock')} *`} />
             ) : null}
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={onClose}>{tx('shared.actions.cancel')}</Button>
+          <Button onClick={onClose}>{tx('common.actions.cancel')}</Button>
           <Button variant="contained" disabled={loading} type="submit">
-            {tx('shared.actions.save')}
+            {tx('common.actions.save')}
           </Button>
         </DialogActions>
       </FormProvider>

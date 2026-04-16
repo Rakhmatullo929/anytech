@@ -9,11 +9,11 @@ export function getLoginSchema(tx: Translate) {
 
   return Yup.object({
     phone: Yup.string()
-      .required(tx('validation.phone_required'))
-      .test('phone-format', tx('validation.phone_invalid_format', { example: phoneRule.example }), (value) =>
+      .required(tx('common.validation.phoneRequired'))
+      .test('phone-format', tx('common.validation.phoneInvalidFormat', { example: phoneRule.example }), (value) =>
         value ? isPhoneValid(normalizeUzLoginPhone(value)) : false
       ),
-    password: Yup.string().required(tx('validation.password_required')),
+    password: Yup.string().required(tx('common.validation.passwordRequired')),
   });
 }
 

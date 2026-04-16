@@ -1,0 +1,20 @@
+{
+  "detail": {
+    "addPayment": "Добавить платёж",
+    "clientLine": "Клиент:",
+    "headingDetail": "Долг · {{name}}",
+    "notFound": "Долг не найден",
+    "paidLine": "Оплачено:",
+    "paymentsSectionTitle": "Платежи",
+    "remLine": "Остаток:",
+    "statusLine": "Статус:",
+    "totalLine": "Всего:"
+  },
+  "detailDocumentTitle": "Долг",
+  "documentTitle": "Долги",
+  "paymentDialog": {
+    "maxAmount": "Максимум:",
+    "payButton": "Оплатить",
+    "title": "Платёж"
+  }
+}

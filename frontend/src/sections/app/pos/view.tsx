@@ -77,9 +77,9 @@ export default function PosView() {
 
   const payLabels = useMemo(
     () => ({
-      cash: tx('shared.payment.cash'),
-      card: tx('shared.payment.card'),
-      debt: tx('shared.payment.debt'),
+      cash: tx('common.payment.cash'),
+      card: tx('common.payment.card'),
+      debt: tx('common.payment.debt'),
     }),
     [tx]
   );
@@ -94,20 +94,20 @@ export default function PosView() {
   return (
     <>
       <CustomBreadcrumbs
-        heading={tx('layout.nav.pos')}
-        links={[{ name: tx('layout.nav.pos'), href: paths.pos }]}
+        heading={tx('common.navigation.pos')}
+        links={[{ name: tx('common.navigation.pos'), href: paths.pos }]}
         sx={{ mb: { xs: 3, md: 5 } }}
       />
 
       <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} alignItems="stretch">
         <Card sx={{ flex: 1, p: 2, minHeight: 480 }}>
           <Typography variant="h6" sx={{ mb: 2 }}>
-            {tx('pages.pos.products_heading')}
+            {tx('pos.productsHeading')}
           </Typography>
           <TextField
             fullWidth
             size="small"
-            placeholder={tx('pages.pos.search_placeholder')}
+            placeholder={tx('pos.searchPlaceholder')}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             sx={{ mb: 2 }}
@@ -126,7 +126,7 @@ export default function PosView() {
                   <Box sx={{ flexGrow: 1 }}>
                     <Typography variant="subtitle2">{p.name}</Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {p.sku} · {tx('pages.pos.stock_short')} {p.stock}
+                      {p.sku} · {tx('pos.stockShort')} {p.stock}
                     </Typography>
                   </Box>
                   <Typography variant="subtitle2">{fCurrency(p.salePrice)}</Typography>
@@ -146,12 +146,12 @@ export default function PosView() {
           }}
         >
           <Typography variant="h6" sx={{ mb: 2 }}>
-            {tx('pages.pos.cart')}
+            {tx('pos.cart')}
           </Typography>
 
           {cart.length === 0 ? (
             <Typography color="text.secondary" variant="body2">
-              {tx('pages.pos.empty_cart')}
+              {tx('pos.emptyCart')}
             </Typography>
           ) : (
             <Stack spacing={1.5} divider={<Divider flexItem />}>
@@ -187,11 +187,11 @@ export default function PosView() {
               select
               fullWidth
               size="small"
-              label={tx('pages.pos.client')}
+              label={tx('pos.client')}
               value={clientId}
               onChange={(e) => setClientId(e.target.value)}
             >
-              <MenuItem value="guest">{tx('shared.labels.guest')}</MenuItem>
+              <MenuItem value="guest">{tx('common.labels.guest')}</MenuItem>
               {MOCK_CLIENTS.map((c) => (
                 <MenuItem key={c.id} value={c.id}>
                   {c.name}
@@ -203,7 +203,7 @@ export default function PosView() {
               select
               fullWidth
               size="small"
-              label={tx('shared.payment.method')}
+              label={tx('common.payment.method')}
               value={paymentType}
               onChange={(e) => setPaymentType(e.target.value as 'cash' | 'card' | 'debt')}
             >
@@ -213,7 +213,7 @@ export default function PosView() {
             </TextField>
 
             <Typography variant="h6">
-              {tx('shared.labels.total')}: {fCurrency(subtotal)}
+              {tx('common.labels.total')}: {fCurrency(subtotal)}
             </Typography>
 
             <Button
@@ -223,7 +223,7 @@ export default function PosView() {
               disabled={!cart.length}
               onClick={completeSale}
             >
-              {tx('pages.pos.complete_sale')}
+              {tx('pos.completeSale')}
             </Button>
           </Stack>
         </Card>
