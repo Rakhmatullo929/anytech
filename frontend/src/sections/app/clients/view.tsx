@@ -46,12 +46,8 @@ import {
   useClientsListQuery,
   useBulkDeleteClientsMutation,
   useBulkCreateClientsMutation,
-  useCreateClientMutation,
   useDeleteClientMutation,
-  useUpdateClientMutation,
 } from 'src/sections/app/clients/api/use-clients-api';
-import type { ClientListItem } from 'src/sections/app/clients/api/types';
-import { ClientUpsertDialog } from 'src/sections/app/clients/components';
 import { ClientsListSkeleton } from 'src/sections/app/clients/skeleton';
 
 // ----------------------------------------------------------------------
@@ -62,11 +58,9 @@ export default function ClientsView() {
   const { canWritePage, canDetailPage } = useCheckPermission();
   const { enqueueSnackbar } = useSnackbar();
   const actionsPopover = usePopover();
-  const createMutation = useCreateClientMutation();
   const deleteMutation = useDeleteClientMutation();
   const bulkDeleteMutation = useBulkDeleteClientsMutation();
   const bulkCreateMutation = useBulkCreateClientsMutation();
-  const updateMutation = useUpdateClientMutation();
   const excelInputRef = useRef<HTMLInputElement | null>(null);
 
   const tableHead = useMemo(
@@ -85,7 +79,6 @@ export default function ClientsView() {
     search: searchValue,
     ordering,
     setSearch,
-    setValues: setQueryState,
     handlePageChange,
     handleRowsPerPageChange,
   } = useUrlListState({
@@ -99,9 +92,6 @@ export default function ClientsView() {
   });
   const debouncedSearch = useDebounce(searchValue.trim(), 400);
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
-  const [upsertOpen, setUpsertOpen] = useState(false);
-  const [upsertMode, setUpsertMode] = useState<'create' | 'edit'>('create');
-  const [editingClient, setEditingClient] = useState<ClientListItem | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
 
@@ -162,14 +152,7 @@ export default function ClientsView() {
 
   const handleEdit = () => {
     if (!selectedClientId) return;
-    const client = rows.find((row) => row.id === selectedClientId);
-    if (!client) {
-      closeActions();
-      return;
-    }
-    setEditingClient(client);
-    setUpsertMode('edit');
-    setUpsertOpen(true);
+    router.push(paths.clients.edit(selectedClientId));
     closeActions(false);
   };
 
@@ -223,9 +206,7 @@ export default function ClientsView() {
   };
 
   const handleOpenCreate = () => {
-    setUpsertMode('create');
-    setEditingClient(null);
-    setUpsertOpen(true);
+    router.push(paths.clients.create);
   };
 
   const handleOpenExcelPicker = () => {
@@ -247,45 +228,12 @@ export default function ClientsView() {
     }
   };
 
-  const handleCloseUpsert = () => {
-    setUpsertOpen(false);
-    setEditingClient(null);
-  };
-
-  const handleSubmitUpsert = async (values: { name: string; phone: string }) => {
-    if (!values.name.trim() || !values.phone.trim()) {
-      enqueueSnackbar(tx('pages.clients.toasts.required_fields'), { variant: 'warning' });
-      return;
-    }
-    try {
-      if (upsertMode === 'create') {
-        await createMutation.mutateAsync({
-          name: values.name.trim(),
-          phone: values.phone.trim(),
-        });
-        enqueueSnackbar(tx('pages.clients.toasts.created'), { variant: 'success' });
-      } else if (editingClient) {
-        await updateMutation.mutateAsync({
-          id: editingClient.id,
-          name: values.name.trim(),
-          phone: values.phone.trim(),
-        });
-        enqueueSnackbar(tx('pages.clients.toasts.updated'), { variant: 'success' });
-      }
-      handleCloseUpsert();
-      setPage(0);
-      setQueryState({ page: 1, search: '' });
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
   const deletingCurrent =
     deleteMutation.isPending &&
     selectedClientId !== null &&
     deleteMutation.variables === selectedClientId;
   const deletingBulk = bulkDeleteMutation.isPending;
-  const upsertLoading = createMutation.isPending || updateMutation.isPending;
   const canWriteClients = canWritePage('clients');
   const canDetailClients = canDetailPage('clients');
   return (
@@ -428,24 +376,6 @@ export default function ClientsView() {
           </MenuItem>
         </Can>
       </CustomPopover>
-
-      <Can page="clients" action="write">
-        <ClientUpsertDialog
-          open={upsertOpen}
-          mode={upsertMode}
-          loading={upsertLoading}
-          initialValues={
-            upsertMode === 'edit' && editingClient
-              ? {
-                  name: editingClient.name,
-                  phone: editingClient.phone,
-                }
-              : undefined
-          }
-          onClose={handleCloseUpsert}
-          onSubmit={handleSubmitUpsert}
-        />
-      </Can>
 
       <Can page="clients" action="write">
         <ConfirmDialog

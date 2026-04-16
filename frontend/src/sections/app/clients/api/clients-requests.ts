@@ -37,7 +37,18 @@ export async function createClient(payload: CreateClientPayload): Promise<Client
   return request<ClientListItem>({
     method: 'POST',
     url: API_ENDPOINTS.clients.list,
-    data: payload,
+    data: {
+      name: payload.name,
+      lastName: payload.lastName ?? '',
+      middleName: payload.middleName ?? '',
+      birthDate: payload.birthDate ?? null,
+      communicationLanguage: payload.communicationLanguage ?? '',
+      gender: payload.gender ?? '',
+      maritalStatus: payload.maritalStatus ?? '',
+      phones: payload.phones,
+      addresses: payload.addresses ?? [],
+      socialNetworks: payload.socialNetworks ?? {},
+    },
   });
 }
 
@@ -73,7 +84,15 @@ export async function updateClient(payload: UpdateClientPayload): Promise<Client
     url: API_ENDPOINTS.clients.detail(payload.id),
     data: {
       name: payload.name,
-      phone: payload.phone,
+      lastName: payload.lastName ?? '',
+      middleName: payload.middleName ?? '',
+      birthDate: payload.birthDate ?? null,
+      communicationLanguage: payload.communicationLanguage ?? '',
+      gender: payload.gender ?? '',
+      maritalStatus: payload.maritalStatus ?? '',
+      phones: payload.phones,
+      addresses: payload.addresses ?? [],
+      socialNetworks: payload.socialNetworks ?? {},
     },
   });
 }

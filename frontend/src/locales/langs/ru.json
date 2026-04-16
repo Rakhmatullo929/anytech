@@ -17,23 +17,33 @@
   "pages": {
     "clients": {
       "add_button": "Добавить клиента",
+      "create_document_title": "Создать клиента",
+      "edit_document_title": "Редактировать клиента",
       "import_excel_button": "Импорт Excel",
       "detail": {
         "not_found": "Клиент не найден",
         "no_purchases": "Покупок пока нет",
+        "first_purchase": "Первая покупка",
+        "last_purchase": "Последняя покупка",
+        "not_set": "Не задано",
         "phone_label": "Телефон",
-        "purchase_history": "История покупок"
+        "purchase_history": "История покупок",
+        "sections": {
+          "personal": "Личные данные",
+          "phones": "Телефоны",
+          "addresses": "Адреса",
+          "social_networks": "Социальные сети"
+        },
+        "tabs": {
+          "overview": "Обзор",
+          "contacts": "Контакты",
+          "addresses": "Адреса",
+          "purchases": "Покупки"
+        }
       },
       "detail_document_title": "Клиент",
       "document_title": "Клиенты",
       "dialogs": {
-        "create": {
-          "first_name_label": "Имя",
-          "title": "Новый клиент"
-        },
-        "edit": {
-          "title": "Редактировать клиента"
-        },
         "delete": {
           "bulk_description": "Вы точно хотите удалить выбранные клиенты? Количество: {{count}}",
           "bulk_title": "Массовое удаление клиентов",
@@ -42,12 +52,55 @@
         }
       },
       "search_placeholder": "Поиск по имени или телефону…",
+      "form": {
+        "create_title": "Новый клиент",
+        "edit_title": "Редактировать клиента",
+        "add_phone": "Добавить телефон",
+        "add_address": "Добавить адрес",
+        "sections": {
+          "personal": "Личные данные",
+          "phones": "Телефоны",
+          "addresses": "Адреса",
+          "social_networks": "Социальные сети"
+        },
+        "fields": {
+          "name": "Имя",
+          "last_name": "Фамилия",
+          "middle_name": "Отчество",
+          "birth_date": "Дата рождения",
+          "communication_language": "Язык общения",
+          "phone_country": "Страна",
+          "gender": "Пол",
+          "marital_status": "Семейное положение",
+          "country": "Страна",
+          "city": "Город",
+          "address": "Адрес",
+          "postal_code": "Почтовый индекс",
+          "note": "Заметка",
+          "telegram": "Telegram",
+          "instagram": "Instagram",
+          "facebook": "Facebook"
+        },
+        "countries": {
+          "uz": "Узбекистан",
+          "ru": "Россия",
+          "us": "США"
+        },
+        "marital": {
+          "married": "В браке",
+          "single": "Не в браке"
+        },
+        "languages": {
+          "uz": "Узбекский",
+          "ru": "Русский",
+          "en": "English"
+        }
+      },
       "toasts": {
         "bulk_deleted": "Удалено клиентов: {{count}}",
         "bulk_created": "Импортировано клиентов: {{count}}",
         "created": "Клиент успешно создан",
         "deleted": "Клиент удалён",
-        "required_fields": "Имя и телефон обязательны",
         "updated": "Клиент обновлён"
       }
     },

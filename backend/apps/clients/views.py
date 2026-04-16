@@ -23,7 +23,7 @@ class ClientViewSet(TenantQuerySetMixin, ModelViewSet):
     serializer_class = ClientSerializer
     http_method_names = ["get", "post", "put", "patch", "delete", "head", "options"]
 
-    search_fields = ["name", "phone"]
+    search_fields = ["name", "last_name", "middle_name", "phone"]
     ordering_fields = ["name", "created_at"]
     ordering = ["-created_at"]
 
@@ -133,7 +133,7 @@ class ClientViewSet(TenantQuerySetMixin, ModelViewSet):
 
         with transaction.atomic():
             clients_to_create = [
-                Client(tenant=tenant, name=name, phone=phone)
+                Client(tenant=tenant, name=name, phone=phone, phones=[phone])
                 for name, phone in valid_rows
             ]
             created_clients = Client.objects.bulk_create(clients_to_create)
