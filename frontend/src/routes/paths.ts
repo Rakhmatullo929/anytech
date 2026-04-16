@@ -11,6 +11,8 @@ export const paths = {
   },
   clients: {
     root: '/clients',
+    create: '/clients/new',
+    edit: (id: string) => `/clients/${id}/edit`,
     details: (id: string) => `/clients/${id}`,
   },
   sales: {

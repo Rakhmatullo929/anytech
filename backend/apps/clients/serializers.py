@@ -1,5 +1,6 @@
 from django.db.models import F, Sum
 from rest_framework import serializers
+import re
 
 from debts.models import Debt
 from sales.models import Sale
@@ -9,6 +10,79 @@ from .models import Client
 
 
 class ClientSerializer(serializers.ModelSerializer):
+    PHONE_PATTERNS = (
+        (re.compile(r"^\+998\d{9}$"), "+998901234567"),
+        (re.compile(r"^\+7\d{10}$"), "+79991234567"),
+        (re.compile(r"^\+1\d{10}$"), "+12025550123"),
+    )
+
+    @classmethod
+    def normalize_phone(cls, value):
+        return str(value or "").strip().replace(" ", "")
+
+    @classmethod
+    def is_supported_phone(cls, value):
+        return any(pattern.fullmatch(value) for pattern, _ in cls.PHONE_PATTERNS)
+
+    @classmethod
+    def supported_phone_examples(cls):
+        return ", ".join(example for _, example in cls.PHONE_PATTERNS)
+
+    communication_language = serializers.ChoiceField(
+        choices=Client.CommunicationLanguage.choices,
+        required=False,
+        allow_blank=True,
+    )
+    phones = serializers.ListField(
+        child=serializers.CharField(allow_blank=True, trim_whitespace=True),
+        allow_empty=False,
+    )
+    addresses = serializers.ListField(
+        child=serializers.DictField(child=serializers.CharField(allow_blank=True, required=False)),
+        required=False,
+        allow_empty=True,
+    )
+    social_networks = serializers.DictField(
+        child=serializers.CharField(allow_blank=True, required=False),
+        required=False,
+    )
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        phones = attrs.get("phones")
+        if phones is None:
+            fallback_phone = str(attrs.get("phone", "")).strip()
+            if fallback_phone:
+                phones = [fallback_phone]
+        if phones is None and self.instance is not None:
+            phones = self.instance.phones
+        normalized_phones = [self.normalize_phone(phone) for phone in (phones or []) if self.normalize_phone(phone)]
+        if not normalized_phones:
+            raise serializers.ValidationError({"phones": "At least one phone number is required."})
+        invalid_phones = [phone for phone in normalized_phones if not self.is_supported_phone(phone)]
+        if invalid_phones:
+            raise serializers.ValidationError(
+                {
+                    "phones": (
+                        f"Unsupported phone format: {', '.join(invalid_phones)}. "
+                        f"Use one of: {self.supported_phone_examples()}."
+                    )
+                }
+            )
+        primary_phone = normalized_phones[0]
+        tenant = self.context["request"].user.tenant
+        duplicate_qs = Client.objects.filter(tenant=tenant, phone=primary_phone)
+        if self.instance:
+            duplicate_qs = duplicate_qs.exclude(pk=self.instance.pk)
+        if duplicate_qs.exists():
+            raise serializers.ValidationError(
+                {"phones": "Client with this phone number already exists."}
+            )
+
+        attrs["phones"] = normalized_phones
+        attrs["phone"] = primary_phone
+        return attrs
+
     def validate_name(self, value):
         value = value.strip()
         if not value:
@@ -16,10 +90,11 @@ class ClientSerializer(serializers.ModelSerializer):
         return value
 
     def validate_phone(self, value):
-        value = value.strip()
-        if not value:
-            raise serializers.ValidationError("Phone number is required.")
-
+        value = self.normalize_phone(value)
+        if not self.is_supported_phone(value):
+            raise serializers.ValidationError(
+                f"Phone must match one of: {self.supported_phone_examples()}."
+            )
         tenant = self.context["request"].user.tenant
         qs = Client.objects.filter(tenant=tenant, phone=value)
         if self.instance:
@@ -32,8 +107,26 @@ class ClientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Client
-        fields = ("id", "tenant", "name", "phone", "created_at")
+        fields = (
+            "id",
+            "tenant",
+            "name",
+            "last_name",
+            "middle_name",
+            "birth_date",
+            "communication_language",
+            "gender",
+            "marital_status",
+            "phone",
+            "phones",
+            "addresses",
+            "social_networks",
+            "created_at",
+        )
         read_only_fields = ("id", "tenant", "created_at")
+        extra_kwargs = {
+            "phone": {"required": False},
+        }
 
 
 # ── Inline serializers for client detail (purchase history) ──────────

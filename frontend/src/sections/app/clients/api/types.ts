@@ -1,9 +1,20 @@
 /** Client row from `GET /api/v1/clients/` (camelCase after axios transform). */
+export type ClientCommunicationLanguage = '' | 'uz' | 'ru' | 'en';
+
 export type ClientListItem = {
   id: string;
   tenant: string;
   name: string;
+  lastName: string;
+  middleName: string;
+  birthDate: string | null;
+  communicationLanguage: ClientCommunicationLanguage;
+  gender: string;
+  maritalStatus: string;
   phone: string;
+  phones: string[];
+  addresses: ClientAddress[];
+  socialNetworks: ClientSocialNetworks;
   createdAt: string;
 };
 
@@ -16,13 +27,44 @@ export type FetchClientsListParams = {
 
 export type CreateClientPayload = {
   name: string;
-  phone: string;
+  lastName?: string;
+  middleName?: string;
+  birthDate?: string | null;
+  communicationLanguage?: ClientCommunicationLanguage;
+  gender?: string;
+  maritalStatus?: string;
+  phones: string[];
+  addresses?: ClientAddress[];
+  socialNetworks?: ClientSocialNetworks;
 };
 
 export type UpdateClientPayload = {
   id: string;
   name: string;
-  phone: string;
+  lastName?: string;
+  middleName?: string;
+  birthDate?: string | null;
+  communicationLanguage?: ClientCommunicationLanguage;
+  gender?: string;
+  maritalStatus?: string;
+  phones: string[];
+  addresses?: ClientAddress[];
+  socialNetworks?: ClientSocialNetworks;
+};
+
+export type ClientAddress = {
+  country?: string;
+  city?: string;
+  address?: string;
+  postalCode?: string;
+  note?: string;
+};
+
+export type ClientSocialNetworks = {
+  email?: string;
+  telegram?: string;
+  instagram?: string;
+  facebook?: string;
 };
 
 export type BulkCreateClientsResult = {

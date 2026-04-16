@@ -17,23 +17,33 @@
   "pages": {
     "clients": {
       "add_button": "Mijoz qoʻshish",
+      "create_document_title": "Mijoz yaratish",
+      "edit_document_title": "Mijozni tahrirlash",
       "import_excel_button": "Excel import",
       "detail": {
         "not_found": "Mijoz topilmadi",
         "no_purchases": "Hozircha xaridlar yoʻq",
+        "first_purchase": "Birinchi xarid",
+        "last_purchase": "Soʻnggi xarid",
+        "not_set": "Kiritilmagan",
         "phone_label": "Telefon",
-        "purchase_history": "Xaridlar tarixi"
+        "purchase_history": "Xaridlar tarixi",
+        "sections": {
+          "personal": "Shaxsiy ma'lumotlar",
+          "phones": "Telefonlar",
+          "addresses": "Manzillar",
+          "social_networks": "Ijtimoiy tarmoqlar"
+        },
+        "tabs": {
+          "overview": "Umumiy",
+          "contacts": "Kontaktlar",
+          "addresses": "Manzillar",
+          "purchases": "Xaridlar"
+        }
       },
       "detail_document_title": "Mijoz",
       "document_title": "Mijozlar",
       "dialogs": {
-        "create": {
-          "first_name_label": "Ism",
-          "title": "Yangi mijoz"
-        },
-        "edit": {
-          "title": "Mijozni tahrirlash"
-        },
         "delete": {
           "bulk_description": "Tanlangan mijozlarni o‘chirishni tasdiqlaysizmi? Soni: {{count}}",
           "bulk_title": "Mijozlarni ommaviy o‘chirish",
@@ -42,12 +52,55 @@
         }
       },
       "search_placeholder": "Ism yoki telefon boʻyicha qidiruv…",
+      "form": {
+        "create_title": "Yangi mijoz",
+        "edit_title": "Mijozni tahrirlash",
+        "add_phone": "Telefon qoʻshish",
+        "add_address": "Manzil qoʻshish",
+        "sections": {
+          "personal": "Shaxsiy ma'lumotlar",
+          "phones": "Telefonlar",
+          "addresses": "Manzillar",
+          "social_networks": "Ijtimoiy tarmoqlar"
+        },
+        "fields": {
+          "name": "Ism",
+          "last_name": "Familiya",
+          "middle_name": "Otasining ismi",
+          "birth_date": "Tugʻilgan sana",
+          "communication_language": "Muloqot tili",
+          "phone_country": "Mamlakat",
+          "gender": "Jins",
+          "marital_status": "Oilaviy holat",
+          "country": "Mamlakat",
+          "city": "Shahar",
+          "address": "Manzil",
+          "postal_code": "Pochta indeksi",
+          "note": "Izoh",
+          "telegram": "Telegram",
+          "instagram": "Instagram",
+          "facebook": "Facebook"
+        },
+        "countries": {
+          "uz": "O'zbekiston",
+          "ru": "Rossiya",
+          "us": "AQSH"
+        },
+        "marital": {
+          "married": "Turmush qurgan",
+          "single": "Turmush qurmagan"
+        },
+        "languages": {
+          "uz": "O'zbekcha",
+          "ru": "Русский",
+          "en": "English"
+        }
+      },
       "toasts": {
         "bulk_deleted": "O‘chirilgan mijozlar soni: {{count}}",
         "bulk_created": "Import qilingan mijozlar soni: {{count}}",
         "created": "Mijoz muvaffaqiyatli yaratildi",
         "deleted": "Mijoz o‘chirildi",
-        "required_fields": "Ism va telefon majburiy",
         "updated": "Mijoz yangilandi"
       }
     },
