@@ -1,0 +1,53 @@
+{
+  "addButton": "Foydalanuvchi qoʻshish",
+  "createDocumentTitle": "Foydalanuvchi yaratish",
+  "detailDocumentTitle": "Foydalanuvchi",
+  "documentTitle": "Foydalanuvchilar",
+  "editDocumentTitle": "Foydalanuvchini tahrirlash",
+  "actions": {
+    "loginAs": "Nomidan kirish"
+  },
+  "detail": {
+    "infoTitle": "Foydalanuvchi ma'lumotlari",
+    "notFound": "Foydalanuvchi topilmadi"
+  },
+  "dialogs": {
+    "create": {
+      "title": "Yangi foydalanuvchi",
+      "confirmPassword": "Parolni tasdiqlash"
+    },
+    "edit": {
+      "title": "Foydalanuvchini tahrirlash",
+      "newPassword": "Yangi parol",
+      "confirmNewPassword": "Yangi parolni tasdiqlash"
+    },
+    "delete": {
+      "title": "Foydalanuvchini o‘chirish",
+      "description": "Ushbu foydalanuvchini o‘chirishni tasdiqlaysizmi?"
+    }
+  },
+  "searchPlaceholder": "Ism, telefon yoki email boʻyicha qidiruv…",
+  "roles": {
+    "admin": "Admin",
+    "manager": "Manager",
+    "seller": "Sotuvchi"
+  },
+  "genders": {
+    "male": "Erkak",
+    "female": "Ayol"
+  },
+  "table": {
+    "role": "Rol"
+  },
+  "form": {
+    "passportPrefix": "Pasport seriyasi (harf)",
+    "passportNumber": "Pasport seriyasi (raqam)"
+  },
+  "toasts": {
+    "loginAsSuccess": "Foydalanuvchi nomidan tizimga kirildi",
+    "loginAsProfileSyncFailed": "Foydalanuvchi nomidan kirilgandan so'ng profilni yangilab bo'lmadi",
+    "created": "Foydalanuvchi yaratildi",
+    "updated": "Foydalanuvchi yangilandi",
+    "deleted": "Foydalanuvchi o‘chirildi"
+  }
+}

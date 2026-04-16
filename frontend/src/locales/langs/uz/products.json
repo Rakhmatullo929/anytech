@@ -1,0 +1,45 @@
+{
+  "addButton": "Mahsulot qoʻshish",
+  "createButton": "Mahsulot yaratish",
+  "detail": {
+    "notFound": "Mahsulot topilmadi"
+  },
+  "detailDocumentTitle": "Mahsulot",
+  "documentTitle": "Mahsulotlar",
+  "dialogs": {
+    "create": {
+      "initialStock": "Boshlangʻich qoldiq",
+      "purchasePrice": "Xarid narxi",
+      "salePrice": "Sotuv narxi",
+      "title": "Yangi mahsulot"
+    },
+    "edit": {
+      "stockHint": "Qoldiq faqat qoldiqni oʻzgartirish orqali yangilanadi.",
+      "title": "Tahrirlash"
+    },
+    "delete": {
+      "bulkDescription": "Tanlangan mahsulotlarni o‘chirishni tasdiqlaysizmi? Soni: {{count}}",
+      "bulkTitle": "Mahsulotlarni ommaviy o‘chirish",
+      "description": "Mahsulotni o‘chirishni tasdiqlaysizmi?",
+      "title": "Mahsulotni o‘chirish"
+    },
+    "stock": {
+      "delta": "Oʻzgarish (+/-)",
+      "mode": "Rejim",
+      "modeIncrement": "Qoʻshish yoki ayirish",
+      "modeSet": "Qiymatni belgilash",
+      "newStock": "Yangi qoldiq",
+      "title": "Qoldiq"
+    }
+  },
+  "searchPlaceholder": "Nom yoki SKU boʻyicha qidiruv…",
+  "toasts": {
+    "bulkDeleted": "O‘chirilgan mahsulotlar soni: {{count}}",
+    "created": "Mahsulot muvaffaqiyatli yaratildi",
+    "deleted": "Mahsulot o‘chirildi",
+    "invalidPrices": "Narxlarni tekshiring: qiymatlar 0 dan katta yoki teng son bo'lishi kerak",
+    "invalidStock": "Qoldiqni tekshiring: qiymat 0 dan katta yoki teng son bo'lishi kerak",
+    "requiredFields": "Nomi, xarid narxi va sotuv narxi majburiy",
+    "updated": "Mahsulot yangilandi"
+  }
+}

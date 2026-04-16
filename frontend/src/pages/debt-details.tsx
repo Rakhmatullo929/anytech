@@ -8,7 +8,7 @@ export default function DebtDetailsPage() {
   return (
     <>
       <Helmet>
-        <title>{tx('pages.debts.detail_document_title')}</title>
+        <title>{tx('debts.detailDocumentTitle')}</title>
       </Helmet>
       <DebtDetailsView />
     </>

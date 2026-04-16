@@ -1,0 +1,89 @@
+{
+  "addButton": "Добавить клиента",
+  "createDocumentTitle": "Создать клиента",
+  "editDocumentTitle": "Редактировать клиента",
+  "importExcelButton": "Импорт Excel",
+  "detail": {
+    "notFound": "Клиент не найден",
+    "noPurchases": "Покупок пока нет",
+    "firstPurchase": "Первая покупка",
+    "lastPurchase": "Последняя покупка",
+    "notSet": "Не задано",
+    "phoneLabel": "Телефон",
+    "purchaseHistory": "История покупок",
+    "sections": {
+      "personal": "Личные данные",
+      "phones": "Телефоны",
+      "addresses": "Адреса",
+      "socialNetworks": "Социальные сети"
+    },
+    "tabs": {
+      "overview": "Обзор",
+      "contacts": "Контакты",
+      "addresses": "Адреса",
+      "purchases": "Покупки"
+    }
+  },
+  "detailDocumentTitle": "Клиент",
+  "documentTitle": "Клиенты",
+  "dialogs": {
+    "delete": {
+      "bulkDescription": "Вы точно хотите удалить выбранные клиенты? Количество: {{count}}",
+      "bulkTitle": "Массовое удаление клиентов",
+      "description": "Вы точно хотите удалить клиента?",
+      "title": "Удаление клиента"
+    }
+  },
+  "searchPlaceholder": "Поиск по имени или телефону…",
+  "form": {
+    "createTitle": "Новый клиент",
+    "editTitle": "Редактировать клиента",
+    "addPhone": "Добавить телефон",
+    "addAddress": "Добавить адрес",
+    "sections": {
+      "personal": "Личные данные",
+      "phones": "Телефоны",
+      "addresses": "Адреса",
+      "socialNetworks": "Социальные сети"
+    },
+    "fields": {
+      "name": "Имя",
+      "lastName": "Фамилия",
+      "middleName": "Отчество",
+      "birthDate": "Дата рождения",
+      "communicationLanguage": "Язык общения",
+      "phoneCountry": "Страна",
+      "gender": "Пол",
+      "maritalStatus": "Семейное положение",
+      "country": "Страна",
+      "city": "Город",
+      "address": "Адрес",
+      "postalCode": "Почтовый индекс",
+      "note": "Заметка",
+      "telegram": "Telegram",
+      "instagram": "Instagram",
+      "facebook": "Facebook"
+    },
+    "countries": {
+      "uz": "Узбекистан",
+      "ru": "Россия",
+      "us": "США"
+    },
+    "marital": {
+      "married": "В браке",
+      "single": "Не в браке"
+    },
+    "languages": {
+      "uz": "Узбекский",
+      "ru": "Русский",
+      "en": "English"
+    }
+  },
+  "toasts": {
+    "bulkDeleted": "Удалено клиентов: {{count}}",
+    "bulkCreated": "Импортировано клиентов: {{count}}",
+    "created": "Клиент успешно создан",
+    "deleted": "Клиент удалён",
+    "updated": "Клиент обновлён"
+  }
+}

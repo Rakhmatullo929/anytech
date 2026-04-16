@@ -11,24 +11,24 @@ function numericStringSchema(requiredMessage: string, invalidMessage: string, mi
 
 export function getProductUpsertSchema(tx: Translate, mode: 'create' | 'edit') {
   return Yup.object({
-    name: Yup.string().trim().required(tx('validation.product_name_required')),
+    name: Yup.string().trim().required(tx('common.validation.productNameRequired')),
     sku: Yup.string().trim(),
     purchasePrice: numericStringSchema(
-      tx('validation.purchase_price_required'),
-      tx('validation.number_invalid'),
-      tx('validation.number_min_zero')
+      tx('common.validation.purchasePriceRequired'),
+      tx('common.validation.numberInvalid'),
+      tx('common.validation.numberMinZero')
     ),
     salePrice: numericStringSchema(
-      tx('validation.sale_price_required'),
-      tx('validation.number_invalid'),
-      tx('validation.number_min_zero')
+      tx('common.validation.salePriceRequired'),
+      tx('common.validation.numberInvalid'),
+      tx('common.validation.numberMinZero')
     ),
     stock:
       mode === 'create'
         ? numericStringSchema(
-            tx('validation.stock_required'),
-            tx('validation.number_invalid'),
-            tx('validation.number_min_zero')
+            tx('common.validation.stockRequired'),
+            tx('common.validation.numberInvalid'),
+            tx('common.validation.numberMinZero')
           )
         : Yup.string().optional(),
   });

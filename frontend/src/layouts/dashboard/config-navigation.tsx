@@ -41,12 +41,12 @@ export function useNavData() {
   const data = useMemo(
     () => [
       {
-        subheader: tx('layout.nav.group'),
+        subheader: tx('common.navigation.group'),
         items: [
           ...(canReadAdmin
             ? [
                 {
-                  title: tx('layout.nav.admin'),
+                  title: tx('common.navigation.admin'),
                   path: paths.admin.root,
                   icon: ICONS.user,
                 },
@@ -55,7 +55,7 @@ export function useNavData() {
           ...(canReadPos
             ? [
                 {
-                  title: tx('layout.nav.pos'),
+                  title: tx('common.navigation.pos'),
                   path: paths.pos,
                   icon: ICONS.pos,
                 },
@@ -64,7 +64,7 @@ export function useNavData() {
           ...(canReadProducts
             ? [
                 {
-                  title: tx('layout.nav.products'),
+                  title: tx('common.navigation.products'),
                   path: paths.products.root,
                   icon: ICONS.product,
                 },
@@ -73,7 +73,7 @@ export function useNavData() {
           ...(canReadClients
             ? [
                 {
-                  title: tx('layout.nav.clients'),
+                  title: tx('common.navigation.clients'),
                   path: paths.clients.root,
                   icon: ICONS.user,
                 },
@@ -82,7 +82,7 @@ export function useNavData() {
           ...(canReadSales
             ? [
                 {
-                  title: tx('layout.nav.sales'),
+                  title: tx('common.navigation.sales'),
                   path: paths.sales.root,
                   icon: ICONS.order,
                 },
@@ -91,7 +91,7 @@ export function useNavData() {
           ...(canReadDebts
             ? [
                 {
-                  title: tx('layout.nav.debts'),
+                  title: tx('common.navigation.debts'),
                   path: paths.debts.root,
                   icon: ICONS.invoice,
                 },

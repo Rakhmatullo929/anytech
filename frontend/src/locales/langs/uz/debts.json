@@ -1,0 +1,20 @@
+{
+  "detail": {
+    "addPayment": "Toʻlov qoʻshish",
+    "clientLine": "Mijoz:",
+    "headingDetail": "Qarz · {{name}}",
+    "notFound": "Qarz topilmadi",
+    "paidLine": "Toʻlangan:",
+    "paymentsSectionTitle": "Toʻlovlar",
+    "remLine": "Qoldiq:",
+    "statusLine": "Holat:",
+    "totalLine": "Jami:"
+  },
+  "detailDocumentTitle": "Qarz",
+  "documentTitle": "Qarzlar",
+  "paymentDialog": {
+    "maxAmount": "Maksimum:",
+    "payButton": "Toʻlash",
+    "title": "Toʻlov"
+  }
+}

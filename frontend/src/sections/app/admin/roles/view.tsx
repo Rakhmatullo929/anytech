@@ -117,7 +117,7 @@ export default function AdminRolesView() {
     const permissions = Array.from(draftPermissions[role] || []).sort();
     try {
       await updateMutation.mutateAsync({ role, permissions });
-      enqueueSnackbar(tx('pages.admin.roles.toasts.saved'), { variant: 'success' });
+      enqueueSnackbar(tx('admin.roles.toasts.saved'), { variant: 'success' });
     } catch (error) {
       console.error(error);
     }
@@ -126,10 +126,10 @@ export default function AdminRolesView() {
   return (
     <>
       <CustomBreadcrumbs
-        heading={tx('layout.nav.admin')}
+        heading={tx('common.navigation.admin')}
         links={[
-          { name: tx('layout.nav.admin'), href: paths.admin.users.root },
-          { name: tx('pages.admin.tabs.roles'), href: paths.admin.roles },
+          { name: tx('common.navigation.admin'), href: paths.admin.users.root },
+          { name: tx('admin.tabs.roles'), href: paths.admin.roles },
         ]}
         sx={{ mb: { xs: 3, md: 5 } }}
       />
@@ -138,14 +138,14 @@ export default function AdminRolesView() {
       <Card sx={{ p: 2 }}>
         {isPending ? <LinearProgress sx={{ mb: 2 }} /> : null}
         <Stack spacing={0.5} sx={{ px: 1, pt: 0.5, pb: 1.5 }}>
-          <Typography variant="subtitle1">{tx('pages.admin.roles.list_title')}</Typography>
+          <Typography variant="subtitle1">{tx('admin.roles.listTitle')}</Typography>
           <Typography variant="body2" color="text.secondary">
-            {tx('pages.admin.roles.list_hint')}
+            {tx('admin.roles.listHint')}
           </Typography>
         </Stack>
 
         {!isPending && roles.length === 0 ? (
-          <EmptyContent title={tx('shared.table.no_data')} />
+          <EmptyContent title={tx('common.table.noData')} />
         ) : (
           <Stack spacing={2}>
             {roles.map((role) => (
@@ -168,7 +168,7 @@ export default function AdminRolesView() {
                   <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ width: 1, pr: 1 }}>
                     <Stack spacing={0.25}>
                       <Stack direction="row" spacing={1} alignItems="center">
-                        <Typography sx={{ fontWeight: 700 }}>{tx(`pages.users.roles.${role.value}`)}</Typography>
+                        <Typography sx={{ fontWeight: 700 }}>{tx(`users.roles.${role.value}`)}</Typography>
                         {hasChanges ? (
                           <Stack direction="row" spacing={0.5} alignItems="center">
                             <Box
@@ -180,13 +180,13 @@ export default function AdminRolesView() {
                               }}
                             />
                             <Typography variant="caption" color="warning.main" sx={{ fontWeight: 600 }}>
-                              {tx('pages.admin.roles.unsaved_changes')}
+                              {tx('admin.roles.unsavedChanges')}
                             </Typography>
                           </Stack>
                         ) : null}
                       </Stack>
                       <Typography variant="body2" color="text.secondary">
-                        {tx(`pages.admin.roles.items.${role.value}`)}
+                        {tx(`admin.roles.items.${role.value}`)}
                       </Typography>
                     </Stack>
                     <Stack direction="row" spacing={1}>
@@ -194,7 +194,7 @@ export default function AdminRolesView() {
                         size="small"
                         variant="soft"
                         color={getRoleColor(role.value)}
-                        label={tx(`pages.users.roles.${role.value}`)}
+                        label={tx(`users.roles.${role.value}`)}
                       />
                     </Stack>
                   </Stack>
@@ -214,7 +214,7 @@ export default function AdminRolesView() {
                       }}
                     >
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                        {tx('pages.admin.roles.all_permissions')}
+                        {tx('admin.roles.allPermissions')}
                       </Typography>
                       {(() => {
                         const roleAllDisabled = !canWriteRoles || availablePermissions.length === 0;
@@ -236,7 +236,7 @@ export default function AdminRolesView() {
                                 onChange={(_, enabled) => toggleAllRolePermissions(role.value, enabled)}
                               />
                             }
-                            label={tx('shared.table.all_option')}
+                            label={tx('common.table.allOption')}
                           />
                         );
                       })()}
@@ -268,7 +268,7 @@ export default function AdminRolesView() {
                           }}
                         >
                           <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                            {tx(`pages.admin.roles.pages.${page}`)}
+                            {tx(`admin.roles.pages.${page}`)}
                           </Typography>
                           <Stack
                             direction={{ xs: 'column', sm: 'row' }}
@@ -291,7 +291,7 @@ export default function AdminRolesView() {
                                         onChange={(_, enabled) => togglePermission(role.value, permission, enabled)}
                                       />
                                     }
-                                    label={tx(`pages.admin.roles.${action}`)}
+                                    label={tx(`admin.roles.${action}`)}
                                   />
                                 );
                               })}
@@ -309,7 +309,7 @@ export default function AdminRolesView() {
                                   }
                                 />
                               }
-                              label={tx('shared.table.all_option')}
+                              label={tx('common.table.allOption')}
                             />
                           </Stack>
                         </Stack>
@@ -325,7 +325,7 @@ export default function AdminRolesView() {
                           onClick={() => saveRolePermissions(role.value)}
                           disabled={updateMutation.isPending}
                         >
-                          {tx('shared.actions.save')}
+                          {tx('common.actions.save')}
                         </Button>
                       </Stack>
                     ) : null}

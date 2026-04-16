@@ -9,7 +9,7 @@ export default function ClientEditPage() {
   return (
     <>
       <Helmet>
-        <title>{tx('pages.clients.edit_document_title')}</title>
+        <title>{tx('clients.editDocumentTitle')}</title>
       </Helmet>
       <ClientFormView mode="edit" />
     </>

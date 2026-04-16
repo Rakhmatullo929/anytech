@@ -105,13 +105,13 @@ export default function ClientFormView({ mode }: Props) {
   });
 
   const languageOptions = [
-    { value: 'uz', icon: 'flagpack:uz', label: tx('pages.clients.form.languages.uz') },
-    { value: 'ru', icon: 'flagpack:ru', label: tx('pages.clients.form.languages.ru') },
-    { value: 'en', icon: 'flagpack:gb-ukm', label: tx('pages.clients.form.languages.en') },
+    { value: 'uz', icon: 'flagpack:uz', label: tx('clients.form.languages.uz') },
+    { value: 'ru', icon: 'flagpack:ru', label: tx('clients.form.languages.ru') },
+    { value: 'en', icon: 'flagpack:gb-ukm', label: tx('clients.form.languages.en') },
   ] as const;
   const genderOptions = [
-    { value: 'male', icon: 'solar:male-bold', label: tx('pages.users.genders.male') },
-    { value: 'female', icon: 'solar:female-bold', label: tx('pages.users.genders.female') },
+    { value: 'male', icon: 'solar:male-bold', label: tx('users.genders.male') },
+    { value: 'female', icon: 'solar:female-bold', label: tx('users.genders.female') },
   ] as const;
 
   useEffect(() => {
@@ -173,10 +173,10 @@ export default function ClientFormView({ mode }: Props) {
     try {
       if (mode === 'create') {
         await createMutation.mutateAsync(payload);
-        enqueueSnackbar(tx('pages.clients.toasts.created'), { variant: 'success' });
+        enqueueSnackbar(tx('clients.toasts.created'), { variant: 'success' });
       } else {
         await updateMutation.mutateAsync({ id, ...payload });
-        enqueueSnackbar(tx('pages.clients.toasts.updated'), { variant: 'success' });
+        enqueueSnackbar(tx('clients.toasts.updated'), { variant: 'success' });
       }
       router.push(paths.clients.root);
     } catch (error) {
@@ -192,10 +192,10 @@ export default function ClientFormView({ mode }: Props) {
     return (
       <EmptyContent
         filled
-        title={tx('pages.clients.detail.not_found')}
+        title={tx('clients.detail.notFound')}
         action={
           <Button onClick={() => router.push(paths.clients.root)} variant="contained">
-            {tx('shared.actions.back_to_list')}
+            {tx('common.actions.backToList')}
           </Button>
         }
       />
@@ -205,11 +205,11 @@ export default function ClientFormView({ mode }: Props) {
   return (
     <>
       <CustomBreadcrumbs
-        heading={mode === 'create' ? tx('pages.clients.form.create_title') : tx('pages.clients.form.edit_title')}
+        heading={mode === 'create' ? tx('clients.form.createTitle') : tx('clients.form.editTitle')}
         links={[
-          { name: tx('layout.nav.clients'), href: paths.clients.root },
+          { name: tx('common.navigation.clients'), href: paths.clients.root },
           {
-            name: mode === 'create' ? tx('pages.clients.form.create_title') : tx('pages.clients.form.edit_title'),
+            name: mode === 'create' ? tx('clients.form.createTitle') : tx('clients.form.editTitle'),
             href: mode === 'create' ? paths.clients.create : paths.clients.edit(id),
           },
         ]}
@@ -220,7 +220,7 @@ export default function ClientFormView({ mode }: Props) {
         <Stack spacing={3}>
           <Card sx={{ p: 3 }}>
             <Typography variant="h6" sx={{ mb: 2 }}>
-              {tx('pages.clients.form.sections.personal')}
+              {tx('clients.form.sections.personal')}
             </Typography>
             <Stack spacing={2}>
               <Box
@@ -230,9 +230,9 @@ export default function ClientFormView({ mode }: Props) {
                   gridTemplateColumns: { xs: '1fr', md: 'repeat(3, minmax(0, 1fr))' },
                 }}
               >
-                <RHFTextField name="name" label={`${tx('pages.clients.form.fields.name')} *`} />
-                <RHFTextField name="lastName" label={tx('pages.clients.form.fields.last_name')} />
-                <RHFTextField name="middleName" label={tx('pages.clients.form.fields.middle_name')} />
+                <RHFTextField name="name" label={`${tx('clients.form.fields.name')} *`} />
+                <RHFTextField name="lastName" label={tx('clients.form.fields.lastName')} />
+                <RHFTextField name="middleName" label={tx('clients.form.fields.middleName')} />
               </Box>
               <Box
                 sx={{
@@ -244,13 +244,13 @@ export default function ClientFormView({ mode }: Props) {
                 <RHFTextField
                   name="birthDate"
                   type="date"
-                  label={tx('pages.clients.form.fields.birth_date')}
+                  label={tx('clients.form.fields.birthDate')}
                   InputLabelProps={{ shrink: true }}
                 />
-                <RHFTextField name="maritalStatus" select label={tx('pages.clients.form.fields.marital_status')}>
-                  <MenuItem value="">{tx('shared.table.all_option')}</MenuItem>
-                  <MenuItem value="married">{tx('pages.clients.form.marital.married')}</MenuItem>
-                  <MenuItem value="single">{tx('pages.clients.form.marital.single')}</MenuItem>
+                <RHFTextField name="maritalStatus" select label={tx('clients.form.fields.maritalStatus')}>
+                  <MenuItem value="">{tx('common.table.allOption')}</MenuItem>
+                  <MenuItem value="married">{tx('clients.form.marital.married')}</MenuItem>
+                  <MenuItem value="single">{tx('clients.form.marital.single')}</MenuItem>
                 </RHFTextField>
               </Box>
               <Box
@@ -262,7 +262,7 @@ export default function ClientFormView({ mode }: Props) {
               >
                 <Box>
                   <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                    {tx('pages.clients.form.fields.communication_language')}
+                    {tx('clients.form.fields.communicationLanguage')}
                   </Typography>
                   <Box
                     sx={{
@@ -311,7 +311,7 @@ export default function ClientFormView({ mode }: Props) {
                 </Box>
                 <Box>
                   <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                    {tx('pages.clients.form.fields.gender')}
+                    {tx('clients.form.fields.gender')}
                   </Typography>
                   <Box
                     sx={{
@@ -367,13 +367,13 @@ export default function ClientFormView({ mode }: Props) {
 
           <Card sx={{ p: 3 }}>
             <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-              <Typography variant="h6">{tx('pages.clients.form.sections.phones')}</Typography>
+              <Typography variant="h6">{tx('clients.form.sections.phones')}</Typography>
               <Button
                 size="small"
                 startIcon={<Iconify icon="mingcute:add-line" />}
                 onClick={() => phonesFieldArray.append({ country: DEFAULT_PHONE_COUNTRY, number: '' })}
               >
-                {tx('pages.clients.form.add_phone')}
+                {tx('clients.form.addPhone')}
               </Button>
             </Stack>
             <Stack spacing={2}>
@@ -381,17 +381,17 @@ export default function ClientFormView({ mode }: Props) {
                 <Stack key={field.id} direction="row" spacing={1.5}>
                   <RHFTextField
                     name={`phones.${index}.country`}
-                    label={tx('pages.clients.form.fields.phone_country')}
+                    label={tx('clients.form.fields.phoneCountry')}
                     select
                     sx={{ maxWidth: 170 }}
                   >
-                    <MenuItem value="uz">🇺🇿 {tx('pages.clients.form.countries.uz')}</MenuItem>
-                    <MenuItem value="ru">🇷🇺 {tx('pages.clients.form.countries.ru')}</MenuItem>
-                    <MenuItem value="us">🇺🇸 {tx('pages.clients.form.countries.us')}</MenuItem>
+                    <MenuItem value="uz">🇺🇿 {tx('clients.form.countries.uz')}</MenuItem>
+                    <MenuItem value="ru">🇷🇺 {tx('clients.form.countries.ru')}</MenuItem>
+                    <MenuItem value="us">🇺🇸 {tx('clients.form.countries.us')}</MenuItem>
                   </RHFTextField>
                   <RHFTextField
                     name={`phones.${index}.number`}
-                    label={index === 0 ? `${tx('shared.table.phone')} *` : tx('shared.table.phone')}
+                    label={index === 0 ? `${tx('common.table.phone')} *` : tx('common.table.phone')}
                     inputProps={{ inputMode: 'numeric' }}
                     onChange={(event) => {
                       const country = methods.getValues(`phones.${index}.country`) || DEFAULT_PHONE_COUNTRY;
@@ -425,7 +425,7 @@ export default function ClientFormView({ mode }: Props) {
 
           <Card sx={{ p: 3 }}>
             <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-              <Typography variant="h6">{tx('pages.clients.form.sections.addresses')}</Typography>
+              <Typography variant="h6">{tx('clients.form.sections.addresses')}</Typography>
               <Button
                 size="small"
                 startIcon={<Iconify icon="mingcute:add-line" />}
@@ -439,7 +439,7 @@ export default function ClientFormView({ mode }: Props) {
                   })
                 }
               >
-                {tx('pages.clients.form.add_address')}
+                {tx('clients.form.addAddress')}
               </Button>
             </Stack>
             <Stack spacing={2}>
@@ -453,8 +453,8 @@ export default function ClientFormView({ mode }: Props) {
                         gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' },
                       }}
                     >
-                      <RHFTextField name={`addresses.${index}.country`} label={tx('pages.clients.form.fields.country')} />
-                      <RHFTextField name={`addresses.${index}.city`} label={tx('pages.clients.form.fields.city')} />
+                      <RHFTextField name={`addresses.${index}.country`} label={tx('clients.form.fields.country')} />
+                      <RHFTextField name={`addresses.${index}.city`} label={tx('clients.form.fields.city')} />
                     </Box>
                     <Box
                       sx={{
@@ -463,20 +463,20 @@ export default function ClientFormView({ mode }: Props) {
                         gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' },
                       }}
                     >
-                      <RHFTextField name={`addresses.${index}.address`} label={tx('pages.clients.form.fields.address')} />
+                      <RHFTextField name={`addresses.${index}.address`} label={tx('clients.form.fields.address')} />
                       <RHFTextField
                         name={`addresses.${index}.postalCode`}
-                        label={tx('pages.clients.form.fields.postal_code')}
+                        label={tx('clients.form.fields.postalCode')}
                       />
                     </Box>
-                    <RHFTextField name={`addresses.${index}.note`} label={tx('pages.clients.form.fields.note')} />
+                    <RHFTextField name={`addresses.${index}.note`} label={tx('clients.form.fields.note')} />
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                       <Button
                         color="error"
                         onClick={() => addressesFieldArray.remove(index)}
                         disabled={addressesFieldArray.fields.length === 1}
                       >
-                        {tx('shared.actions.delete')}
+                        {tx('common.actions.delete')}
                       </Button>
                     </Box>
                   </Stack>
@@ -487,7 +487,7 @@ export default function ClientFormView({ mode }: Props) {
 
           <Card sx={{ p: 3 }}>
             <Typography variant="h6" sx={{ mb: 2 }}>
-              {tx('pages.clients.form.sections.social_networks')}
+              {tx('clients.form.sections.socialNetworks')}
             </Typography>
             <Box
               sx={{
@@ -498,7 +498,7 @@ export default function ClientFormView({ mode }: Props) {
             >
               <RHFTextField
                 name="socialNetworks.email"
-                label={tx('shared.table.email')}
+                label={tx('common.table.email')}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -509,7 +509,7 @@ export default function ClientFormView({ mode }: Props) {
               />
               <RHFTextField
                 name="socialNetworks.telegram"
-                label={tx('pages.clients.form.fields.telegram')}
+                label={tx('clients.form.fields.telegram')}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -520,7 +520,7 @@ export default function ClientFormView({ mode }: Props) {
               />
               <RHFTextField
                 name="socialNetworks.instagram"
-                label={tx('pages.clients.form.fields.instagram')}
+                label={tx('clients.form.fields.instagram')}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -531,7 +531,7 @@ export default function ClientFormView({ mode }: Props) {
               />
               <RHFTextField
                 name="socialNetworks.facebook"
-                label={tx('pages.clients.form.fields.facebook')}
+                label={tx('clients.form.fields.facebook')}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -546,9 +546,9 @@ export default function ClientFormView({ mode }: Props) {
           <Divider />
 
           <Stack direction="row" justifyContent="flex-end" spacing={1.5}>
-            <Button onClick={() => router.push(paths.clients.root)}>{tx('shared.actions.cancel')}</Button>
+            <Button onClick={() => router.push(paths.clients.root)}>{tx('common.actions.cancel')}</Button>
             <Button variant="contained" type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
-              {tx('shared.actions.save')}
+              {tx('common.actions.save')}
             </Button>
           </Stack>
         </Stack>

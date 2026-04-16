@@ -19,7 +19,7 @@ export default function ProfileView() {
   const displayName = user.displayName || '-';
   const email = user.email || '-';
   const phone = user.phoneNumber || '-';
-  const gender = user.gender ? tx(`pages.users.genders.${user.gender}`) : '-';
+  const gender = user.gender ? tx(`users.genders.${user.gender}`) : '-';
   const passportSeries = user.passportSeries || '-';
   const createdAt = user.createdAt ? fDateTime(user.createdAt) : '';
 
@@ -28,8 +28,8 @@ export default function ProfileView() {
   return (
     <>
       <CustomBreadcrumbs
-        heading={tx('pages.profile.heading')}
-        links={[{ name: tx('pages.profile.heading'), href: '/profile' }]}
+        heading={tx('profile.heading')}
+        links={[{ name: tx('profile.heading'), href: '/profile' }]}
         sx={{ mb: { xs: 3, md: 5 } }}
       />
 
@@ -51,12 +51,12 @@ export default function ProfileView() {
                 {email}
               </Typography>
             </Box>
-            <Chip color="primary" variant="soft" label={tx(`pages.users.roles.${role}`)} />
+            <Chip color="primary" variant="soft" label={tx(`users.roles.${role}`)} />
           </Stack>
         </Card>
 
         <Card sx={{ p: 3 }}>
-          <Typography variant="subtitle1">{tx('pages.profile.personal_info')}</Typography>
+          <Typography variant="subtitle1">{tx('profile.personalInfo')}</Typography>
           <Divider sx={{ my: 2 }} />
 
           <Box
@@ -68,7 +68,7 @@ export default function ProfileView() {
           >
             <Stack spacing={0.5}>
               <Typography variant="caption" color="text.secondary">
-                {tx('shared.table.phone')}
+                {tx('common.table.phone')}
               </Typography>
               <Typography variant="body2" sx={{ fontWeight: 600 }}>
                 {phone}
@@ -77,7 +77,7 @@ export default function ProfileView() {
 
             <Stack spacing={0.5}>
               <Typography variant="caption" color="text.secondary">
-                {tx('shared.table.gender')}
+                {tx('common.table.gender')}
               </Typography>
               <Typography variant="body2" sx={{ fontWeight: 600 }}>
                 {gender}
@@ -86,7 +86,7 @@ export default function ProfileView() {
 
             <Stack spacing={0.5}>
               <Typography variant="caption" color="text.secondary">
-                {tx('shared.table.passport_series')}
+                {tx('common.table.passportSeries')}
               </Typography>
               <Typography variant="body2" sx={{ fontWeight: 600 }}>
                 {passportSeries}
@@ -95,7 +95,7 @@ export default function ProfileView() {
 
             <Stack spacing={0.5}>
               <Typography variant="caption" color="text.secondary">
-                {tx('shared.table.created')}
+                {tx('common.table.created')}
               </Typography>
               <Typography variant="body2" sx={{ fontWeight: 600 }}>
                 {createdAt || '-'}

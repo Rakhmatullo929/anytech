@@ -95,7 +95,7 @@ export default function JwtLoginView() {
 
       <RHFTextField
         name="phone"
-        label={`${tx('shared.table.phone')} *`}
+        label={`${tx('common.table.phone')} *`}
         placeholder="90 123 45 67"
         inputProps={{ inputMode: 'tel' }}
         sx={{

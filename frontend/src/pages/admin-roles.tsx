@@ -10,7 +10,7 @@ export default function AdminRolesPage() {
   return (
     <>
       <Helmet>
-        <title>{tx('pages.admin.roles.document_title')}</title>
+        <title>{tx('admin.roles.documentTitle')}</title>
       </Helmet>
       <AdminRolesView />
     </>

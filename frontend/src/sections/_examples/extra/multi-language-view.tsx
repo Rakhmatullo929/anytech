@@ -101,7 +101,7 @@ export default function MultiLanguageView() {
               <Tooltip title={currentLang.label}>
                 <Stack direction="row" alignItems="center" sx={{ typography: 'h2', my: 3 }}>
                   <Iconify icon={currentLang.icon} width={32} sx={{ mr: 1, borderRadius: 1 }} />
-                  {t('demo.title')}
+                  {t('common.demo.title')}
                 </Stack>
               </Tooltip>
 

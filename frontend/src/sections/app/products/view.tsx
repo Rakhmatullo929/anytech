@@ -65,11 +65,11 @@ export default function ProductsView() {
 
   const tableHead = useMemo(
     () => [
-      { id: 'name', label: tx('shared.table.name') },
-      { id: 'sku', label: tx('shared.table.sku') },
-      { id: 'stock', label: tx('shared.table.stock') },
-      { id: 'purchase', label: tx('shared.table.purchase') },
-      { id: 'sale', label: tx('shared.table.sale_price') },
+      { id: 'name', label: tx('common.table.name') },
+      { id: 'sku', label: tx('common.table.sku') },
+      { id: 'stock', label: tx('common.table.stock') },
+      { id: 'purchase', label: tx('common.table.purchase') },
+      { id: 'sale', label: tx('common.table.salePrice') },
       { id: '', label: '' },
     ],
     [tx]
@@ -197,7 +197,7 @@ export default function ProductsView() {
     if (!selectedProductId) return;
     try {
       await deleteMutation.mutateAsync(selectedProductId);
-      enqueueSnackbar(tx('pages.products.toasts.deleted'), { variant: 'success' });
+      enqueueSnackbar(tx('products.toasts.deleted'), { variant: 'success' });
     } catch (error) {
       console.error(error);
     } finally {
@@ -209,7 +209,7 @@ export default function ProductsView() {
     if (!selectedIds.length) return;
     try {
       await bulkDeleteMutation.mutateAsync(selectedIds);
-      enqueueSnackbar(tx('pages.products.toasts.bulk_deleted', { count: selectedIds.length }), {
+      enqueueSnackbar(tx('products.toasts.bulkDeleted', { count: selectedIds.length }), {
         variant: 'success',
       });
       table.onUpdatePageDeleteRows({
@@ -238,7 +238,7 @@ export default function ProductsView() {
     const parsedStock = Number(values.stock);
 
     if (!normalizedName || !normalizedPurchase || !normalizedSale) {
-      enqueueSnackbar(tx('pages.products.toasts.required_fields'), { variant: 'warning' });
+      enqueueSnackbar(tx('products.toasts.requiredFields'), { variant: 'warning' });
       return;
     }
 
@@ -248,12 +248,12 @@ export default function ProductsView() {
       Number(normalizedPurchase) < 0 ||
       Number(normalizedSale) < 0
     ) {
-      enqueueSnackbar(tx('pages.products.toasts.invalid_prices'), { variant: 'warning' });
+      enqueueSnackbar(tx('products.toasts.invalidPrices'), { variant: 'warning' });
       return;
     }
 
     if (upsertMode === 'create' && (Number.isNaN(parsedStock) || parsedStock < 0)) {
-      enqueueSnackbar(tx('pages.products.toasts.invalid_stock'), { variant: 'warning' });
+      enqueueSnackbar(tx('products.toasts.invalidStock'), { variant: 'warning' });
       return;
     }
 
@@ -266,7 +266,7 @@ export default function ProductsView() {
           salePrice: normalizedSale,
           stock: parsedStock,
         });
-        enqueueSnackbar(tx('pages.products.toasts.created'), { variant: 'success' });
+        enqueueSnackbar(tx('products.toasts.created'), { variant: 'success' });
       } else if (editingProduct) {
         await updateMutation.mutateAsync({
           id: editingProduct.id,
@@ -275,7 +275,7 @@ export default function ProductsView() {
           purchasePrice: normalizedPurchase,
           salePrice: normalizedSale,
         });
-        enqueueSnackbar(tx('pages.products.toasts.updated'), { variant: 'success' });
+        enqueueSnackbar(tx('products.toasts.updated'), { variant: 'success' });
       }
       handleCloseUpsert();
       setPage(0);
@@ -296,12 +296,12 @@ export default function ProductsView() {
   return (
     <>
       <CustomBreadcrumbs
-        heading={tx('layout.nav.products')}
-        links={[{ name: tx('layout.nav.products'), href: paths.products.root }]}
+        heading={tx('common.navigation.products')}
+        links={[{ name: tx('common.navigation.products'), href: paths.products.root }]}
         action={
           <Can page="products" action="write">
             <Button variant="contained" startIcon={<Iconify icon="mingcute:add-line" />} onClick={handleOpenCreate}>
-              {tx('pages.products.add_button')}
+              {tx('products.addButton')}
             </Button>
           </Can>
         }
@@ -326,14 +326,14 @@ export default function ProductsView() {
                 onSelectAllRows={(checked) => table.onSelectAllRows(checked, rows.map((row) => row.id))}
                 action={
                   <Button color="error" onClick={handleOpenBulkDelete}>
-                    {tx('shared.actions.delete')}
+                    {tx('common.actions.delete')}
                   </Button>
                 }
               />
             </Can>
             <TextField
               size="small"
-              placeholder={tx('pages.products.search_placeholder')}
+              placeholder={tx('products.searchPlaceholder')}
               value={searchValue}
               onChange={(e) => setSearch(e.target.value)}
               sx={{ maxWidth: 360 }}
@@ -382,7 +382,7 @@ export default function ProductsView() {
                     </TableRow>
                   ))}
 
-                  <TableNoData notFound={!rows.length} title={tx('shared.table.no_data')} />
+                  <TableNoData notFound={!rows.length} title={tx('common.table.noData')} />
                 </TableBody>
               </Table>
             </Scrollbar>
@@ -403,13 +403,13 @@ export default function ProductsView() {
         <Can page="products" action="write">
           <MenuItem onClick={handleEdit}>
             <Iconify icon="solar:pen-bold" />
-            {tx('shared.actions.edit')}
+            {tx('common.actions.edit')}
           </MenuItem>
         </Can>
         <Can page="products" action="write">
           <MenuItem onClick={handleAskDelete} sx={{ color: 'error.main' }} disabled={deletingCurrent}>
             <Iconify icon="solar:trash-bin-trash-bold" />
-            {tx('shared.actions.delete')}
+            {tx('common.actions.delete')}
           </MenuItem>
         </Can>
       </CustomPopover>
@@ -439,12 +439,12 @@ export default function ProductsView() {
         <ConfirmDialog
           open={deleteOpen}
           onClose={handleCloseDelete}
-          title={tx('pages.products.dialogs.delete.title')}
-          content={tx('pages.products.dialogs.delete.description')}
-          cancelText={tx('shared.actions.cancel')}
+          title={tx('products.dialogs.delete.title')}
+          content={tx('products.dialogs.delete.description')}
+          cancelText={tx('common.actions.cancel')}
           action={
             <Button color="error" variant="contained" onClick={handleDelete} disabled={deletingCurrent}>
-              {tx('shared.actions.delete')}
+              {tx('common.actions.delete')}
             </Button>
           }
         />
@@ -454,12 +454,12 @@ export default function ProductsView() {
         <ConfirmDialog
           open={bulkDeleteOpen}
           onClose={handleCloseBulkDelete}
-          title={tx('pages.products.dialogs.delete.bulk_title')}
-          content={tx('pages.products.dialogs.delete.bulk_description', { count: selectedIds.length })}
-          cancelText={tx('shared.actions.cancel')}
+          title={tx('products.dialogs.delete.bulkTitle')}
+          content={tx('products.dialogs.delete.bulkDescription', { count: selectedIds.length })}
+          cancelText={tx('common.actions.cancel')}
           action={
             <Button color="error" variant="contained" onClick={handleBulkDelete} disabled={deletingBulk}>
-              {tx('shared.actions.delete')}
+              {tx('common.actions.delete')}
             </Button>
           }
         />

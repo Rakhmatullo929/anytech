@@ -58,10 +58,10 @@ export default function ProductDetailsView() {
     return (
       <EmptyContent
         filled
-        title={tx('pages.products.detail.not_found')}
+        title={tx('products.detail.notFound')}
         action={
           <Button component={RouterLink} href={paths.products.root} variant="contained">
-            {tx('shared.actions.back_to_list')}
+            {tx('common.actions.backToList')}
           </Button>
         }
       />
@@ -73,7 +73,7 @@ export default function ProductDetailsView() {
       <CustomBreadcrumbs
         heading={product.name}
         links={[
-          { name: tx('layout.nav.products'), href: paths.products.root },
+          { name: tx('common.navigation.products'), href: paths.products.root },
           { name: product.name, href: paths.products.details(product.id) },
         ]}
         sx={{ mb: { xs: 3, md: 5 } }}
@@ -95,7 +95,7 @@ export default function ProductDetailsView() {
                 variant="soft"
                 color={stockColor}
                 icon={<Iconify icon="solar:box-bold" />}
-                label={`${tx('shared.table.stock')}: ${product.stock}`}
+                label={`${tx('common.table.stock')}: ${product.stock}`}
               />
               <Chip
                 size="small"
@@ -111,7 +111,7 @@ export default function ProductDetailsView() {
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems="stretch">
           <Card sx={{ p: 2.5, flex: 1, border: (theme) => `1px dashed ${theme.palette.divider}` }}>
             <Typography variant="caption" color="text.secondary">
-              {tx('shared.table.purchase')}
+              {tx('common.table.purchase')}
             </Typography>
             <Typography variant="h5" sx={{ mt: 0.5 }}>
               {fCurrency(product.purchasePrice)}
@@ -119,7 +119,7 @@ export default function ProductDetailsView() {
           </Card>
           <Card sx={{ p: 2.5, flex: 1, border: (theme) => `1px dashed ${theme.palette.divider}` }}>
             <Typography variant="caption" color="text.secondary">
-              {tx('shared.table.sale_price')}
+              {tx('common.table.salePrice')}
             </Typography>
             <Typography variant="h5" sx={{ mt: 0.5 }}>
               {fCurrency(product.salePrice)}
@@ -134,7 +134,7 @@ export default function ProductDetailsView() {
             </Typography>
             <Divider sx={{ my: 1.5 }} />
             <Typography variant="caption" color="text.secondary">
-              {tx('shared.table.created')}
+              {tx('common.table.created')}
             </Typography>
             <Typography variant="subtitle2" sx={{ mt: 0.5 }}>
               {fDateTime(product.createdAt)}

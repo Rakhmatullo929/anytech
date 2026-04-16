@@ -112,7 +112,7 @@ export default function AccountPopover() {
         <Stack sx={{ p: 1 }}>
           {OPTIONS.map((option) => (
             <MenuItem key={option.label} onClick={() => handleClickItem(option.linkTo)}>
-              {tx('pages.profile.menu_label')}
+              {tx('profile.menuLabel')}
             </MenuItem>
           ))}
         </Stack>

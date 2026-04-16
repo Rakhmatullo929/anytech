@@ -1,0 +1,10 @@
+{
+  "cart": "Корзина",
+  "client": "Клиент",
+  "completeSale": "Завершить продажу",
+  "documentTitle": "POS",
+  "emptyCart": "Добавьте товар из списка слева.",
+  "productsHeading": "Товары",
+  "searchPlaceholder": "Поиск по названию или SKU…",
+  "stockShort": "остаток"
+}

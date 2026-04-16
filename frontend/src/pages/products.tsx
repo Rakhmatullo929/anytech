@@ -8,7 +8,7 @@ export default function ProductsPage() {
   return (
     <>
       <Helmet>
-        <title>{tx('pages.products.document_title')}</title>
+        <title>{tx('products.documentTitle')}</title>
       </Helmet>
       <ProductsView />
     </>

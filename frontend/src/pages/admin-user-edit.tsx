@@ -9,7 +9,7 @@ export default function AdminUserEditPage() {
   return (
     <>
       <Helmet>
-        <title>{tx('pages.users.edit_document_title')}</title>
+        <title>{tx('users.editDocumentTitle')}</title>
       </Helmet>
       <AdminUserFormView mode="edit" />
     </>

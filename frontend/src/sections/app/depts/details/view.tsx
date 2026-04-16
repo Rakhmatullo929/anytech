@@ -40,8 +40,8 @@ export default function DebtDetailsView() {
 
   const payHead = useMemo(
     () => [
-      { id: 'amount', label: tx('shared.table.amount') },
-      { id: 'date', label: tx('shared.table.date') },
+      { id: 'amount', label: tx('common.table.amount') },
+      { id: 'date', label: tx('common.table.date') },
     ],
     [tx]
   );
@@ -72,10 +72,10 @@ export default function DebtDetailsView() {
     return (
       <EmptyContent
         filled
-        title={tx('pages.debts.detail.not_found')}
+        title={tx('debts.detail.notFound')}
         action={
           <Button component={RouterLink} href={paths.debts.root} variant="contained">
-            {tx('shared.actions.back_to_list')}
+            {tx('common.actions.backToList')}
           </Button>
         }
       />
@@ -85,15 +85,15 @@ export default function DebtDetailsView() {
   return (
     <>
       <CustomBreadcrumbs
-        heading={tx('pages.debts.detail.heading_detail', { name: debt.clientName })}
+        heading={tx('debts.detail.headingDetail', { name: debt.clientName })}
         links={[
-          { name: tx('layout.nav.debts'), href: paths.debts.root },
+          { name: tx('common.navigation.debts'), href: paths.debts.root },
           { name: debt.clientName, href: paths.debts.details(debt.id) },
         ]}
         action={
           debt.status === 'active' && canWriteDebts ? (
             <Button variant="contained" onClick={() => setPayOpen(true)}>
-              {tx('pages.debts.detail.add_payment')}
+              {tx('debts.detail.addPayment')}
             </Button>
           ) : null
         }
@@ -104,29 +104,29 @@ export default function DebtDetailsView() {
         <Card sx={{ p: 3 }}>
           <Stack spacing={1}>
             <Typography>
-              {tx('pages.debts.detail.client_line')} {debt.clientName}
+              {tx('debts.detail.clientLine')} {debt.clientName}
             </Typography>
             <Typography>
-              {tx('pages.debts.detail.total_line')} {fCurrency(debt.totalAmount)}
+              {tx('debts.detail.totalLine')} {fCurrency(debt.totalAmount)}
             </Typography>
             <Typography>
-              {tx('pages.debts.detail.paid_line')} {fCurrency(debt.paidAmount)}
+              {tx('debts.detail.paidLine')} {fCurrency(debt.paidAmount)}
             </Typography>
             <Typography>
-              {tx('pages.debts.detail.rem_line')} {fCurrency(debt.remaining)}
+              {tx('debts.detail.remLine')} {fCurrency(debt.remaining)}
             </Typography>
             <Typography>
-              {tx('pages.debts.detail.status_line')}{' '}
+              {tx('debts.detail.statusLine')}{' '}
               {debt.status === 'active'
-                ? tx('shared.status.row_active')
-                : tx('shared.status.row_closed')}
+                ? tx('common.status.rowActive')
+                : tx('common.status.rowClosed')}
             </Typography>
           </Stack>
         </Card>
 
         <Card sx={{ p: 2 }}>
           <Typography variant="h6" sx={{ mb: 2 }}>
-            {tx('pages.debts.detail.payments_section_title')}
+            {tx('debts.detail.paymentsSectionTitle')}
           </Typography>
           <Table size="small">
             <TableHeadCustom headLabel={payHead} />
@@ -179,24 +179,24 @@ function PaymentDialog({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-      <DialogTitle>{tx('pages.debts.payment_dialog.title')}</DialogTitle>
+      <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
+      <DialogTitle>{tx('debts.paymentDialog.title')}</DialogTitle>
       <DialogContent>
         <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 2 }}>
-          {tx('pages.debts.payment_dialog.max_amount')} {fCurrency(maxAmount)}
+          {tx('debts.paymentDialog.maxAmount')} {fCurrency(maxAmount)}
         </Typography>
         <TextField
           fullWidth
-          label={tx('shared.table.amount')}
+          label={tx('common.table.amount')}
           type="number"
           value={val}
           onChange={(e) => setVal(e.target.value)}
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>{tx('shared.actions.cancel')}</Button>
+        <Button onClick={onClose}>{tx('common.actions.cancel')}</Button>
         <Button variant="contained" onClick={submit}>
-          {tx('pages.debts.payment_dialog.pay_button')}
+          {tx('debts.paymentDialog.payButton')}
         </Button>
       </DialogActions>
     </Dialog>

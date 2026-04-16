@@ -8,7 +8,7 @@ export default function PosPage() {
   return (
     <>
       <Helmet>
-        <title>{tx('pages.pos.document_title')}</title>
+        <title>{tx('pos.documentTitle')}</title>
       </Helmet>
       <PosView />
     </>
