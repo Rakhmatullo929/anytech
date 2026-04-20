@@ -2,6 +2,7 @@ import uuid
 
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 class Tenant(models.Model):
@@ -36,13 +37,13 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
     class Role(models.TextChoices):
-        ADMIN = "admin", "Admin"
-        MANAGER = "manager", "Manager"
-        SELLER = "seller", "Seller"
+        ADMIN = "admin", _("Admin")
+        MANAGER = "manager", _("Manager")
+        SELLER = "seller", _("Seller")
 
     class Gender(models.TextChoices):
-        MALE = "male", "Male"
-        FEMALE = "female", "Female"
+        MALE = "male", _("Male")
+        FEMALE = "female", _("Female")
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     tenant = models.ForeignKey(

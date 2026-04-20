@@ -1,12 +1,13 @@
 import uuid
 
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 class Debt(models.Model):
     class Status(models.TextChoices):
-        ACTIVE = "active", "Active"
-        CLOSED = "closed", "Closed"
+        ACTIVE = "active", _("Active")
+        CLOSED = "closed", _("Closed")
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     tenant = models.ForeignKey(

@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from django.db import transaction
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from rest_framework import serializers
 
 from debts.models import Debt
@@ -28,20 +29,19 @@ class SaleCreateSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         if not attrs.get("items"):
-            raise serializers.ValidationError({"items": "At least one item is required."})
+            raise serializers.ValidationError({"items": _("At least one item is required.")})
 
         if attrs.get("payment_type") == Sale.PaymentType.DEBT and not attrs.get("client"):
             raise serializers.ValidationError(
-                {"client": "Client is required for debt sales."}
+                {"client": _("Client is required for debt sales.")}
             )
 
-        # Validate client belongs to the same tenant as the authenticated user
         client = attrs.get("client")
         if client:
             tenant = self.context["request"].user.tenant
             if client.tenant_id != tenant.pk:
                 raise serializers.ValidationError(
-                    {"client": "Client not found."}
+                    {"client": _("Client not found.")}
                 )
 
         return attrs
@@ -62,7 +62,9 @@ class SaleCreateSerializer(serializers.ModelSerializer):
             missing = set(product_ids) - set(products_map.keys())
             if missing:
                 raise serializers.ValidationError(
-                    {"items": f"Products not found: {', '.join(str(pk) for pk in missing)}"}
+                    {"items": _("Products not found: %(ids)s") % {
+                        "ids": ", ".join(str(pk) for pk in missing)
+                    }}
                 )
 
             total_amount = Decimal("0.00")
@@ -75,10 +77,14 @@ class SaleCreateSerializer(serializers.ModelSerializer):
                 if product.stock < item_data["quantity"]:
                     raise serializers.ValidationError(
                         {
-                            "items": (
-                                f"Insufficient stock for '{product.name}'. "
-                                f"Available: {product.stock}, requested: {item_data['quantity']}."
-                            )
+                            "items": _(
+                                "Insufficient stock for '%(name)s'. "
+                                "Available: %(available)d, requested: %(requested)d."
+                            ) % {
+                                "name": product.name,
+                                "available": product.stock,
+                                "requested": item_data["quantity"],
+                            }
                         }
                     )
 

@@ -1,5 +1,6 @@
 from django.db import transaction
 from django.http import Http404
+from django.utils.translation import gettext as _
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
@@ -66,11 +67,13 @@ class DebtViewSet(TenantQuerySetMixin, ListModelMixin, RetrieveModelMixin, Gener
                 raise Http404
 
             if debt.status == Debt.Status.CLOSED:
-                raise ValidationError({"detail": "Debt is already closed."})
+                raise ValidationError({"detail": _("Debt is already closed.")})
 
             if amount > debt.remaining:
                 raise ValidationError(
-                    {"detail": f"Amount exceeds remaining debt of {debt.remaining}."}
+                    {"detail": _("Amount exceeds remaining debt of %(remaining)s.") % {
+                        "remaining": debt.remaining
+                    }}
                 )
 
             Payment.objects.create(debt=debt, amount=amount)

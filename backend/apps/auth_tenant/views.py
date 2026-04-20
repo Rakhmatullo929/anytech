@@ -1,3 +1,4 @@
+from django.utils.translation import gettext as _
 from rest_framework import generics, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -120,7 +121,7 @@ class TenantUserDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def perform_destroy(self, instance):
         if instance.id == self.request.user.id:
-            raise ValidationError({"detail": "You cannot delete your own account."})
+            raise ValidationError({"detail": _("You cannot delete your own account.")})
         instance.delete()
 
     def update(self, request, *args, **kwargs):
@@ -198,7 +199,7 @@ class TenantRolePermissionsUpdateView(generics.GenericAPIView):
     def patch(self, request, role, *args, **kwargs):
         valid_roles = {value: label for value, label in User.Role.choices}
         if role not in valid_roles:
-            return Response({"detail": "Role not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": _("Role not found.")}, status=status.HTTP_404_NOT_FOUND)
 
         serializer = self.get_serializer(
             data=request.data,

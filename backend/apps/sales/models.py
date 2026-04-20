@@ -1,13 +1,14 @@
 import uuid
 
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 class Sale(models.Model):
     class PaymentType(models.TextChoices):
-        CASH = "cash", "Cash"
-        CARD = "card", "Card"
-        DEBT = "debt", "Debt"
+        CASH = "cash", _("Cash")
+        CARD = "card", _("Card")
+        DEBT = "debt", _("Debt")
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     tenant = models.ForeignKey(

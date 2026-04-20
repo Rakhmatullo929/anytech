@@ -1,4 +1,5 @@
 from django.db.models import F, Sum
+from django.utils.translation import gettext as _
 from rest_framework import serializers
 import re
 
@@ -22,11 +23,11 @@ class ClientSerializer(serializers.ModelSerializer):
 
     @classmethod
     def is_supported_phone(cls, value):
-        return any(pattern.fullmatch(value) for pattern, _ in cls.PHONE_PATTERNS)
+        return any(pattern.fullmatch(value) for pattern, _example in cls.PHONE_PATTERNS)
 
     @classmethod
     def supported_phone_examples(cls):
-        return ", ".join(example for _, example in cls.PHONE_PATTERNS)
+        return ", ".join(example for _pattern, example in cls.PHONE_PATTERNS)
 
     communication_language = serializers.ChoiceField(
         choices=Client.CommunicationLanguage.choices,
@@ -58,15 +59,17 @@ class ClientSerializer(serializers.ModelSerializer):
             phones = self.instance.phones
         normalized_phones = [self.normalize_phone(phone) for phone in (phones or []) if self.normalize_phone(phone)]
         if not normalized_phones:
-            raise serializers.ValidationError({"phones": "At least one phone number is required."})
+            raise serializers.ValidationError({"phones": _("At least one phone number is required.")})
         invalid_phones = [phone for phone in normalized_phones if not self.is_supported_phone(phone)]
         if invalid_phones:
             raise serializers.ValidationError(
                 {
-                    "phones": (
-                        f"Unsupported phone format: {', '.join(invalid_phones)}. "
-                        f"Use one of: {self.supported_phone_examples()}."
-                    )
+                    "phones": _(
+                        "Unsupported phone format: %(phones)s. Use one of: %(examples)s."
+                    ) % {
+                        "phones": ", ".join(invalid_phones),
+                        "examples": self.supported_phone_examples(),
+                    }
                 }
             )
         primary_phone = normalized_phones[0]
@@ -76,7 +79,7 @@ class ClientSerializer(serializers.ModelSerializer):
             duplicate_qs = duplicate_qs.exclude(pk=self.instance.pk)
         if duplicate_qs.exists():
             raise serializers.ValidationError(
-                {"phones": "Client with this phone number already exists."}
+                {"phones": _("Client with this phone number already exists.")}
             )
 
         attrs["phones"] = normalized_phones
@@ -86,14 +89,15 @@ class ClientSerializer(serializers.ModelSerializer):
     def validate_name(self, value):
         value = value.strip()
         if not value:
-            raise serializers.ValidationError("Name is required.")
+            raise serializers.ValidationError(_("Name is required."))
         return value
 
     def validate_phone(self, value):
         value = self.normalize_phone(value)
         if not self.is_supported_phone(value):
             raise serializers.ValidationError(
-                f"Phone must match one of: {self.supported_phone_examples()}."
+                _("Phone must match one of: %(examples)s.")
+                % {"examples": self.supported_phone_examples()}
             )
         tenant = self.context["request"].user.tenant
         qs = Client.objects.filter(tenant=tenant, phone=value)
@@ -101,7 +105,7 @@ class ClientSerializer(serializers.ModelSerializer):
             qs = qs.exclude(pk=self.instance.pk)
         if qs.exists():
             raise serializers.ValidationError(
-                "Client with this phone number already exists."
+                _("Client with this phone number already exists.")
             )
         return value
 

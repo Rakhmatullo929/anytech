@@ -29,6 +29,9 @@ echo "Database is ready!"
 echo "Applying migrations..."
 python manage.py migrate --noinput
 
+echo "Compiling translation catalogs..."
+python manage.py compilemessages
+
 echo "Collecting static files..."
 python manage.py collectstatic --noinput 2>/dev/null || true
 

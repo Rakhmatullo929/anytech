@@ -7,11 +7,31 @@ products, clients, and helper factories.
 from decimal import Decimal
 
 import pytest
+from django.core.management import call_command
 from rest_framework.test import APIClient
 
 from auth_tenant.models import Tenant, User
 from clients.models import Client
 from products.models import Product
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _compile_translations():
+    """Ensure .mo catalogs are compiled before any test runs — tests rely on
+    translated strings, and .mo files are gitignored (compiled at build/test time).
+
+    Also flushes Django's translation cache: if Django activated a language
+    during its own setup (before this fixture ran), it may have cached an
+    empty catalog for a missing .mo — we force a fresh re-read."""
+    call_command("compilemessages", verbosity=0)
+
+    # Django internals — no public API exists to invalidate the translation
+    # cache. Verify these attribute names still exist on major Django upgrades
+    # (django.utils.translation.trans_real, tested up to Django 5.2).
+    from django.utils.translation import trans_real
+
+    trans_real._translations = {}
+    trans_real._default = None
 
 
 # ── Tenants ───────────────────────────────────────────────────────────

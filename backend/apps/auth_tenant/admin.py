@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.utils.translation import gettext_lazy as _
 
 from .models import Tenant, User
 
@@ -21,9 +22,9 @@ class UserAdmin(BaseUserAdmin):
 
     fieldsets = (
         (None, {"fields": ("phone", "password")}),
-        ("Personal info", {"fields": ("name", "tenant", "role", "email")}),
-        ("Permissions", {"fields": ("is_active", "is_staff", "is_superuser")}),
-        ("Meta", {"fields": ("id", "created_at")}),
+        (_("Personal info"), {"fields": ("name", "tenant", "role", "email")}),
+        (_("Permissions"), {"fields": ("is_active", "is_staff", "is_superuser")}),
+        (_("Meta"), {"fields": ("id", "created_at")}),
     )
     add_fieldsets = (
         (None, {

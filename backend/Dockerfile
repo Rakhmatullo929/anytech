@@ -38,6 +38,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         libpq-dev \
         curl \
+        gettext \
     && rm -rf /var/lib/apt/lists/*
 
 RUN addgroup --system django \

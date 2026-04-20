@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.utils.translation import gettext as _
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -49,7 +50,7 @@ class ProductViewSet(TenantQuerySetMixin, ModelViewSet):
         serializer.is_valid(raise_exception=True)
 
         ids = serializer.validated_data["ids"]
-        deleted_count, _ = self.get_queryset().filter(id__in=ids).delete()
+        deleted_count, _details = self.get_queryset().filter(id__in=ids).delete()
         return Response({"deleted": deleted_count})
 
     @action(detail=True, methods=["patch"], url_path="stock")
@@ -67,10 +68,9 @@ class ProductViewSet(TenantQuerySetMixin, ModelViewSet):
             if new_stock < 0:
                 raise ValidationError(
                     {
-                        "detail": (
-                            f"Insufficient stock. "
-                            f"Current: {product.stock}, adjustment: {quantity}."
-                        )
+                        "detail": _(
+                            "Insufficient stock. Current: %(current)d, adjustment: %(adjustment)d."
+                        ) % {"current": product.stock, "adjustment": quantity}
                     }
                 )
             product.stock = new_stock
