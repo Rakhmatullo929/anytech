@@ -61,6 +61,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "config.middleware.i18n.APILocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -111,13 +112,20 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # ---------------------------------------------------------------------------
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "uz"
 
 TIME_ZONE = "UTC"
 
 USE_I18N = True
 
 USE_TZ = True
+
+LANGUAGES = [
+    ("uz", "O'zbekcha"),
+    ("ru", "Русский"),
+]
+
+LOCALE_PATHS = [BASE_DIR / "locale"]
 
 # ---------------------------------------------------------------------------
 # Static & Media files

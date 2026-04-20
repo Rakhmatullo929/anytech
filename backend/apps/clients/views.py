@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from django.db import transaction
+from django.utils.translation import gettext as _
 
 from auth_tenant.mixins import TenantQuerySetMixin
 from auth_tenant.permissions import page_action_permission
@@ -59,7 +60,7 @@ class ClientViewSet(TenantQuerySetMixin, ModelViewSet):
         serializer.is_valid(raise_exception=True)
 
         ids = serializer.validated_data["ids"]
-        deleted_count, _ = self.get_queryset().filter(id__in=ids).delete()
+        deleted_count, _details = self.get_queryset().filter(id__in=ids).delete()
         return Response({"deleted": deleted_count}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=["post"], url_path="bulk-create-excel")
@@ -72,18 +73,18 @@ class ClientViewSet(TenantQuerySetMixin, ModelViewSet):
             from openpyxl import load_workbook
         except ImportError as exc:
             raise ValidationError(
-                {"file": "Excel import requires openpyxl package on backend."}
+                {"file": _("Excel import requires openpyxl package on backend.")}
             ) from exc
 
         try:
             workbook = load_workbook(filename=excel_file, data_only=True)
         except Exception as exc:
-            raise ValidationError({"file": "Invalid Excel file."}) from exc
+            raise ValidationError({"file": _("Invalid Excel file.")}) from exc
 
         sheet = workbook.active
         raw_rows = list(sheet.iter_rows(values_only=True))
         if not raw_rows:
-            raise ValidationError({"file": "Excel file is empty."})
+            raise ValidationError({"file": _("Excel file is empty.")})
 
         def _clean(value):
             if value is None:
@@ -105,28 +106,34 @@ class ClientViewSet(TenantQuerySetMixin, ModelViewSet):
 
         valid_rows = [(name, phone) for name, phone in rows if name or phone]
         if not valid_rows:
-            raise ValidationError({"file": "No client rows found in Excel."})
+            raise ValidationError({"file": _("No client rows found in Excel.")})
 
         errors = []
         phones_in_file = []
         for idx, (name, phone) in enumerate(valid_rows, start=1):
             if not name:
-                errors.append(f"Row {idx}: name is required.")
+                errors.append(_("Row %(idx)d: name is required.") % {"idx": idx})
             if not phone:
-                errors.append(f"Row {idx}: phone is required.")
+                errors.append(_("Row %(idx)d: phone is required.") % {"idx": idx})
             if name and phone:
                 phones_in_file.append(phone)
 
         duplicate_phones_in_file = {phone for phone in phones_in_file if phones_in_file.count(phone) > 1}
         if duplicate_phones_in_file:
-            errors.append(f"Duplicate phones in file: {', '.join(sorted(duplicate_phones_in_file))}.")
+            errors.append(
+                _("Duplicate phones in file: %(phones)s.")
+                % {"phones": ", ".join(sorted(duplicate_phones_in_file))}
+            )
 
         tenant = request.user.tenant
         existing_phones = set(
             Client.objects.filter(tenant=tenant, phone__in=phones_in_file).values_list("phone", flat=True)
         )
         if existing_phones:
-            errors.append(f"Phones already exist: {', '.join(sorted(existing_phones))}.")
+            errors.append(
+                _("Phones already exist: %(phones)s.")
+                % {"phones": ", ".join(sorted(existing_phones))}
+            )
 
         if errors:
             raise ValidationError({"file": errors})

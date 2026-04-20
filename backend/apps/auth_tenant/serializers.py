@@ -1,5 +1,6 @@
 from django.contrib.auth import password_validation
 from django.db import transaction
+from django.utils.translation import gettext as _
 from rest_framework import serializers
 
 from .models import RolePermission, Tenant, User
@@ -18,7 +19,7 @@ def validate_passport_series(value):
     if normalized is None:
         return None
     if not (len(normalized) == 9 and normalized[:2].isalpha() and normalized[2:].isdigit()):
-        raise serializers.ValidationError("Passport series must match AB1234567 format.")
+        raise serializers.ValidationError(_("Passport series must match AB1234567 format."))
     return normalized
 
 
@@ -44,10 +45,10 @@ class RegisterSerializer(serializers.Serializer):
         rule = get_phone_rule()
         if not is_phone_valid(phone):
             raise serializers.ValidationError(
-                f"Phone must match {rule.example} format."
+                _("Phone must match %(example)s format.") % {"example": rule.example}
             )
         if User.objects.filter(phone=phone).exists():
-            raise serializers.ValidationError("A user with this phone already exists.")
+            raise serializers.ValidationError(_("A user with this phone already exists."))
         return phone
 
     def validate_email(self, value):
@@ -55,13 +56,13 @@ class RegisterSerializer(serializers.Serializer):
             return None
         normalized = value.lower()
         if User.objects.filter(email__iexact=normalized).exists():
-            raise serializers.ValidationError("A user with this email already exists.")
+            raise serializers.ValidationError(_("A user with this email already exists."))
         return normalized
 
     def validate(self, attrs):
         if attrs["password"] != attrs["password_confirm"]:
             raise serializers.ValidationError(
-                {"password_confirm": "Passwords do not match."}
+                {"password_confirm": _("Passwords do not match.")}
             )
         password_validation.validate_password(attrs["password"])
         return attrs
@@ -94,7 +95,7 @@ class ImpersonateSerializer(serializers.Serializer):
         ).first()
 
         if target_user is None:
-            raise serializers.ValidationError({"user_id": "User not found in your tenant."})
+            raise serializers.ValidationError({"user_id": _("User not found in your tenant.")})
 
         attrs["target_user"] = target_user
         return attrs
@@ -114,9 +115,11 @@ class TenantUserCreateSerializer(serializers.Serializer):
         phone = normalize_phone(value)
         rule = get_phone_rule()
         if not is_phone_valid(phone):
-            raise serializers.ValidationError(f"Phone must match {rule.example} format.")
+            raise serializers.ValidationError(
+                _("Phone must match %(example)s format.") % {"example": rule.example}
+            )
         if User.objects.filter(phone=phone).exists():
-            raise serializers.ValidationError("A user with this phone already exists.")
+            raise serializers.ValidationError(_("A user with this phone already exists."))
         return phone
 
     def validate_email(self, value):
@@ -124,7 +127,7 @@ class TenantUserCreateSerializer(serializers.Serializer):
             return None
         normalized = value.lower()
         if User.objects.filter(email__iexact=normalized).exists():
-            raise serializers.ValidationError("A user with this email already exists.")
+            raise serializers.ValidationError(_("A user with this email already exists."))
         return normalized
 
     def validate_passport_series(self, value):
@@ -132,7 +135,7 @@ class TenantUserCreateSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         if attrs["password"] != attrs["password_confirm"]:
-            raise serializers.ValidationError({"password_confirm": "Passwords do not match."})
+            raise serializers.ValidationError({"password_confirm": _("Passwords do not match.")})
         password_validation.validate_password(attrs["password"])
         return attrs
 
@@ -167,13 +170,15 @@ class TenantUserUpdateSerializer(serializers.Serializer):
         phone = normalize_phone(value)
         rule = get_phone_rule()
         if not is_phone_valid(phone):
-            raise serializers.ValidationError(f"Phone must match {rule.example} format.")
+            raise serializers.ValidationError(
+                _("Phone must match %(example)s format.") % {"example": rule.example}
+            )
 
         qs = User.objects.filter(phone=phone)
         if self.instance:
             qs = qs.exclude(pk=self.instance.pk)
         if qs.exists():
-            raise serializers.ValidationError("A user with this phone already exists.")
+            raise serializers.ValidationError(_("A user with this phone already exists."))
         return phone
 
     def validate_email(self, value):
@@ -184,7 +189,7 @@ class TenantUserUpdateSerializer(serializers.Serializer):
         if self.instance:
             qs = qs.exclude(pk=self.instance.pk)
         if qs.exists():
-            raise serializers.ValidationError("A user with this email already exists.")
+            raise serializers.ValidationError(_("A user with this email already exists."))
         return normalized
 
     def validate_passport_series(self, value):
@@ -196,7 +201,7 @@ class TenantUserUpdateSerializer(serializers.Serializer):
 
         if password or password_confirm:
             if password != password_confirm:
-                raise serializers.ValidationError({"password_confirm": "Passwords do not match."})
+                raise serializers.ValidationError({"password_confirm": _("Passwords do not match.")})
             password_validation.validate_password(password, user=self.instance)
 
         return attrs
@@ -232,7 +237,9 @@ class TenantRolePermissionsUpdateSerializer(serializers.Serializer):
             if permission == "":
                 continue
             if permission not in ALL_PERMISSIONS:
-                raise serializers.ValidationError(f"Unsupported permission: {permission}")
+                raise serializers.ValidationError(
+                    _("Unsupported permission: %(permission)s") % {"permission": permission}
+                )
             if permission in seen:
                 continue
             normalized.append(permission)

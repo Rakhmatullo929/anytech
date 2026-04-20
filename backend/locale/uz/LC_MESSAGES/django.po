@@ -1,0 +1,264 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: anytech 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-17 15:11+0000\n"
+"PO-Revision-Date: 2026-04-17 15:11+0000\n"
+"Language-Team: Uzbek\n"
+"Language: uz\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# ── auth_tenant / admin ─────────────────────────────────────────────
+msgid "Personal info"
+msgstr "Shaxsiy ma'lumotlar"
+
+msgid "Permissions"
+msgstr "Ruxsatlar"
+
+msgid "Meta"
+msgstr "Meta ma'lumotlar"
+
+# ── auth_tenant / models (choices) ──────────────────────────────────
+msgid "Admin"
+msgstr "Administrator"
+
+msgid "Manager"
+msgstr "Menejer"
+
+msgid "Seller"
+msgstr "Sotuvchi"
+
+msgid "Male"
+msgstr "Erkak"
+
+msgid "Female"
+msgstr "Ayol"
+
+# ── auth_tenant / serializers + views ───────────────────────────────
+msgid "Passport series must match AB1234567 format."
+msgstr "Pasport seriyasi AB1234567 formatiga mos kelishi kerak."
+
+#, python-format
+msgid "Phone must match %(example)s format."
+msgstr "Telefon raqami %(example)s formatiga mos kelishi kerak."
+
+msgid "A user with this phone already exists."
+msgstr "Bu telefon raqami bilan foydalanuvchi allaqachon mavjud."
+
+msgid "A user with this email already exists."
+msgstr "Bu email bilan foydalanuvchi allaqachon mavjud."
+
+msgid "Passwords do not match."
+msgstr "Parollar mos kelmadi."
+
+msgid "User not found in your tenant."
+msgstr "Foydalanuvchi sizning tashkilotingizda topilmadi."
+
+#, python-format
+msgid "Unsupported permission: %(permission)s"
+msgstr "Qo'llab-quvvatlanmaydigan ruxsat: %(permission)s"
+
+msgid "You cannot delete your own account."
+msgstr "O'zingizning hisobingizni o'chira olmaysiz."
+
+msgid "Role not found."
+msgstr "Rol topilmadi."
+
+# ── clients / models (communication language) ───────────────────────
+msgid "Uzbek"
+msgstr "O'zbekcha"
+
+msgid "Russian"
+msgstr "Ruscha"
+
+msgid "English"
+msgstr "Inglizcha"
+
+# ── clients / serializers + views ───────────────────────────────────
+msgid "At least one phone number is required."
+msgstr "Kamida bitta telefon raqami kerak."
+
+#, python-format
+msgid "Unsupported phone format: %(phones)s. Use one of: %(examples)s."
+msgstr "Qo'llab-quvvatlanmaydigan telefon formati: %(phones)s. Mumkin bo'lganlari: %(examples)s."
+
+msgid "Client with this phone number already exists."
+msgstr "Bu telefon raqami bilan mijoz allaqachon mavjud."
+
+msgid "Name is required."
+msgstr "Ism ko'rsatilishi shart."
+
+#, python-format
+msgid "Phone must match one of: %(examples)s."
+msgstr "Telefon quyidagilardan biriga mos kelishi kerak: %(examples)s."
+
+msgid "Excel import requires openpyxl package on backend."
+msgstr "Excel-import uchun backendda openpyxl paketi talab qilinadi."
+
+msgid "Invalid Excel file."
+msgstr "Excel fayli noto'g'ri."
+
+msgid "Excel file is empty."
+msgstr "Excel fayli bo'sh."
+
+msgid "No client rows found in Excel."
+msgstr "Excel-faylda mijoz qatorlari topilmadi."
+
+#, python-format
+msgid "Row %(idx)d: name is required."
+msgstr "Qator %(idx)d: ism ko'rsatilishi shart."
+
+#, python-format
+msgid "Row %(idx)d: phone is required."
+msgstr "Qator %(idx)d: telefon ko'rsatilishi shart."
+
+#, python-format
+msgid "Duplicate phones in file: %(phones)s."
+msgstr "Faylda takrorlanuvchi telefonlar: %(phones)s."
+
+#, python-format
+msgid "Phones already exist: %(phones)s."
+msgstr "Telefonlar allaqachon mavjud: %(phones)s."
+
+# ── debts / models + serializers + views ────────────────────────────
+msgid "Active"
+msgstr "Faol"
+
+msgid "Closed"
+msgstr "Yopiq"
+
+msgid "Amount must be greater than zero."
+msgstr "Summa noldan katta bo'lishi kerak."
+
+msgid "Debt is already closed."
+msgstr "Qarz allaqachon yopilgan."
+
+#, python-format
+msgid "Amount exceeds remaining debt of %(remaining)s."
+msgstr "Summa qarz qoldig'idan oshib ketdi: %(remaining)s."
+
+# ── products / serializers + views ──────────────────────────────────
+msgid "Purchase price must be >= 0."
+msgstr "Sotib olish narxi >= 0 bo'lishi kerak."
+
+msgid "Sale price must be >= 0."
+msgstr "Sotish narxi >= 0 bo'lishi kerak."
+
+msgid "Stock must be >= 0."
+msgstr "Ombor qoldig'i >= 0 bo'lishi kerak."
+
+msgid "Quantity must not be zero."
+msgstr "Miqdor nol bo'lmasligi kerak."
+
+msgid "Stock value must be >= 0."
+msgstr "Ombor qiymati >= 0 bo'lishi kerak."
+
+msgid "Increment"
+msgstr "Qo'shish"
+
+msgid "Set"
+msgstr "O'rnatish"
+
+msgid "Value to add/subtract (increment mode) or absolute value (set mode)."
+msgstr "Qo'shish/ayirish qiymati (increment rejimi) yoki aniq qiymat (set rejimi)."
+
+msgid "'increment' to add/subtract, 'set' to overwrite."
+msgstr "'increment' — qo'shish/ayirish, 'set' — qayta yozish."
+
+#, python-format
+msgid "Insufficient stock. Current: %(current)d, adjustment: %(adjustment)d."
+msgstr "Ombor qoldig'i yetarli emas. Joriy: %(current)d, o'zgartirish: %(adjustment)d."
+
+# ── sales / models + serializers ────────────────────────────────────
+msgid "Cash"
+msgstr "Naqd pul"
+
+msgid "Card"
+msgstr "Karta"
+
+msgid "Debt"
+msgstr "Qarz"
+
+msgid "At least one item is required."
+msgstr "Kamida bitta mahsulot tanlanishi kerak."
+
+msgid "Client is required for debt sales."
+msgstr "Qarzga sotish uchun mijoz ko'rsatilishi shart."
+
+msgid "Client not found."
+msgstr "Mijoz topilmadi."
+
+#, python-format
+msgid "Products not found: %(ids)s"
+msgstr "Mahsulotlar topilmadi: %(ids)s"
+
+#, python-format
+msgid "Insufficient stock for '%(name)s'. Available: %(available)d, requested: %(requested)d."
+msgstr "'%(name)s' uchun ombor qoldig'i yetarli emas. Mavjud: %(available)d, so'ralgan: %(requested)d."
+
+# ── DRF default error messages (overrides; DRF ships no uz catalog) ─
+msgid "This field is required."
+msgstr "Bu maydon to'ldirilishi shart."
+
+msgid "This field may not be null."
+msgstr "Bu maydon null bo'lishi mumkin emas."
+
+msgid "This field may not be blank."
+msgstr "Bu maydon bo'sh bo'lishi mumkin emas."
+
+msgid "A valid integer is required."
+msgstr "To'g'ri butun son kiritilishi kerak."
+
+msgid "A valid number is required."
+msgstr "To'g'ri son kiritilishi kerak."
+
+msgid "\"{input}\" is not a valid choice."
+msgstr "\"{input}\" to'g'ri variant emas."
+
+msgid "Ensure this field has no more than {max_length} characters."
+msgstr "Bu maydonda {max_length} belgidan ko'p bo'lmasligi kerak."
+
+msgid "Ensure this field has at least {min_length} characters."
+msgstr "Bu maydonda kamida {min_length} belgi bo'lishi kerak."
+
+msgid "Ensure this value is greater than or equal to {min_value}."
+msgstr "Qiymat {min_value} dan katta yoki teng bo'lishi kerak."
+
+msgid "Ensure this value is less than or equal to {max_value}."
+msgstr "Qiymat {max_value} dan kichik yoki teng bo'lishi kerak."
+
+msgid "Enter a valid email address."
+msgstr "To'g'ri email manzilini kiriting."
+
+msgid "Enter a valid URL."
+msgstr "To'g'ri URL kiriting."
+
+msgid "No file was submitted."
+msgstr "Fayl yuborilmadi."
+
+msgid "The submitted file is empty."
+msgstr "Yuborilgan fayl bo'sh."
+
+msgid "Not found."
+msgstr "Topilmadi."
+
+msgid "You do not have permission to perform this action."
+msgstr "Bu amalni bajarish uchun ruxsatingiz yo'q."
+
+msgid "A server error occurred."
+msgstr "Server xatosi yuz berdi."
+
+msgid "Invalid value."
+msgstr "Noto'g'ri qiymat."
+
+msgid "Invalid username/password."
+msgstr "Noto'g'ri login yoki parol."
+
+msgid "User inactive or deleted."
+msgstr "Foydalanuvchi faol emas yoki o'chirilgan."
+
+msgid "This field must be unique."
+msgstr "Bu maydon unikal bo'lishi kerak."

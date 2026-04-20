@@ -1,3 +1,4 @@
+from django.utils.translation import gettext as _, gettext_lazy
 from rest_framework import serializers
 
 from .models import Product
@@ -11,17 +12,17 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def validate_purchase_price(self, value):
         if value < 0:
-            raise serializers.ValidationError("Purchase price must be >= 0.")
+            raise serializers.ValidationError(_("Purchase price must be >= 0."))
         return value
 
     def validate_sale_price(self, value):
         if value < 0:
-            raise serializers.ValidationError("Sale price must be >= 0.")
+            raise serializers.ValidationError(_("Sale price must be >= 0."))
         return value
 
     def validate_stock(self, value):
         if value < 0:
-            raise serializers.ValidationError("Stock must be >= 0.")
+            raise serializers.ValidationError(_("Stock must be >= 0."))
         return value
 
     class Meta:
@@ -48,25 +49,25 @@ class ProductUpdateSerializer(ProductSerializer):
 
 
 class StockAdjustmentSerializer(serializers.Serializer):
-    MODE_CHOICES = (("increment", "Increment"), ("set", "Set"))
+    MODE_CHOICES = (("increment", gettext_lazy("Increment")), ("set", gettext_lazy("Set")))
 
     quantity = serializers.IntegerField(
-        help_text="Value to add/subtract (increment mode) or absolute value (set mode)."
+        help_text=gettext_lazy("Value to add/subtract (increment mode) or absolute value (set mode).")
     )
     mode = serializers.ChoiceField(
         choices=MODE_CHOICES,
         default="increment",
-        help_text="'increment' to add/subtract, 'set' to overwrite.",
+        help_text=gettext_lazy("'increment' to add/subtract, 'set' to overwrite."),
     )
 
     def validate(self, attrs):
         if attrs.get("mode", "increment") == "increment" and attrs["quantity"] == 0:
             raise serializers.ValidationError(
-                {"quantity": "Quantity must not be zero."}
+                {"quantity": _("Quantity must not be zero.")}
             )
         if attrs.get("mode") == "set" and attrs["quantity"] < 0:
             raise serializers.ValidationError(
-                {"quantity": "Stock value must be >= 0."}
+                {"quantity": _("Stock value must be >= 0.")}
             )
         return attrs
 

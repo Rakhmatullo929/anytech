@@ -1,13 +1,14 @@
 import uuid
 
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 class Client(models.Model):
     class CommunicationLanguage(models.TextChoices):
-        UZ = "uz", "Uzbek"
-        RU = "ru", "Russian"
-        EN = "en", "English"
+        UZ = "uz", _("Uzbek")
+        RU = "ru", _("Russian")
+        EN = "en", _("English")
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     tenant = models.ForeignKey(

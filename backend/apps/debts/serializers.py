@@ -1,3 +1,4 @@
+from django.utils.translation import gettext as _
 from rest_framework import serializers
 
 from .models import Debt, Payment
@@ -43,5 +44,5 @@ class PaymentCreateSerializer(serializers.Serializer):
 
     def validate_amount(self, value):
         if value <= 0:
-            raise serializers.ValidationError("Amount must be greater than zero.")
+            raise serializers.ValidationError(_("Amount must be greater than zero."))
         return value
