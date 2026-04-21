@@ -40,6 +40,7 @@
     "role": "Роль"
   },
   "form": {
+    "region": "Регион",
     "passportPrefix": "Серия паспорта (буквы)",
     "passportNumber": "Серия паспорта (цифры)"
   },

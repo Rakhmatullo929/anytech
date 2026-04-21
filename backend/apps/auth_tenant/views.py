@@ -5,11 +5,13 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 
-from .models import User
+from .models import District, Region, User
 from .permission_catalog import ALL_PERMISSIONS, DEFAULT_ROLE_PERMISSIONS
 from .permissions import get_user_permissions, page_action_permission
 from .serializers import (
+    DistrictSerializer,
     ImpersonateSerializer,
+    RegionSerializer,
     RegisterSerializer,
     TenantRolePermissionsUpdateSerializer,
     TenantUserCreateSerializer,
@@ -68,8 +70,8 @@ class TenantUsersListView(generics.ListCreateAPIView):
 
     serializer_class = UserSerializer
     permission_classes = (IsAuthenticated,)
-    search_fields = ("name", "phone", "email", "role")
-    ordering_fields = ("name", "role", "created_at")
+    search_fields = ("first_name", "last_name", "middle_name", "phone", "email", "role")
+    ordering_fields = ("first_name", "role", "created_at")
     ordering = ("-created_at",)
 
     def get_serializer_class(self):
@@ -87,7 +89,11 @@ class TenantUsersListView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return user.__class__.objects.filter(tenant_id=user.tenant_id).order_by("-created_at")
+        return (
+            user.__class__.objects.filter(tenant_id=user.tenant_id)
+            .select_related("region", "district")
+            .order_by("-created_at")
+        )
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -117,7 +123,11 @@ class TenantUserDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return user.__class__.objects.filter(tenant_id=user.tenant_id).order_by("-created_at")
+        return (
+            user.__class__.objects.filter(tenant_id=user.tenant_id)
+            .select_related("region", "district")
+            .order_by("-created_at")
+        )
 
     def perform_destroy(self, instance):
         if instance.id == self.request.user.id:
@@ -215,3 +225,22 @@ class TenantRolePermissionsUpdateView(generics.GenericAPIView):
             },
             status=status.HTTP_200_OK,
         )
+
+
+class RegionListView(generics.ListAPIView):
+    serializer_class = RegionSerializer
+    permission_classes = (IsAuthenticated,)
+    pagination_class = None
+
+    def get_queryset(self):
+        return Region.objects.all().order_by("name_uz")
+
+
+class RegionDistrictListView(generics.ListAPIView):
+    serializer_class = DistrictSerializer
+    permission_classes = (IsAuthenticated,)
+    pagination_class = None
+
+    def get_queryset(self):
+        region_id = self.kwargs["pk"]
+        return District.objects.filter(region_id=region_id).order_by("name_uz")

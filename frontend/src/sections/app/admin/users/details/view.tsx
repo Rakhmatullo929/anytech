@@ -1,4 +1,3 @@
-import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -8,10 +7,11 @@ import Typography from '@mui/material/Typography';
 
 import EmptyContent from 'src/components/empty-content';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+import ProfileCover from 'src/components/profile-cover';
 import { paths } from 'src/routes/paths';
 import { useParams } from 'src/routes/hook';
 import { RouterLink } from 'src/routes/components';
-import { fDateTime } from 'src/utils/format-time';
+import { fDate, fDateTime } from 'src/utils/format-time';
 import { useLocales } from 'src/locales';
 import { useCheckPermission } from 'src/auth/hooks/use-check-permission';
 
@@ -25,6 +25,8 @@ export default function UserDetailsView() {
   const { id = '' } = useParams();
   const { data: user, isPending } = useTenantUserDetailQuery(id);
   const canWriteUsers = canWritePage('users');
+  const fullName = [user?.firstName, user?.lastName, user?.middleName].filter(Boolean).join(' ');
+  const notSetLabel = '-';
 
   if (isPending) {
     return (
@@ -51,11 +53,11 @@ export default function UserDetailsView() {
   return (
     <>
       <CustomBreadcrumbs
-        heading={user.name || user.phone || '-'}
+        heading={fullName || user.phone || '-'}
         links={[
           { name: tx('common.navigation.admin'), href: paths.admin.users.root },
           { name: tx('admin.tabs.users'), href: paths.admin.users.root },
-          { name: user.name || user.phone || '-', href: paths.admin.users.details(user.id) },
+          { name: fullName || user.phone || '-', href: paths.admin.users.details(user.id) },
         ]}
         action={
           canWriteUsers ? (
@@ -67,21 +69,33 @@ export default function UserDetailsView() {
         sx={{ mb: { xs: 3, md: 5 } }}
       />
 
-      <Stack spacing={3}>
-        <Card sx={{ p: 3 }}>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2.5} alignItems={{ xs: 'flex-start', sm: 'center' }}>
-            <Avatar sx={{ width: 52, height: 52, bgcolor: 'primary.main', fontWeight: 700 }}>
-              {(user.name || user.phone || 'U').charAt(0).toUpperCase()}
-            </Avatar>
-            <Box sx={{ flexGrow: 1 }}>
-              <Typography variant="h6">{user.name || '-'}</Typography>
-              <Typography variant="body2" color="text.secondary">
-                {user.phone || '-'}
-              </Typography>
-            </Box>
-            <UserRoleLabel role={user.role} label={tx(`users.roles.${user.role}`)} />
-          </Stack>
-        </Card>
+      <Stack spacing={2}>
+        <ProfileCover
+          title={fullName || user.phone || notSetLabel}
+          subtitle={user.phone || ''}
+          editHref={paths.admin.users.edit(user.id)}
+          canEdit={canWriteUsers}
+          editLabel={tx('common.actions.edit')}
+          emptyLabel={notSetLabel}
+          chips={[
+            { key: 'role', icon: 'solar:shield-user-bold', label: tx(`users.roles.${user.role}`) },
+            {
+              key: 'gender',
+              icon: user.gender === 'female' ? 'solar:female-bold' : 'solar:male-bold',
+              label: user.gender ? tx(`users.genders.${user.gender}`) : notSetLabel,
+            },
+            {
+              key: 'region',
+              icon: 'solar:map-point-bold',
+              label: user.region?.name || notSetLabel,
+            },
+            {
+              key: 'district',
+              icon: 'solar:city-bold',
+              label: user.district?.name || notSetLabel,
+            },
+          ]}
+        />
 
         <Card sx={{ p: 3 }}>
           <Typography variant="subtitle1">{tx('users.detail.infoTitle')}</Typography>
@@ -106,10 +120,50 @@ export default function UserDetailsView() {
             <Box>
               <Stack spacing={0.5}>
                 <Typography variant="caption" color="text.secondary">
+                  {tx('clients.form.fields.name')}
+                </Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  {user.firstName || notSetLabel}
+                </Typography>
+              </Stack>
+            </Box>
+            <Box>
+              <Stack spacing={0.5}>
+                <Typography variant="caption" color="text.secondary">
+                  {tx('clients.form.fields.lastName')}
+                </Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  {user.lastName || notSetLabel}
+                </Typography>
+              </Stack>
+            </Box>
+            <Box>
+              <Stack spacing={0.5}>
+                <Typography variant="caption" color="text.secondary">
+                  {tx('clients.form.fields.middleName')}
+                </Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  {user.middleName || notSetLabel}
+                </Typography>
+              </Stack>
+            </Box>
+            <Box>
+              <Stack spacing={0.5}>
+                <Typography variant="caption" color="text.secondary">
+                  {tx('clients.form.fields.birthDate')}
+                </Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  {user.birthDate ? fDate(user.birthDate) : notSetLabel}
+                </Typography>
+              </Stack>
+            </Box>
+            <Box>
+              <Stack spacing={0.5}>
+                <Typography variant="caption" color="text.secondary">
                   {tx('common.table.gender')}
                 </Typography>
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {user.gender ? tx(`users.genders.${user.gender}`) : '-'}
+                  {user.gender ? tx(`users.genders.${user.gender}`) : notSetLabel}
                 </Typography>
               </Stack>
             </Box>
@@ -119,7 +173,27 @@ export default function UserDetailsView() {
                   {tx('common.table.passportSeries')}
                 </Typography>
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {user.passportSeries || '-'}
+                  {user.passportSeries || notSetLabel}
+                </Typography>
+              </Stack>
+            </Box>
+            <Box>
+              <Stack spacing={0.5}>
+                <Typography variant="caption" color="text.secondary">
+                  {tx('users.form.region')}
+                </Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  {user.region?.name || notSetLabel}
+                </Typography>
+              </Stack>
+            </Box>
+            <Box>
+              <Stack spacing={0.5}>
+                <Typography variant="caption" color="text.secondary">
+                  {tx('clients.form.fields.city')}
+                </Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  {user.district?.name || notSetLabel}
                 </Typography>
               </Stack>
             </Box>
@@ -129,9 +203,12 @@ export default function UserDetailsView() {
                   Tenant ID
                 </Typography>
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {user.tenantId || '-'}
+                  {user.tenantId || notSetLabel}
                 </Typography>
               </Stack>
+            </Box>
+            <Box sx={{ gridColumn: { md: '1 / -1' }, display: 'flex', justifyContent: 'flex-end', pt: 0.5 }}>
+              <UserRoleLabel role={user.role} label={tx(`users.roles.${user.role}`)} />
             </Box>
             <Box sx={{ gridColumn: { md: '1 / -1' } }}>
               <Stack spacing={0.5}>

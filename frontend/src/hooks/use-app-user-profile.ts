@@ -33,7 +33,7 @@ function isTenantUser(u: unknown): u is TenantUser {
     u !== null &&
     typeof u === 'object' &&
     typeof (u as TenantUser).id === 'string' &&
-    typeof (u as TenantUser).name === 'string' &&
+    typeof (u as TenantUser).firstName === 'string' &&
     ((u as TenantUser).email === null || typeof (u as TenantUser).email === 'string') &&
     ((u as TenantUser).phone === null || typeof (u as TenantUser).phone === 'string') &&
     typeof (u as TenantUser).role === 'string'
@@ -66,9 +66,10 @@ function emptyProfile(partial: Partial<AppUserProfile> = {}): AppUserProfile {
 
 function mapAuthUserToProfile(u: NonNullable<AuthUserType>): AppUserProfile {
   if (isTenantUser(u)) {
+    const fullName = [u.firstName, u.lastName, u.middleName].filter(Boolean).join(' ');
     return emptyProfile({
       id: u.id,
-      displayName: u.name,
+      displayName: fullName || u.phone || '',
       email: u.email || '',
       photoURL: undefined,
       role: u.role,
@@ -82,10 +83,12 @@ function mapAuthUserToProfile(u: NonNullable<AuthUserType>): AppUserProfile {
   }
 
   const rec = u as Record<string, unknown>;
-  const { displayName: rawDisplayName, name: rawName } = rec;
+  const { displayName: rawDisplayName, name: rawName, firstName: rawFirstName, lastName: rawLastName, middleName: rawMiddleName } = rec;
   let displayName = '';
   if (typeof rawDisplayName === 'string') {
     displayName = rawDisplayName;
+  } else if (typeof rawFirstName === 'string') {
+    displayName = [rawFirstName, rawLastName, rawMiddleName].filter((part): part is string => typeof part === 'string' && part.trim().length > 0).join(' ');
   } else if (typeof rawName === 'string') {
     displayName = rawName;
   }

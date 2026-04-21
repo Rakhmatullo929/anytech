@@ -14,6 +14,7 @@ import { useCheckPermission } from 'src/auth/hooks/use-check-permission';
 import { stringParam, useUrlQueryState } from 'src/hooks/use-url-query-state';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import EmptyContent from 'src/components/empty-content';
+import ProfileCover from 'src/components/profile-cover';
 import { useClientDetailQuery } from 'src/sections/app/clients/api/use-clients-api';
 import { ClientDetailsSkeleton } from 'src/sections/app/clients/skeleton';
 import {
@@ -21,7 +22,6 @@ import {
   ContactsTabPanel,
   DetailsTabs,
   OverviewTabPanel,
-  ProfileCover,
   PurchasesTabPanel,
   type ClientDetailsTabValue,
 } from './components';
@@ -184,12 +184,12 @@ export default function ClientDetailsView() {
 
       <Stack spacing={2}>
         <ProfileCover
-          fullName={fullNameResolved}
-          primaryPhone={primaryPhone}
+          title={fullNameResolved}
+          subtitle={primaryPhone}
           editHref={paths.clients.edit(client.id)}
           canEdit={canEditClient}
-          metadataChips={metadataChips}
-        editLabel={tx('common.actions.edit')}
+          chips={metadataChips}
+          editLabel={tx('common.actions.edit')}
           emptyLabel={notSetLabel}
         />
 

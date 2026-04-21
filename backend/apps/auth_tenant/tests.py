@@ -73,7 +73,7 @@ class TestRegistration:
     def test_register_success(self, anon_client):
         data = {
             "tenant_name": "New Company",
-            "name": "John Doe",
+            "first_name": "John",
             "phone": "+998901110003",
             "email": "john@example.com",
             "password": "StrongPass123!",
@@ -93,7 +93,7 @@ class TestRegistration:
     def test_register_duplicate_phone(self, anon_client, admin_user):
         data = {
             "tenant_name": "Dup Co",
-            "name": "Dup",
+            "first_name": "Dup",
             "phone": admin_user.phone,
             "email": "dup@test.com",
             "password": "StrongPass123!",
@@ -105,7 +105,7 @@ class TestRegistration:
     def test_register_password_mismatch(self, anon_client):
         data = {
             "tenant_name": "Mis Co",
-            "name": "Mis",
+            "first_name": "Mis",
             "phone": "+998901110004",
             "email": "mis@test.com",
             "password": "StrongPass123!",
@@ -117,7 +117,7 @@ class TestRegistration:
     def test_register_weak_password(self, anon_client):
         data = {
             "tenant_name": "Weak Co",
-            "name": "Weak",
+            "first_name": "Weak",
             "phone": "+998901110005",
             "email": "weak@test.com",
             "password": "123",
@@ -212,7 +212,7 @@ class TestMeEndpoint:
         resp = admin_client.get(ME_URL)
         assert resp.status_code == status.HTTP_200_OK
         assert resp.data["user"]["phone"] == admin_user.phone
-        assert resp.data["user"]["name"] == admin_user.name
+        assert resp.data["user"]["first_name"] == admin_user.first_name
         assert resp.data["user"]["role"] == admin_user.role
         assert "permissions" in resp.data["user"]
         assert isinstance(resp.data["user"]["permissions"], list)
@@ -262,7 +262,10 @@ class TestTenantUsersEndpoint:
 
     def test_users_create_admin_success(self, admin_client, tenant):
         payload = {
-            "name": "Created Manager",
+            "first_name": "Created",
+            "last_name": "Manager",
+            "middle_name": "",
+            "birth_date": "1995-01-01",
             "phone": "+998901110199",
             "email": "created-manager@test.com",
             "passport_series": "AB1231212",
@@ -285,7 +288,10 @@ class TestTenantUsersEndpoint:
         resp = admin_client.patch(
             USER_DETAIL_URL(manager_user.id),
             {
-                "name": "Manager Updated",
+                "first_name": "Manager",
+                "last_name": "Updated",
+                "middle_name": "M",
+                "birth_date": "1994-02-02",
                 "phone": manager_user.phone,
                 "email": manager_user.email,
                 "passport_series": "CD7654321",
@@ -297,14 +303,18 @@ class TestTenantUsersEndpoint:
         assert resp.status_code == status.HTTP_200_OK
         assert resp.data["id"] == str(manager_user.id)
         manager_user.refresh_from_db()
-        assert manager_user.name == "Manager Updated"
+        assert manager_user.first_name == "Manager"
+        assert manager_user.last_name == "Updated"
         assert manager_user.role == User.Role.SELLER
         assert manager_user.passport_series == "CD7654321"
         assert manager_user.gender == User.Gender.FEMALE
 
     def test_users_create_invalid_passport_series_rejected(self, admin_client):
         payload = {
-            "name": "Invalid Passport",
+            "first_name": "Invalid",
+            "last_name": "Passport",
+            "middle_name": "",
+            "birth_date": "1990-05-10",
             "phone": "+998901110198",
             "role": "seller",
             "passport_series": "A1234567",

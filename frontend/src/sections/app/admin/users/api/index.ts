@@ -2,6 +2,8 @@ export {
   useTenantUsersListQuery,
   useImpersonateTenantUserMutation,
   useTenantUserDetailQuery,
+  useRegionsQuery,
+  useDistrictsQuery,
   useCreateTenantUserMutation,
   useUpdateTenantUserMutation,
   useDeleteTenantUserMutation,
@@ -11,5 +13,7 @@ export type {
   FetchTenantUsersParams,
   TenantUserDetail,
   TenantUserListItem,
+  LocationRegion,
+  LocationDistrict,
   UpdateTenantUserPayload,
 } from './types';

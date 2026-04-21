@@ -5,6 +5,8 @@ from .tokens import CustomTokenObtainPairSerializer
 from .views import (
     MeView,
     RegisterView,
+    RegionDistrictListView,
+    RegionListView,
     TenantImpersonateView,
     TenantRolePermissionsUpdateView,
     TenantUserDetailView,
@@ -27,4 +29,6 @@ urlpatterns = [
     path("roles/", TenantRolesListView.as_view(), name="auth-roles"),
     path("roles/<str:role>/permissions/", TenantRolePermissionsUpdateView.as_view(), name="auth-role-permissions"),
     path("impersonate/", TenantImpersonateView.as_view(), name="auth-impersonate"),
+    path("locations/regions/", RegionListView.as_view(), name="locations-regions"),
+    path("locations/regions/<uuid:pk>/districts/", RegionDistrictListView.as_view(), name="locations-region-districts"),
 ]

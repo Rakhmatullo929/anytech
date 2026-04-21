@@ -11,28 +11,30 @@ import { alpha } from '@mui/material/styles';
 import { RouterLink } from 'src/routes/components';
 import Iconify from 'src/components/iconify';
 
-type MetadataChip = {
+export type ProfileCoverChip = {
   key: string;
   icon: string;
   label: string;
 };
 
 type Props = {
-  fullName: string;
-  primaryPhone: string;
-  editHref: string;
-  canEdit: boolean;
-  metadataChips: MetadataChip[];
+  title: string;
+  subtitle?: string;
+  subtitleIcon?: string;
+  editHref?: string;
+  canEdit?: boolean;
+  chips?: ProfileCoverChip[];
   editLabel: string;
   emptyLabel: string;
 };
 
 export default function ProfileCover({
-  fullName,
-  primaryPhone,
-  editHref,
-  canEdit,
-  metadataChips,
+  title,
+  subtitle = '',
+  subtitleIcon = 'solar:phone-calling-rounded-bold',
+  editHref = '',
+  canEdit = false,
+  chips = [],
   editLabel,
   emptyLabel,
 }: Props) {
@@ -62,21 +64,21 @@ export default function ProfileCover({
               fontWeight: 700,
             }}
           >
-            {fullName.charAt(0).toUpperCase()}
+            {title.charAt(0).toUpperCase()}
           </Avatar>
           <Box sx={{ minWidth: 0 }}>
             <Typography variant="h5" sx={{ lineHeight: 1.2 }} noWrap>
-              {fullName}
+              {title}
             </Typography>
             <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mt: 0.35 }}>
-              <Iconify icon="solar:phone-calling-rounded-bold" width={15} />
+              <Iconify icon={subtitleIcon} width={15} />
               <Typography variant="body2" color="text.secondary">
-                {primaryPhone || emptyLabel}
+                {subtitle || emptyLabel}
               </Typography>
             </Stack>
           </Box>
         </Stack>
-        {canEdit ? (
+        {canEdit && editHref ? (
           <Button
             component={RouterLink}
             href={editHref}
@@ -103,7 +105,7 @@ export default function ProfileCover({
       </Stack>
       <Divider sx={{ my: 2 }} />
       <Stack direction="row" flexWrap="wrap" gap={1}>
-        {metadataChips.map((item) => (
+        {chips.map((item) => (
           <Chip
             key={item.key}
             size="small"
@@ -114,7 +116,6 @@ export default function ProfileCover({
               borderRadius: 1.5,
               bgcolor: (theme) => alpha(theme.palette.primary.main, 0.06),
               border: (theme) => `1px solid ${alpha(theme.palette.primary.main, 0.22)}`,
-              transition: 'none',
               '&:hover': {
                 bgcolor: (theme) => alpha(theme.palette.primary.main, 0.06),
                 border: (theme) => `1px solid ${alpha(theme.palette.primary.main, 0.22)}`,

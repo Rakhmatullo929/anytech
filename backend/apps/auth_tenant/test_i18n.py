@@ -14,7 +14,7 @@ def _disable_throttles(settings):
 REGISTER_URL = reverse_lazy("auth-register")
 BAD_PAYLOAD = {
     "tenant_name": "T",
-    "name": "N",
+    "first_name": "N",
     "phone": "not-a-valid-phone",
     "password": "StrongPass123!",
     "password_confirm": "StrongPass123!",

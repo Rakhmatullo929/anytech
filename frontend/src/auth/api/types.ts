@@ -4,7 +4,10 @@ export type UserRole = 'admin' | 'manager' | 'seller';
 /** Matches DRF `UserSerializer` response (camelCase). */
 export type TenantUser = {
   id: string;
-  name: string;
+  firstName: string;
+  lastName?: string;
+  middleName?: string;
+  birthDate?: string | null;
   phone: string | null;
   email: string | null;
   passportSeries?: string | null;
@@ -30,7 +33,7 @@ export type LoginRequest = {
 /** Matches `RegisterSerializer` (camelCase request body). */
 export type RegisterRequest = {
   tenantName: string;
-  name: string;
+  firstName: string;
   phone: string;
   email?: string | null;
   password: string;

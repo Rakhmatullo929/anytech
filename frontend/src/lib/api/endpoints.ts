@@ -5,6 +5,10 @@ const API_V1 = '/api/v1';
  * Django: `config.urls` → `/api/v1/...`
  */
 export const API_ENDPOINTS = {
+  locations: {
+    regions: '/api/locations/regions/',
+    regionDistricts: (id: string) => `/api/locations/regions/${id}/districts/`,
+  },
   auth: {
     register: `${API_V1}/auth/register/`,
     login: `${API_V1}/auth/login/`,

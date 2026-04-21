@@ -3,7 +3,7 @@ from django.db import transaction
 from django.utils.translation import gettext as _
 from rest_framework import serializers
 
-from .models import RolePermission, Tenant, User
+from .models import District, Region, RolePermission, Tenant, User
 from .permission_catalog import ADMIN_REQUIRED_PERMISSIONS, ALL_PERMISSIONS
 from .phone import get_phone_rule, is_phone_valid, normalize_phone
 
@@ -25,16 +25,75 @@ def validate_passport_series(value):
 
 class UserSerializer(serializers.ModelSerializer):
     tenant_id = serializers.UUIDField(read_only=True)
+    region = serializers.SerializerMethodField()
+    district = serializers.SerializerMethodField()
+    region_id = serializers.UUIDField(read_only=True)
+    district_id = serializers.UUIDField(read_only=True)
 
     class Meta:
         model = User
-        fields = ("id", "name", "phone", "email", "passport_series", "gender", "role", "tenant_id", "created_at")
+        fields = (
+            "id",
+            "first_name",
+            "last_name",
+            "middle_name",
+            "birth_date",
+            "phone",
+            "email",
+            "passport_series",
+            "gender",
+            "role",
+            "region",
+            "district",
+            "region_id",
+            "district_id",
+            "tenant_id",
+            "created_at",
+        )
         read_only_fields = fields
+
+    def get_region(self, obj):
+        if not obj.region_id:
+            return None
+        return RegionSerializer(obj.region).data
+
+    def get_district(self, obj):
+        if not obj.district_id:
+            return None
+        return DistrictSerializer(obj.district).data
+
+
+class RegionSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Region
+        fields = ("id", "name", "code")
+        read_only_fields = fields
+
+    def get_name(self, obj):
+        request = self.context.get("request")
+        lang = getattr(request, "LANGUAGE_CODE", "uz") if request else "uz"
+        return obj.name_ru if lang == "ru" else obj.name_uz
+
+
+class DistrictSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = District
+        fields = ("id", "region_id", "name", "code")
+        read_only_fields = fields
+
+    def get_name(self, obj):
+        request = self.context.get("request")
+        lang = getattr(request, "LANGUAGE_CODE", "uz") if request else "uz"
+        return obj.name_ru if lang == "ru" else obj.name_uz
 
 
 class RegisterSerializer(serializers.Serializer):
     tenant_name = serializers.CharField(max_length=255)
-    name = serializers.CharField(max_length=255)
+    first_name = serializers.CharField(max_length=255)
     phone = serializers.CharField(max_length=20)
     email = serializers.EmailField(required=False, allow_blank=True, allow_null=True)
     password = serializers.CharField(write_only=True, min_length=6)
@@ -77,7 +136,7 @@ class RegisterSerializer(serializers.Serializer):
                 phone=validated_data["phone"],
                 email=validated_data.get("email"),
                 password=validated_data["password"],
-                name=validated_data["name"],
+                first_name=validated_data["first_name"],
                 tenant=tenant,
                 role=User.Role.ADMIN,
             )
@@ -102,12 +161,17 @@ class ImpersonateSerializer(serializers.Serializer):
 
 
 class TenantUserCreateSerializer(serializers.Serializer):
-    name = serializers.CharField(max_length=255)
+    first_name = serializers.CharField(max_length=255)
+    last_name = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    middle_name = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    birth_date = serializers.DateField(required=True)
     phone = serializers.CharField(max_length=20)
     email = serializers.EmailField(required=False, allow_blank=True, allow_null=True)
     passport_series = serializers.CharField(required=False, allow_blank=True, allow_null=True, max_length=9)
     gender = serializers.ChoiceField(choices=User.Gender.choices, required=False, allow_null=True)
     role = serializers.ChoiceField(choices=User.Role.choices)
+    region_id = serializers.UUIDField(required=True, allow_null=False)
+    district_id = serializers.UUIDField(required=True, allow_null=False)
     password = serializers.CharField(write_only=True, min_length=6)
     password_confirm = serializers.CharField(write_only=True, min_length=6)
 
@@ -134,6 +198,16 @@ class TenantUserCreateSerializer(serializers.Serializer):
         return validate_passport_series(value)
 
     def validate(self, attrs):
+        region_id = attrs.get("region_id")
+        district_id = attrs.get("district_id")
+        region = Region.objects.filter(id=region_id).first() if region_id else None
+        district = District.objects.filter(id=district_id).select_related("region").first() if district_id else None
+        if district and region and district.region_id != region.id:
+            raise serializers.ValidationError({"district_id": _("District does not belong to selected region.")})
+        if district and not region:
+            region = district.region
+        attrs["region"] = region
+        attrs["district"] = district
         if attrs["password"] != attrs["password_confirm"]:
             raise serializers.ValidationError({"password_confirm": _("Passwords do not match.")})
         password_validation.validate_password(attrs["password"])
@@ -148,19 +222,29 @@ class TenantUserCreateSerializer(serializers.Serializer):
             passport_series=validated_data.get("passport_series"),
             gender=validated_data.get("gender"),
             password=validated_data["password"],
-            name=validated_data["name"],
+            first_name=validated_data["first_name"],
+            last_name=validated_data.get("last_name", ""),
+            middle_name=validated_data.get("middle_name", ""),
+            birth_date=validated_data["birth_date"],
+            region=validated_data.get("region"),
+            district=validated_data.get("district"),
             tenant=request.user.tenant,
             role=validated_data["role"],
         )
 
 
 class TenantUserUpdateSerializer(serializers.Serializer):
-    name = serializers.CharField(max_length=255)
+    first_name = serializers.CharField(max_length=255)
+    last_name = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    middle_name = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    birth_date = serializers.DateField(required=True)
     phone = serializers.CharField(max_length=20)
     email = serializers.EmailField(required=False, allow_blank=True, allow_null=True)
     passport_series = serializers.CharField(required=False, allow_blank=True, allow_null=True, max_length=9)
     gender = serializers.ChoiceField(choices=User.Gender.choices, required=False, allow_null=True)
     role = serializers.ChoiceField(choices=User.Role.choices)
+    region_id = serializers.UUIDField(required=True, allow_null=False)
+    district_id = serializers.UUIDField(required=True, allow_null=False)
     password = serializers.CharField(write_only=True, min_length=6, required=False, allow_blank=True)
     password_confirm = serializers.CharField(
         write_only=True, min_length=6, required=False, allow_blank=True
@@ -196,6 +280,18 @@ class TenantUserUpdateSerializer(serializers.Serializer):
         return validate_passport_series(value)
 
     def validate(self, attrs):
+        region_id = attrs.get("region_id")
+        district_id = attrs.get("district_id")
+        region = Region.objects.filter(id=region_id).first() if region_id else None
+        district = District.objects.filter(id=district_id).select_related("region").first() if district_id else None
+        if district and region and district.region_id != region.id:
+            raise serializers.ValidationError({"district_id": _("District does not belong to selected region.")})
+        if district and not region:
+            region = district.region
+        if "region_id" in attrs:
+            attrs["region"] = region
+        if "district_id" in attrs:
+            attrs["district"] = district
         password = attrs.get("password") or ""
         password_confirm = attrs.get("password_confirm") or ""
 
@@ -209,6 +305,8 @@ class TenantUserUpdateSerializer(serializers.Serializer):
     def update(self, instance, validated_data):
         password = validated_data.pop("password", "")
         validated_data.pop("password_confirm", None)
+        validated_data.pop("region_id", None)
+        validated_data.pop("district_id", None)
 
         for field, value in validated_data.items():
             setattr(instance, field, value)
@@ -218,7 +316,21 @@ class TenantUserUpdateSerializer(serializers.Serializer):
             instance.save()
             return instance
 
-        instance.save(update_fields=["name", "phone", "email", "passport_series", "gender", "role"])
+        instance.save(
+            update_fields=[
+                "first_name",
+                "last_name",
+                "middle_name",
+                "birth_date",
+                "phone",
+                "email",
+                "passport_series",
+                "gender",
+                "role",
+                "region",
+                "district",
+            ]
+        )
         return instance
 
 
