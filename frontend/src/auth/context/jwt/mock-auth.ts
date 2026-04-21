@@ -22,14 +22,18 @@ export function createMockAccessToken(expiresInSec = 60 * 60 * 24 * 365) {
 export function buildMockAuthUser(
   phone: string,
   firstName?: string,
-  lastName?: string
+  lastName?: string,
+  middleName?: string
 ): TenantUser {
-  const name =
-    firstName && lastName ? `${firstName} ${lastName}`.trim() : 'User';
+  const resolvedFirstName = firstName?.trim() || 'User';
+  const resolvedLastName = lastName?.trim() || '';
+  const resolvedMiddleName = middleName?.trim() || '';
 
   return {
     id: '00000000-0000-4000-8000-000000000001',
-    name,
+    firstName: resolvedFirstName,
+    lastName: resolvedLastName,
+    middleName: resolvedMiddleName,
     phone,
     email: null,
     role: 'admin',

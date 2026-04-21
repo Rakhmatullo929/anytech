@@ -172,6 +172,8 @@ export default function UsersView() {
     deleteMutation.isPending && selectedUserId !== null && deleteMutation.variables === selectedUserId;
   const canWriteUsers = canWritePage('users');
   const canDetailUsers = canDetailPage('users');
+  const getFullName = (user: { firstName?: string; lastName?: string; middleName?: string; phone?: string | null }) =>
+    [user.firstName, user.lastName, user.middleName].filter(Boolean).join(' ') || user.phone || '-';
 
   return (
     <>
@@ -222,9 +224,9 @@ export default function UsersView() {
                   {rows.map((row) => (
                     <TableRow key={row.id} hover>
                       <TableCell>
-                        <Can page="users" action="detail" fallback={row.name || '-'}>
+                        <Can page="users" action="detail" fallback={getFullName(row)}>
                           <Link component={RouterLink} href={paths.admin.users.details(row.id)} variant="subtitle2">
-                            {row.name || '-'}
+                            {getFullName(row)}
                           </Link>
                         </Can>
                       </TableCell>

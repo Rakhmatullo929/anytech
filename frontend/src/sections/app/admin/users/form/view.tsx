@@ -9,6 +9,7 @@ import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import MenuItem from '@mui/material/MenuItem';
 import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 
 import { useLocales } from 'src/locales';
 import { paths } from 'src/routes/paths';
@@ -19,9 +20,18 @@ import FormProvider, { RHFTextField } from 'src/components/hook-form';
 import EmptyContent from 'src/components/empty-content';
 import { useSnackbar } from 'src/components/snackbar';
 import Iconify from 'src/components/iconify';
+import {
+  DEFAULT_PHONE_COUNTRY,
+  formatPhoneLocalInput,
+  getClientPhoneRule,
+  parseE164Phone,
+  toE164Phone,
+} from 'src/sections/app/clients/form/utils/phone-format';
 
 import {
   useCreateTenantUserMutation,
+  useDistrictsQuery,
+  useRegionsQuery,
   useTenantUserDetailQuery,
   useUpdateTenantUserMutation,
 } from '../api';
@@ -33,7 +43,12 @@ type Props = {
 };
 
 type UserFormValues = {
-  name: string;
+  firstName: string;
+  lastName: string;
+  middleName: string;
+  birthDate: string | null;
+  regionId: string;
+  districtId: string;
   phone: string;
   email: string;
   passportSeriesPrefix: string;
@@ -67,6 +82,7 @@ export default function UserFormView({ mode }: Props) {
   const createMutation = useCreateTenantUserMutation();
   const updateMutation = useUpdateTenantUserMutation();
   const detailQuery = useTenantUserDetailQuery(id);
+  const regionsQuery = useRegionsQuery();
   const passwordVisible = useBoolean();
   const passwordConfirmVisible = useBoolean();
 
@@ -76,7 +92,12 @@ export default function UserFormView({ mode }: Props) {
     mode: 'onChange',
     reValidateMode: 'onChange',
     defaultValues: {
-      name: '',
+      firstName: '',
+      lastName: '',
+      middleName: '',
+      birthDate: null,
+      regionId: '',
+      districtId: '',
       phone: '',
       email: '',
       passportSeriesPrefix: '',
@@ -89,7 +110,16 @@ export default function UserFormView({ mode }: Props) {
   });
 
   const { reset, handleSubmit } = methods;
+  const selectedRegionId = methods.watch('regionId');
+  const districtsQuery = useDistrictsQuery(selectedRegionId);
   const loading = createMutation.isPending || updateMutation.isPending;
+
+  useEffect(() => {
+    const currentDistrictId = methods.getValues('districtId');
+    if (!currentDistrictId) return;
+    if (districtsQuery.data?.some((district) => district.id === currentDistrictId)) return;
+    methods.setValue('districtId', '', { shouldDirty: true, shouldValidate: true });
+  }, [districtsQuery.data, methods]);
 
   useEffect(() => {
     if (mode !== 'edit') return;
@@ -98,8 +128,13 @@ export default function UserFormView({ mode }: Props) {
     const passport = parsePassportSeries(detailQuery.data.passportSeries);
 
     reset({
-      name: detailQuery.data.name || '',
-      phone: detailQuery.data.phone || '',
+      firstName: detailQuery.data.firstName || '',
+      lastName: detailQuery.data.lastName || '',
+      middleName: detailQuery.data.middleName || '',
+      birthDate: detailQuery.data.birthDate || null,
+      regionId: detailQuery.data.regionId || '',
+      districtId: detailQuery.data.districtId || '',
+      phone: parseE164Phone(detailQuery.data.phone || '').local,
       email: detailQuery.data.email || '',
       passportSeriesPrefix: passport.prefix,
       passportSeriesNumber: passport.number,
@@ -111,9 +146,14 @@ export default function UserFormView({ mode }: Props) {
   }, [detailQuery.data, mode, reset]);
 
   const onSubmit = handleSubmit(async (values) => {
-    const name = safeTrim(values.name);
-    const phone = safeTrim(values.phone);
+    const firstName = safeTrim(values.firstName);
+    const lastName = safeTrim(values.lastName);
+    const middleName = safeTrim(values.middleName);
+    const phone = toE164Phone(DEFAULT_PHONE_COUNTRY, values.phone);
     const email = safeTrim(values.email);
+    const birthDate = values.birthDate || null;
+    const regionId = values.regionId || null;
+    const districtId = values.districtId || null;
     const passportPrefix = safeTrim(values.passportSeriesPrefix).toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2);
     const passportNumber = safeTrim(values.passportSeriesNumber).replace(/\D/g, '').slice(0, 7);
     const passportSeries = passportPrefix && passportNumber ? `${passportPrefix}${passportNumber}` : null;
@@ -124,7 +164,12 @@ export default function UserFormView({ mode }: Props) {
     try {
       if (mode === 'create') {
         await createMutation.mutateAsync({
-          name,
+          firstName,
+          lastName: lastName || '',
+          middleName: middleName || '',
+          birthDate,
+          regionId,
+          districtId,
           phone,
           email: email || null,
           passportSeries,
@@ -137,7 +182,12 @@ export default function UserFormView({ mode }: Props) {
       } else {
         await updateMutation.mutateAsync({
           id,
-          name,
+          firstName,
+          lastName: lastName || '',
+          middleName: middleName || '',
+          birthDate,
+          regionId,
+          districtId,
           phone,
           email: email || null,
           passportSeries,
@@ -197,100 +247,206 @@ export default function UserFormView({ mode }: Props) {
       />
 
       <FormProvider methods={methods} onSubmit={onSubmit}>
-        <Card sx={{ p: 3 }}>
-          <Stack spacing={2}>
-            <RHFTextField name="name" label={`${tx('common.table.name')} *`} />
-            <RHFTextField name="phone" label={`${tx('common.table.phone')} *`} />
-            <RHFTextField name="email" label={tx('common.table.email')} />
-            <RHFTextField name="gender" label={`${tx('common.table.gender')} *`} select>
-              <MenuItem value="male">{tx('users.genders.male')}</MenuItem>
-              <MenuItem value="female">{tx('users.genders.female')}</MenuItem>
-            </RHFTextField>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-              <Box sx={{ width: { xs: 1, sm: '34%' } }}>
-                <RHFTextField
-                  name="passportSeriesPrefix"
-                  label={tx('users.form.passportPrefix')}
-                  inputProps={{ maxLength: 2 }}
-                  onChange={(event) => {
-                    methods.setValue(
-                      'passportSeriesPrefix',
-                      String(event.target.value || '')
-                        .toUpperCase()
-                        .replace(/[^A-Z]/g, '')
-                        .slice(0, 2),
-                      { shouldDirty: true, shouldValidate: true }
-                    );
-                  }}
-                />
-              </Box>
-              <Box sx={{ width: { xs: 1, sm: '66%' } }}>
-                <RHFTextField
-                  name="passportSeriesNumber"
-                  label={tx('users.form.passportNumber')}
-                  inputProps={{ maxLength: 7, inputMode: 'numeric' }}
-                  onChange={(event) => {
-                    methods.setValue(
-                      'passportSeriesNumber',
-                      String(event.target.value || '')
-                        .replace(/\D/g, '')
-                        .slice(0, 7),
-                      { shouldDirty: true, shouldValidate: true }
-                    );
-                  }}
-                />
-              </Box>
+        <Stack spacing={2}>
+          <Card sx={{ p: 3 }}>
+            <Stack spacing={2}>
+              <Typography variant="subtitle1">{tx('clients.form.sections.personal')}</Typography>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
+                <Box sx={{ width: { xs: 1, sm: '34%' } }}>
+                  <RHFTextField name="firstName" label={`${tx('clients.form.fields.name')} *`} />
+                </Box>
+                <Box sx={{ width: { xs: 1, sm: '33%' } }}>
+                  <RHFTextField name="lastName" label={tx('clients.form.fields.lastName')} />
+                </Box>
+                <Box sx={{ width: { xs: 1, sm: '33%' } }}>
+                  <RHFTextField name="middleName" label={tx('clients.form.fields.middleName')} />
+                </Box>
+              </Stack>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
+                <Box sx={{ width: { xs: 1, sm: '50%' } }}>
+                  <RHFTextField
+                    name="birthDate"
+                    type="date"
+                    label={`${tx('clients.form.fields.birthDate')} *`}
+                    InputLabelProps={{ shrink: true }}
+                  />
+                </Box>
+                <Box sx={{ width: { xs: 1, sm: '50%' } }}>
+                  <RHFTextField name="gender" label={`${tx('common.table.gender')} *`} select>
+                    <MenuItem value="male">{tx('users.genders.male')}</MenuItem>
+                    <MenuItem value="female">{tx('users.genders.female')}</MenuItem>
+                  </RHFTextField>
+                </Box>
+              </Stack>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
+                <Box sx={{ width: { xs: 1, sm: '50%' } }}>
+                  <RHFTextField
+                    name="regionId"
+                    select
+                    label={`${tx('users.form.region')} *`}
+                    onChange={(event) => {
+                      const nextRegionId = String(event.target.value || '');
+                      methods.setValue('regionId', nextRegionId, { shouldDirty: true, shouldValidate: true });
+                      methods.setValue('districtId', '', { shouldDirty: true, shouldValidate: true });
+                    }}
+                  >
+                    <MenuItem value="">-</MenuItem>
+                    {(regionsQuery.data || []).map((region) => (
+                      <MenuItem key={region.id} value={region.id}>
+                        {region.name}
+                      </MenuItem>
+                    ))}
+                  </RHFTextField>
+                </Box>
+                <Box sx={{ width: { xs: 1, sm: '50%' } }}>
+                  <RHFTextField
+                    name="districtId"
+                    select
+                    label={`${tx('clients.form.fields.city')} *`}
+                    disabled={!selectedRegionId}
+                  >
+                    <MenuItem value="">-</MenuItem>
+                    {(districtsQuery.data || []).map((district) => (
+                      <MenuItem key={district.id} value={district.id}>
+                        {district.name}
+                      </MenuItem>
+                    ))}
+                  </RHFTextField>
+                </Box>
+              </Stack>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
+                <Box sx={{ width: { xs: 1, sm: '34%' } }}>
+                  <RHFTextField
+                    name="passportSeriesPrefix"
+                    label={tx('users.form.passportPrefix')}
+                    inputProps={{ maxLength: 2 }}
+                    onChange={(event) => {
+                      methods.setValue(
+                        'passportSeriesPrefix',
+                        String(event.target.value || '')
+                          .toUpperCase()
+                          .replace(/[^A-Z]/g, '')
+                          .slice(0, 2),
+                        { shouldDirty: true, shouldValidate: true }
+                      );
+                    }}
+                  />
+                </Box>
+                <Box sx={{ width: { xs: 1, sm: '66%' } }}>
+                  <RHFTextField
+                    name="passportSeriesNumber"
+                    label={tx('users.form.passportNumber')}
+                    inputProps={{ maxLength: 7, inputMode: 'numeric' }}
+                    onChange={(event) => {
+                      methods.setValue(
+                        'passportSeriesNumber',
+                        String(event.target.value || '')
+                          .replace(/\D/g, '')
+                          .slice(0, 7),
+                        { shouldDirty: true, shouldValidate: true }
+                      );
+                    }}
+                  />
+                </Box>
+              </Stack>
             </Stack>
-            <RHFTextField name="role" label={`${tx('users.table.role')} *`} select>
-              <MenuItem value="admin">{tx('users.roles.admin')}</MenuItem>
-              <MenuItem value="manager">{tx('users.roles.manager')}</MenuItem>
-              <MenuItem value="seller">{tx('users.roles.seller')}</MenuItem>
-            </RHFTextField>
-            <RHFTextField
-              name="password"
-              type={passwordVisible.value ? 'text' : 'password'}
-              label={mode === 'create' ? `${tx('common.table.password')} *` : tx('users.dialogs.edit.newPassword')}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton onClick={passwordVisible.onToggle} edge="end">
-                      <Iconify
-                        icon={passwordVisible.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'}
-                      />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <RHFTextField
-              name="passwordConfirm"
-              type={passwordConfirmVisible.value ? 'text' : 'password'}
-              label={
-                mode === 'create'
-                  ? `${tx('users.dialogs.create.confirmPassword')} *`
-                  : tx('users.dialogs.edit.confirmNewPassword')
-              }
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton onClick={passwordConfirmVisible.onToggle} edge="end">
-                      <Iconify
-                        icon={passwordConfirmVisible.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'}
-                      />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
+          </Card>
 
-            <Stack direction="row" spacing={1.5} justifyContent="flex-end" sx={{ pt: 1 }}>
-              <Button onClick={() => router.push(paths.admin.users.root)}>{tx('common.actions.cancel')}</Button>
-              <Button variant="contained" type="submit" disabled={loading}>
-                {tx('common.actions.save')}
-              </Button>
+          <Card sx={{ p: 3 }}>
+            <Stack spacing={2}>
+              <Typography variant="subtitle1">{tx('clients.form.sections.phones')}</Typography>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
+                <Box sx={{ width: { xs: 1, sm: '50%' } }}>
+                  <RHFTextField
+                    name="phone"
+                    label={`${tx('common.table.phone')} *`}
+                    inputProps={{ inputMode: 'numeric' }}
+                    onChange={(event) => {
+                      const masked = formatPhoneLocalInput(event.target.value, DEFAULT_PHONE_COUNTRY);
+                      methods.setValue('phone', masked, {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      });
+                    }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Stack direction="row" spacing={0.75} alignItems="center">
+                            <Iconify icon="flagpack:uz" width={16} />
+                            <span>{getClientPhoneRule(DEFAULT_PHONE_COUNTRY).prefix}</span>
+                          </Stack>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Box>
+                <Box sx={{ width: { xs: 1, sm: '50%' } }}>
+                  <RHFTextField name="email" label={tx('common.table.email')} />
+                </Box>
+              </Stack>
             </Stack>
+          </Card>
+
+          <Card sx={{ p: 3 }}>
+            <Stack spacing={2}>
+              <Typography variant="subtitle1">{tx('users.table.role')}</Typography>
+              <RHFTextField name="role" label={`${tx('users.table.role')} *`} select>
+                <MenuItem value="admin">{tx('users.roles.admin')}</MenuItem>
+                <MenuItem value="manager">{tx('users.roles.manager')}</MenuItem>
+                <MenuItem value="seller">{tx('users.roles.seller')}</MenuItem>
+              </RHFTextField>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
+                <Box sx={{ width: { xs: 1, sm: '50%' } }}>
+                  <RHFTextField
+                    name="password"
+                    type={passwordVisible.value ? 'text' : 'password'}
+                    label={mode === 'create' ? `${tx('common.table.password')} *` : tx('users.dialogs.edit.newPassword')}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton onClick={passwordVisible.onToggle} edge="end">
+                            <Iconify
+                              icon={passwordVisible.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'}
+                            />
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Box>
+                <Box sx={{ width: { xs: 1, sm: '50%' } }}>
+                  <RHFTextField
+                    name="passwordConfirm"
+                    type={passwordConfirmVisible.value ? 'text' : 'password'}
+                    label={
+                      mode === 'create'
+                        ? `${tx('users.dialogs.create.confirmPassword')} *`
+                        : tx('users.dialogs.edit.confirmNewPassword')
+                    }
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton onClick={passwordConfirmVisible.onToggle} edge="end">
+                            <Iconify
+                              icon={passwordConfirmVisible.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'}
+                            />
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Box>
+              </Stack>
+            </Stack>
+          </Card>
+
+          <Stack direction="row" spacing={1.5} justifyContent="flex-end" sx={{ pt: 1 }}>
+            <Button onClick={() => router.push(paths.admin.users.root)}>{tx('common.actions.cancel')}</Button>
+            <Button variant="contained" type="submit" disabled={loading}>
+              {tx('common.actions.save')}
+            </Button>
           </Stack>
-        </Card>
+        </Stack>
       </FormProvider>
     </>
   );

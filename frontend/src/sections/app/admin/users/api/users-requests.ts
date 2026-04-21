@@ -6,6 +6,8 @@ import type { TokenPairResponse } from 'src/auth/api/types';
 import type {
   CreateTenantUserPayload,
   FetchTenantUsersParams,
+  LocationDistrict,
+  LocationRegion,
   TenantUserDetail,
   TenantUserListItem,
   UpdateTenantUserPayload,
@@ -30,6 +32,20 @@ export async function fetchTenantUserDetail(id: string): Promise<TenantUserDetai
   return request<TenantUserDetail>({
     method: 'GET',
     url: API_ENDPOINTS.auth.userDetail(id),
+  });
+}
+
+export async function fetchRegions(): Promise<LocationRegion[]> {
+  return request<LocationRegion[]>({
+    method: 'GET',
+    url: API_ENDPOINTS.locations.regions,
+  });
+}
+
+export async function fetchDistricts(regionId: string): Promise<LocationDistrict[]> {
+  return request<LocationDistrict[]>({
+    method: 'GET',
+    url: API_ENDPOINTS.locations.regionDistricts(regionId),
   });
 }
 

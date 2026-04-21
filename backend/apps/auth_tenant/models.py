@@ -17,6 +17,35 @@ class Tenant(models.Model):
         return self.name
 
 
+class Region(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name_uz = models.CharField(max_length=255)
+    name_ru = models.CharField(max_length=255)
+    code = models.CharField(max_length=32, unique=True)
+
+    class Meta:
+        db_table = "regions"
+        ordering = ("name_uz",)
+
+    def __str__(self):
+        return self.name_uz
+
+
+class District(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    region = models.ForeignKey(Region, on_delete=models.CASCADE, related_name="districts")
+    name_uz = models.CharField(max_length=255)
+    name_ru = models.CharField(max_length=255)
+    code = models.CharField(max_length=32, unique=True)
+
+    class Meta:
+        db_table = "districts"
+        ordering = ("name_uz",)
+
+    def __str__(self):
+        return self.name_uz
+
+
 class UserManager(BaseUserManager):
     def create_user(self, phone, password=None, **extra_fields):
         if not phone:
@@ -49,7 +78,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     tenant = models.ForeignKey(
         Tenant, on_delete=models.CASCADE, related_name="users", null=True, blank=True
     )
-    name = models.CharField(max_length=255, blank=True, default="")
+    first_name = models.CharField(max_length=255, blank=True, default="")
+    last_name = models.CharField(max_length=255, blank=True, default="")
+    middle_name = models.CharField(max_length=255, blank=True, default="")
+    birth_date = models.DateField(null=True, blank=True)
+    region = models.ForeignKey(Region, on_delete=models.SET_NULL, null=True, blank=True, related_name="users")
+    district = models.ForeignKey(District, on_delete=models.SET_NULL, null=True, blank=True, related_name="users")
     phone = models.CharField(max_length=20, unique=True, null=True, blank=True)
     email = models.EmailField(unique=True, null=True, blank=True)
     passport_series = models.CharField(max_length=9, null=True, blank=True)

@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import {
   deleteFromList,
   type Pagination,
+  useFetch,
   updateList,
   useFetchList,
   useFetchOne,
@@ -20,6 +21,8 @@ import {
   deleteTenantUser,
   fetchTenantUserDetail,
   fetchTenantUsers,
+  fetchRegions,
+  fetchDistricts,
   impersonateTenantUser,
   updateTenantUser,
 } from './users-requests';
@@ -28,6 +31,8 @@ import type {
   FetchTenantUsersParams,
   TenantUserDetail,
   TenantUserListItem,
+  LocationRegion,
+  LocationDistrict,
   UpdateTenantUserPayload,
 } from './types';
 
@@ -73,6 +78,18 @@ export function useTenantUserDetailQuery(id: string) {
   return useFetchOne<TenantUserDetail>(queryKey, () => fetchTenantUserDetail(id), {
     enabled: Boolean(id),
   });
+}
+
+export function useRegionsQuery() {
+  return useFetch<LocationRegion[]>(['locations', 'regions'], fetchRegions);
+}
+
+export function useDistrictsQuery(regionId: string) {
+  return useFetch<LocationDistrict[]>(
+    ['locations', 'districts', regionId],
+    () => fetchDistricts(regionId),
+    { enabled: Boolean(regionId) }
+  );
 }
 
 export function useCreateTenantUserMutation() {

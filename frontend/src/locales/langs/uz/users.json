@@ -9,7 +9,17 @@
   },
   "detail": {
     "infoTitle": "Foydalanuvchi ma'lumotlari",
-    "notFound": "Foydalanuvchi topilmadi"
+    "notFound": "Foydalanuvchi topilmadi",
+    "tabs": {
+      "overview": "Asosiy",
+      "contacts": "Kontaktlar",
+      "access": "Kirish va huquqlar"
+    },
+    "sections": {
+      "personal": "Shaxsiy ma'lumotlar",
+      "contacts": "Aloqa ma'lumotlari",
+      "access": "Ruxsat va hujjatlar"
+    }
   },
   "dialogs": {
     "create": {
@@ -40,6 +50,7 @@
     "role": "Rol"
   },
   "form": {
+    "region": "Viloyat",
     "passportPrefix": "Pasport seriyasi (harf)",
     "passportNumber": "Pasport seriyasi (raqam)"
   },

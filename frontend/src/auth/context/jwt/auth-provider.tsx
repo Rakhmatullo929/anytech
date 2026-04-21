@@ -172,8 +172,7 @@ export function AuthProvider({ children }: Props) {
     async (data: RegisterRequest) => {
       if (isJwtAuthMock()) {
         const accessToken = createMockAccessToken();
-        const [first, ...rest] = data.name.split(' ');
-        const user = buildMockAuthUser(data.phone, first, rest.join(' ') || undefined);
+        const user = buildMockAuthUser(data.phone, data.firstName);
         syncSessionFromApiResponse({
           access: accessToken,
           refresh: '',

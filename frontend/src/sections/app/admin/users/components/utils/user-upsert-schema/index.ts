@@ -1,4 +1,5 @@
 import * as Yup from 'yup';
+import { digitsOnly, getClientPhoneRule, DEFAULT_PHONE_COUNTRY } from 'src/sections/app/clients/form/utils/phone-format';
 
 type Translate = (key: string, options?: Record<string, string | number>) => string;
 
@@ -6,8 +7,19 @@ type Mode = 'create' | 'edit';
 
 export function getUserUpsertSchema(tx: Translate, mode: Mode) {
   return Yup.object({
-    name: Yup.string().trim().required(tx('common.validation.clientNameRequired')),
-    phone: Yup.string().trim().required(tx('common.validation.phoneRequired')),
+    firstName: Yup.string().trim().required(tx('common.validation.clientNameRequired')),
+    lastName: Yup.string().trim(),
+    middleName: Yup.string().trim(),
+    birthDate: Yup.string().nullable().required(tx('common.validation.birthDateRequired')),
+    regionId: Yup.string().trim().required(tx('common.validation.regionRequired')),
+    districtId: Yup.string().trim().required(tx('common.validation.districtRequired')),
+    phone: Yup.string()
+      .trim()
+      .required(tx('common.validation.phoneRequired'))
+      .test('phone-local-format', tx('common.validation.phoneInvalidFormat', { example: '+998901234567' }), (value) => {
+        const rule = getClientPhoneRule(DEFAULT_PHONE_COUNTRY);
+        return digitsOnly(value || '').length === rule.localLength;
+      }),
     email: Yup.string().trim().email(tx('common.validation.emailInvalid')).nullable(),
     passportSeriesPrefix: Yup.string()
       .transform((value) => String(value || '').toUpperCase().replace(/[^A-Z]/g, ''))

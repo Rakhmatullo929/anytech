@@ -57,7 +57,8 @@ def admin_user(tenant):
         phone="+998901111111",
         email="admin@test.com",
         password="StrongPass123!",
-        name="Admin User",
+        first_name="Admin",
+        last_name="User",
         tenant=tenant,
         role=User.Role.ADMIN,
     )
@@ -69,7 +70,8 @@ def manager_user(tenant):
         phone="+998901111112",
         email="manager@test.com",
         password="StrongPass123!",
-        name="Manager User",
+        first_name="Manager",
+        last_name="User",
         tenant=tenant,
         role=User.Role.MANAGER,
     )
@@ -81,7 +83,8 @@ def seller_user(tenant):
         phone="+998901111113",
         email="seller@test.com",
         password="StrongPass123!",
-        name="Seller User",
+        first_name="Seller",
+        last_name="User",
         tenant=tenant,
         role=User.Role.SELLER,
     )
@@ -94,7 +97,8 @@ def other_tenant_user(other_tenant):
         phone="+998901111114",
         email="other@test.com",
         password="StrongPass123!",
-        name="Other User",
+        first_name="Other",
+        last_name="User",
         tenant=other_tenant,
         role=User.Role.ADMIN,
     )

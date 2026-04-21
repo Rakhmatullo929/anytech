@@ -1,0 +1,1225 @@
+- model: auth_tenant.region
+  pk: 11111111-1111-4111-8111-111111111111
+  fields:
+    name_uz: Qoraqalpog'iston Respublikasi
+    name_ru: Республика Каракалпакстан
+    code: uz-qr
+- model: auth_tenant.region
+  pk: 11111111-1111-4111-8111-111111111112
+  fields:
+    name_uz: Andijon viloyati
+    name_ru: Андижанская область
+    code: uz-an
+- model: auth_tenant.region
+  pk: 11111111-1111-4111-8111-111111111113
+  fields:
+    name_uz: Buxoro viloyati
+    name_ru: Бухарская область
+    code: uz-bu
+- model: auth_tenant.region
+  pk: 11111111-1111-4111-8111-111111111114
+  fields:
+    name_uz: Jizzax viloyati
+    name_ru: Джизакская область
+    code: uz-ji
+- model: auth_tenant.region
+  pk: 11111111-1111-4111-8111-111111111115
+  fields:
+    name_uz: Qashqadaryo viloyati
+    name_ru: Кашкадарьинская область
+    code: uz-qa
+- model: auth_tenant.region
+  pk: 11111111-1111-4111-8111-111111111116
+  fields:
+    name_uz: Navoiy viloyati
+    name_ru: Навоийская область
+    code: uz-nw
+- model: auth_tenant.region
+  pk: 11111111-1111-4111-8111-111111111117
+  fields:
+    name_uz: Namangan viloyati
+    name_ru: Наманганская область
+    code: uz-ng
+- model: auth_tenant.region
+  pk: 11111111-1111-4111-8111-111111111118
+  fields:
+    name_uz: Samarqand viloyati
+    name_ru: Самаркандская область
+    code: uz-sa
+- model: auth_tenant.region
+  pk: 11111111-1111-4111-8111-111111111119
+  fields:
+    name_uz: Surxondaryo viloyati
+    name_ru: Сурхандарьинская область
+    code: uz-su
+- model: auth_tenant.region
+  pk: 11111111-1111-4111-8111-111111111120
+  fields:
+    name_uz: Sirdaryo viloyati
+    name_ru: Сырдарьинская область
+    code: uz-si
+- model: auth_tenant.region
+  pk: 11111111-1111-4111-8111-111111111121
+  fields:
+    name_uz: Toshkent viloyati
+    name_ru: Ташкентская область
+    code: uz-to
+- model: auth_tenant.region
+  pk: 11111111-1111-4111-8111-111111111122
+  fields:
+    name_uz: Farg'ona viloyati
+    name_ru: Ферганская область
+    code: uz-fa
+- model: auth_tenant.region
+  pk: 11111111-1111-4111-8111-111111111123
+  fields:
+    name_uz: Xorazm viloyati
+    name_ru: Хорезмская область
+    code: uz-xo
+- model: auth_tenant.region
+  pk: 11111111-1111-4111-8111-111111111124
+  fields:
+    name_uz: Toshkent shahri
+    name_ru: Город Ташкент
+    code: uz-tk
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222001
+  fields:
+    region: 11111111-1111-4111-8111-111111111111
+    name_uz: Amudaryo tumani
+    name_ru: Амударьинский район
+    code: qr-amudaryo
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222002
+  fields:
+    region: 11111111-1111-4111-8111-111111111111
+    name_uz: Beruniy tumani
+    name_ru: Берунийский район
+    code: qr-beruniy
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222003
+  fields:
+    region: 11111111-1111-4111-8111-111111111111
+    name_uz: Chimboy tumani
+    name_ru: Чимбайский район
+    code: qr-chimboy
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222004
+  fields:
+    region: 11111111-1111-4111-8111-111111111111
+    name_uz: Ellikqal'a tumani
+    name_ru: Элликкалинский район
+    code: qr-ellikqala
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222005
+  fields:
+    region: 11111111-1111-4111-8111-111111111111
+    name_uz: Kegeyli tumani
+    name_ru: Кегейлийский район
+    code: qr-kegeyli
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222006
+  fields:
+    region: 11111111-1111-4111-8111-111111111111
+    name_uz: Mo'ynoq tumani
+    name_ru: Муйнакский район
+    code: qr-moynoq
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222007
+  fields:
+    region: 11111111-1111-4111-8111-111111111111
+    name_uz: Nukus tumani
+    name_ru: Нукусский район
+    code: qr-nukus-t
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222008
+  fields:
+    region: 11111111-1111-4111-8111-111111111111
+    name_uz: Qo'ng'irot tumani
+    name_ru: Кунградский район
+    code: qr-qongirot
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222009
+  fields:
+    region: 11111111-1111-4111-8111-111111111111
+    name_uz: Qanliko'l tumani
+    name_ru: Канлыкульский район
+    code: qr-qanlikol
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222010
+  fields:
+    region: 11111111-1111-4111-8111-111111111111
+    name_uz: Shumanay tumani
+    name_ru: Шуманайский район
+    code: qr-shumanay
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222011
+  fields:
+    region: 11111111-1111-4111-8111-111111111111
+    name_uz: Taxiatosh tumani
+    name_ru: Тахиаташский район
+    code: qr-taxiatosh
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222012
+  fields:
+    region: 11111111-1111-4111-8111-111111111111
+    name_uz: To'rtko'l tumani
+    name_ru: Турткульский район
+    code: qr-tortkol
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222013
+  fields:
+    region: 11111111-1111-4111-8111-111111111111
+    name_uz: Xo'jayli tumani
+    name_ru: Ходжейлийский район
+    code: qr-xojayli
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222101
+  fields:
+    region: 11111111-1111-4111-8111-111111111112
+    name_uz: Andijon tumani
+    name_ru: Андижанский район
+    code: an-andijon-t
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222102
+  fields:
+    region: 11111111-1111-4111-8111-111111111112
+    name_uz: Asaka tumani
+    name_ru: Асакинский район
+    code: an-asaka
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222103
+  fields:
+    region: 11111111-1111-4111-8111-111111111112
+    name_uz: Baliqchi tumani
+    name_ru: Балыкчинский район
+    code: an-baliqchi
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222104
+  fields:
+    region: 11111111-1111-4111-8111-111111111112
+    name_uz: Bo'z tumani
+    name_ru: Бозский район
+    code: an-boz
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222105
+  fields:
+    region: 11111111-1111-4111-8111-111111111112
+    name_uz: Buloqboshi tumani
+    name_ru: Булакбашинский район
+    code: an-buloqboshi
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222106
+  fields:
+    region: 11111111-1111-4111-8111-111111111112
+    name_uz: Izboskan tumani
+    name_ru: Избасканский район
+    code: an-izboskan
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222107
+  fields:
+    region: 11111111-1111-4111-8111-111111111112
+    name_uz: Jalaquduq tumani
+    name_ru: Джалакудукский район
+    code: an-jalaquduq
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222108
+  fields:
+    region: 11111111-1111-4111-8111-111111111112
+    name_uz: Marhamat tumani
+    name_ru: Мархаматский район
+    code: an-marhamat
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222109
+  fields:
+    region: 11111111-1111-4111-8111-111111111112
+    name_uz: Paxtaobod tumani
+    name_ru: Пахтаабадский район
+    code: an-paxtaobod
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222110
+  fields:
+    region: 11111111-1111-4111-8111-111111111112
+    name_uz: Qo'rg'ontepa tumani
+    name_ru: Кургантепинский район
+    code: an-qorgontepa
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222111
+  fields:
+    region: 11111111-1111-4111-8111-111111111112
+    name_uz: Shahrixon tumani
+    name_ru: Шахриханский район
+    code: an-shahrixon
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222112
+  fields:
+    region: 11111111-1111-4111-8111-111111111112
+    name_uz: Ulug'nor tumani
+    name_ru: Улугнорский район
+    code: an-ulugnor
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222113
+  fields:
+    region: 11111111-1111-4111-8111-111111111112
+    name_uz: Xo'jaobod tumani
+    name_ru: Ходжаабадский район
+    code: an-xojaobod
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222201
+  fields:
+    region: 11111111-1111-4111-8111-111111111113
+    name_uz: Buxoro tumani
+    name_ru: Бухарский район
+    code: bu-buxoro-t
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222202
+  fields:
+    region: 11111111-1111-4111-8111-111111111113
+    name_uz: G'ijduvon tumani
+    name_ru: Гиждуванский район
+    code: bu-gijduvon
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222203
+  fields:
+    region: 11111111-1111-4111-8111-111111111113
+    name_uz: Jondor tumani
+    name_ru: Жондорский район
+    code: bu-jondor
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222204
+  fields:
+    region: 11111111-1111-4111-8111-111111111113
+    name_uz: Kogon tumani
+    name_ru: Каганский район
+    code: bu-kogon-t
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222205
+  fields:
+    region: 11111111-1111-4111-8111-111111111113
+    name_uz: Qorako'l tumani
+    name_ru: Каракульский район
+    code: bu-qorakol
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222206
+  fields:
+    region: 11111111-1111-4111-8111-111111111113
+    name_uz: Qorovulbozor tumani
+    name_ru: Караулбазарский район
+    code: bu-qorovulbozor
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222207
+  fields:
+    region: 11111111-1111-4111-8111-111111111113
+    name_uz: Olot tumani
+    name_ru: Алатский район
+    code: bu-olot
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222208
+  fields:
+    region: 11111111-1111-4111-8111-111111111113
+    name_uz: Peshku tumani
+    name_ru: Пешкунский район
+    code: bu-peshku
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222209
+  fields:
+    region: 11111111-1111-4111-8111-111111111113
+    name_uz: Romitan tumani
+    name_ru: Ромитанский район
+    code: bu-romitan
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222210
+  fields:
+    region: 11111111-1111-4111-8111-111111111113
+    name_uz: Shofirkon tumani
+    name_ru: Шафирканский район
+    code: bu-shofirkon
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222211
+  fields:
+    region: 11111111-1111-4111-8111-111111111113
+    name_uz: Vobkent tumani
+    name_ru: Вабкентский район
+    code: bu-vobkent
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222301
+  fields:
+    region: 11111111-1111-4111-8111-111111111114
+    name_uz: Arnasoy tumani
+    name_ru: Арнасайский район
+    code: ji-arnasoy
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222302
+  fields:
+    region: 11111111-1111-4111-8111-111111111114
+    name_uz: Baxmal tumani
+    name_ru: Бахмальский район
+    code: ji-baxmal
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222303
+  fields:
+    region: 11111111-1111-4111-8111-111111111114
+    name_uz: Do'stlik tumani
+    name_ru: Дустликский район
+    code: ji-dostlik
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222304
+  fields:
+    region: 11111111-1111-4111-8111-111111111114
+    name_uz: Forish tumani
+    name_ru: Фаришский район
+    code: ji-forish
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222305
+  fields:
+    region: 11111111-1111-4111-8111-111111111114
+    name_uz: G'allaorol tumani
+    name_ru: Галляаральский район
+    code: ji-gallaorol
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222306
+  fields:
+    region: 11111111-1111-4111-8111-111111111114
+    name_uz: Mirzacho'l tumani
+    name_ru: Мирзачульский район
+    code: ji-mirzachol
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222307
+  fields:
+    region: 11111111-1111-4111-8111-111111111114
+    name_uz: Paxtakor tumani
+    name_ru: Пахтакорский район
+    code: ji-paxtakor
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222308
+  fields:
+    region: 11111111-1111-4111-8111-111111111114
+    name_uz: Yangiobod tumani
+    name_ru: Янгиабадский район
+    code: ji-yangiobod
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222309
+  fields:
+    region: 11111111-1111-4111-8111-111111111114
+    name_uz: Zafarobod tumani
+    name_ru: Зафарабадский район
+    code: ji-zafarobod
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222310
+  fields:
+    region: 11111111-1111-4111-8111-111111111114
+    name_uz: Zarbdor tumani
+    name_ru: Зарбдарский район
+    code: ji-zarbdor
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222401
+  fields:
+    region: 11111111-1111-4111-8111-111111111115
+    name_uz: Chiroqchi tumani
+    name_ru: Чиракчинский район
+    code: qa-chiroqchi
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222402
+  fields:
+    region: 11111111-1111-4111-8111-111111111115
+    name_uz: Dehqonobod tumani
+    name_ru: Дехканабадский район
+    code: qa-dehqonobod
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222403
+  fields:
+    region: 11111111-1111-4111-8111-111111111115
+    name_uz: G'uzor tumani
+    name_ru: Гузарский район
+    code: qa-guzor
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222404
+  fields:
+    region: 11111111-1111-4111-8111-111111111115
+    name_uz: Kasbi tumani
+    name_ru: Касбинский район
+    code: qa-kasbi
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222405
+  fields:
+    region: 11111111-1111-4111-8111-111111111115
+    name_uz: Kitob tumani
+    name_ru: Китабский район
+    code: qa-kitob
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222406
+  fields:
+    region: 11111111-1111-4111-8111-111111111115
+    name_uz: Koson tumani
+    name_ru: Касанский район
+    code: qa-koson
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222407
+  fields:
+    region: 11111111-1111-4111-8111-111111111115
+    name_uz: Mirishkor tumani
+    name_ru: Миришкорский район
+    code: qa-mirishkor
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222408
+  fields:
+    region: 11111111-1111-4111-8111-111111111115
+    name_uz: Muborak tumani
+    name_ru: Мубарекский район
+    code: qa-muborak
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222409
+  fields:
+    region: 11111111-1111-4111-8111-111111111115
+    name_uz: Nishon tumani
+    name_ru: Нишанский район
+    code: qa-nishon
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222410
+  fields:
+    region: 11111111-1111-4111-8111-111111111115
+    name_uz: Qamashi tumani
+    name_ru: Камашинский район
+    code: qa-qamashi
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222411
+  fields:
+    region: 11111111-1111-4111-8111-111111111115
+    name_uz: Qarshi tumani
+    name_ru: Каршинский район
+    code: qa-qarshi-t
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222412
+  fields:
+    region: 11111111-1111-4111-8111-111111111115
+    name_uz: Shahrisabz tumani
+    name_ru: Шахрисабзский район
+    code: qa-shahrisabz-t
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222413
+  fields:
+    region: 11111111-1111-4111-8111-111111111115
+    name_uz: Yakkabog' tumani
+    name_ru: Яккабагский район
+    code: qa-yakkabog
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222501
+  fields:
+    region: 11111111-1111-4111-8111-111111111116
+    name_uz: Konimex tumani
+    name_ru: Канимехский район
+    code: nw-konimex
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222502
+  fields:
+    region: 11111111-1111-4111-8111-111111111116
+    name_uz: Karmana tumani
+    name_ru: Карманинский район
+    code: nw-karmana
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222503
+  fields:
+    region: 11111111-1111-4111-8111-111111111116
+    name_uz: Qiziltepa tumani
+    name_ru: Кызылтепинский район
+    code: nw-qiziltepa
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222504
+  fields:
+    region: 11111111-1111-4111-8111-111111111116
+    name_uz: Navbahor tumani
+    name_ru: Навбахорский район
+    code: nw-navbahor
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222505
+  fields:
+    region: 11111111-1111-4111-8111-111111111116
+    name_uz: Nurota tumani
+    name_ru: Нуратаинский район
+    code: nw-nurota
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222506
+  fields:
+    region: 11111111-1111-4111-8111-111111111116
+    name_uz: Tomdi tumani
+    name_ru: Тамдынский район
+    code: nw-tomdi
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222507
+  fields:
+    region: 11111111-1111-4111-8111-111111111116
+    name_uz: Uchquduq tumani
+    name_ru: Учкудукский район
+    code: nw-uchquduq
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222508
+  fields:
+    region: 11111111-1111-4111-8111-111111111116
+    name_uz: Xatirchi tumani
+    name_ru: Хатырчинский район
+    code: nw-xatirchi
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222601
+  fields:
+    region: 11111111-1111-4111-8111-111111111117
+    name_uz: Chortoq tumani
+    name_ru: Чартакский район
+    code: ng-chortoq
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222602
+  fields:
+    region: 11111111-1111-4111-8111-111111111117
+    name_uz: Chust tumani
+    name_ru: Чустский район
+    code: ng-chust
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222603
+  fields:
+    region: 11111111-1111-4111-8111-111111111117
+    name_uz: Kosonsoy tumani
+    name_ru: Касансайский район
+    code: ng-kosonsoy
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222604
+  fields:
+    region: 11111111-1111-4111-8111-111111111117
+    name_uz: Mingbuloq tumani
+    name_ru: Мингбулакский район
+    code: ng-mingbuloq
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222605
+  fields:
+    region: 11111111-1111-4111-8111-111111111117
+    name_uz: Namangan tumani
+    name_ru: Наманганский район
+    code: ng-namangan-t
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222606
+  fields:
+    region: 11111111-1111-4111-8111-111111111117
+    name_uz: Norin tumani
+    name_ru: Нарынский район
+    code: ng-norin
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222607
+  fields:
+    region: 11111111-1111-4111-8111-111111111117
+    name_uz: Pop tumani
+    name_ru: Папский район
+    code: ng-pop
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222608
+  fields:
+    region: 11111111-1111-4111-8111-111111111117
+    name_uz: To'raqo'rg'on tumani
+    name_ru: Туракурганский район
+    code: ng-toraqorgon
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222609
+  fields:
+    region: 11111111-1111-4111-8111-111111111117
+    name_uz: Uchqo'rg'on tumani
+    name_ru: Учкурганский район
+    code: ng-uchqorgon
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222610
+  fields:
+    region: 11111111-1111-4111-8111-111111111117
+    name_uz: Uychi tumani
+    name_ru: Уйчинский район
+    code: ng-uychi
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222611
+  fields:
+    region: 11111111-1111-4111-8111-111111111117
+    name_uz: Yangiqo'rg'on tumani
+    name_ru: Янгикурганский район
+    code: ng-yangiqorgon
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222701
+  fields:
+    region: 11111111-1111-4111-8111-111111111118
+    name_uz: Bulung'ur tumani
+    name_ru: Булунгурский район
+    code: sa-bulungur
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222702
+  fields:
+    region: 11111111-1111-4111-8111-111111111118
+    name_uz: Ishtixon tumani
+    name_ru: Иштыханский район
+    code: sa-ishtixon
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222703
+  fields:
+    region: 11111111-1111-4111-8111-111111111118
+    name_uz: Jomboy tumani
+    name_ru: Джамбайский район
+    code: sa-jomboy
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222704
+  fields:
+    region: 11111111-1111-4111-8111-111111111118
+    name_uz: Kattaqo'rg'on tumani
+    name_ru: Каттакурганский район
+    code: sa-kattaqorgon-t
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222705
+  fields:
+    region: 11111111-1111-4111-8111-111111111118
+    name_uz: Narpay tumani
+    name_ru: Нарпайский район
+    code: sa-narpay
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222706
+  fields:
+    region: 11111111-1111-4111-8111-111111111118
+    name_uz: Nurobod tumani
+    name_ru: Нурабадский район
+    code: sa-nurobod
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222707
+  fields:
+    region: 11111111-1111-4111-8111-111111111118
+    name_uz: Oqdaryo tumani
+    name_ru: Акдарьинский район
+    code: sa-oqdaryo
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222708
+  fields:
+    region: 11111111-1111-4111-8111-111111111118
+    name_uz: Paxtachi tumani
+    name_ru: Пахтачинский район
+    code: sa-paxtachi
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222709
+  fields:
+    region: 11111111-1111-4111-8111-111111111118
+    name_uz: Pastdarg'om tumani
+    name_ru: Пастдаргомский район
+    code: sa-pastdargom
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222710
+  fields:
+    region: 11111111-1111-4111-8111-111111111118
+    name_uz: Payariq tumani
+    name_ru: Пайарыкский район
+    code: sa-payariq
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222711
+  fields:
+    region: 11111111-1111-4111-8111-111111111118
+    name_uz: Qo'shrabot tumani
+    name_ru: Кошрабадский район
+    code: sa-qoshrabot
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222712
+  fields:
+    region: 11111111-1111-4111-8111-111111111118
+    name_uz: Samarqand tumani
+    name_ru: Самаркандский район
+    code: sa-samarqand-t
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222713
+  fields:
+    region: 11111111-1111-4111-8111-111111111118
+    name_uz: Toyloq tumani
+    name_ru: Тайлакский район
+    code: sa-toyloq
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222714
+  fields:
+    region: 11111111-1111-4111-8111-111111111118
+    name_uz: Urgut tumani
+    name_ru: Ургутский район
+    code: sa-urgut
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222801
+  fields:
+    region: 11111111-1111-4111-8111-111111111119
+    name_uz: Angor tumani
+    name_ru: Ангорский район
+    code: su-angor
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222802
+  fields:
+    region: 11111111-1111-4111-8111-111111111119
+    name_uz: Bandixon tumani
+    name_ru: Бандиханский район
+    code: su-bandixon
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222803
+  fields:
+    region: 11111111-1111-4111-8111-111111111119
+    name_uz: Boysun tumani
+    name_ru: Байсунский район
+    code: su-boysun
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222804
+  fields:
+    region: 11111111-1111-4111-8111-111111111119
+    name_uz: Denov tumani
+    name_ru: Денауский район
+    code: su-denov
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222805
+  fields:
+    region: 11111111-1111-4111-8111-111111111119
+    name_uz: Jarqo'rg'on tumani
+    name_ru: Джаркурганский район
+    code: su-jarqorgon
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222806
+  fields:
+    region: 11111111-1111-4111-8111-111111111119
+    name_uz: Muzrabot tumani
+    name_ru: Музрабадский район
+    code: su-muzrabot
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222807
+  fields:
+    region: 11111111-1111-4111-8111-111111111119
+    name_uz: Oltinsoy tumani
+    name_ru: Алтынсайский район
+    code: su-oltinsoy
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222808
+  fields:
+    region: 11111111-1111-4111-8111-111111111119
+    name_uz: Qiziriq tumani
+    name_ru: Кизирикский район
+    code: su-qiziriq
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222809
+  fields:
+    region: 11111111-1111-4111-8111-111111111119
+    name_uz: Qumqo'rg'on tumani
+    name_ru: Кумкурганский район
+    code: su-qumqorgon
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222810
+  fields:
+    region: 11111111-1111-4111-8111-111111111119
+    name_uz: Sariosiyo tumani
+    name_ru: Сариасийский район
+    code: su-sariosiyo
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222811
+  fields:
+    region: 11111111-1111-4111-8111-111111111119
+    name_uz: Sherobod tumani
+    name_ru: Шерабадский район
+    code: su-sherobod
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222812
+  fields:
+    region: 11111111-1111-4111-8111-111111111119
+    name_uz: Sho'rchi tumani
+    name_ru: Шурчинский район
+    code: su-shorchi
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222813
+  fields:
+    region: 11111111-1111-4111-8111-111111111119
+    name_uz: Termiz tumani
+    name_ru: Термезский район
+    code: su-termiz-t
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222814
+  fields:
+    region: 11111111-1111-4111-8111-111111111119
+    name_uz: Uzun tumani
+    name_ru: Узунский район
+    code: su-uzun
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222901
+  fields:
+    region: 11111111-1111-4111-8111-111111111120
+    name_uz: Boyovut tumani
+    name_ru: Баёвутский район
+    code: si-boyovut
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222902
+  fields:
+    region: 11111111-1111-4111-8111-111111111120
+    name_uz: Guliston tumani
+    name_ru: Гулистанский район
+    code: si-guliston-t
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222903
+  fields:
+    region: 11111111-1111-4111-8111-111111111120
+    name_uz: Mirzaobod tumani
+    name_ru: Мирзаабадский район
+    code: si-mirzaobod
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222904
+  fields:
+    region: 11111111-1111-4111-8111-111111111120
+    name_uz: Oqoltin tumani
+    name_ru: Акалтынский район
+    code: si-oqoltin
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222905
+  fields:
+    region: 11111111-1111-4111-8111-111111111120
+    name_uz: Sardoba tumani
+    name_ru: Сардобинский район
+    code: si-sardoba
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222906
+  fields:
+    region: 11111111-1111-4111-8111-111111111120
+    name_uz: Sayxunobod tumani
+    name_ru: Сайхунабадский район
+    code: si-sayxunobod
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222907
+  fields:
+    region: 11111111-1111-4111-8111-111111111120
+    name_uz: Sirdaryo tumani
+    name_ru: Сырдарьинский район
+    code: si-sirdaryo-t
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222222908
+  fields:
+    region: 11111111-1111-4111-8111-111111111120
+    name_uz: Xovos tumani
+    name_ru: Хавастский район
+    code: si-xovos
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223001
+  fields:
+    region: 11111111-1111-4111-8111-111111111121
+    name_uz: Bekobod tumani
+    name_ru: Бекабадский район
+    code: to-bekobod-t
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223002
+  fields:
+    region: 11111111-1111-4111-8111-111111111121
+    name_uz: Bo'ka tumani
+    name_ru: Букинский район
+    code: to-boka
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223003
+  fields:
+    region: 11111111-1111-4111-8111-111111111121
+    name_uz: Bo'stonliq tumani
+    name_ru: Бостанлыкский район
+    code: to-bostonliq
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223004
+  fields:
+    region: 11111111-1111-4111-8111-111111111121
+    name_uz: Chinoz tumani
+    name_ru: Чиназский район
+    code: to-chinoz
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223005
+  fields:
+    region: 11111111-1111-4111-8111-111111111121
+    name_uz: Ohangaron tumani
+    name_ru: Ахангаранский район
+    code: to-ohangaron-t
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223006
+  fields:
+    region: 11111111-1111-4111-8111-111111111121
+    name_uz: Oqqo'rg'on tumani
+    name_ru: Аккурганский район
+    code: to-oqqorgon
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223007
+  fields:
+    region: 11111111-1111-4111-8111-111111111121
+    name_uz: Parkent tumani
+    name_ru: Паркентский район
+    code: to-parkent
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223008
+  fields:
+    region: 11111111-1111-4111-8111-111111111121
+    name_uz: Piskent tumani
+    name_ru: Пскентский район
+    code: to-piskent
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223009
+  fields:
+    region: 11111111-1111-4111-8111-111111111121
+    name_uz: Quyi Chirchiq tumani
+    name_ru: Нижнечирчикский район
+    code: to-quyi-chirchiq
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223010
+  fields:
+    region: 11111111-1111-4111-8111-111111111121
+    name_uz: O'rta Chirchiq tumani
+    name_ru: Среднечирчикский район
+    code: to-orta-chirchiq
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223011
+  fields:
+    region: 11111111-1111-4111-8111-111111111121
+    name_uz: Yuqori Chirchiq tumani
+    name_ru: Верхнечирчикский район
+    code: to-yuqori-chirchiq
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223012
+  fields:
+    region: 11111111-1111-4111-8111-111111111121
+    name_uz: Yangiyo'l tumani
+    name_ru: Янгиюльский район
+    code: to-yangiyol-t
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223013
+  fields:
+    region: 11111111-1111-4111-8111-111111111121
+    name_uz: Zangiota tumani
+    name_ru: Зангиатинский район
+    code: to-zangiota
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223101
+  fields:
+    region: 11111111-1111-4111-8111-111111111122
+    name_uz: Bag'dod tumani
+    name_ru: Багдадский район
+    code: fa-bagdod
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223102
+  fields:
+    region: 11111111-1111-4111-8111-111111111122
+    name_uz: Beshariq tumani
+    name_ru: Бешарыкский район
+    code: fa-beshariq
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223103
+  fields:
+    region: 11111111-1111-4111-8111-111111111122
+    name_uz: Buvayda tumani
+    name_ru: Бувайдинский район
+    code: fa-buvayda
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223104
+  fields:
+    region: 11111111-1111-4111-8111-111111111122
+    name_uz: Dang'ara tumani
+    name_ru: Дангаринский район
+    code: fa-dangara
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223105
+  fields:
+    region: 11111111-1111-4111-8111-111111111122
+    name_uz: Farg'ona tumani
+    name_ru: Ферганский район
+    code: fa-fargona-t
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223106
+  fields:
+    region: 11111111-1111-4111-8111-111111111122
+    name_uz: Furqat tumani
+    name_ru: Фуркатский район
+    code: fa-furqat
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223107
+  fields:
+    region: 11111111-1111-4111-8111-111111111122
+    name_uz: Oltiariq tumani
+    name_ru: Алтыарыкский район
+    code: fa-oltiariq
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223108
+  fields:
+    region: 11111111-1111-4111-8111-111111111122
+    name_uz: Qo'qon tumani
+    name_ru: Кокандский район
+    code: fa-qoqon-t
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223109
+  fields:
+    region: 11111111-1111-4111-8111-111111111122
+    name_uz: Quva tumani
+    name_ru: Кувинский район
+    code: fa-quva
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223110
+  fields:
+    region: 11111111-1111-4111-8111-111111111122
+    name_uz: Rishton tumani
+    name_ru: Риштанский район
+    code: fa-rishton
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223111
+  fields:
+    region: 11111111-1111-4111-8111-111111111122
+    name_uz: So'x tumani
+    name_ru: Сохский район
+    code: fa-sox
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223112
+  fields:
+    region: 11111111-1111-4111-8111-111111111122
+    name_uz: Toshloq tumani
+    name_ru: Ташлакский район
+    code: fa-toshloq
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223113
+  fields:
+    region: 11111111-1111-4111-8111-111111111122
+    name_uz: Uchko'prik tumani
+    name_ru: Учкуприкский район
+    code: fa-uchkoprik
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223114
+  fields:
+    region: 11111111-1111-4111-8111-111111111122
+    name_uz: Yozyovon tumani
+    name_ru: Язъяванский район
+    code: fa-yozyovon
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223201
+  fields:
+    region: 11111111-1111-4111-8111-111111111123
+    name_uz: Bog'ot tumani
+    name_ru: Багатский район
+    code: xo-bogot
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223202
+  fields:
+    region: 11111111-1111-4111-8111-111111111123
+    name_uz: Gurlan tumani
+    name_ru: Гурленский район
+    code: xo-gurlan
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223203
+  fields:
+    region: 11111111-1111-4111-8111-111111111123
+    name_uz: Xazorasp tumani
+    name_ru: Хазараспский район
+    code: xo-xazorasp
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223204
+  fields:
+    region: 11111111-1111-4111-8111-111111111123
+    name_uz: Xiva tumani
+    name_ru: Хивинский район
+    code: xo-xiva-t
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223205
+  fields:
+    region: 11111111-1111-4111-8111-111111111123
+    name_uz: Qo'shko'pir tumani
+    name_ru: Кошкупырский район
+    code: xo-qoshkopir
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223206
+  fields:
+    region: 11111111-1111-4111-8111-111111111123
+    name_uz: Shovot tumani
+    name_ru: Шаватский район
+    code: xo-shovot
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223207
+  fields:
+    region: 11111111-1111-4111-8111-111111111123
+    name_uz: Urganch tumani
+    name_ru: Ургенчский район
+    code: xo-urganch-t
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223208
+  fields:
+    region: 11111111-1111-4111-8111-111111111123
+    name_uz: Yangiariq tumani
+    name_ru: Янгиарыкский район
+    code: xo-yangiariq
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223209
+  fields:
+    region: 11111111-1111-4111-8111-111111111123
+    name_uz: Yangibozor tumani
+    name_ru: Янгибазарский район
+    code: xo-yangibozor
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223301
+  fields:
+    region: 11111111-1111-4111-8111-111111111124
+    name_uz: Bektemir tumani
+    name_ru: Бектемирский район
+    code: tk-bektemir
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223302
+  fields:
+    region: 11111111-1111-4111-8111-111111111124
+    name_uz: Chilonzor tumani
+    name_ru: Чиланзарский район
+    code: tk-chilonzor
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223303
+  fields:
+    region: 11111111-1111-4111-8111-111111111124
+    name_uz: Yakkasaroy tumani
+    name_ru: Яккасарайский район
+    code: tk-yakkasaroy
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223304
+  fields:
+    region: 11111111-1111-4111-8111-111111111124
+    name_uz: Mirobod tumani
+    name_ru: Мирабадский район
+    code: tk-mirobod
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223305
+  fields:
+    region: 11111111-1111-4111-8111-111111111124
+    name_uz: Mirzo Ulug'bek tumani
+    name_ru: Мирзо-Улугбекский район
+    code: tk-mirzo-ulugbek
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223306
+  fields:
+    region: 11111111-1111-4111-8111-111111111124
+    name_uz: Sergeli tumani
+    name_ru: Сергелийский район
+    code: tk-sergeli
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223307
+  fields:
+    region: 11111111-1111-4111-8111-111111111124
+    name_uz: Shayxontohur tumani
+    name_ru: Шайхантахурский район
+    code: tk-shayxontohur
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223308
+  fields:
+    region: 11111111-1111-4111-8111-111111111124
+    name_uz: Olmazor tumani
+    name_ru: Алмазарский район
+    code: tk-olmazor
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223309
+  fields:
+    region: 11111111-1111-4111-8111-111111111124
+    name_uz: Uchtepa tumani
+    name_ru: Учтепинский район
+    code: tk-uchtepa
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223310
+  fields:
+    region: 11111111-1111-4111-8111-111111111124
+    name_uz: Yunusobod tumani
+    name_ru: Юнусабадский район
+    code: tk-yunusobod
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223311
+  fields:
+    region: 11111111-1111-4111-8111-111111111124
+    name_uz: Yashnobod tumani
+    name_ru: Яшнабадский район
+    code: tk-yashnobod
+- model: auth_tenant.district
+  pk: 22222222-2222-4222-8222-222222223312
+  fields:
+    region: 11111111-1111-4111-8111-111111111124
+    name_uz: Yangihayot tumani
+    name_ru: Янгихаётский район
+    code: tk-yangihayot

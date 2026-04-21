@@ -40,8 +40,7 @@ export function useRegisterMutation() {
     async (data) => {
       if (isJwtAuthMock()) {
         const access = createMockAccessToken();
-        const [first, ...rest] = data.name.split(' ');
-        const user = buildMockAuthUser(data.phone, first, rest.join(' ') || undefined);
+        const user = buildMockAuthUser(data.phone, data.firstName);
         return { access, refresh: '', user };
       }
       return fetchRegister(data);
