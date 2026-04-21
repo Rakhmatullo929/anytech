@@ -2,17 +2,18 @@ import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
-import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
+import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { alpha } from '@mui/material/styles';
+import { alpha, useTheme } from '@mui/material/styles';
 
 import { RouterLink } from 'src/routes/components';
 import Iconify from 'src/components/iconify';
 
 export type ProfileCoverChip = {
   key: string;
+  title?: string;
   icon: string;
   label: string;
 };
@@ -38,103 +39,135 @@ export default function ProfileCover({
   editLabel,
   emptyLabel,
 }: Props) {
+  const theme = useTheme();
+
   return (
     <Card
       sx={{
-        p: 2.5,
-        borderRadius: 2,
-        border: (theme) => `1px solid ${theme.palette.divider}`,
-        bgcolor: 'background.paper',
+        p: 0,
+        borderRadius: 3,
+        border: (muiTheme) => `1px solid ${muiTheme.palette.divider}`,
+        overflow: 'hidden',
       }}
     >
-      <Stack
-        direction={{ xs: 'column', md: 'row' }}
-        spacing={2.5}
-        alignItems={{ xs: 'flex-start', md: 'center' }}
-        justifyContent="space-between"
+      <Box
+        sx={{
+          px: { xs: 2, md: 3.5 },
+          py: { xs: 2.2, md: 3 },
+          position: 'relative',
+          background: `radial-gradient(circle at 18% 18%, ${alpha(theme.palette.primary.main, 0.2)} 0%, transparent 35%), linear-gradient(120deg, ${alpha(theme.palette.primary.main, 0.14)} 0%, ${alpha(theme.palette.info.main, 0.1)} 45%, ${theme.palette.background.paper} 100%)`,
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            right: -40,
+            top: -40,
+            width: 180,
+            height: 180,
+            borderRadius: '50%',
+            background: alpha(theme.palette.primary.main, 0.08),
+          },
+        }}
       >
-        <Stack direction="row" spacing={2} alignItems="center">
-          <Avatar
-            sx={{
-              width: 60,
-              height: 60,
-              bgcolor: (theme) => alpha(theme.palette.primary.main, 0.14),
-              color: 'primary.main',
-              fontSize: 24,
-              fontWeight: 700,
-            }}
-          >
-            {title.charAt(0).toUpperCase()}
-          </Avatar>
-          <Box sx={{ minWidth: 0 }}>
-            <Typography variant="h5" sx={{ lineHeight: 1.2 }} noWrap>
-              {title}
-            </Typography>
-            <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mt: 0.35 }}>
-              <Iconify icon={subtitleIcon} width={15} />
-              <Typography variant="body2" color="text.secondary">
-                {subtitle || emptyLabel}
-              </Typography>
-            </Stack>
-          </Box>
-        </Stack>
-        {canEdit && editHref ? (
-          <Button
-            component={RouterLink}
-            href={editHref}
-            variant="contained"
-            color="inherit"
-            size="medium"
-            startIcon={<Iconify icon="solar:pen-bold" />}
-            sx={{
-              borderRadius: 1.5,
-              px: 2,
-              border: (theme) => `1px solid ${theme.palette.divider}`,
-              bgcolor: 'background.paper',
-              color: 'text.primary',
-              boxShadow: 'none',
-              '&:hover': {
-                boxShadow: 'none',
+        <Stack
+          direction={{ xs: 'column', md: 'row' }}
+          spacing={{ xs: 2, md: 3 }}
+          alignItems={{ xs: 'flex-start', md: 'center' }}
+          justifyContent="space-between"
+          sx={{ position: 'relative', zIndex: 1 }}
+        >
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Avatar
+              sx={{
+                width: { xs: 62, md: 72 },
+                height: { xs: 62, md: 72 },
                 bgcolor: 'background.paper',
-              },
-            }}
-          >
-            {editLabel}
-          </Button>
-        ) : null}
-      </Stack>
-      <Divider sx={{ my: 2 }} />
-      <Stack direction="row" flexWrap="wrap" gap={1}>
-        {chips.map((item) => (
-          <Chip
-            key={item.key}
-            size="small"
-            icon={<Iconify icon={item.icon} width={14} />}
-            label={item.label}
-            sx={{
-              height: 34,
-              borderRadius: 1.5,
-              bgcolor: (theme) => alpha(theme.palette.primary.main, 0.06),
-              border: (theme) => `1px solid ${alpha(theme.palette.primary.main, 0.22)}`,
-              '&:hover': {
-                bgcolor: (theme) => alpha(theme.palette.primary.main, 0.06),
-                border: (theme) => `1px solid ${alpha(theme.palette.primary.main, 0.22)}`,
-              },
-              '& .MuiChip-label': {
-                px: 1.1,
-                fontSize: 13,
-                fontWeight: 600,
-                color: (theme) =>
-                  item.label === emptyLabel ? theme.palette.text.disabled : theme.palette.text.primary,
-              },
-              '& .MuiChip-icon': {
-                ml: 0.9,
-                color: (theme) => (item.label === emptyLabel ? theme.palette.text.disabled : theme.palette.primary.main),
-              },
-            }}
-          />
-        ))}
-      </Stack>
+                color: 'primary.main',
+                fontSize: { xs: 24, md: 30 },
+                fontWeight: 800,
+                border: (innerTheme) => `2px solid ${alpha(innerTheme.palette.primary.main, 0.3)}`,
+                boxShadow: (innerTheme) => innerTheme.customShadows.z8,
+              }}
+            >
+              {title.charAt(0).toUpperCase()}
+            </Avatar>
+            <Box sx={{ minWidth: 0 }}>
+              <Typography variant="h4" sx={{ lineHeight: 1.1 }} noWrap>
+                {title}
+              </Typography>
+              <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mt: 0.9 }}>
+                <Iconify icon={subtitleIcon} width={16} />
+                <Typography variant="body2" color="text.secondary">
+                  {subtitle || emptyLabel}
+                </Typography>
+              </Stack>
+            </Box>
+          </Stack>
+          {canEdit && editHref ? (
+            <Button
+              component={RouterLink}
+              href={editHref}
+              variant="contained"
+              size="medium"
+              startIcon={<Iconify icon="solar:pen-bold" />}
+            >
+              {editLabel}
+            </Button>
+          ) : null}
+        </Stack>
+      </Box>
+      <Divider />
+      <Box sx={{ px: { xs: 2, md: 3.5 }, py: { xs: 1.6, md: 2.2 }, bgcolor: alpha(theme.palette.background.neutral, 0.25) }}>
+        <Grid container spacing={1.2}>
+          {chips.map((item) => (
+            <Grid key={item.key} item xs={12} sm={6} md={3}>
+              <Stack
+                direction="row"
+                alignItems="center"
+                spacing={1}
+                sx={{
+                  px: 1.2,
+                  py: 1,
+                  borderRadius: 1.5,
+                  bgcolor: 'background.paper',
+                  border: (innerTheme) => `1px solid ${alpha(innerTheme.palette.primary.main, 0.16)}`,
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: 1.2,
+                    display: 'grid',
+                    placeItems: 'center',
+                    bgcolor: alpha(theme.palette.primary.main, 0.12),
+                    color: 'primary.main',
+                    flexShrink: 0,
+                  }}
+                >
+                  <Iconify icon={item.icon} width={15} />
+                </Box>
+                <Stack spacing={0.2} sx={{ minWidth: 0 }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1 }}>
+                    {item.title || item.key}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: 700,
+                      color: item.label === emptyLabel ? 'text.disabled' : 'text.primary',
+                      lineHeight: 1.1,
+                    }}
+                    noWrap
+                  >
+                    {item.label}
+                  </Typography>
+                </Stack>
+              </Stack>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+      {chips.length === 0 ? <Box sx={{ pb: 0.5 }} /> : null}
     </Card>
   );
 }

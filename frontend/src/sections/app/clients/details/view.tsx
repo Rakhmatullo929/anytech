@@ -103,13 +103,19 @@ export default function ClientDetailsView() {
   );
 
   const metadataChips = [
-    { key: 'lang', icon: languageIcon, label: languageLabel || notSetLabel },
+    { key: 'lang', title: tx('clients.form.fields.communicationLanguage'), icon: languageIcon, label: languageLabel || notSetLabel },
     {
       key: 'gender',
+      title: tx('clients.form.fields.gender'),
       icon: genderIcon,
       label: genderLabel || notSetLabel,
     },
-    { key: 'marital', icon: 'solar:users-group-two-rounded-bold', label: maritalLabel || notSetLabel },
+    {
+      key: 'marital',
+      title: tx('clients.form.fields.maritalStatus'),
+      icon: 'solar:users-group-two-rounded-bold',
+      label: maritalLabel || notSetLabel,
+    },
   ];
 
   const saleHead = useMemo(
