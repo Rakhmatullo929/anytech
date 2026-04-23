@@ -1,5 +1,40 @@
 {
   "addButton": "Добавить клиента",
+  "tabs": {
+    "clients": "Клиенты",
+    "groups": "Группы"
+  },
+  "groups": {
+    "addButton": "Добавить группу",
+    "searchPlaceholder": "Поиск по названию…",
+    "table": {
+      "name": "Название",
+      "clients": "Клиентов",
+      "created": "Создана"
+    },
+    "form": {
+      "createTitle": "Новая группа",
+      "editTitle": "Редактировать группу",
+      "fields": {
+        "name": "Название *",
+        "description": "Описание"
+      }
+    },
+    "dialogs": {
+      "delete": {
+        "title": "Удаление группы",
+        "description": "Вы точно хотите удалить эту группу?",
+        "bulkTitle": "Массовое удаление групп",
+        "bulkDescription": "Вы точно хотите удалить выбранные группы? Количество: {{count}}"
+      }
+    },
+    "toasts": {
+      "created": "Группа успешно создана",
+      "updated": "Группа обновлена",
+      "deleted": "Группа удалена",
+      "bulkDeleted": "Удалено групп: {{count}}"
+    }
+  },
   "createDocumentTitle": "Создать клиента",
   "editDocumentTitle": "Редактировать клиента",
   "importExcelButton": "Импорт Excel",

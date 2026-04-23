@@ -1,33 +1,28 @@
-import { useMemo, useRef, useState, useEffect, type MouseEvent } from 'react';
-// locales
-import { useLocales } from 'src/locales';
-// @mui
+import { useMemo, useState, useEffect, type MouseEvent } from 'react';
+
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
 import Table from '@mui/material/Table';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
-import Link from '@mui/material/Link';
 import MenuItem from '@mui/material/MenuItem';
 import Checkbox from '@mui/material/Checkbox';
 import LinearProgress from '@mui/material/LinearProgress';
+import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-// utils
+
 import { fDateTime } from 'src/utils/format-time';
-// routes
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hook';
-import { RouterLink } from 'src/routes/components';
 import { useDebounce } from 'src/hooks/use-debounce';
 import { useUrlListState, useSyncTableWithUrlListState } from 'src/hooks/use-url-query-state';
 import { useCheckPermission } from 'src/auth/hooks/use-check-permission';
 import Can from 'src/auth/components/can';
-// components
+import { useLocales } from 'src/locales';
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
@@ -42,33 +37,39 @@ import {
   TablePaginationCustom,
 } from 'src/components/table';
 
-import {
-  useClientsListQuery,
-  useBulkDeleteClientsMutation,
-  useBulkCreateClientsMutation,
-  useDeleteClientMutation,
-} from 'src/sections/app/clients/api/use-clients-api';
 import { ClientsTabs, type ClientsTabValue } from 'src/sections/app/clients/components';
-import { ClientsListSkeleton } from 'src/sections/app/clients/skeleton';
+
+import {
+  useGroupsListQuery,
+  useDeleteGroupMutation,
+  useBulkDeleteGroupsMutation,
+} from './api/use-groups-api';
+import type { Group } from './api/types';
+import { GroupsListSkeleton } from './skeleton';
+import { GroupUpsertDialog } from './components';
 
 // ----------------------------------------------------------------------
 
-export default function ClientsView() {
+export default function GroupsView() {
   const { tx } = useLocales();
   const router = useRouter();
-  const { canWritePage, canDetailPage } = useCheckPermission();
+  const { canWritePage } = useCheckPermission();
   const { enqueueSnackbar } = useSnackbar();
   const actionsPopover = usePopover();
-  const deleteMutation = useDeleteClientMutation();
-  const bulkDeleteMutation = useBulkDeleteClientsMutation();
-  const bulkCreateMutation = useBulkCreateClientsMutation();
-  const excelInputRef = useRef<HTMLInputElement | null>(null);
+  const deleteMutation = useDeleteGroupMutation();
+  const bulkDeleteMutation = useBulkDeleteGroupsMutation();
+
+  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingGroup, setEditingGroup] = useState<Group | null>(null);
 
   const tableHead = useMemo(
     () => [
-      { id: 'name', label: tx('common.table.client') },
-      { id: 'phone', label: tx('common.table.phone') },
-      { id: 'created', label: tx('common.table.created') },
+      { id: 'name', label: tx('clients.groups.table.name') },
+      { id: 'clientCount', label: tx('clients.groups.table.clients') },
+      { id: 'createdAt', label: tx('clients.groups.table.created') },
       { id: '', label: '' },
     ],
     [tx]
@@ -92,18 +93,16 @@ export default function ClientsView() {
     defaultOrdering: '-created_at',
   });
   const debouncedSearch = useDebounce(searchValue.trim(), 400);
-  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const page = Math.max(0, pageParam - 1);
 
   const table = useTable({
-    defaultCurrentPage: Math.max(0, pageParam - 1),
+    defaultCurrentPage: page,
     defaultRowsPerPage: rowsPerPage,
   });
   const { setPage, setRowsPerPage } = table;
-  const page = Math.max(0, pageParam - 1);
+  const { selected: selectedIds, setSelected } = table;
 
-  const { data, isPending, isFetching } = useClientsListQuery({
+  const { data, isPending, isFetching } = useGroupsListQuery({
     page: page + 1,
     pageSize: rowsPerPage,
     search: debouncedSearch || undefined,
@@ -113,7 +112,6 @@ export default function ClientsView() {
   const rows = useMemo(() => data?.results ?? [], [data?.results]);
   const total = data?.count ?? 0;
   const showInitialLoader = isPending && !data;
-  const { selected: selectedIds, setSelected } = table;
 
   useEffect(() => {
     const rowIdSet = new Set(rows.map((row) => row.id));
@@ -132,66 +130,64 @@ export default function ClientsView() {
     setTableRowsPerPage: setRowsPerPage,
   });
 
-  const closeActions = (clearSelected = true) => {
+  const handleCloseActions = () => {
     actionsPopover.onClose();
-    if (clearSelected) {
-      setSelectedClientId(null);
-    }
+    setSelectedGroupId(null);
   };
-  const handleCloseActions = () => closeActions();
 
-  const openActions = (event: MouseEvent<HTMLElement>, clientId: string) => {
-    setSelectedClientId(clientId);
+  const openActions = (event: MouseEvent<HTMLElement>, groupId: string) => {
+    setSelectedGroupId(groupId);
     actionsPopover.onOpen(event);
   };
 
-  const handleView = () => {
-    if (!selectedClientId) return;
-    router.push(paths.clients.details(selectedClientId));
-    closeActions();
+  const handleOpenCreate = () => {
+    setEditingGroup(null);
+    setDialogOpen(true);
   };
 
-  const handleEdit = () => {
-    if (!selectedClientId) return;
-    router.push(paths.clients.edit(selectedClientId));
-    closeActions(false);
+  const handleOpenEdit = () => {
+    const group = rows.find((r) => r.id === selectedGroupId) ?? null;
+    setEditingGroup(group);
+    actionsPopover.onClose();
+    setSelectedGroupId(null);
+    setDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+    setEditingGroup(null);
   };
 
   const handleAskDelete = () => {
-    closeActions(false);
+    actionsPopover.onClose();
     setDeleteOpen(true);
   };
 
   const handleCloseDelete = () => {
     setDeleteOpen(false);
-    setSelectedClientId(null);
-  };
-
-  const handleOpenBulkDelete = () => {
-    setBulkDeleteOpen(true);
-  };
-
-  const handleCloseBulkDelete = () => {
-    setBulkDeleteOpen(false);
+    setSelectedGroupId(null);
   };
 
   const handleDelete = async () => {
-    if (!selectedClientId) return;
+    if (!selectedGroupId) return;
     try {
-      await deleteMutation.mutateAsync(selectedClientId);
-      enqueueSnackbar(tx('clients.toasts.deleted'), { variant: 'success' });
-    } catch (error) {
-      console.error(error);
+      await deleteMutation.mutateAsync(selectedGroupId);
+      enqueueSnackbar(tx('clients.groups.toasts.deleted'), { variant: 'success' });
+    } catch {
+      // handled globally
     } finally {
       handleCloseDelete();
     }
   };
 
+  const handleOpenBulkDelete = () => setBulkDeleteOpen(true);
+  const handleCloseBulkDelete = () => setBulkDeleteOpen(false);
+
   const handleBulkDelete = async () => {
     if (!selectedIds.length) return;
     try {
       await bulkDeleteMutation.mutateAsync(selectedIds);
-      enqueueSnackbar(tx('clients.toasts.bulkDeleted', { count: selectedIds.length }), {
+      enqueueSnackbar(tx('clients.groups.toasts.bulkDeleted', { count: selectedIds.length }), {
         variant: 'success',
       });
       table.onUpdatePageDeleteRows({
@@ -201,42 +197,11 @@ export default function ClientsView() {
       });
       table.setSelected([]);
       handleCloseBulkDelete();
-    } catch (error) {
-      console.error(error);
+    } catch {
+      // handled globally
     }
   };
 
-  const handleOpenCreate = () => {
-    router.push(paths.clients.create);
-  };
-
-  const handleOpenExcelPicker = () => {
-    excelInputRef.current?.click();
-  };
-
-  const handleExcelFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    event.target.value = '';
-    if (!file) return;
-
-    try {
-      const result = await bulkCreateMutation.mutateAsync(file);
-      enqueueSnackbar(tx('clients.toasts.bulkCreated', { count: result.created }), {
-        variant: 'success',
-      });
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-
-  const deletingCurrent =
-    deleteMutation.isPending &&
-    selectedClientId !== null &&
-    deleteMutation.variables === selectedClientId;
-  const deletingBulk = bulkDeleteMutation.isPending;
-  const canWriteClients = canWritePage('clients');
-  const canDetailClients = canDetailPage('clients');
   const tabLabels: Record<ClientsTabValue, string> = {
     clients: tx('clients.tabs.clients'),
     groups: tx('clients.tabs.groups'),
@@ -244,41 +209,42 @@ export default function ClientsView() {
   const handleTabChange = (nextTab: ClientsTabValue) => {
     router.push(nextTab === 'clients' ? paths.clients.root : paths.clients.groups);
   };
+
+  const canWrite = canWritePage('clients');
+  const deletingCurrent =
+    deleteMutation.isPending &&
+    selectedGroupId !== null &&
+    deleteMutation.variables === selectedGroupId;
+  const deletingBulk = bulkDeleteMutation.isPending;
+
   return (
     <>
       <CustomBreadcrumbs
-        heading={tx('common.navigation.clients')}
-        links={[{ name: tx('common.navigation.clients'), href: paths.clients.root }]}
+        heading={tx('clients.tabs.groups')}
+        links={[
+          { name: tx('common.navigation.clients'), href: paths.clients.root },
+          { name: tx('clients.tabs.groups'), href: paths.clients.groups },
+        ]}
         action={
           <Stack direction="row" spacing={1}>
             <Can page="clients" action="write">
               <Button
-                variant="outlined"
-                startIcon={<Iconify icon="eva:cloud-upload-fill" />}
-                onClick={handleOpenExcelPicker}
-                disabled={bulkCreateMutation.isPending}
+                variant="contained"
+                startIcon={<Iconify icon="mingcute:add-line" />}
+                onClick={handleOpenCreate}
               >
-                {tx('clients.importExcelButton')}
-              </Button>
-              <Button variant="contained" startIcon={<Iconify icon="mingcute:add-line" />} onClick={handleOpenCreate}>
-                {tx('clients.addButton')}
+                {tx('clients.groups.addButton')}
               </Button>
             </Can>
           </Stack>
         }
         sx={{ mb: { xs: 3, md: 5 } }}
       />
-      <ClientsTabs value="clients" onChange={handleTabChange} labels={tabLabels} />
-      <input
-        ref={excelInputRef}
-        type="file"
-        accept=".xlsx,.xls"
-        onChange={handleExcelFileChange}
-        style={{ display: 'none' }}
-      />
+
+      <ClientsTabs value="groups" onChange={handleTabChange} labels={tabLabels} />
 
       {showInitialLoader ? (
-        <ClientsListSkeleton headLabel={tableHead} />
+        <GroupsListSkeleton headLabel={tableHead} />
       ) : (
         <Card>
           {isFetching && data ? (
@@ -292,7 +258,12 @@ export default function ClientsView() {
               <TableSelectedAction
                 numSelected={selectedIds.length}
                 rowCount={rows.length}
-                onSelectAllRows={(checked) => table.onSelectAllRows(checked, rows.map((row) => row.id))}
+                onSelectAllRows={(checked) =>
+                  table.onSelectAllRows(
+                    checked,
+                    rows.map((row) => row.id)
+                  )
+                }
                 action={
                   <Button color="error" onClick={handleOpenBulkDelete}>
                     {tx('common.actions.delete')}
@@ -300,9 +271,10 @@ export default function ClientsView() {
                 }
               />
             </Can>
+
             <TextField
               size="small"
-              placeholder={tx('clients.searchPlaceholder')}
+              placeholder={tx('clients.groups.searchPlaceholder')}
               value={searchValue}
               onChange={(e) => setSearch(e.target.value)}
               sx={{ maxWidth: 360 }}
@@ -314,7 +286,12 @@ export default function ClientsView() {
                   headLabel={tableHead}
                   rowCount={rows.length}
                   numSelected={selectedIds.length}
-                  onSelectAllRows={(checked) => table.onSelectAllRows(checked, rows.map((row) => row.id))}
+                  onSelectAllRows={(checked) =>
+                    table.onSelectAllRows(
+                      checked,
+                      rows.map((row) => row.id)
+                    )
+                  }
                 />
                 <TableBody>
                   {rows.map((row) => (
@@ -323,25 +300,20 @@ export default function ClientsView() {
                         <Checkbox
                           checked={selectedIds.includes(row.id)}
                           onClick={() => table.onSelectRow(row.id)}
-                          disabled={!canWriteClients}
+                          disabled={!canWrite}
                         />
                       </TableCell>
                       <TableCell>
-                        <Can
-                          page="clients"
-                          action="detail"
-                          fallback={<Typography variant="subtitle2">{row.name}</Typography>}
-                        >
-                          <Link component={RouterLink} href={paths.clients.details(row.id)} variant="subtitle2">
-                            {row.name}
-                          </Link>
-                        </Can>
+                        <Typography variant="subtitle2">{row.name}</Typography>
                       </TableCell>
-                      <TableCell>{row.phone}</TableCell>
+                      <TableCell>{row.clientCount}</TableCell>
                       <TableCell>{fDateTime(row.createdAt)}</TableCell>
                       <TableCell align="right">
-                        {canDetailClients || canWriteClients ? (
-                          <IconButton color="default" onClick={(event) => openActions(event, row.id)}>
+                        {canWrite ? (
+                          <IconButton
+                            color="default"
+                            onClick={(event) => openActions(event, row.id)}
+                          >
                             <Iconify icon="eva:more-vertical-fill" />
                           </IconButton>
                         ) : null}
@@ -370,35 +342,40 @@ export default function ClientsView() {
         onClose={handleCloseActions}
         sx={{ width: 180, p: 1 }}
       >
-        <Can page="clients" action="detail">
-          <MenuItem onClick={handleView}>
-            <Iconify icon="solar:eye-bold" />
-            {tx('common.actions.view')}
-          </MenuItem>
-        </Can>
         <Can page="clients" action="write">
-          <MenuItem onClick={handleEdit}>
+          <MenuItem onClick={handleOpenEdit}>
             <Iconify icon="solar:pen-bold" />
             {tx('common.actions.edit')}
           </MenuItem>
         </Can>
         <Can page="clients" action="write">
-          <MenuItem onClick={handleAskDelete} sx={{ color: 'error.main' }} disabled={deletingCurrent}>
+          <MenuItem
+            onClick={handleAskDelete}
+            sx={{ color: 'error.main' }}
+            disabled={deletingCurrent}
+          >
             <Iconify icon="solar:trash-bin-trash-bold" />
             {tx('common.actions.delete')}
           </MenuItem>
         </Can>
       </CustomPopover>
 
+      <GroupUpsertDialog open={dialogOpen} onClose={handleCloseDialog} group={editingGroup} />
+
       <Can page="clients" action="write">
         <ConfirmDialog
           open={deleteOpen}
           onClose={handleCloseDelete}
-          title={tx('clients.dialogs.delete.title')}
-          content={tx('clients.dialogs.delete.description')}
+          title={tx('clients.groups.dialogs.delete.title')}
+          content={tx('clients.groups.dialogs.delete.description')}
           cancelText={tx('common.actions.cancel')}
           action={
-            <Button color="error" variant="contained" onClick={handleDelete} disabled={deletingCurrent}>
+            <Button
+              color="error"
+              variant="contained"
+              onClick={handleDelete}
+              disabled={deletingCurrent}
+            >
               {tx('common.actions.delete')}
             </Button>
           }
@@ -409,11 +386,18 @@ export default function ClientsView() {
         <ConfirmDialog
           open={bulkDeleteOpen}
           onClose={handleCloseBulkDelete}
-          title={tx('clients.dialogs.delete.bulkTitle')}
-          content={tx('clients.dialogs.delete.bulkDescription', { count: selectedIds.length })}
+          title={tx('clients.groups.dialogs.delete.bulkTitle')}
+          content={tx('clients.groups.dialogs.delete.bulkDescription', {
+            count: selectedIds.length,
+          })}
           cancelText={tx('common.actions.cancel')}
           action={
-            <Button color="error" variant="contained" onClick={handleBulkDelete} disabled={deletingBulk}>
+            <Button
+              color="error"
+              variant="contained"
+              onClick={handleBulkDelete}
+              disabled={deletingBulk}
+            >
               {tx('common.actions.delete')}
             </Button>
           }

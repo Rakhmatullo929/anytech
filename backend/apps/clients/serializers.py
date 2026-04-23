@@ -7,7 +7,45 @@ from debts.models import Debt
 from sales.models import Sale
 from sales.serializers import SaleItemReadSerializer
 
-from .models import Client
+from .models import Client, Group
+
+
+class GroupSerializer(serializers.ModelSerializer):
+    client_count = serializers.IntegerField(read_only=True)
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        request = self.context.get("request")
+        if not request or not hasattr(request.user, "tenant"):
+            return attrs
+
+        tenant = request.user.tenant
+        name = attrs.get("name", getattr(self.instance, "name", "")).strip()
+        duplicate_qs = Group.objects.filter(tenant=tenant, name=name)
+        if self.instance:
+            duplicate_qs = duplicate_qs.exclude(pk=self.instance.pk)
+        if duplicate_qs.exists():
+            raise serializers.ValidationError({"name": _("Group with this name already exists.")})
+        attrs["name"] = name
+        return attrs
+
+    def validate_name(self, value):
+        value = value.strip()
+        if not value:
+            raise serializers.ValidationError(_("Name is required."))
+        return value
+
+    class Meta:
+        model = Group
+        fields = (
+            "id",
+            "tenant",
+            "name",
+            "description",
+            "client_count",
+            "created_at",
+        )
+        read_only_fields = ("id", "tenant", "client_count", "created_at")
 
 
 class ClientSerializer(serializers.ModelSerializer):
@@ -47,6 +85,17 @@ class ClientSerializer(serializers.ModelSerializer):
         child=serializers.CharField(allow_blank=True, required=False),
         required=False,
     )
+    groups = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Group.objects.none(),
+        required=False,
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and hasattr(request.user, "tenant"):
+            self.fields["groups"].queryset = Group.objects.filter(tenant=request.user.tenant)
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
@@ -125,6 +174,7 @@ class ClientSerializer(serializers.ModelSerializer):
             "phones",
             "addresses",
             "social_networks",
+            "groups",
             "created_at",
         )
         read_only_fields = ("id", "tenant", "created_at")
@@ -178,3 +228,10 @@ class ClientBulkDeleteSerializer(serializers.Serializer):
 
 class ClientBulkCreateExcelSerializer(serializers.Serializer):
     file = serializers.FileField()
+
+
+class GroupBulkDeleteSerializer(serializers.Serializer):
+    ids = serializers.ListField(
+        child=serializers.UUIDField(),
+        allow_empty=False,
+    )

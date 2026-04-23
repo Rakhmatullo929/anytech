@@ -1,5 +1,40 @@
 {
   "addButton": "Mijoz qoʻshish",
+  "tabs": {
+    "clients": "Mijozlar",
+    "groups": "Guruhlar"
+  },
+  "groups": {
+    "addButton": "Guruh qoʻshish",
+    "searchPlaceholder": "Nomi boʻyicha qidiruv…",
+    "table": {
+      "name": "Nomi",
+      "clients": "Mijozlar",
+      "created": "Yaratilgan"
+    },
+    "form": {
+      "createTitle": "Yangi guruh",
+      "editTitle": "Guruhni tahrirlash",
+      "fields": {
+        "name": "Nomi *",
+        "description": "Tavsif"
+      }
+    },
+    "dialogs": {
+      "delete": {
+        "title": "Guruhni o'chirish",
+        "description": "Ushbu guruhni o'chirishni tasdiqlaysizmi?",
+        "bulkTitle": "Guruhlarni ommaviy o'chirish",
+        "bulkDescription": "Tanlangan guruhlarni o'chirishni tasdiqlaysizmi? Soni: {{count}}"
+      }
+    },
+    "toasts": {
+      "created": "Guruh muvaffaqiyatli yaratildi",
+      "updated": "Guruh yangilandi",
+      "deleted": "Guruh o'chirildi",
+      "bulkDeleted": "O'chirilgan guruhlar: {{count}}"
+    }
+  },
   "createDocumentTitle": "Mijoz yaratish",
   "editDocumentTitle": "Mijozni tahrirlash",
   "importExcelButton": "Excel import",

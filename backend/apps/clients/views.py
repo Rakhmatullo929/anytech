@@ -5,17 +5,20 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from django.db import transaction
+from django.db.models import Count
 from django.utils.translation import gettext as _
 
 from auth_tenant.mixins import TenantQuerySetMixin
 from auth_tenant.permissions import page_action_permission
 
-from .models import Client
+from .models import Client, Group
 from .serializers import (
     ClientBulkDeleteSerializer,
     ClientBulkCreateExcelSerializer,
     ClientDetailSerializer,
     ClientSerializer,
+    GroupBulkDeleteSerializer,
+    GroupSerializer,
 )
 
 
@@ -147,3 +150,36 @@ class ClientViewSet(TenantQuerySetMixin, ModelViewSet):
 
         response_data = ClientSerializer(created_clients, many=True, context={"request": request}).data
         return Response({"created": len(response_data), "results": response_data}, status=status.HTTP_201_CREATED)
+
+
+class GroupViewSet(TenantQuerySetMixin, ModelViewSet):
+    queryset = Group.objects.all()
+    serializer_class = GroupSerializer
+    http_method_names = ["get", "post", "put", "patch", "delete", "head", "options"]
+
+    search_fields = ["name", "description"]
+    ordering_fields = ["name", "created_at"]
+    ordering = ["-created_at"]
+
+    def get_permissions(self):
+        if self.action in ("list", "search"):
+            return [page_action_permission("clients", "read")()]
+        if self.action == "retrieve":
+            return [page_action_permission("clients", "detail")()]
+        return [page_action_permission("clients", "write")()]
+
+    def get_queryset(self):
+        return super().get_queryset().annotate(client_count=Count("clients", distinct=True))
+
+    @action(detail=False, methods=["get"], url_path="search")
+    def search(self, request):
+        return self.list(request)
+
+    @action(detail=False, methods=["post"], url_path="bulk-delete")
+    def bulk_delete(self, request):
+        serializer = GroupBulkDeleteSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        ids = serializer.validated_data["ids"]
+        deleted_count, _details = self.get_queryset().filter(id__in=ids).delete()
+        return Response({"deleted": deleted_count}, status=status.HTTP_200_OK)
