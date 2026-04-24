@@ -12,8 +12,16 @@ type PresetsOptionsProps = {
   onChange: (newValue: string) => void;
 };
 
+type PrimaryPreset = (typeof primaryPresets)[number];
+
 export default function PresetsOptions({ value, onChange }: PresetsOptionsProps) {
-  const options = primaryPresets.map((color) => ({
+  const presetsOrder = ['purple', 'cyan', 'default', 'blue', 'orange', 'red'];
+
+  const orderedPresets = presetsOrder
+    .map((name) => primaryPresets.find((color) => color.name === name))
+    .filter((color): color is PrimaryPreset => Boolean(color));
+
+  const options = orderedPresets.map((color) => ({
     name: color.name,
     value: color.main,
   }));
