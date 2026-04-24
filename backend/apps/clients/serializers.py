@@ -29,11 +29,6 @@ class ClientSerializer(serializers.ModelSerializer):
     def supported_phone_examples(cls):
         return ", ".join(example for _pattern, example in cls.PHONE_PATTERNS)
 
-    communication_language = serializers.ChoiceField(
-        choices=Client.CommunicationLanguage.choices,
-        required=False,
-        allow_blank=True,
-    )
     phones = serializers.ListField(
         child=serializers.CharField(allow_blank=True, trim_whitespace=True),
         allow_empty=False,
@@ -151,7 +146,6 @@ class ClientSerializer(serializers.ModelSerializer):
             "last_name",
             "middle_name",
             "birth_date",
-            "communication_language",
             "gender",
             "marital_status",
             "phone",

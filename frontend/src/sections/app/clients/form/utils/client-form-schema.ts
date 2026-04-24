@@ -9,7 +9,6 @@ export function getClientFormSchema(tx: Translate) {
     lastName: Yup.string().trim(),
     middleName: Yup.string().trim(),
     birthDate: Yup.string().nullable(),
-    communicationLanguage: Yup.string().oneOf(['', 'uz', 'ru', 'en']),
     gender: Yup.string().trim(),
     maritalStatus: Yup.string().trim(),
     phones: Yup.array()

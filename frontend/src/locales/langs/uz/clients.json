@@ -92,7 +92,6 @@
       "lastName": "Familiya",
       "middleName": "Otasining ismi",
       "birthDate": "Tugʻilgan sana",
-      "communicationLanguage": "Muloqot tili",
       "groups": "Guruhlar",
       "groupsPlaceholder": "Guruhlarni tanlang",
       "phoneCountry": "Mamlakat",
@@ -115,11 +114,6 @@
     "marital": {
       "married": "Turmush qurgan",
       "single": "Turmush qurmagan"
-    },
-    "languages": {
-      "uz": "O'zbekcha",
-      "ru": "Русский",
-      "en": "English"
     }
   },
   "toasts": {

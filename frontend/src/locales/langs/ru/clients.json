@@ -92,7 +92,6 @@
       "lastName": "Фамилия",
       "middleName": "Отчество",
       "birthDate": "Дата рождения",
-      "communicationLanguage": "Язык общения",
       "groups": "Группы",
       "groupsPlaceholder": "Выберите группы",
       "phoneCountry": "Страна",
@@ -115,11 +114,6 @@
     "marital": {
       "married": "В браке",
       "single": "Не в браке"
-    },
-    "languages": {
-      "uz": "Узбекский",
-      "ru": "Русский",
-      "en": "English"
     }
   },
   "toasts": {

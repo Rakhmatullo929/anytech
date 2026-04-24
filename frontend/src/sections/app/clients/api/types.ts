@@ -1,6 +1,3 @@
-/** Client row from `GET /api/v1/clients/` (camelCase after axios transform). */
-export type ClientCommunicationLanguage = '' | 'uz' | 'ru' | 'en';
-
 export type ClientListItem = {
   id: string;
   tenant: string;
@@ -8,7 +5,6 @@ export type ClientListItem = {
   lastName: string;
   middleName: string;
   birthDate: string | null;
-  communicationLanguage: ClientCommunicationLanguage;
   gender: string;
   maritalStatus: string;
   phone: string;
@@ -32,7 +28,6 @@ export type CreateClientPayload = {
   lastName?: string;
   middleName?: string;
   birthDate?: string | null;
-  communicationLanguage?: ClientCommunicationLanguage;
   gender?: string;
   maritalStatus?: string;
   phones: string[];
@@ -47,7 +42,6 @@ export type UpdateClientPayload = {
   lastName?: string;
   middleName?: string;
   birthDate?: string | null;
-  communicationLanguage?: ClientCommunicationLanguage;
   gender?: string;
   maritalStatus?: string;
   phones: string[];
