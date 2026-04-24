@@ -15,6 +15,7 @@ const ProductsPage = lazy(() => import('../../pages/products'));
 const ProductDetailsPage = lazy(() => import('../../pages/product-details'));
 const ClientsListPage = lazy(() => import('../../pages/clients'));
 const ClientsGroupsPage = lazy(() => import('../../pages/clients-groups'));
+const ClientsGroupsDetailsPage = lazy(() => import('../../pages/clients-groups-details'));
 const ClientCreatePage = lazy(() => import('../../pages/client-create'));
 const ClientEditPage = lazy(() => import('../../pages/client-edit'));
 const ClientDetailsPage = lazy(() => import('../../pages/client-details'));
@@ -77,6 +78,10 @@ export const dashboardRoutes = [
           {
             path: 'groups',
             element: withPermission('clients', 'read', <ClientsGroupsPage />),
+          },
+          {
+            path: 'groups/:id',
+            element: withPermission('clients', 'detail', <ClientsGroupsDetailsPage />),
           },
           {
             path: 'new',

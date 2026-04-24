@@ -40,11 +40,36 @@
     "groups": "Guruhlar"
   },
   "groups": {
+    "addButton": "Guruh qoʻshish",
+    "clientsCount": "Mijozlar: {{count}}",
+    "detailDocumentTitle": "Mijozlar guruhi",
+    "detailTitle": "Guruh tafsilotlari",
+    "emptyDescription": "Tavsif kiritilmagan",
     "documentTitle": "Mijozlar guruhlari",
+    "notFound": "Guruh topilmadi",
     "searchPlaceholder": "Guruh nomi bo‘yicha qidiruv…",
     "loading": "Guruhlar yuklanmoqda...",
+    "fields": {
+      "name": "Guruh nomi",
+      "description": "Tavsif"
+    },
+    "validation": {
+      "nameRequired": "Guruh nomi majburiy"
+    },
+    "dialogs": {
+      "createTitle": "Yangi guruh",
+      "editTitle": "Guruhni tahrirlash",
+      "deleteTitle": "Guruhni o‘chirish",
+      "deleteDescription": "Guruhni o‘chirishni tasdiqlaysizmi?"
+    },
+    "toasts": {
+      "created": "Guruh muvaffaqiyatli yaratildi",
+      "updated": "Guruh yangilandi",
+      "deleted": "Guruh o‘chirildi"
+    },
     "table": {
       "name": "Guruh nomi",
+      "description": "Tavsif",
       "clientsCount": "Mijozlar soni"
     }
   },

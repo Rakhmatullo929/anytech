@@ -1,9 +1,10 @@
 import { useMemo } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
-import { useFetchList } from 'src/hooks/api';
+import { deleteFromList, type Pagination, updateList, updateObject, useFetchList, useFetchOne, useMutate } from 'src/hooks/api';
 
-import { fetchGroupsList } from './groups-requests';
-import type { FetchGroupsListParams, GroupListItem } from './types';
+import { createGroup, deleteGroup, fetchGroupDetail, fetchGroupsList, updateGroup } from './groups-requests';
+import type { CreateGroupPayload, FetchGroupsListParams, GroupDetail, GroupListItem, UpdateGroupPayload } from './types';
 
 export function useGroupsListQuery(params: FetchGroupsListParams) {
   const { page, pageSize, search, ordering } = params;
@@ -15,5 +16,50 @@ export function useGroupsListQuery(params: FetchGroupsListParams) {
 
   return useFetchList<GroupListItem>(queryKey, () => fetchGroupsList(params), {
     placeholderData: (previousData) => previousData,
+  });
+}
+
+export function useGroupDetailQuery(id: string) {
+  const queryKey = useMemo(() => ['clients-groups', 'detail', id] as const, [id]);
+  return useFetchOne<GroupDetail>(queryKey, () => fetchGroupDetail(id), {
+    enabled: Boolean(id),
+  });
+}
+
+export function useCreateGroupMutation() {
+  const queryClient = useQueryClient();
+  return useMutate<GroupListItem, CreateGroupPayload>(createGroup, {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clients-groups', 'list'] });
+    },
+  });
+}
+
+export function useUpdateGroupMutation() {
+  const queryClient = useQueryClient();
+  return useMutate<GroupListItem, UpdateGroupPayload>(updateGroup, {
+    onSuccess: (updatedGroup) => {
+      queryClient.setQueriesData<Pagination<GroupListItem> | undefined>(
+        { queryKey: ['clients-groups', 'list'] },
+        updateList(updatedGroup)
+      );
+      queryClient.setQueryData<GroupDetail | undefined>(
+        ['clients-groups', 'detail', updatedGroup.id],
+        updateObject<GroupDetail>(updatedGroup)
+      );
+    },
+  });
+}
+
+export function useDeleteGroupMutation() {
+  const queryClient = useQueryClient();
+  return useMutate<void, string>(deleteGroup, {
+    onSuccess: (_, deletedGroupId) => {
+      queryClient.setQueriesData<Pagination<GroupListItem> | undefined>(
+        { queryKey: ['clients-groups', 'list'] },
+        deleteFromList(deletedGroupId)
+      );
+      queryClient.removeQueries({ queryKey: ['clients-groups', 'detail', deletedGroupId] });
+    },
   });
 }

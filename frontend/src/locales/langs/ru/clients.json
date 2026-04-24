@@ -40,11 +40,36 @@
     "groups": "Группы"
   },
   "groups": {
+    "addButton": "Добавить группу",
+    "clientsCount": "Клиентов: {{count}}",
+    "detailDocumentTitle": "Группа клиентов",
+    "detailTitle": "Детали группы",
+    "emptyDescription": "Описание не заполнено",
     "documentTitle": "Группы клиентов",
+    "notFound": "Группа не найдена",
     "searchPlaceholder": "Поиск по названию группы…",
     "loading": "Загрузка групп...",
+    "fields": {
+      "name": "Название группы",
+      "description": "Описание"
+    },
+    "validation": {
+      "nameRequired": "Название группы обязательно"
+    },
+    "dialogs": {
+      "createTitle": "Новая группа",
+      "editTitle": "Редактировать группу",
+      "deleteTitle": "Удаление группы",
+      "deleteDescription": "Вы точно хотите удалить группу?"
+    },
+    "toasts": {
+      "created": "Группа успешно создана",
+      "updated": "Группа обновлена",
+      "deleted": "Группа удалена"
+    },
     "table": {
       "name": "Название группы",
+      "description": "Описание",
       "clientsCount": "Количество клиентов"
     }
   },

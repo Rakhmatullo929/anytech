@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+from rest_framework.viewsets import ModelViewSet
 
 from django.db import transaction
 from django.db.models import Count
@@ -153,10 +153,10 @@ class ClientViewSet(TenantQuerySetMixin, ModelViewSet):
         return Response({"created": len(response_data), "results": response_data}, status=status.HTTP_201_CREATED)
 
 
-class GroupViewSet(TenantQuerySetMixin, ReadOnlyModelViewSet):
+class GroupViewSet(TenantQuerySetMixin, ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupListSerializer
-    http_method_names = ["get", "head", "options"]
+    http_method_names = ["get", "post", "put", "patch", "delete", "head", "options"]
 
     search_fields = ["name"]
     ordering_fields = ["name", "created_at"]
@@ -165,7 +165,9 @@ class GroupViewSet(TenantQuerySetMixin, ReadOnlyModelViewSet):
     def get_permissions(self):
         if self.action == "retrieve":
             return [page_action_permission("clients", "detail")()]
-        return [page_action_permission("clients", "read")()]
+        if self.action in ("list", "search"):
+            return [page_action_permission("clients", "read")()]
+        return [page_action_permission("clients", "write")()]
 
     def get_serializer_class(self):
         if self.action == "retrieve":

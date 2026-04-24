@@ -225,8 +225,36 @@ class GroupListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Group
-        fields = ("id", "tenant", "name", "clients_count", "created_at")
-        read_only_fields = fields
+        fields = ("id", "tenant", "name", "description", "clients_count", "created_at")
+        read_only_fields = ("id", "tenant", "clients_count", "created_at")
+
+    def validate_name(self, value):
+        value = value.strip()
+        if not value:
+            raise serializers.ValidationError(_("Name is required."))
+        return value
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        request = self.context.get("request")
+        tenant = getattr(request.user, "tenant", None) if request else None
+        if not tenant:
+            return attrs
+
+        name = attrs.get("name")
+        if not name and self.instance is not None:
+            name = self.instance.name
+        if not name:
+            return attrs
+
+        qs = Group.objects.filter(tenant=tenant, name=name)
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError(
+                {"name": _("Group with this name already exists.")}
+            )
+        return attrs
 
 
 class GroupDetailSerializer(serializers.ModelSerializer):
@@ -235,5 +263,5 @@ class GroupDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Group
-        fields = ("id", "tenant", "name", "clients_count", "clients", "created_at")
+        fields = ("id", "tenant", "name", "description", "clients_count", "clients", "created_at")
         read_only_fields = fields

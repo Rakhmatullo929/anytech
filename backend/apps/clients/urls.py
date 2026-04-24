@@ -5,12 +5,14 @@ from .views import ClientViewSet, GroupViewSet
 urlpatterns = [
     path(
         "groups/",
-        GroupViewSet.as_view({"get": "list"}),
+        GroupViewSet.as_view({"get": "list", "post": "create"}),
         name="group-list",
     ),
     path(
         "groups/<uuid:pk>/",
-        GroupViewSet.as_view({"get": "retrieve"}),
+        GroupViewSet.as_view(
+            {"get": "retrieve", "put": "update", "patch": "partial_update", "delete": "destroy"}
+        ),
         name="group-detail",
     ),
     path(
