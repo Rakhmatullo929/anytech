@@ -9,6 +9,11 @@ urlpatterns = [
         name="group-list",
     ),
     path(
+        "groups/bulk-delete/",
+        GroupViewSet.as_view({"post": "bulk_delete"}),
+        name="group-bulk-delete",
+    ),
+    path(
         "groups/<uuid:pk>/",
         GroupViewSet.as_view(
             {"get": "retrieve", "put": "update", "patch": "partial_update", "delete": "destroy"}

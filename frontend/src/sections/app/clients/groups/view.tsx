@@ -3,6 +3,7 @@ import { useMemo, useState, type MouseEvent } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
+import Checkbox from '@mui/material/Checkbox';
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
 import LinearProgress from '@mui/material/LinearProgress';
@@ -16,13 +17,14 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 
 import Can from 'src/auth/components/can';
+import { useCheckPermission } from 'src/auth/hooks/use-check-permission';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 import { useSnackbar } from 'src/components/snackbar';
-import { TableHeadCustom, TableNoData, TablePaginationCustom, useTable } from 'src/components/table';
+import { TableHeadCustom, TableNoData, TablePaginationCustom, TableSelectedAction, useTable } from 'src/components/table';
 import { useDebounce } from 'src/hooks/use-debounce';
 import { useSyncTableWithUrlListState, useUrlListState } from 'src/hooks/use-url-query-state';
 import { useLocales } from 'src/locales';
@@ -33,20 +35,29 @@ import { fDateTime } from 'src/utils/format-time';
 import ClientsTabs from '../components/clients-tabs';
 import { GroupUpsertDialog } from './components';
 import type { GroupListItem } from './api/types';
-import { useCreateGroupMutation, useDeleteGroupMutation, useGroupsListQuery, useUpdateGroupMutation } from './api/use-groups-api';
+import {
+  useBulkDeleteGroupsMutation,
+  useCreateGroupMutation,
+  useDeleteGroupMutation,
+  useGroupsListQuery,
+  useUpdateGroupMutation,
+} from './api/use-groups-api';
 import { ClientGroupsListSkeleton } from './skeleton';
 
 export default function ClientGroupsView() {
   const { tx } = useLocales();
+  const { canWritePage } = useCheckPermission();
   const { enqueueSnackbar } = useSnackbar();
   const actionsPopover = usePopover();
   const createMutation = useCreateGroupMutation();
   const updateMutation = useUpdateGroupMutation();
   const deleteMutation = useDeleteGroupMutation();
+  const bulkDeleteMutation = useBulkDeleteGroupsMutation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
   const [selectedGroup, setSelectedGroup] = useState<GroupListItem | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
 
   const tableHead = useMemo(
     () => [
@@ -102,6 +113,8 @@ export default function ClientGroupsView() {
   const rows = useMemo(() => data?.results ?? [], [data?.results]);
   const total = data?.count ?? 0;
   const showInitialLoader = isPending && !data;
+  const canWriteGroups = canWritePage('groups');
+  const { selected: selectedIds } = table;
 
   const closeActions = (clearSelected = true) => {
     actionsPopover.onClose();
@@ -174,6 +187,35 @@ export default function ClientGroupsView() {
     }
   };
 
+  const handleOpenBulkDelete = () => {
+    if (!selectedIds.length) return;
+    setBulkDeleteOpen(true);
+  };
+
+  const handleCloseBulkDelete = () => {
+    if (bulkDeleteMutation.isPending) return;
+    setBulkDeleteOpen(false);
+  };
+
+  const handleBulkDelete = async () => {
+    if (!selectedIds.length) return;
+    try {
+      await bulkDeleteMutation.mutateAsync(selectedIds);
+      enqueueSnackbar(tx('clients.groups.toasts.bulkDeleted', { count: selectedIds.length }), {
+        variant: 'success',
+      });
+      table.onUpdatePageDeleteRows({
+        totalRows: total,
+        totalRowsInPage: rows.length,
+        totalRowsFiltered: total,
+      });
+      table.setSelected([]);
+      handleCloseBulkDelete();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <>
       <CustomBreadcrumbs
@@ -201,6 +243,18 @@ export default function ClientGroupsView() {
           {isFetching && data ? <LinearProgress sx={{ borderRadius: 1 }} color="inherit" /> : <Box sx={{ height: 4 }} />}
 
           <Stack spacing={2} sx={{ p: 2 }}>
+            <Can page="groups" action="write">
+              <TableSelectedAction
+                numSelected={selectedIds.length}
+                rowCount={rows.length}
+                onSelectAllRows={(checked) => table.onSelectAllRows(checked, rows.map((row) => row.id))}
+                action={
+                  <Button color="error" onClick={handleOpenBulkDelete}>
+                    {tx('common.actions.delete')}
+                  </Button>
+                }
+              />
+            </Can>
             <TextField
               size="small"
               placeholder={tx('clients.groups.searchPlaceholder')}
@@ -211,10 +265,24 @@ export default function ClientGroupsView() {
 
             <Scrollbar>
               <Table size="small">
-                <TableHeadCustom headLabel={tableHead} rowCount={rows.length} />
+                <TableHeadCustom
+                  headLabel={tableHead}
+                  rowCount={rows.length}
+                  numSelected={selectedIds.length}
+                  onSelectAllRows={
+                    canWriteGroups ? (checked) => table.onSelectAllRows(checked, rows.map((row) => row.id)) : undefined
+                  }
+                />
                 <TableBody>
                   {rows.map((row) => (
-                    <TableRow key={row.id} hover>
+                    <TableRow key={row.id} hover selected={selectedIds.includes(row.id)}>
+                      <TableCell padding="checkbox">
+                        <Checkbox
+                          checked={selectedIds.includes(row.id)}
+                          onClick={() => table.onSelectRow(row.id)}
+                          disabled={!canWriteGroups}
+                        />
+                      </TableCell>
                       <TableCell>
                         <Can
                           page="groups"
@@ -285,6 +353,20 @@ export default function ClientGroupsView() {
           cancelText={tx('common.actions.cancel')}
           action={
             <Button color="error" variant="contained" onClick={handleDelete} disabled={deleteMutation.isPending}>
+              {tx('common.actions.delete')}
+            </Button>
+          }
+        />
+      </Can>
+      <Can page="groups" action="write">
+        <ConfirmDialog
+          open={bulkDeleteOpen}
+          onClose={handleCloseBulkDelete}
+          title={tx('clients.groups.dialogs.bulkDeleteTitle')}
+          content={tx('clients.groups.dialogs.bulkDeleteDescription', { count: selectedIds.length })}
+          cancelText={tx('common.actions.cancel')}
+          action={
+            <Button color="error" variant="contained" onClick={handleBulkDelete} disabled={bulkDeleteMutation.isPending}>
               {tx('common.actions.delete')}
             </Button>
           }

@@ -61,12 +61,15 @@
       "createTitle": "Новая группа",
       "editTitle": "Редактировать группу",
       "deleteTitle": "Удаление группы",
-      "deleteDescription": "Вы точно хотите удалить группу?"
+      "deleteDescription": "Вы точно хотите удалить группу?",
+      "bulkDeleteTitle": "Массовое удаление групп",
+      "bulkDeleteDescription": "Вы точно хотите удалить выбранные группы? Количество: {{count}}"
     },
     "toasts": {
       "created": "Группа успешно создана",
       "updated": "Группа обновлена",
-      "deleted": "Группа удалена"
+      "deleted": "Группа удалена",
+      "bulkDeleted": "Удалено групп: {{count}}"
     },
     "table": {
       "name": "Название группы",

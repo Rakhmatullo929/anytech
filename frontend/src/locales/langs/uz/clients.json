@@ -61,12 +61,15 @@
       "createTitle": "Yangi guruh",
       "editTitle": "Guruhni tahrirlash",
       "deleteTitle": "Guruhni o‘chirish",
-      "deleteDescription": "Guruhni o‘chirishni tasdiqlaysizmi?"
+      "deleteDescription": "Guruhni o‘chirishni tasdiqlaysizmi?",
+      "bulkDeleteTitle": "Guruhlarni ommaviy o‘chirish",
+      "bulkDeleteDescription": "Tanlangan guruhlarni o‘chirishni tasdiqlaysizmi? Soni: {{count}}"
     },
     "toasts": {
       "created": "Guruh muvaffaqiyatli yaratildi",
       "updated": "Guruh yangilandi",
-      "deleted": "Guruh o‘chirildi"
+      "deleted": "Guruh o‘chirildi",
+      "bulkDeleted": "O‘chirilgan guruhlar soni: {{count}}"
     },
     "table": {
       "name": "Guruh nomi",

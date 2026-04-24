@@ -57,3 +57,11 @@ export async function deleteGroup(id: string): Promise<void> {
     url: API_ENDPOINTS.clients.groupsDetail(id),
   });
 }
+
+export async function bulkDeleteGroups(ids: string[]): Promise<void> {
+  await request<void>({
+    method: 'POST',
+    url: API_ENDPOINTS.clients.groupsBulkDelete,
+    data: { ids },
+  });
+}

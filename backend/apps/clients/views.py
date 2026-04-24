@@ -17,6 +17,7 @@ from .serializers import (
     ClientBulkCreateExcelSerializer,
     ClientDetailSerializer,
     ClientSerializer,
+    GroupBulkDeleteSerializer,
     GroupDetailSerializer,
     GroupListSerializer,
 )
@@ -179,3 +180,12 @@ class GroupViewSet(TenantQuerySetMixin, ModelViewSet):
 
     def get_queryset(self):
         return super().get_queryset().annotate(clients_count=Count("clients", distinct=True))
+
+    @action(detail=False, methods=["post"], url_path="bulk-delete")
+    def bulk_delete(self, request):
+        serializer = GroupBulkDeleteSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        ids = serializer.validated_data["ids"]
+        deleted_count, _details = self.get_queryset().filter(id__in=ids).delete()
+        return Response({"deleted": deleted_count}, status=status.HTTP_200_OK)

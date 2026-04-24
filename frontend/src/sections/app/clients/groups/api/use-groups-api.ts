@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { deleteFromList, type Pagination, updateList, updateObject, useFetchList, useFetchOne, useMutate } from 'src/hooks/api';
 
-import { createGroup, deleteGroup, fetchGroupDetail, fetchGroupsList, updateGroup } from './groups-requests';
+import { bulkDeleteGroups, createGroup, deleteGroup, fetchGroupDetail, fetchGroupsList, updateGroup } from './groups-requests';
 import type { CreateGroupPayload, FetchGroupsListParams, GroupDetail, GroupListItem, UpdateGroupPayload } from './types';
 
 export function useGroupsListQuery(params: FetchGroupsListParams) {
@@ -60,6 +60,30 @@ export function useDeleteGroupMutation() {
         deleteFromList(deletedGroupId)
       );
       queryClient.removeQueries({ queryKey: ['clients-groups', 'detail', deletedGroupId] });
+    },
+  });
+}
+
+export function useBulkDeleteGroupsMutation() {
+  const queryClient = useQueryClient();
+  return useMutate<void, string[]>(bulkDeleteGroups, {
+    onSuccess: (_, deletedIds) => {
+      queryClient.setQueriesData<Pagination<GroupListItem> | undefined>(
+        { queryKey: ['clients-groups', 'list'] },
+        (old) => {
+          if (!old) return old;
+          const deletedSet = new Set(deletedIds);
+          const nextResults = old.results.filter((row) => !deletedSet.has(String(row.id)));
+          return {
+            ...old,
+            results: nextResults,
+            count: Math.max(0, old.count - (old.results.length - nextResults.length)),
+          };
+        }
+      );
+      deletedIds.forEach((id) => {
+        queryClient.removeQueries({ queryKey: ['clients-groups', 'detail', id] });
+      });
     },
   });
 }
