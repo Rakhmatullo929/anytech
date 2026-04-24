@@ -1,10 +1,12 @@
 from django.contrib.auth import password_validation
 from django.db import transaction
+from django.utils.text import slugify
 from django.utils.translation import gettext as _
 from rest_framework import serializers
 
-from .models import District, Region, RolePermission, Tenant, User
+from .models import District, Region, RolePermission, Tenant, TenantRole, User
 from .permission_catalog import ADMIN_REQUIRED_PERMISSIONS, ALL_PERMISSIONS
+from .roles import ensure_tenant_roles
 from .phone import get_phone_rule, is_phone_valid, normalize_phone
 
 
@@ -132,13 +134,14 @@ class RegisterSerializer(serializers.Serializer):
 
         with transaction.atomic():
             tenant = Tenant.objects.create(name=tenant_name)
+            ensure_tenant_roles(tenant)
             user = User.objects.create_user(
                 phone=validated_data["phone"],
                 email=validated_data.get("email"),
                 password=validated_data["password"],
                 first_name=validated_data["first_name"],
                 tenant=tenant,
-                role=User.Role.ADMIN,
+                role="admin",
             )
         return user
 
@@ -169,7 +172,7 @@ class TenantUserCreateSerializer(serializers.Serializer):
     email = serializers.EmailField(required=False, allow_blank=True, allow_null=True)
     passport_series = serializers.CharField(required=False, allow_blank=True, allow_null=True, max_length=9)
     gender = serializers.ChoiceField(choices=User.Gender.choices, required=False, allow_null=True)
-    role = serializers.ChoiceField(choices=User.Role.choices)
+    role = serializers.CharField(max_length=64)
     region_id = serializers.UUIDField(required=True, allow_null=False)
     district_id = serializers.UUIDField(required=True, allow_null=False)
     password = serializers.CharField(write_only=True, min_length=6)
@@ -196,6 +199,14 @@ class TenantUserCreateSerializer(serializers.Serializer):
 
     def validate_passport_series(self, value):
         return validate_passport_series(value)
+
+    def validate_role(self, value):
+        request = self.context["request"]
+        ensure_tenant_roles(request.user.tenant)
+        role = TenantRole.objects.filter(tenant=request.user.tenant, code=value).first()
+        if role is None:
+            raise serializers.ValidationError(_("Role not found in your tenant."))
+        return value
 
     def validate(self, attrs):
         region_id = attrs.get("region_id")
@@ -242,7 +253,7 @@ class TenantUserUpdateSerializer(serializers.Serializer):
     email = serializers.EmailField(required=False, allow_blank=True, allow_null=True)
     passport_series = serializers.CharField(required=False, allow_blank=True, allow_null=True, max_length=9)
     gender = serializers.ChoiceField(choices=User.Gender.choices, required=False, allow_null=True)
-    role = serializers.ChoiceField(choices=User.Role.choices)
+    role = serializers.CharField(max_length=64)
     region_id = serializers.UUIDField(required=True, allow_null=False)
     district_id = serializers.UUIDField(required=True, allow_null=False)
     password = serializers.CharField(write_only=True, min_length=6, required=False, allow_blank=True)
@@ -278,6 +289,14 @@ class TenantUserUpdateSerializer(serializers.Serializer):
 
     def validate_passport_series(self, value):
         return validate_passport_series(value)
+
+    def validate_role(self, value):
+        request = self.context["request"]
+        ensure_tenant_roles(request.user.tenant)
+        role = TenantRole.objects.filter(tenant=request.user.tenant, code=value).first()
+        if role is None:
+            raise serializers.ValidationError(_("Role not found in your tenant."))
+        return value
 
     def validate(self, attrs):
         region_id = attrs.get("region_id")
@@ -357,7 +376,7 @@ class TenantRolePermissionsUpdateSerializer(serializers.Serializer):
             normalized.append(permission)
             seen.add(permission)
 
-        if role == User.Role.ADMIN:
+        if role == "admin":
             for permission in ADMIN_REQUIRED_PERMISSIONS:
                 if permission not in seen:
                     normalized.append(permission)
@@ -378,3 +397,39 @@ class TenantRolePermissionsUpdateSerializer(serializers.Serializer):
             ]
         )
         return permissions
+
+
+class TenantRoleCreateSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=255)
+
+    def validate_name(self, value):
+        normalized = str(value or "").strip()
+        if normalized == "":
+            raise serializers.ValidationError(_("Role name is required."))
+        return normalized
+
+    def validate(self, attrs):
+        request = self.context["request"]
+        base_code = slugify(attrs["name"]).replace("_", "-")
+        if base_code == "":
+            base_code = "role"
+
+        candidate = base_code[:64]
+        suffix = 2
+        while TenantRole.objects.filter(tenant=request.user.tenant, code=candidate).exists():
+            suffix_str = f"-{suffix}"
+            candidate = f"{base_code[: max(1, 64 - len(suffix_str))]}{suffix_str}"
+            suffix += 1
+
+        attrs["code"] = candidate
+        return attrs
+
+
+class TenantRoleUpdateSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=255)
+
+    def validate_name(self, value):
+        normalized = str(value or "").strip()
+        if normalized == "":
+            raise serializers.ValidationError(_("Role name is required."))
+        return normalized

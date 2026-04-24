@@ -48,7 +48,7 @@ export function getUserUpsertSchema(tx: Translate, mode: Mode) {
         }
       ),
     gender: Yup.string().oneOf(['male', 'female']).required(tx('common.validation.genderRequired')),
-    role: Yup.string().oneOf(['admin', 'manager', 'seller']).required(tx('common.validation.roleRequired')),
+    role: Yup.string().trim().required(tx('common.validation.roleRequired')),
     password:
       mode === 'create'
         ? Yup.string()

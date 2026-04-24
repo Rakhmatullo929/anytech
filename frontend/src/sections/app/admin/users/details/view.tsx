@@ -43,6 +43,11 @@ export default function UserDetailsView() {
     contacts: tx('users.detail.tabs.contacts'),
     access: tx('users.detail.tabs.access'),
   };
+  const getRoleLabel = (role: string) => {
+    const key = `users.roles.${role}`;
+    const translated = tx(key);
+    return translated === key ? role : translated;
+  };
 
   if (isPending) {
     return (
@@ -87,7 +92,7 @@ export default function UserDetailsView() {
           editLabel={tx('common.actions.edit')}
           emptyLabel={notSetLabel}
           chips={[
-            { key: 'role', title: tx('users.table.role'), icon: 'solar:shield-user-bold', label: tx(`users.roles.${user.role}`) },
+            { key: 'role', title: tx('users.table.role'), icon: 'solar:shield-user-bold', label: getRoleLabel(user.role) },
             {
               key: 'gender',
               title: tx('common.table.gender'),
@@ -116,7 +121,7 @@ export default function UserDetailsView() {
             title={tx('users.detail.sections.personal')}
             emptyLabel={notSetLabel}
             stats={[
-              { label: tx('users.table.role'), value: tx(`users.roles.${user.role}`) },
+              { label: tx('users.table.role'), value: getRoleLabel(user.role) },
               { label: tx('common.table.created'), value: fDateTime(user.createdAt) },
               { label: tx('common.table.phone'), value: user.phone || notSetLabel },
             ]}
@@ -148,7 +153,7 @@ export default function UserDetailsView() {
             title={tx('users.detail.sections.access')}
             emptyLabel={notSetLabel}
             items={[
-              { label: tx('users.table.role'), value: tx(`users.roles.${user.role}`) },
+              { label: tx('users.table.role'), value: getRoleLabel(user.role) },
               { label: tx('common.table.passportSeries'), value: user.passportSeries || '' },
               { label: tx('common.table.created'), value: fDateTime(user.createdAt) },
             ]}

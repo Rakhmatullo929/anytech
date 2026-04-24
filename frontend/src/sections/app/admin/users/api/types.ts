@@ -26,7 +26,7 @@ export type TenantUserListItem = {
   email: string | null;
   passportSeries: string | null;
   gender: 'male' | 'female' | null;
-  role: 'admin' | 'manager' | 'seller';
+  role: string;
   createdAt: string;
 };
 
@@ -50,7 +50,7 @@ export type CreateTenantUserPayload = {
   email?: string | null;
   passportSeries?: string | null;
   gender?: 'male' | 'female' | null;
-  role: 'admin' | 'manager' | 'seller';
+  role: string;
   password: string;
   passwordConfirm: string;
 };
@@ -67,7 +67,7 @@ export type UpdateTenantUserPayload = {
   email?: string | null;
   passportSeries?: string | null;
   gender?: 'male' | 'female' | null;
-  role: 'admin' | 'manager' | 'seller';
+  role: string;
   password?: string;
   passwordConfirm?: string;
 };

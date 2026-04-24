@@ -22,6 +22,11 @@ export default function ProfileView() {
   const gender = user.gender ? tx(`users.genders.${user.gender}`) : '-';
   const passportSeries = user.passportSeries || '-';
   const createdAt = user.createdAt ? fDateTime(user.createdAt) : '';
+  const roleLabel = (() => {
+    const key = `users.roles.${role}`;
+    const translated = tx(key);
+    return translated === key ? role : translated;
+  })();
 
   const avatarInitial = displayName.trim().charAt(0).toUpperCase() || 'U';
 
@@ -51,7 +56,7 @@ export default function ProfileView() {
                 {email}
               </Typography>
             </Box>
-            <Chip color="primary" variant="soft" label={tx(`users.roles.${role}`)} />
+            <Chip color="primary" variant="soft" label={roleLabel} />
           </Stack>
         </Card>
 
