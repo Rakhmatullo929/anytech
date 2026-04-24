@@ -14,6 +14,8 @@ const ProfilePage = lazy(() => import('../../pages/profile'));
 const ProductsPage = lazy(() => import('../../pages/products'));
 const ProductDetailsPage = lazy(() => import('../../pages/product-details'));
 const ClientsListPage = lazy(() => import('../../pages/clients'));
+const ClientsGroupsPage = lazy(() => import('../../pages/clients-groups'));
+const ClientsGroupsDetailsPage = lazy(() => import('../../pages/clients-groups-details'));
 const ClientCreatePage = lazy(() => import('../../pages/client-create'));
 const ClientEditPage = lazy(() => import('../../pages/client-edit'));
 const ClientDetailsPage = lazy(() => import('../../pages/client-details'));
@@ -28,7 +30,7 @@ const AdminUserEditPage = lazy(() => import('../../pages/admin-user-edit'));
 const AdminRolesPage = lazy(() => import('../../pages/admin-roles'));
 
 function withPermission(
-  page: 'admin' | 'roles' | 'users' | 'pos' | 'products' | 'clients' | 'sales' | 'debts',
+  page: 'admin' | 'roles' | 'users' | 'pos' | 'products' | 'clients' | 'groups' | 'sales' | 'debts',
   action: 'read' | 'detail' | 'write',
   element: ReactElement
 ) {
@@ -72,6 +74,14 @@ export const dashboardRoutes = [
           {
             index: true,
             element: withPermission('clients', 'read', <ClientsListPage />),
+          },
+          {
+            path: 'groups',
+            element: withPermission('groups', 'read', <ClientsGroupsPage />),
+          },
+          {
+            path: 'groups/:id',
+            element: withPermission('groups', 'detail', <ClientsGroupsDetailsPage />),
           },
           {
             path: 'new',

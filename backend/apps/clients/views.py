@@ -5,17 +5,21 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from django.db import transaction
+from django.db.models import Count
 from django.utils.translation import gettext as _
 
 from auth_tenant.mixins import TenantQuerySetMixin
 from auth_tenant.permissions import page_action_permission
 
-from .models import Client
+from .models import Client, Group
 from .serializers import (
     ClientBulkDeleteSerializer,
     ClientBulkCreateExcelSerializer,
     ClientDetailSerializer,
     ClientSerializer,
+    GroupBulkDeleteSerializer,
+    GroupDetailSerializer,
+    GroupListSerializer,
 )
 
 
@@ -42,11 +46,15 @@ class ClientViewSet(TenantQuerySetMixin, ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
+        group_id = self.request.query_params.get("group_id")
+        if group_id:
+            qs = qs.filter(groups__id=group_id)
         if self.action == "retrieve":
             qs = qs.prefetch_related(
                 "sales__items__product",
                 "sales__debt",
                 "debts",
+                "groups",
             )
         return qs
 
@@ -147,3 +155,37 @@ class ClientViewSet(TenantQuerySetMixin, ModelViewSet):
 
         response_data = ClientSerializer(created_clients, many=True, context={"request": request}).data
         return Response({"created": len(response_data), "results": response_data}, status=status.HTTP_201_CREATED)
+
+
+class GroupViewSet(TenantQuerySetMixin, ModelViewSet):
+    queryset = Group.objects.all()
+    serializer_class = GroupListSerializer
+    http_method_names = ["get", "post", "put", "patch", "delete", "head", "options"]
+
+    search_fields = ["name"]
+    ordering_fields = ["name", "created_at"]
+    ordering = ["-created_at"]
+
+    def get_permissions(self):
+        if self.action == "retrieve":
+            return [page_action_permission("groups", "detail")()]
+        if self.action in ("list", "search"):
+            return [page_action_permission("groups", "read")()]
+        return [page_action_permission("groups", "write")()]
+
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return GroupDetailSerializer
+        return GroupListSerializer
+
+    def get_queryset(self):
+        return super().get_queryset().annotate(clients_count=Count("clients", distinct=True))
+
+    @action(detail=False, methods=["post"], url_path="bulk-delete")
+    def bulk_delete(self, request):
+        serializer = GroupBulkDeleteSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        ids = serializer.validated_data["ids"]
+        deleted_count, _details = self.get_queryset().filter(id__in=ids).delete()
+        return Response({"deleted": deleted_count}, status=status.HTTP_200_OK)

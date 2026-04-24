@@ -35,6 +35,47 @@
     }
   },
   "searchPlaceholder": "Ism yoki telefon boʻyicha qidiruv…",
+  "tabs": {
+    "clients": "Mijozlar",
+    "groups": "Guruhlar"
+  },
+  "groups": {
+    "addButton": "Guruh qoʻshish",
+    "clientsCount": "Mijozlar: {{count}}",
+    "clientsListTitle": "Guruhdagi mijozlar",
+    "clientsListHint": "Ushbu guruhga biriktirilgan mijozlar ro‘yxati",
+    "detailDocumentTitle": "Mijozlar guruhi",
+    "detailTitle": "Guruh tafsilotlari",
+    "emptyDescription": "Tavsif kiritilmagan",
+    "documentTitle": "Mijozlar guruhlari",
+    "notFound": "Guruh topilmadi",
+    "searchPlaceholder": "Guruh nomi bo‘yicha qidiruv…",
+    "fields": {
+      "name": "Guruh nomi",
+      "description": "Tavsif"
+    },
+    "validation": {
+      "nameRequired": "Guruh nomi majburiy"
+    },
+    "dialogs": {
+      "createTitle": "Yangi guruh",
+      "editTitle": "Guruhni tahrirlash",
+      "deleteTitle": "Guruhni o‘chirish",
+      "deleteDescription": "Guruhni o‘chirishni tasdiqlaysizmi?",
+      "bulkDeleteTitle": "Guruhlarni ommaviy o‘chirish",
+      "bulkDeleteDescription": "Tanlangan guruhlarni o‘chirishni tasdiqlaysizmi? Soni: {{count}}"
+    },
+    "toasts": {
+      "created": "Guruh muvaffaqiyatli yaratildi",
+      "updated": "Guruh yangilandi",
+      "deleted": "Guruh o‘chirildi",
+      "bulkDeleted": "O‘chirilgan guruhlar soni: {{count}}"
+    },
+    "table": {
+      "name": "Guruh nomi",
+      "clientsCount": "Mijozlar soni"
+    }
+  },
   "form": {
     "createTitle": "Yangi mijoz",
     "editTitle": "Mijozni tahrirlash",
@@ -51,7 +92,8 @@
       "lastName": "Familiya",
       "middleName": "Otasining ismi",
       "birthDate": "Tugʻilgan sana",
-      "communicationLanguage": "Muloqot tili",
+      "groups": "Guruhlar",
+      "groupsPlaceholder": "Guruhlarni tanlang",
       "phoneCountry": "Mamlakat",
       "gender": "Jins",
       "maritalStatus": "Oilaviy holat",
@@ -72,11 +114,6 @@
     "marital": {
       "married": "Turmush qurgan",
       "single": "Turmush qurmagan"
-    },
-    "languages": {
-      "uz": "O'zbekcha",
-      "ru": "Русский",
-      "en": "English"
     }
   },
   "toasts": {

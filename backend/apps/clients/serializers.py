@@ -7,7 +7,7 @@ from debts.models import Debt
 from sales.models import Sale
 from sales.serializers import SaleItemReadSerializer
 
-from .models import Client
+from .models import Client, Group
 
 
 class ClientSerializer(serializers.ModelSerializer):
@@ -29,11 +29,6 @@ class ClientSerializer(serializers.ModelSerializer):
     def supported_phone_examples(cls):
         return ", ".join(example for _pattern, example in cls.PHONE_PATTERNS)
 
-    communication_language = serializers.ChoiceField(
-        choices=Client.CommunicationLanguage.choices,
-        required=False,
-        allow_blank=True,
-    )
     phones = serializers.ListField(
         child=serializers.CharField(allow_blank=True, trim_whitespace=True),
         allow_empty=False,
@@ -45,6 +40,11 @@ class ClientSerializer(serializers.ModelSerializer):
     )
     social_networks = serializers.DictField(
         child=serializers.CharField(allow_blank=True, required=False),
+        required=False,
+    )
+    groups = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Group.objects.all(),
         required=False,
     )
 
@@ -109,6 +109,34 @@ class ClientSerializer(serializers.ModelSerializer):
             )
         return value
 
+    def validate_groups(self, value):
+        request = self.context.get("request")
+        if not request or not hasattr(request.user, "tenant"):
+            return value
+
+        tenant_id = request.user.tenant_id
+        invalid = [group.id for group in value if group.tenant_id != tenant_id]
+        if invalid:
+            raise serializers.ValidationError(
+                _("Some groups do not belong to your tenant: %(ids)s.")
+                % {"ids": ", ".join(str(group_id) for group_id in invalid)}
+            )
+        return value
+
+    def create(self, validated_data):
+        groups = validated_data.pop("groups", [])
+        client = super().create(validated_data)
+        if groups:
+            client.groups.set(groups)
+        return client
+
+    def update(self, instance, validated_data):
+        groups = validated_data.pop("groups", None)
+        client = super().update(instance, validated_data)
+        if groups is not None:
+            client.groups.set(groups)
+        return client
+
     class Meta:
         model = Client
         fields = (
@@ -118,13 +146,13 @@ class ClientSerializer(serializers.ModelSerializer):
             "last_name",
             "middle_name",
             "birth_date",
-            "communication_language",
             "gender",
             "marital_status",
             "phone",
             "phones",
             "addresses",
             "social_networks",
+            "groups",
             "created_at",
         )
         read_only_fields = ("id", "tenant", "created_at")
@@ -178,3 +206,56 @@ class ClientBulkDeleteSerializer(serializers.Serializer):
 
 class ClientBulkCreateExcelSerializer(serializers.Serializer):
     file = serializers.FileField()
+
+
+class GroupBulkDeleteSerializer(serializers.Serializer):
+    ids = serializers.ListField(
+        child=serializers.UUIDField(),
+        allow_empty=False,
+    )
+
+
+class GroupListSerializer(serializers.ModelSerializer):
+    clients_count = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Group
+        fields = ("id", "tenant", "name", "description", "clients_count", "created_at")
+        read_only_fields = ("id", "tenant", "clients_count", "created_at")
+
+    def validate_name(self, value):
+        value = value.strip()
+        if not value:
+            raise serializers.ValidationError(_("Name is required."))
+        return value
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        request = self.context.get("request")
+        tenant = getattr(request.user, "tenant", None) if request else None
+        if not tenant:
+            return attrs
+
+        name = attrs.get("name")
+        if not name and self.instance is not None:
+            name = self.instance.name
+        if not name:
+            return attrs
+
+        qs = Group.objects.filter(tenant=tenant, name=name)
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError(
+                {"name": _("Group with this name already exists.")}
+            )
+        return attrs
+
+
+class GroupDetailSerializer(serializers.ModelSerializer):
+    clients_count = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Group
+        fields = ("id", "tenant", "name", "description", "clients_count", "created_at")
+        read_only_fields = fields

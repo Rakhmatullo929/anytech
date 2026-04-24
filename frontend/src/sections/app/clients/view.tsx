@@ -49,6 +49,7 @@ import {
   useDeleteClientMutation,
 } from 'src/sections/app/clients/api/use-clients-api';
 import { ClientsListSkeleton } from 'src/sections/app/clients/skeleton';
+import ClientsTabs from 'src/sections/app/clients/components/clients-tabs';
 
 // ----------------------------------------------------------------------
 
@@ -267,6 +268,7 @@ export default function ClientsView() {
         onChange={handleExcelFileChange}
         style={{ display: 'none' }}
       />
+      <ClientsTabs value="clients" />
 
       {showInitialLoader ? (
         <ClientsListSkeleton headLabel={tableHead} />

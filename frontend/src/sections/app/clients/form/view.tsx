@@ -5,6 +5,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
+import Checkbox from '@mui/material/Checkbox';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -17,12 +18,13 @@ import { paths } from 'src/routes/paths';
 import { useParams, useRouter } from 'src/routes/hook';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import EmptyContent from 'src/components/empty-content';
-import FormProvider, { RHFTextField } from 'src/components/hook-form';
+import FormProvider, { RHFAutocomplete, RHFTextField } from 'src/components/hook-form';
 import Iconify from 'src/components/iconify';
 import { useSnackbar } from 'src/components/snackbar';
 
 import { useClientDetailQuery, useCreateClientMutation, useUpdateClientMutation } from '../api/use-clients-api';
-import type { ClientAddress, ClientCommunicationLanguage, ClientSocialNetworks } from '../api/types';
+import type { ClientAddress, ClientSocialNetworks } from '../api/types';
+import { useGroupsListQuery } from '../groups/api/use-groups-api';
 import { getClientFormSchema } from './utils/client-form-schema';
 import {
   DEFAULT_PHONE_COUNTRY,
@@ -42,12 +44,12 @@ type ClientFormValues = {
   lastName: string;
   middleName: string;
   birthDate: string | null;
-  communicationLanguage: ClientCommunicationLanguage;
   gender: string;
   maritalStatus: string;
   phones: { country: ClientPhoneCountry; number: string }[];
   addresses: ClientAddress[];
   socialNetworks: ClientSocialNetworks;
+  groups: string[];
 };
 
 function normalizePhones(phones: { country: ClientPhoneCountry; number: string }[]) {
@@ -67,6 +69,11 @@ export default function ClientFormView({ mode }: Props) {
   const createMutation = useCreateClientMutation();
   const updateMutation = useUpdateClientMutation();
   const detailQuery = useClientDetailQuery(id);
+  const groupsQuery = useGroupsListQuery({
+    page: 1,
+    pageSize: 200,
+    ordering: 'name',
+  });
 
   const methods = useForm<ClientFormValues>({
     resolver: yupResolver(getClientFormSchema(tx)),
@@ -77,7 +84,6 @@ export default function ClientFormView({ mode }: Props) {
       lastName: '',
       middleName: '',
       birthDate: null,
-      communicationLanguage: '',
       gender: '',
       maritalStatus: '',
       phones: [{ country: DEFAULT_PHONE_COUNTRY, number: '' }],
@@ -88,12 +94,11 @@ export default function ClientFormView({ mode }: Props) {
         instagram: '',
         facebook: '',
       },
+      groups: [],
     },
   });
 
   const { control, handleSubmit, reset } = methods;
-  const selectedCommunicationLanguage = methods.watch('communicationLanguage');
-  const selectedGender = methods.watch('gender');
 
   const phonesFieldArray = useFieldArray({
     control,
@@ -104,16 +109,6 @@ export default function ClientFormView({ mode }: Props) {
     name: 'addresses',
   });
 
-  const languageOptions = [
-    { value: 'uz', icon: 'flagpack:uz', label: tx('clients.form.languages.uz') },
-    { value: 'ru', icon: 'flagpack:ru', label: tx('clients.form.languages.ru') },
-    { value: 'en', icon: 'flagpack:gb-ukm', label: tx('clients.form.languages.en') },
-  ] as const;
-  const genderOptions = [
-    { value: 'male', icon: 'solar:male-bold', label: tx('users.genders.male') },
-    { value: 'female', icon: 'solar:female-bold', label: tx('users.genders.female') },
-  ] as const;
-
   useEffect(() => {
     if (mode !== 'edit' || !detailQuery.data) return;
 
@@ -122,7 +117,6 @@ export default function ClientFormView({ mode }: Props) {
       lastName: detailQuery.data.lastName || '',
       middleName: detailQuery.data.middleName || '',
       birthDate: detailQuery.data.birthDate || null,
-      communicationLanguage: detailQuery.data.communicationLanguage || '',
       gender: detailQuery.data.gender || '',
       maritalStatus: detailQuery.data.maritalStatus || '',
       phones: (detailQuery.data.phones || []).map((phone) => {
@@ -142,8 +136,16 @@ export default function ClientFormView({ mode }: Props) {
         instagram: '',
         facebook: '',
       },
+      groups: detailQuery.data.groups || [],
     });
   }, [detailQuery.data, mode, reset]);
+
+  const groupOptions = (groupsQuery.data?.results ?? []).map((group) => ({
+    value: group.id,
+    label: group.name,
+  }));
+  const groupIds = groupOptions.map((option) => option.value);
+  const groupLabelById = new Map(groupOptions.map((option) => [option.value, option.label]));
 
   const onSubmit = handleSubmit(async (values) => {
     const payload = {
@@ -151,7 +153,6 @@ export default function ClientFormView({ mode }: Props) {
       lastName: values.lastName.trim(),
       middleName: values.middleName.trim(),
       birthDate: values.birthDate || null,
-      communicationLanguage: values.communicationLanguage,
       gender: values.gender.trim(),
       maritalStatus: values.maritalStatus.trim(),
       phones: normalizePhones(values.phones),
@@ -168,6 +169,7 @@ export default function ClientFormView({ mode }: Props) {
         instagram: values.socialNetworks.instagram?.trim() || '',
         facebook: values.socialNetworks.facebook?.trim() || '',
       },
+      groups: values.groups,
     };
 
     try {
@@ -219,8 +221,11 @@ export default function ClientFormView({ mode }: Props) {
       <FormProvider methods={methods} onSubmit={onSubmit}>
         <Stack spacing={3}>
           <Card sx={{ p: 3 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>
+            <Typography variant="h6" sx={{ mb: 0.5 }}>
               {tx('clients.form.sections.personal')}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              {mode === 'create' ? tx('clients.form.createTitle') : tx('clients.form.editTitle')}
             </Typography>
             <Stack spacing={2}>
               <Box
@@ -238,7 +243,7 @@ export default function ClientFormView({ mode }: Props) {
                 sx={{
                   display: 'grid',
                   gap: 1.5,
-                  gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' },
+                  gridTemplateColumns: { xs: '1fr', md: 'repeat(3, minmax(0, 1fr))' },
                 }}
               >
                 <RHFTextField
@@ -247,121 +252,32 @@ export default function ClientFormView({ mode }: Props) {
                   label={tx('clients.form.fields.birthDate')}
                   InputLabelProps={{ shrink: true }}
                 />
+                <RHFTextField name="gender" select label={tx('clients.form.fields.gender')}>
+                  <MenuItem value="">{tx('common.table.allOption')}</MenuItem>
+                  <MenuItem value="male">{tx('users.genders.male')}</MenuItem>
+                  <MenuItem value="female">{tx('users.genders.female')}</MenuItem>
+                </RHFTextField>
                 <RHFTextField name="maritalStatus" select label={tx('clients.form.fields.maritalStatus')}>
                   <MenuItem value="">{tx('common.table.allOption')}</MenuItem>
                   <MenuItem value="married">{tx('clients.form.marital.married')}</MenuItem>
                   <MenuItem value="single">{tx('clients.form.marital.single')}</MenuItem>
                 </RHFTextField>
               </Box>
-              <Box
-                sx={{
-                  display: 'grid',
-                  gap: 1.5,
-                  gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' },
-                }}
-              >
-                <Box>
-                  <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                    {tx('clients.form.fields.communicationLanguage')}
-                  </Typography>
-                  <Box
-                    sx={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-                      gap: 0.75,
-                      p: 0.5,
-                      borderRadius: 2,
-                      bgcolor: 'grey.200',
-                      minHeight: 56,
-                      alignItems: 'center',
-                    }}
-                  >
-                    {languageOptions.map((option) => {
-                      const selected = selectedCommunicationLanguage === option.value;
-                      return (
-                        <Button
-                          key={option.value}
-                          type="button"
-                          onClick={() =>
-                            methods.setValue('communicationLanguage', option.value, {
-                              shouldDirty: true,
-                              shouldTouch: true,
-                              shouldValidate: true,
-                            })
-                          }
-                          sx={{
-                            minHeight: 44,
-                            minWidth: 0,
-                            borderRadius: 1.75,
-                            lineHeight: 1,
-                            px: 1.5,
-                            color: 'text.primary',
-                            bgcolor: selected ? 'common.white' : 'transparent',
-                            boxShadow: selected ? (theme) => theme.customShadows.z8 : 'none',
-                            '&:hover': {
-                              bgcolor: selected ? 'common.white' : 'action.hover',
-                            },
-                          }}
-                        >
-                          <Iconify icon={option.icon} width={20} />
-                        </Button>
-                      );
-                    })}
-                  </Box>
-                </Box>
-                <Box>
-                  <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                    {tx('clients.form.fields.gender')}
-                  </Typography>
-                  <Box
-                    sx={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-                      gap: 0.5,
-                      p: 0.5,
-                      borderRadius: 2,
-                      bgcolor: 'grey.200',
-                      minHeight: 56,
-                      alignItems: 'center',
-                    }}
-                  >
-                    {genderOptions.map((option) => {
-                      const selected = selectedGender === option.value;
-                      return (
-                        <Button
-                          key={option.value}
-                          type="button"
-                          onClick={() =>
-                            methods.setValue('gender', option.value, {
-                              shouldDirty: true,
-                              shouldTouch: true,
-                              shouldValidate: true,
-                            })
-                          }
-                          sx={{
-                            minHeight: 44,
-                            minWidth: 0,
-                            borderRadius: 1.75,
-                            lineHeight: 1,
-                            px: 1.5,
-                            color: 'text.primary',
-                            bgcolor: selected ? 'common.white' : 'transparent',
-                            boxShadow: selected ? (theme) => theme.customShadows.z8 : 'none',
-                            '&:hover': {
-                              bgcolor: selected ? 'common.white' : 'action.hover',
-                            },
-                          }}
-                        >
-                          <Stack direction="row" spacing={1} alignItems="center">
-                            <Iconify icon={option.icon} width={18} />
-                            <Typography variant="body2">{option.label}</Typography>
-                          </Stack>
-                        </Button>
-                      );
-                    })}
-                  </Box>
-                </Box>
-              </Box>
+              <RHFAutocomplete
+                name="groups"
+                label={tx('clients.form.fields.groups')}
+                multiple
+                disableCloseOnSelect
+                options={groupIds}
+                getOptionLabel={(option) => groupLabelById.get(option) || option}
+                isOptionEqualToValue={(option, value) => option === value}
+                renderOption={(props, option, { selected }) => (
+                  <li {...props}>
+                    <Checkbox size="small" disableRipple checked={selected} sx={{ mr: 1 }} />
+                    {groupLabelById.get(option) || option}
+                  </li>
+                )}
+              />
             </Stack>
           </Card>
 

@@ -35,6 +35,47 @@
     }
   },
   "searchPlaceholder": "Поиск по имени или телефону…",
+  "tabs": {
+    "clients": "Клиенты",
+    "groups": "Группы"
+  },
+  "groups": {
+    "addButton": "Добавить группу",
+    "clientsCount": "Клиентов: {{count}}",
+    "clientsListTitle": "Клиенты в группе",
+    "clientsListHint": "Список клиентов, привязанных к этой группе",
+    "detailDocumentTitle": "Группа клиентов",
+    "detailTitle": "Детали группы",
+    "emptyDescription": "Описание не заполнено",
+    "documentTitle": "Группы клиентов",
+    "notFound": "Группа не найдена",
+    "searchPlaceholder": "Поиск по названию группы…",
+    "fields": {
+      "name": "Название группы",
+      "description": "Описание"
+    },
+    "validation": {
+      "nameRequired": "Название группы обязательно"
+    },
+    "dialogs": {
+      "createTitle": "Новая группа",
+      "editTitle": "Редактировать группу",
+      "deleteTitle": "Удаление группы",
+      "deleteDescription": "Вы точно хотите удалить группу?",
+      "bulkDeleteTitle": "Массовое удаление групп",
+      "bulkDeleteDescription": "Вы точно хотите удалить выбранные группы? Количество: {{count}}"
+    },
+    "toasts": {
+      "created": "Группа успешно создана",
+      "updated": "Группа обновлена",
+      "deleted": "Группа удалена",
+      "bulkDeleted": "Удалено групп: {{count}}"
+    },
+    "table": {
+      "name": "Название группы",
+      "clientsCount": "Количество клиентов"
+    }
+  },
   "form": {
     "createTitle": "Новый клиент",
     "editTitle": "Редактировать клиента",
@@ -51,7 +92,8 @@
       "lastName": "Фамилия",
       "middleName": "Отчество",
       "birthDate": "Дата рождения",
-      "communicationLanguage": "Язык общения",
+      "groups": "Группы",
+      "groupsPlaceholder": "Выберите группы",
       "phoneCountry": "Страна",
       "gender": "Пол",
       "maritalStatus": "Семейное положение",
@@ -72,11 +114,6 @@
     "marital": {
       "married": "В браке",
       "single": "Не в браке"
-    },
-    "languages": {
-      "uz": "Узбекский",
-      "ru": "Русский",
-      "en": "English"
     }
   },
   "toasts": {

@@ -51,16 +51,6 @@ export default function ClientDetailsView() {
     [client?.name, client?.lastName, client?.middleName]
   );
 
-  const languageLabel = useMemo(() => {
-    if (!client?.communicationLanguage) return '';
-    const map: Record<string, string> = {
-      uz: tx('clients.form.languages.uz'),
-      ru: tx('clients.form.languages.ru'),
-      en: tx('clients.form.languages.en'),
-    };
-    return map[client.communicationLanguage] || client.communicationLanguage;
-  }, [client?.communicationLanguage, tx]);
-
   const genderLabel = useMemo(() => {
     if (client?.gender === 'male') return tx('users.genders.male');
     if (client?.gender === 'female') return tx('users.genders.female');
@@ -79,19 +69,6 @@ export default function ClientDetailsView() {
     return 'solar:user-bold';
   })();
 
-  const languageIcon = (() => {
-    switch (client?.communicationLanguage) {
-      case 'uz':
-        return 'flagpack:uz';
-      case 'ru':
-        return 'flagpack:ru';
-      case 'en':
-        return 'flagpack:gb-ukm';
-      default:
-        return 'solar:global-bold';
-    }
-  })();
-
   const socialItems = useMemo(
     () => [
       { key: 'email', icon: 'solar:letter-bold', label: tx('common.table.email'), value: client?.socialNetworks?.email || '' },
@@ -103,7 +80,6 @@ export default function ClientDetailsView() {
   );
 
   const metadataChips = [
-    { key: 'lang', title: tx('clients.form.fields.communicationLanguage'), icon: languageIcon, label: languageLabel || notSetLabel },
     {
       key: 'gender',
       title: tx('clients.form.fields.gender'),
@@ -215,7 +191,6 @@ export default function ClientDetailsView() {
               { label: tx('clients.form.fields.lastName'), value: client.lastName || '' },
               { label: tx('clients.form.fields.middleName'), value: client.middleName || '' },
               { label: tx('clients.form.fields.birthDate'), value: client.birthDate ? fDate(client.birthDate) : '' },
-              { label: tx('clients.form.fields.communicationLanguage'), value: languageLabel },
               { label: tx('clients.form.fields.gender'), value: genderLabel },
               { label: tx('clients.form.fields.maritalStatus'), value: maritalLabel },
               { label: tx('clients.detail.firstPurchase'), value: firstSaleDate },

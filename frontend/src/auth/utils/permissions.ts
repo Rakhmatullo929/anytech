@@ -5,6 +5,7 @@ export type PermissionPage =
   | 'pos'
   | 'products'
   | 'clients'
+  | 'groups'
   | 'sales'
   | 'debts';
 
