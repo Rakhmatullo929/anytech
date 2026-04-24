@@ -19,6 +19,7 @@
     "dialogs": {
       "create": {
         "title": "Rol qo'shish",
+        "submit": "Rol yaratish",
         "fields": {
           "name": "Rol nomi"
         }
