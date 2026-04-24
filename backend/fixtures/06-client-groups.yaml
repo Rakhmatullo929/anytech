@@ -1,0 +1,23 @@
+- model: clients.group
+  pk: e1000000-0000-0000-0000-000000000001
+  fields:
+    tenant: a1000000-0000-0000-0000-000000000001
+    name: VIP
+    description: Premium clients with high LTV
+    created_at: "2025-02-15T09:00:00Z"
+
+- model: clients.group
+  pk: e1000000-0000-0000-0000-000000000002
+  fields:
+    tenant: a1000000-0000-0000-0000-000000000001
+    name: New Leads
+    description: Recently added potential buyers
+    created_at: "2025-02-16T11:20:00Z"
+
+- model: clients.group
+  pk: e1000000-0000-0000-0000-000000000003
+  fields:
+    tenant: a1000000-0000-0000-0000-000000000002
+    name: Wholesale
+    description: B2B and bulk order customers
+    created_at: "2025-02-17T08:45:00Z"

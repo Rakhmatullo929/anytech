@@ -17,12 +17,13 @@ import { paths } from 'src/routes/paths';
 import { useParams, useRouter } from 'src/routes/hook';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import EmptyContent from 'src/components/empty-content';
-import FormProvider, { RHFTextField } from 'src/components/hook-form';
+import FormProvider, { RHFMultiSelect, RHFTextField } from 'src/components/hook-form';
 import Iconify from 'src/components/iconify';
 import { useSnackbar } from 'src/components/snackbar';
 
 import { useClientDetailQuery, useCreateClientMutation, useUpdateClientMutation } from '../api/use-clients-api';
 import type { ClientAddress, ClientCommunicationLanguage, ClientSocialNetworks } from '../api/types';
+import { useGroupsListQuery } from '../groups/api/use-groups-api';
 import { getClientFormSchema } from './utils/client-form-schema';
 import {
   DEFAULT_PHONE_COUNTRY,
@@ -48,6 +49,7 @@ type ClientFormValues = {
   phones: { country: ClientPhoneCountry; number: string }[];
   addresses: ClientAddress[];
   socialNetworks: ClientSocialNetworks;
+  groups: string[];
 };
 
 function normalizePhones(phones: { country: ClientPhoneCountry; number: string }[]) {
@@ -67,6 +69,11 @@ export default function ClientFormView({ mode }: Props) {
   const createMutation = useCreateClientMutation();
   const updateMutation = useUpdateClientMutation();
   const detailQuery = useClientDetailQuery(id);
+  const groupsQuery = useGroupsListQuery({
+    page: 1,
+    pageSize: 200,
+    ordering: 'name',
+  });
 
   const methods = useForm<ClientFormValues>({
     resolver: yupResolver(getClientFormSchema(tx)),
@@ -88,6 +95,7 @@ export default function ClientFormView({ mode }: Props) {
         instagram: '',
         facebook: '',
       },
+      groups: [],
     },
   });
 
@@ -142,8 +150,14 @@ export default function ClientFormView({ mode }: Props) {
         instagram: '',
         facebook: '',
       },
+      groups: detailQuery.data.groups || [],
     });
   }, [detailQuery.data, mode, reset]);
+
+  const groupOptions = (groupsQuery.data?.results ?? []).map((group) => ({
+    value: group.id,
+    label: group.name,
+  }));
 
   const onSubmit = handleSubmit(async (values) => {
     const payload = {
@@ -168,6 +182,7 @@ export default function ClientFormView({ mode }: Props) {
         instagram: values.socialNetworks.instagram?.trim() || '',
         facebook: values.socialNetworks.facebook?.trim() || '',
       },
+      groups: values.groups,
     };
 
     try {
@@ -252,6 +267,13 @@ export default function ClientFormView({ mode }: Props) {
                   <MenuItem value="married">{tx('clients.form.marital.married')}</MenuItem>
                   <MenuItem value="single">{tx('clients.form.marital.single')}</MenuItem>
                 </RHFTextField>
+                <RHFMultiSelect
+                  name="groups"
+                  label={tx('clients.form.fields.groups')}
+                  options={groupOptions}
+                  checkbox
+                  chip
+                />
               </Box>
               <Box
                 sx={{

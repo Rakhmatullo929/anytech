@@ -43,5 +43,6 @@ export function getClientFormSchema(tx: Translate) {
       instagram: Yup.string().trim(),
       facebook: Yup.string().trim(),
     }),
+    groups: Yup.array().of(Yup.string().trim()),
   });
 }

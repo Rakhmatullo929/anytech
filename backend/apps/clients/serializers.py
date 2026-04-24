@@ -7,7 +7,7 @@ from debts.models import Debt
 from sales.models import Sale
 from sales.serializers import SaleItemReadSerializer
 
-from .models import Client
+from .models import Client, Group
 
 
 class ClientSerializer(serializers.ModelSerializer):
@@ -45,6 +45,11 @@ class ClientSerializer(serializers.ModelSerializer):
     )
     social_networks = serializers.DictField(
         child=serializers.CharField(allow_blank=True, required=False),
+        required=False,
+    )
+    groups = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Group.objects.all(),
         required=False,
     )
 
@@ -109,6 +114,34 @@ class ClientSerializer(serializers.ModelSerializer):
             )
         return value
 
+    def validate_groups(self, value):
+        request = self.context.get("request")
+        if not request or not hasattr(request.user, "tenant"):
+            return value
+
+        tenant_id = request.user.tenant_id
+        invalid = [group.id for group in value if group.tenant_id != tenant_id]
+        if invalid:
+            raise serializers.ValidationError(
+                _("Some groups do not belong to your tenant: %(ids)s.")
+                % {"ids": ", ".join(str(group_id) for group_id in invalid)}
+            )
+        return value
+
+    def create(self, validated_data):
+        groups = validated_data.pop("groups", [])
+        client = super().create(validated_data)
+        if groups:
+            client.groups.set(groups)
+        return client
+
+    def update(self, instance, validated_data):
+        groups = validated_data.pop("groups", None)
+        client = super().update(instance, validated_data)
+        if groups is not None:
+            client.groups.set(groups)
+        return client
+
     class Meta:
         model = Client
         fields = (
@@ -125,6 +158,7 @@ class ClientSerializer(serializers.ModelSerializer):
             "phones",
             "addresses",
             "social_networks",
+            "groups",
             "created_at",
         )
         read_only_fields = ("id", "tenant", "created_at")
@@ -178,3 +212,28 @@ class ClientBulkDeleteSerializer(serializers.Serializer):
 
 class ClientBulkCreateExcelSerializer(serializers.Serializer):
     file = serializers.FileField()
+
+
+class GroupClientInlineSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Client
+        fields = ("id", "name", "phone")
+
+
+class GroupListSerializer(serializers.ModelSerializer):
+    clients_count = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Group
+        fields = ("id", "tenant", "name", "clients_count", "created_at")
+        read_only_fields = fields
+
+
+class GroupDetailSerializer(serializers.ModelSerializer):
+    clients = GroupClientInlineSerializer(many=True, read_only=True)
+    clients_count = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Group
+        fields = ("id", "tenant", "name", "clients_count", "clients", "created_at")
+        read_only_fields = fields

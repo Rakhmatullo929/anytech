@@ -48,6 +48,7 @@ export async function createClient(payload: CreateClientPayload): Promise<Client
       phones: payload.phones,
       addresses: payload.addresses ?? [],
       socialNetworks: payload.socialNetworks ?? {},
+      groups: payload.groups ?? [],
     },
   });
 }
@@ -93,6 +94,7 @@ export async function updateClient(payload: UpdateClientPayload): Promise<Client
       phones: payload.phones,
       addresses: payload.addresses ?? [],
       socialNetworks: payload.socialNetworks ?? {},
+      groups: payload.groups ?? [],
     },
   });
 }

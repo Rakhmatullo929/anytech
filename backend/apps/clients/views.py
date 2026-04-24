@@ -2,20 +2,23 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from django.db import transaction
+from django.db.models import Count
 from django.utils.translation import gettext as _
 
 from auth_tenant.mixins import TenantQuerySetMixin
 from auth_tenant.permissions import page_action_permission
 
-from .models import Client
+from .models import Client, Group
 from .serializers import (
     ClientBulkDeleteSerializer,
     ClientBulkCreateExcelSerializer,
     ClientDetailSerializer,
     ClientSerializer,
+    GroupDetailSerializer,
+    GroupListSerializer,
 )
 
 
@@ -47,6 +50,7 @@ class ClientViewSet(TenantQuerySetMixin, ModelViewSet):
                 "sales__items__product",
                 "sales__debt",
                 "debts",
+                "groups",
             )
         return qs
 
@@ -147,3 +151,28 @@ class ClientViewSet(TenantQuerySetMixin, ModelViewSet):
 
         response_data = ClientSerializer(created_clients, many=True, context={"request": request}).data
         return Response({"created": len(response_data), "results": response_data}, status=status.HTTP_201_CREATED)
+
+
+class GroupViewSet(TenantQuerySetMixin, ReadOnlyModelViewSet):
+    queryset = Group.objects.all()
+    serializer_class = GroupListSerializer
+    http_method_names = ["get", "head", "options"]
+
+    search_fields = ["name"]
+    ordering_fields = ["name", "created_at"]
+    ordering = ["-created_at"]
+
+    def get_permissions(self):
+        if self.action == "retrieve":
+            return [page_action_permission("clients", "detail")()]
+        return [page_action_permission("clients", "read")()]
+
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return GroupDetailSerializer
+        return GroupListSerializer
+
+    def get_queryset(self):
+        return super().get_queryset().annotate(clients_count=Count("clients", distinct=True)).prefetch_related(
+            "clients"
+        )

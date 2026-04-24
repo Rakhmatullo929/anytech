@@ -1,8 +1,18 @@
 from django.urls import path
 
-from .views import ClientViewSet
+from .views import ClientViewSet, GroupViewSet
 
 urlpatterns = [
+    path(
+        "groups/",
+        GroupViewSet.as_view({"get": "list"}),
+        name="group-list",
+    ),
+    path(
+        "groups/<uuid:pk>/",
+        GroupViewSet.as_view({"get": "retrieve"}),
+        name="group-detail",
+    ),
     path(
         "",
         ClientViewSet.as_view({"get": "list", "post": "create"}),

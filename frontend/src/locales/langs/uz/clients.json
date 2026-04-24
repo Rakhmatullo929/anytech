@@ -35,6 +35,19 @@
     }
   },
   "searchPlaceholder": "Ism yoki telefon boʻyicha qidiruv…",
+  "tabs": {
+    "clients": "Mijozlar",
+    "groups": "Guruhlar"
+  },
+  "groups": {
+    "documentTitle": "Mijozlar guruhlari",
+    "searchPlaceholder": "Guruh nomi bo‘yicha qidiruv…",
+    "loading": "Guruhlar yuklanmoqda...",
+    "table": {
+      "name": "Guruh nomi",
+      "clientsCount": "Mijozlar soni"
+    }
+  },
   "form": {
     "createTitle": "Yangi mijoz",
     "editTitle": "Mijozni tahrirlash",
@@ -52,6 +65,8 @@
       "middleName": "Otasining ismi",
       "birthDate": "Tugʻilgan sana",
       "communicationLanguage": "Muloqot tili",
+      "groups": "Guruhlar",
+      "groupsPlaceholder": "Guruhlarni tanlang",
       "phoneCountry": "Mamlakat",
       "gender": "Jins",
       "maritalStatus": "Oilaviy holat",

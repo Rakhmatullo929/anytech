@@ -35,6 +35,19 @@
     }
   },
   "searchPlaceholder": "Поиск по имени или телефону…",
+  "tabs": {
+    "clients": "Клиенты",
+    "groups": "Группы"
+  },
+  "groups": {
+    "documentTitle": "Группы клиентов",
+    "searchPlaceholder": "Поиск по названию группы…",
+    "loading": "Загрузка групп...",
+    "table": {
+      "name": "Название группы",
+      "clientsCount": "Количество клиентов"
+    }
+  },
   "form": {
     "createTitle": "Новый клиент",
     "editTitle": "Редактировать клиента",
@@ -52,6 +65,8 @@
       "middleName": "Отчество",
       "birthDate": "Дата рождения",
       "communicationLanguage": "Язык общения",
+      "groups": "Группы",
+      "groupsPlaceholder": "Выберите группы",
       "phoneCountry": "Страна",
       "gender": "Пол",
       "maritalStatus": "Семейное положение",

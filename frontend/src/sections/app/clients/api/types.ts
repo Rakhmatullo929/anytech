@@ -15,6 +15,7 @@ export type ClientListItem = {
   phones: string[];
   addresses: ClientAddress[];
   socialNetworks: ClientSocialNetworks;
+  groups: string[];
   createdAt: string;
 };
 
@@ -36,6 +37,7 @@ export type CreateClientPayload = {
   phones: string[];
   addresses?: ClientAddress[];
   socialNetworks?: ClientSocialNetworks;
+  groups?: string[];
 };
 
 export type UpdateClientPayload = {
@@ -50,6 +52,7 @@ export type UpdateClientPayload = {
   phones: string[];
   addresses?: ClientAddress[];
   socialNetworks?: ClientSocialNetworks;
+  groups?: string[];
 };
 
 export type ClientAddress = {
