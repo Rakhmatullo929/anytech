@@ -4,6 +4,7 @@ import type {
   CreateTenantRolePayload,
   TenantRole,
   TenantRolesResponse,
+  UpdateTenantRolePayload,
   UpdateTenantRolePermissionsPayload,
 } from './types';
 
@@ -36,5 +37,13 @@ export async function deleteTenantRole(role: string): Promise<void> {
   await request<void>({
     method: 'DELETE',
     url: API_ENDPOINTS.auth.roleDelete(role),
+  });
+}
+
+export async function updateTenantRole(payload: UpdateTenantRolePayload): Promise<TenantRole> {
+  return request<TenantRole>({
+    method: 'PATCH',
+    url: API_ENDPOINTS.auth.roleDelete(payload.role),
+    data: { name: payload.name },
   });
 }

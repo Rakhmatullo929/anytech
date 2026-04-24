@@ -20,11 +20,22 @@ type RoleCreateValues = {
 type Props = {
   open: boolean;
   loading: boolean;
+  title?: string;
+  submitLabel?: string;
+  initialName?: string;
   onClose: () => void;
   onSubmit: (values: RoleCreateValues) => void;
 };
 
-export default function RoleCreateDialog({ open, loading, onClose, onSubmit }: Props) {
+export default function RoleCreateDialog({
+  open,
+  loading,
+  title,
+  submitLabel,
+  initialName,
+  onClose,
+  onSubmit,
+}: Props) {
   const { tx } = useLocales();
   const schema = Yup.object({
     name: Yup.string().trim().required(tx('common.validation.roleRequired')),
@@ -41,12 +52,12 @@ export default function RoleCreateDialog({ open, loading, onClose, onSubmit }: P
 
   useEffect(() => {
     if (!open) return;
-    reset({ name: '' });
-  }, [open, reset]);
+    reset({ name: initialName ?? '' });
+  }, [open, reset, initialName]);
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-      <DialogTitle>{tx('admin.roles.dialogs.create.title')}</DialogTitle>
+      <DialogTitle>{title || tx('admin.roles.dialogs.create.title')}</DialogTitle>
       <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
@@ -60,7 +71,7 @@ export default function RoleCreateDialog({ open, loading, onClose, onSubmit }: P
         <DialogActions>
           <Button onClick={onClose}>{tx('common.actions.cancel')}</Button>
           <Button variant="contained" disabled={loading} type="submit">
-            {tx('admin.roles.dialogs.create.submit')}
+            {submitLabel || tx('admin.roles.dialogs.create.submit')}
           </Button>
         </DialogActions>
       </FormProvider>

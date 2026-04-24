@@ -23,6 +23,13 @@
         "fields": {
           "name": "Rol nomi"
         }
+      },
+      "edit": {
+        "title": "Rolni tahrirlash"
+      },
+      "delete": {
+        "title": "Rolni o'chirish",
+        "description": "\"{{role}}\" rolini haqiqatan ham o'chirmoqchimisiz?"
       }
     },
     "pages": {

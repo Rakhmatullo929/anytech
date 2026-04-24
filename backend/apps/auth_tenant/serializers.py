@@ -423,3 +423,13 @@ class TenantRoleCreateSerializer(serializers.Serializer):
 
         attrs["code"] = candidate
         return attrs
+
+
+class TenantRoleUpdateSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=255)
+
+    def validate_name(self, value):
+        normalized = str(value or "").strip()
+        if normalized == "":
+            raise serializers.ValidationError(_("Role name is required."))
+        return normalized

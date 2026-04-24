@@ -18,3 +18,8 @@ export type UpdateTenantRolePermissionsPayload = {
 export type CreateTenantRolePayload = {
   name: string;
 };
+
+export type UpdateTenantRolePayload = {
+  role: string;
+  name: string;
+};

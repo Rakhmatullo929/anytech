@@ -12,6 +12,7 @@ import Can from 'src/auth/components/can';
 import Iconify from 'src/components/iconify';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import EmptyContent from 'src/components/empty-content';
+import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useSnackbar } from 'src/components/snackbar';
 
 import AdminTabs from '../users/components/admin-tabs';
@@ -19,6 +20,7 @@ import {
   useCreateTenantRoleMutation,
   useDeleteTenantRoleMutation,
   useTenantRolesQuery,
+  useUpdateTenantRoleMutation,
   useUpdateTenantRolePermissionsMutation,
 } from './api';
 import { RoleCreateDialog, RolePermissionsAccordion } from './components';
@@ -39,6 +41,7 @@ export default function AdminRolesView() {
   const { data, isPending } = useTenantRolesQuery();
   const updateMutation = useUpdateTenantRolePermissionsMutation();
   const createMutation = useCreateTenantRoleMutation();
+  const updateRoleMutation = useUpdateTenantRoleMutation();
   const deleteMutation = useDeleteTenantRoleMutation();
   const roles = useMemo(() => data?.results ?? [], [data]);
   const availablePermissions = useMemo(() => data?.availablePermissions ?? [], [data]);
@@ -61,6 +64,8 @@ export default function AdminRolesView() {
   const [draftPermissions, setDraftPermissions] = useState<Record<string, Set<string>>>({});
   const [expandedRole, setExpandedRole] = useState<string | false>(false);
   const [createOpen, setCreateOpen] = useState(false);
+  const [editingRole, setEditingRole] = useState<{ value: string; label: string } | null>(null);
+  const [deletingRole, setDeletingRole] = useState<{ value: string; label: string } | null>(null);
   const canWriteRoles = canWritePage('roles');
 
   useEffect(() => {
@@ -140,12 +145,35 @@ export default function AdminRolesView() {
     }
   };
 
+  const confirmDeleteRole = async () => {
+    if (!deletingRole) return;
+    await removeRole(deletingRole.value);
+    setDeletingRole(null);
+  };
+
+  const updateRole = async (values: { name: string }) => {
+    if (!editingRole) return;
+    const name = values.name.trim();
+    if (!name) return;
+    try {
+      await updateRoleMutation.mutateAsync({ role: editingRole.value, name });
+      setEditingRole(null);
+      enqueueSnackbar(tx('admin.roles.toasts.saved'), { variant: 'success' });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const handleOpenCreate = () => {
     setCreateOpen(true);
   };
 
   const handleCloseCreate = () => {
     setCreateOpen(false);
+  };
+
+  const handleCloseEdit = () => {
+    setEditingRole(null);
   };
 
   return (
@@ -213,7 +241,8 @@ export default function AdminRolesView() {
                   }
                   onToggleAllPermissions={(enabled) => toggleAllRolePermissions(role.value, enabled)}
                   onSave={() => saveRolePermissions(role.value)}
-                  onDelete={() => removeRole(role.value)}
+                  onEdit={() => setEditingRole({ value: role.value, label: role.label || role.value })}
+                  onDelete={() => setDeletingRole({ value: role.value, label: role.label || role.value })}
                 />
               );
             })}
@@ -228,6 +257,36 @@ export default function AdminRolesView() {
           loading={createMutation.isPending}
           onClose={handleCloseCreate}
           onSubmit={createRole}
+        />
+      </Can>
+      <Can page="roles" action="write">
+        <RoleCreateDialog
+          open={Boolean(editingRole)}
+          loading={updateRoleMutation.isPending}
+          title={tx('admin.roles.dialogs.edit.title')}
+          submitLabel={tx('common.actions.save')}
+          initialName={editingRole?.label || ''}
+          onClose={handleCloseEdit}
+          onSubmit={updateRole}
+        />
+      </Can>
+      <Can page="roles" action="write">
+        <ConfirmDialog
+          open={Boolean(deletingRole)}
+          onClose={() => setDeletingRole(null)}
+          title={tx('admin.roles.dialogs.delete.title')}
+          content={tx('admin.roles.dialogs.delete.description', { role: deletingRole?.label || '' })}
+          cancelText={tx('common.actions.cancel')}
+          action={
+            <Button
+              color="error"
+              variant="contained"
+              onClick={confirmDeleteRole}
+              disabled={deleteMutation.isPending}
+            >
+              {tx('common.actions.delete')}
+            </Button>
+          }
         />
       </Can>
     </>

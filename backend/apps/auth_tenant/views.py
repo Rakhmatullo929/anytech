@@ -16,6 +16,7 @@ from .serializers import (
     RegisterSerializer,
     TenantRolePermissionsUpdateSerializer,
     TenantRoleCreateSerializer,
+    TenantRoleUpdateSerializer,
     TenantUserCreateSerializer,
     TenantUserUpdateSerializer,
     UserSerializer,
@@ -231,7 +232,35 @@ class TenantRoleCreateView(generics.GenericAPIView):
 
 
 class TenantRoleDeleteView(generics.GenericAPIView):
+    serializer_class = TenantRoleUpdateSerializer
     permission_classes = (IsAuthenticated, page_action_permission("roles", "write"))
+
+    def patch(self, request, role, *args, **kwargs):
+        ensure_tenant_roles(request.user.tenant)
+        role_obj = TenantRole.objects.filter(tenant=request.user.tenant, code=role).first()
+        if role_obj is None:
+            return Response({"detail": _("Role not found.")}, status=status.HTTP_404_NOT_FOUND)
+        if role_obj.is_system:
+            return Response({"detail": _("Cannot edit system role.")}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        role_obj.name = serializer.validated_data["name"]
+        role_obj.save(update_fields=["name"])
+        custom_permissions = list(
+            request.user.tenant.role_permissions.filter(role=role_obj.code).values_list("permission", flat=True)
+        )
+        permissions = sorted(custom_permissions or list(DEFAULT_ROLE_PERMISSIONS.get(role_obj.code, [])))
+
+        return Response(
+            {
+                "value": role_obj.code,
+                "label": role_obj.name,
+                "permissions": permissions,
+                "is_system": role_obj.is_system,
+            },
+            status=status.HTTP_200_OK,
+        )
 
     def delete(self, request, role, *args, **kwargs):
         ensure_tenant_roles(request.user.tenant)

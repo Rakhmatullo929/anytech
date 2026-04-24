@@ -48,6 +48,7 @@ type Props = {
   onTogglePagePermissions: (permissions: string[], enabled: boolean) => void;
   onToggleAllPermissions: (enabled: boolean) => void;
   onSave: () => void;
+  onEdit: () => void;
   onDelete: () => void;
 };
 
@@ -68,6 +69,7 @@ export default function RolePermissionsAccordion({
   onTogglePagePermissions,
   onToggleAllPermissions,
   onSave,
+  onEdit,
   onDelete,
 }: Props) {
   const selectedCount = availablePermissions.filter((permission) => roleDraftSet.has(permission)).length;
@@ -107,9 +109,14 @@ export default function RolePermissionsAccordion({
           <Stack direction="row" spacing={1}>
             <Chip size="small" variant="soft" color={getRoleColor(role.value)} label={role.label || role.value} />
             {!role.isSystem && canWriteRoles ? (
-              <IconButton size="small" color="error" onClick={onDelete} disabled={deletePending}>
-                <Iconify icon="solar:trash-bin-trash-bold" width={16} />
-              </IconButton>
+              <>
+                <IconButton size="small" color="default" onClick={onEdit}>
+                  <Iconify icon="solar:pen-bold" width={16} />
+                </IconButton>
+                <IconButton size="small" color="error" onClick={onDelete} disabled={deletePending}>
+                  <Iconify icon="solar:trash-bin-trash-bold" width={16} />
+                </IconButton>
+              </>
             ) : null}
           </Stack>
         </Stack>
