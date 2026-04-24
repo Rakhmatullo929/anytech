@@ -214,12 +214,6 @@ class ClientBulkCreateExcelSerializer(serializers.Serializer):
     file = serializers.FileField()
 
 
-class GroupClientInlineSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Client
-        fields = ("id", "name", "phone")
-
-
 class GroupListSerializer(serializers.ModelSerializer):
     clients_count = serializers.IntegerField(read_only=True)
 
@@ -258,10 +252,9 @@ class GroupListSerializer(serializers.ModelSerializer):
 
 
 class GroupDetailSerializer(serializers.ModelSerializer):
-    clients = GroupClientInlineSerializer(many=True, read_only=True)
     clients_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Group
-        fields = ("id", "tenant", "name", "description", "clients_count", "clients", "created_at")
+        fields = ("id", "tenant", "name", "description", "clients_count", "created_at")
         read_only_fields = fields

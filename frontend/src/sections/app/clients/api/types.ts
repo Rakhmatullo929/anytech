@@ -24,6 +24,7 @@ export type FetchClientsListParams = {
   pageSize: number;
   search?: string;
   ordering?: string;
+  groupId?: string;
 };
 
 export type CreateClientPayload = {

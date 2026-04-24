@@ -42,13 +42,14 @@
   "groups": {
     "addButton": "Добавить группу",
     "clientsCount": "Клиентов: {{count}}",
+    "clientsListTitle": "Клиенты в группе",
+    "clientsListHint": "Список клиентов, привязанных к этой группе",
     "detailDocumentTitle": "Группа клиентов",
     "detailTitle": "Детали группы",
     "emptyDescription": "Описание не заполнено",
     "documentTitle": "Группы клиентов",
     "notFound": "Группа не найдена",
     "searchPlaceholder": "Поиск по названию группы…",
-    "loading": "Загрузка групп...",
     "fields": {
       "name": "Название группы",
       "description": "Описание"
@@ -69,7 +70,6 @@
     },
     "table": {
       "name": "Название группы",
-      "description": "Описание",
       "clientsCount": "Количество клиентов"
     }
   },

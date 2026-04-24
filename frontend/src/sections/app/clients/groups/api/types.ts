@@ -7,15 +7,7 @@ export type GroupListItem = {
   createdAt: string;
 };
 
-export type GroupClient = {
-  id: string;
-  name: string;
-  phone: string;
-};
-
-export type GroupDetail = GroupListItem & {
-  clients: GroupClient[];
-};
+export type GroupDetail = GroupListItem;
 
 export type FetchGroupsListParams = {
   page: number;

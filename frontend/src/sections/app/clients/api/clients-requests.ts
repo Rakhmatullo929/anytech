@@ -21,6 +21,7 @@ export async function fetchClientsList(
       page: params.page,
       pageSize: params.pageSize,
       ...(params.search ? { search: params.search } : {}),
+      ...(params.groupId ? { groupId: params.groupId } : {}),
       ordering: params.ordering ?? '-created_at',
     },
   });

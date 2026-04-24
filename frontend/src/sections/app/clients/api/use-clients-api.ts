@@ -35,6 +35,7 @@ type ClientsListKeyParams = {
   pageSize?: number;
   search?: string;
   ordering?: string;
+  groupId?: string;
 };
 
 function getClientsListKeyParams(queryKey: QueryKey): ClientsListKeyParams {
@@ -48,15 +49,21 @@ function getClientsListKeyParams(queryKey: QueryKey): ClientsListKeyParams {
     pageSize: typeof params.pageSize === 'number' ? params.pageSize : undefined,
     search: typeof params.search === 'string' ? params.search : undefined,
     ordering: typeof params.ordering === 'string' ? params.ordering : undefined,
+    groupId: typeof params.groupId === 'string' ? params.groupId : undefined,
   };
 }
 
 export function useClientsListQuery(params: FetchClientsListParams) {
-  const { page, pageSize, search, ordering } = params;
+  const { page, pageSize, search, ordering, groupId } = params;
 
   const queryKey = useMemo(
-    () => ['clients', 'list', { page, pageSize, search: search ?? '', ordering: ordering ?? '-created_at' }] as const,
-    [page, pageSize, search, ordering]
+    () =>
+      [
+        'clients',
+        'list',
+        { page, pageSize, search: search ?? '', ordering: ordering ?? '-created_at', groupId: groupId ?? '' },
+      ] as const,
+    [page, pageSize, search, ordering, groupId]
   );
 
   return useFetchList<ClientListItem>(queryKey, () => fetchClientsList(params), {
@@ -86,11 +93,12 @@ export function useCreateClientMutation() {
       cachedLists.forEach(([queryKey, cachedPage]) => {
         if (!cachedPage) return;
 
-        const { page = 1, pageSize = cachedPage.results.length, search = '', ordering = '-created_at' } =
+        const { page = 1, pageSize = cachedPage.results.length, search = '', ordering = '-created_at', groupId = '' } =
           getClientsListKeyParams(queryKey);
 
         // New entity should only appear immediately on the first page of default ordering without active search.
-        const shouldInsertIntoCurrentPage = page === 1 && ordering === '-created_at' && search.trim() === '';
+        const shouldInsertIntoCurrentPage =
+          page === 1 && ordering === '-created_at' && search.trim() === '' && groupId.trim() === '';
         if (!shouldInsertIntoCurrentPage) return;
 
         const nextResults = [createdClient, ...cachedPage.results];
@@ -159,10 +167,11 @@ export function useBulkCreateClientsMutation() {
       cachedLists.forEach(([queryKey, cachedPage]) => {
         if (!cachedPage) return;
 
-        const { page = 1, pageSize = cachedPage.results.length, search = '', ordering = '-created_at' } =
+        const { page = 1, pageSize = cachedPage.results.length, search = '', ordering = '-created_at', groupId = '' } =
           getClientsListKeyParams(queryKey);
 
-        const shouldInsertIntoCurrentPage = page === 1 && ordering === '-created_at' && search.trim() === '';
+        const shouldInsertIntoCurrentPage =
+          page === 1 && ordering === '-created_at' && search.trim() === '' && groupId.trim() === '';
         if (!shouldInsertIntoCurrentPage) return;
 
         const nextResults = [...createdClients, ...cachedPage.results];

@@ -45,6 +45,9 @@ class ClientViewSet(TenantQuerySetMixin, ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
+        group_id = self.request.query_params.get("group_id")
+        if group_id:
+            qs = qs.filter(groups__id=group_id)
         if self.action == "retrieve":
             qs = qs.prefetch_related(
                 "sales__items__product",
@@ -175,6 +178,4 @@ class GroupViewSet(TenantQuerySetMixin, ModelViewSet):
         return GroupListSerializer
 
     def get_queryset(self):
-        return super().get_queryset().annotate(clients_count=Count("clients", distinct=True)).prefetch_related(
-            "clients"
-        )
+        return super().get_queryset().annotate(clients_count=Count("clients", distinct=True))

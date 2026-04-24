@@ -42,13 +42,14 @@
   "groups": {
     "addButton": "Guruh qoʻshish",
     "clientsCount": "Mijozlar: {{count}}",
+    "clientsListTitle": "Guruhdagi mijozlar",
+    "clientsListHint": "Ushbu guruhga biriktirilgan mijozlar ro‘yxati",
     "detailDocumentTitle": "Mijozlar guruhi",
     "detailTitle": "Guruh tafsilotlari",
     "emptyDescription": "Tavsif kiritilmagan",
     "documentTitle": "Mijozlar guruhlari",
     "notFound": "Guruh topilmadi",
     "searchPlaceholder": "Guruh nomi bo‘yicha qidiruv…",
-    "loading": "Guruhlar yuklanmoqda...",
     "fields": {
       "name": "Guruh nomi",
       "description": "Tavsif"
@@ -69,7 +70,6 @@
     },
     "table": {
       "name": "Guruh nomi",
-      "description": "Tavsif",
       "clientsCount": "Mijozlar soni"
     }
   },
