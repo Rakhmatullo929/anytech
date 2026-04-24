@@ -37,7 +37,7 @@ class TestUserModel:
         )
         assert user.phone == "+998901110001"
         assert user.check_password("StrongPass123!")
-        assert user.role == User.Role.SELLER  # default
+        assert user.role == "seller"  # default
         assert user.is_active is True
         assert user.is_staff is False
 
@@ -52,7 +52,7 @@ class TestUserModel:
             password="StrongPass123!",
             tenant=tenant,
         )
-        assert su.role == User.Role.ADMIN
+        assert su.role == "admin"
         assert su.is_staff is True
         assert su.is_superuser is True
 
@@ -280,7 +280,7 @@ class TestTenantUsersEndpoint:
         assert resp.data["role"] == "manager"
         created = User.objects.get(phone=payload["phone"])
         assert created.tenant_id == tenant.id
-        assert created.role == User.Role.MANAGER
+        assert created.role == "manager"
         assert created.passport_series == "AB1231212"
         assert created.gender == User.Gender.MALE
 
@@ -305,7 +305,7 @@ class TestTenantUsersEndpoint:
         manager_user.refresh_from_db()
         assert manager_user.first_name == "Manager"
         assert manager_user.last_name == "Updated"
-        assert manager_user.role == User.Role.SELLER
+        assert manager_user.role == "seller"
         assert manager_user.passport_series == "CD7654321"
         assert manager_user.gender == User.Gender.FEMALE
 

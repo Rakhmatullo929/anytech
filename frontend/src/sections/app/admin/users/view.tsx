@@ -174,6 +174,11 @@ export default function UsersView() {
   const canDetailUsers = canDetailPage('users');
   const getFullName = (user: { firstName?: string; lastName?: string; middleName?: string; phone?: string | null }) =>
     [user.firstName, user.lastName, user.middleName].filter(Boolean).join(' ') || user.phone || '-';
+  const getRoleLabel = (role: string) => {
+    const key = `users.roles.${role}`;
+    const translated = tx(key);
+    return translated === key ? role : translated;
+  };
 
   return (
     <>
@@ -233,7 +238,7 @@ export default function UsersView() {
                       <TableCell>{row.phone || '-'}</TableCell>
                       <TableCell>{row.email || '-'}</TableCell>
                       <TableCell>
-                        <UserRoleLabel role={row.role} label={tx(`users.roles.${row.role}`)} />
+                        <UserRoleLabel role={row.role} label={getRoleLabel(row.role)} />
                       </TableCell>
                       <TableCell>{fDateTime(row.createdAt)}</TableCell>
                       <TableCell align="right">

@@ -1,6 +1,6 @@
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
-from .models import RolePermission, User
+from .models import RolePermission
 from .permission_catalog import DEFAULT_ROLE_PERMISSIONS, permission_key
 
 _PERMISSIONS_CACHE_ATTR = "_cached_permissions"

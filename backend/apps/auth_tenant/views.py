@@ -5,15 +5,17 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 
-from .models import District, Region, User
+from .models import District, Region, TenantRole, User
 from .permission_catalog import ALL_PERMISSIONS, DEFAULT_ROLE_PERMISSIONS
 from .permissions import get_user_permissions, page_action_permission
+from .roles import create_tenant_role, delete_tenant_role, ensure_tenant_roles
 from .serializers import (
     DistrictSerializer,
     ImpersonateSerializer,
     RegionSerializer,
     RegisterSerializer,
     TenantRolePermissionsUpdateSerializer,
+    TenantRoleCreateSerializer,
     TenantUserCreateSerializer,
     TenantUserUpdateSerializer,
     UserSerializer,
@@ -175,9 +177,10 @@ class TenantRolesListView(generics.GenericAPIView):
     permission_classes = (IsAuthenticated, page_action_permission("roles", "read"))
 
     def get(self, request, *args, **kwargs):
+        ensure_tenant_roles(request.user.tenant)
         role_to_permissions = {
-            role: list(DEFAULT_ROLE_PERMISSIONS.get(role, []))
-            for role, _label in User.Role.choices
+            role.code: list(DEFAULT_ROLE_PERMISSIONS.get(role.code, []))
+            for role in request.user.tenant.roles.all()
         }
 
         rows = request.user.tenant.role_permissions.all().values_list("role", "permission")
@@ -189,15 +192,56 @@ class TenantRolesListView(generics.GenericAPIView):
         for role in custom_roles:
             role_to_permissions[role] = sorted(grouped_custom.get(role, []))
 
-        roles = [
-            {
-                "value": value,
-                "label": label,
-                "permissions": role_to_permissions.get(value, []),
-            }
-            for value, label in User.Role.choices
-        ]
+        roles = []
+        for role in request.user.tenant.roles.all():
+            roles.append(
+                {
+                    "value": role.code,
+                    "label": role.name,
+                    "permissions": role_to_permissions.get(role.code, []),
+                    "is_system": role.is_system,
+                }
+            )
         return Response({"results": roles, "available_permissions": ALL_PERMISSIONS}, status=status.HTTP_200_OK)
+
+
+class TenantRoleCreateView(generics.GenericAPIView):
+    serializer_class = TenantRoleCreateSerializer
+    permission_classes = (IsAuthenticated, page_action_permission("roles", "write"))
+
+    def post(self, request, *args, **kwargs):
+        ensure_tenant_roles(request.user.tenant)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        role = create_tenant_role(
+            tenant=request.user.tenant,
+            code=serializer.validated_data["code"],
+            name=serializer.validated_data["name"],
+        )
+        permissions = list(DEFAULT_ROLE_PERMISSIONS.get(role.code, []))
+        return Response(
+            {
+                "value": role.code,
+                "label": role.name,
+                "permissions": permissions,
+                "is_system": role.is_system,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class TenantRoleDeleteView(generics.GenericAPIView):
+    permission_classes = (IsAuthenticated, page_action_permission("roles", "write"))
+
+    def delete(self, request, role, *args, **kwargs):
+        ensure_tenant_roles(request.user.tenant)
+        try:
+            deleted = delete_tenant_role(tenant=request.user.tenant, code=role)
+        except ValueError as exc:
+            return Response({"detail": _(str(exc))}, status=status.HTTP_400_BAD_REQUEST)
+        if not deleted:
+            return Response({"detail": _("Role not found.")}, status=status.HTTP_404_NOT_FOUND)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class TenantRolePermissionsUpdateView(generics.GenericAPIView):
@@ -207,8 +251,9 @@ class TenantRolePermissionsUpdateView(generics.GenericAPIView):
     permission_classes = (IsAuthenticated, page_action_permission("roles", "write"))
 
     def patch(self, request, role, *args, **kwargs):
-        valid_roles = {value: label for value, label in User.Role.choices}
-        if role not in valid_roles:
+        ensure_tenant_roles(request.user.tenant)
+        role_obj = TenantRole.objects.filter(tenant=request.user.tenant, code=role).first()
+        if role_obj is None:
             return Response({"detail": _("Role not found.")}, status=status.HTTP_404_NOT_FOUND)
 
         serializer = self.get_serializer(
@@ -220,8 +265,9 @@ class TenantRolePermissionsUpdateView(generics.GenericAPIView):
         return Response(
             {
                 "value": role,
-                "label": valid_roles[role],
+                "label": role_obj.name,
                 "permissions": permissions,
+                "is_system": role_obj.is_system,
             },
             status=status.HTTP_200_OK,
         )

@@ -60,7 +60,7 @@ def admin_user(tenant):
         first_name="Admin",
         last_name="User",
         tenant=tenant,
-        role=User.Role.ADMIN,
+        role="admin",
     )
 
 
@@ -73,7 +73,7 @@ def manager_user(tenant):
         first_name="Manager",
         last_name="User",
         tenant=tenant,
-        role=User.Role.MANAGER,
+        role="manager",
     )
 
 
@@ -86,7 +86,7 @@ def seller_user(tenant):
         first_name="Seller",
         last_name="User",
         tenant=tenant,
-        role=User.Role.SELLER,
+        role="seller",
     )
 
 
@@ -100,7 +100,7 @@ def other_tenant_user(other_tenant):
         first_name="Other",
         last_name="User",
         tenant=other_tenant,
-        role=User.Role.ADMIN,
+        role="admin",
     )
 
 

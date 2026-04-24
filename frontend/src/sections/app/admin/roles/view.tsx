@@ -13,6 +13,12 @@ import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import Divider from '@mui/material/Divider';
+import TextField from '@mui/material/TextField';
+import IconButton from '@mui/material/IconButton';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
 
 import { useLocales } from 'src/locales';
 import { paths } from 'src/routes/paths';
@@ -24,15 +30,27 @@ import EmptyContent from 'src/components/empty-content';
 import { useSnackbar } from 'src/components/snackbar';
 
 import AdminTabs from '../users/components/admin-tabs';
-import { useTenantRolesQuery, useUpdateTenantRolePermissionsMutation } from './api';
+import {
+  useCreateTenantRoleMutation,
+  useDeleteTenantRoleMutation,
+  useTenantRolesQuery,
+  useUpdateTenantRolePermissionsMutation,
+} from './api';
 
-function getRoleColor(role: 'admin' | 'manager' | 'seller'): 'error' | 'warning' | 'info' {
+function getRoleColor(role: string): 'error' | 'warning' | 'info' {
   if (role === 'admin') return 'error';
   if (role === 'manager') return 'warning';
   return 'info';
 }
 
 const ADMIN_LOCKED_PAGES = new Set(['admin', 'roles', 'users']);
+const ACTIONS_ORDER = ['read', 'detail', 'write'] as const;
+
+function isLockedAdminPermission(role: string, permission: string) {
+  if (role !== 'admin') return false;
+  const [page] = permission.split(':');
+  return ADMIN_LOCKED_PAGES.has(page);
+}
 
 export default function AdminRolesView() {
   const { tx } = useLocales();
@@ -40,6 +58,8 @@ export default function AdminRolesView() {
   const { enqueueSnackbar } = useSnackbar();
   const { data, isPending } = useTenantRolesQuery();
   const updateMutation = useUpdateTenantRolePermissionsMutation();
+  const createMutation = useCreateTenantRoleMutation();
+  const deleteMutation = useDeleteTenantRoleMutation();
   const roles = useMemo(() => data?.results ?? [], [data]);
   const availablePermissions = useMemo(() => data?.availablePermissions ?? [], [data]);
 
@@ -60,12 +80,10 @@ export default function AdminRolesView() {
 
   const [draftPermissions, setDraftPermissions] = useState<Record<string, Set<string>>>({});
   const [expandedRole, setExpandedRole] = useState<string | false>(false);
+  const [newRoleName, setNewRoleName] = useState('');
+  const [createAttempted, setCreateAttempted] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
   const canWriteRoles = canWritePage('roles');
-  const isLockedAdminPermission = (role: 'admin' | 'manager' | 'seller', permission: string) => {
-    if (role !== 'admin') return false;
-    const [page] = permission.split(':');
-    return ADMIN_LOCKED_PAGES.has(page);
-  };
 
   useEffect(() => {
     const next: Record<string, Set<string>> = {};
@@ -76,7 +94,7 @@ export default function AdminRolesView() {
     setExpandedRole(roles.length ? roles[0].value : false);
   }, [roles]);
 
-  const togglePermission = (role: 'admin' | 'manager' | 'seller', permission: string, enabled: boolean) => {
+  const togglePermission = (role: string, permission: string, enabled: boolean) => {
     setDraftPermissions((prev) => {
       const current = new Set(prev[role] || []);
       if (enabled) current.add(permission);
@@ -86,7 +104,7 @@ export default function AdminRolesView() {
   };
 
   const togglePagePermissions = (
-    role: 'admin' | 'manager' | 'seller',
+    role: string,
     permissions: string[],
     enabled: boolean
   ) => {
@@ -100,7 +118,7 @@ export default function AdminRolesView() {
     });
   };
 
-  const toggleAllRolePermissions = (role: 'admin' | 'manager' | 'seller', enabled: boolean) => {
+  const toggleAllRolePermissions = (role: string, enabled: boolean) => {
     setDraftPermissions((prev) => {
       if (enabled) return { ...prev, [role]: new Set(availablePermissions) };
       if (role === 'admin') {
@@ -113,7 +131,7 @@ export default function AdminRolesView() {
     });
   };
 
-  const saveRolePermissions = async (role: 'admin' | 'manager' | 'seller') => {
+  const saveRolePermissions = async (role: string) => {
     const permissions = Array.from(draftPermissions[role] || []).sort();
     try {
       await updateMutation.mutateAsync({ role, permissions });
@@ -121,6 +139,42 @@ export default function AdminRolesView() {
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const createRole = async () => {
+    setCreateAttempted(true);
+    const name = newRoleName.trim();
+    if (!name) return;
+    try {
+      await createMutation.mutateAsync({ name });
+      setNewRoleName('');
+      setCreateAttempted(false);
+      setCreateOpen(false);
+      enqueueSnackbar(tx('admin.roles.toasts.saved'), { variant: 'success' });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const removeRole = async (role: string) => {
+    try {
+      await deleteMutation.mutateAsync(role);
+      enqueueSnackbar(tx('admin.roles.toasts.saved'), { variant: 'success' });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleOpenCreate = () => {
+    setCreateOpen(true);
+    setCreateAttempted(false);
+    setNewRoleName('');
+  };
+
+  const handleCloseCreate = () => {
+    setCreateOpen(false);
+    setCreateAttempted(false);
+    setNewRoleName('');
   };
 
   return (
@@ -131,6 +185,13 @@ export default function AdminRolesView() {
           { name: tx('common.navigation.admin'), href: paths.admin.users.root },
           { name: tx('admin.tabs.roles'), href: paths.admin.roles },
         ]}
+        action={
+          <Can page="roles" action="write">
+            <Button variant="contained" startIcon={<Iconify icon="mingcute:add-line" />} onClick={handleOpenCreate}>
+              {tx('common.dictionary.create')}
+            </Button>
+          </Can>
+        }
         sx={{ mb: { xs: 3, md: 5 } }}
       />
       <AdminTabs value="roles" />
@@ -148,13 +209,20 @@ export default function AdminRolesView() {
           <EmptyContent title={tx('common.table.noData')} />
         ) : (
           <Stack spacing={2}>
-            {roles.map((role) => (
-              (() => {
+            {roles.map((role) => {
+                const roleDraftSet = draftPermissions[role.value] || new Set<string>();
                 const currentDraft = Array.from(draftPermissions[role.value] || []).sort();
                 const initialPermissions = [...role.permissions].sort();
                 const hasChanges =
                   currentDraft.length !== initialPermissions.length ||
                   currentDraft.some((item, index) => item !== initialPermissions[index]);
+                const selectedCount = availablePermissions.filter((permission) =>
+                  roleDraftSet.has(permission)
+                ).length;
+                const allChecked =
+                  availablePermissions.length > 0 && selectedCount === availablePermissions.length;
+                const partiallyChecked = selectedCount > 0 && selectedCount < availablePermissions.length;
+                const roleAllDisabled = !canWriteRoles || availablePermissions.length === 0;
 
                 return (
               <Accordion
@@ -168,7 +236,7 @@ export default function AdminRolesView() {
                   <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ width: 1, pr: 1 }}>
                     <Stack spacing={0.25}>
                       <Stack direction="row" spacing={1} alignItems="center">
-                        <Typography sx={{ fontWeight: 700 }}>{tx(`users.roles.${role.value}`)}</Typography>
+                        <Typography sx={{ fontWeight: 700 }}>{role.label || role.value}</Typography>
                         {hasChanges ? (
                           <Stack direction="row" spacing={0.5} alignItems="center">
                             <Box
@@ -185,17 +253,25 @@ export default function AdminRolesView() {
                           </Stack>
                         ) : null}
                       </Stack>
-                      <Typography variant="body2" color="text.secondary">
-                        {tx(`admin.roles.items.${role.value}`)}
-                      </Typography>
+                        <Typography variant="body2" color="text.secondary">{role.value}</Typography>
                     </Stack>
                     <Stack direction="row" spacing={1}>
                       <Chip
                         size="small"
                         variant="soft"
                         color={getRoleColor(role.value)}
-                        label={tx(`users.roles.${role.value}`)}
+                        label={role.label || role.value}
                       />
+                      {!role.isSystem && canWriteRoles ? (
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => removeRole(role.value)}
+                          disabled={deleteMutation.isPending}
+                        >
+                          <Iconify icon="solar:trash-bin-trash-bold" width={16} />
+                        </IconButton>
+                      ) : null}
                     </Stack>
                   </Stack>
                 </AccordionSummary>
@@ -216,40 +292,28 @@ export default function AdminRolesView() {
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>
                         {tx('admin.roles.allPermissions')}
                       </Typography>
-                      {(() => {
-                        const roleAllDisabled = !canWriteRoles || availablePermissions.length === 0;
-                        const selectedCount = availablePermissions.filter((permission) =>
-                          (draftPermissions[role.value] || new Set()).has(permission)
-                        ).length;
-                        const allChecked =
-                          availablePermissions.length > 0 && selectedCount === availablePermissions.length;
-                        const partiallyChecked = selectedCount > 0 && selectedCount < availablePermissions.length;
-
-                        return (
-                          <FormControlLabel
-                            control={
-                              <Checkbox
-                                size="small"
-                                checked={allChecked}
-                                indeterminate={partiallyChecked}
-                                disabled={roleAllDisabled}
-                                onChange={(_, enabled) => toggleAllRolePermissions(role.value, enabled)}
-                              />
-                            }
-                            label={tx('common.table.allOption')}
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            size="small"
+                            checked={allChecked}
+                            indeterminate={partiallyChecked}
+                            disabled={roleAllDisabled}
+                            onChange={(_, enabled) => toggleAllRolePermissions(role.value, enabled)}
                           />
-                        );
-                      })()}
+                        }
+                        label={tx('common.table.allOption')}
+                      />
                     </Stack>
 
                     {pageKeys.map((page) => {
-                      const actions = ['read', 'detail', 'write'].filter((action) =>
+                      const actions = ACTIONS_ORDER.filter((action) =>
                         (pageActions[page] || new Set()).has(action)
                       );
                       const pagePermissions = actions.map((action) => `${page}:${action}`);
                       const isLockedPage = role.value === 'admin' && ADMIN_LOCKED_PAGES.has(page);
                       const selectedInPage = pagePermissions.filter((permission) =>
-                        (draftPermissions[role.value] || new Set()).has(permission)
+                        roleDraftSet.has(permission)
                       ).length;
                       const allPageChecked = pagePermissions.length > 0 && selectedInPage === pagePermissions.length;
                       const partiallyPageChecked = selectedInPage > 0 && selectedInPage < pagePermissions.length;
@@ -278,7 +342,7 @@ export default function AdminRolesView() {
                             <Stack direction="row" spacing={2}>
                               {actions.map((action) => {
                                 const permission = `${page}:${action}`;
-                                const checked = (draftPermissions[role.value] || new Set()).has(permission);
+                                const checked = roleDraftSet.has(permission);
 
                                 return (
                                   <FormControlLabel
@@ -333,11 +397,40 @@ export default function AdminRolesView() {
                 </AccordionDetails>
               </Accordion>
                 );
-              })()
-            ))}
+            })}
           </Stack>
         )}
       </Card>
+
+      <Can page="roles" action="write">
+        <Dialog open={createOpen} onClose={handleCloseCreate} fullWidth maxWidth="xs">
+          <DialogTitle>{tx('admin.roles.dialogs.create.title')}</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              fullWidth
+              size="small"
+              label={tx('admin.roles.dialogs.create.fields.name')}
+              value={newRoleName}
+              error={createAttempted && !newRoleName.trim()}
+              helperText={
+                createAttempted && !newRoleName.trim() ? tx('common.validation.roleRequired') : ' '
+              }
+              onChange={(event) => {
+                setNewRoleName(String(event.target.value || ''));
+                if (createAttempted) setCreateAttempted(false);
+              }}
+              sx={{ mt: 1 }}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseCreate}>{tx('common.actions.cancel')}</Button>
+            <Button variant="contained" onClick={createRole} disabled={createMutation.isPending}>
+              {tx('common.dictionary.create')}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Can>
     </>
   );
 }

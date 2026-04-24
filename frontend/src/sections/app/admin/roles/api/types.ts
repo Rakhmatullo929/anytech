@@ -1,7 +1,8 @@
 export type TenantRole = {
-  value: 'admin' | 'manager' | 'seller';
+  value: string;
   label: string;
   permissions: string[];
+  isSystem?: boolean;
 };
 
 export type TenantRolesResponse = {
@@ -10,6 +11,10 @@ export type TenantRolesResponse = {
 };
 
 export type UpdateTenantRolePermissionsPayload = {
-  role: 'admin' | 'manager' | 'seller';
+  role: string;
   permissions: string[];
+};
+
+export type CreateTenantRolePayload = {
+  name: string;
 };

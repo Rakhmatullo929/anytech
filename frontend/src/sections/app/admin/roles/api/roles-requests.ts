@@ -1,6 +1,11 @@
 import { request, API_ENDPOINTS } from 'src/utils/axios';
 
-import type { TenantRole, TenantRolesResponse, UpdateTenantRolePermissionsPayload } from './types';
+import type {
+  CreateTenantRolePayload,
+  TenantRole,
+  TenantRolesResponse,
+  UpdateTenantRolePermissionsPayload,
+} from './types';
 
 export async function fetchTenantRoles(): Promise<TenantRolesResponse> {
   return request<TenantRolesResponse>({
@@ -16,5 +21,20 @@ export async function updateTenantRolePermissions(
     method: 'PATCH',
     url: API_ENDPOINTS.auth.rolePermissions(payload.role),
     data: { permissions: payload.permissions },
+  });
+}
+
+export async function createTenantRole(payload: CreateTenantRolePayload): Promise<TenantRole> {
+  return request<TenantRole>({
+    method: 'POST',
+    url: API_ENDPOINTS.auth.roleCreate,
+    data: payload,
+  });
+}
+
+export async function deleteTenantRole(role: string): Promise<void> {
+  await request<void>({
+    method: 'DELETE',
+    url: API_ENDPOINTS.auth.roleDelete(role),
   });
 }

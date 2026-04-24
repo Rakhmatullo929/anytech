@@ -16,6 +16,14 @@
     "toasts": {
       "saved": "Rol ruxsatlari yangilandi"
     },
+    "dialogs": {
+      "create": {
+        "title": "Rol qo'shish",
+        "fields": {
+          "name": "Rol nomi"
+        }
+      }
+    },
     "pages": {
       "admin": "Admin",
       "roles": "Rollar",
