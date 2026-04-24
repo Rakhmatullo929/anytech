@@ -13,6 +13,7 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
 import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 
 import Can from 'src/auth/components/can';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
@@ -182,7 +183,7 @@ export default function ClientGroupsView() {
           { name: tx('clients.tabs.groups'), href: paths.clients.groups },
         ]}
         action={
-          <Can page="clients" action="write">
+          <Can page="groups" action="write">
             <Button variant="contained" startIcon={<Iconify icon="mingcute:add-line" />} onClick={handleOpenCreate}>
               {tx('clients.groups.addButton')}
             </Button>
@@ -215,14 +216,20 @@ export default function ClientGroupsView() {
                   {rows.map((row) => (
                     <TableRow key={row.id} hover>
                       <TableCell>
-                        <Link component={RouterLink} href={paths.clients.groupsDetails(row.id)} variant="subtitle2">
-                          {row.name}
-                        </Link>
+                        <Can
+                          page="groups"
+                          action="detail"
+                          fallback={<Typography variant="subtitle2">{row.name}</Typography>}
+                        >
+                          <Link component={RouterLink} href={paths.clients.groupsDetails(row.id)} variant="subtitle2">
+                            {row.name}
+                          </Link>
+                        </Can>
                       </TableCell>
                       <TableCell>{row.clientsCount}</TableCell>
                       <TableCell>{fDateTime(row.createdAt)}</TableCell>
                       <TableCell align="right">
-                        <Can page="clients" action="write">
+                        <Can page="groups" action="write">
                           <IconButton color="default" onClick={(event) => openActions(event, row)}>
                             <Iconify icon="eva:more-vertical-fill" />
                           </IconButton>
@@ -258,7 +265,7 @@ export default function ClientGroupsView() {
         </MenuItem>
       </CustomPopover>
 
-      <Can page="clients" action="write">
+      <Can page="groups" action="write">
         <GroupUpsertDialog
           open={dialogOpen}
           mode={dialogMode}
@@ -269,7 +276,7 @@ export default function ClientGroupsView() {
         />
       </Can>
 
-      <Can page="clients" action="write">
+      <Can page="groups" action="write">
         <ConfirmDialog
           open={deleteOpen}
           onClose={handleCloseDelete}

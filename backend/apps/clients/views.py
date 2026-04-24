@@ -167,10 +167,10 @@ class GroupViewSet(TenantQuerySetMixin, ModelViewSet):
 
     def get_permissions(self):
         if self.action == "retrieve":
-            return [page_action_permission("clients", "detail")()]
+            return [page_action_permission("groups", "detail")()]
         if self.action in ("list", "search"):
-            return [page_action_permission("clients", "read")()]
-        return [page_action_permission("clients", "write")()]
+            return [page_action_permission("groups", "read")()]
+        return [page_action_permission("groups", "write")()]
 
     def get_serializer_class(self):
         if self.action == "retrieve":

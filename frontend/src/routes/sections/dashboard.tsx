@@ -30,7 +30,7 @@ const AdminUserEditPage = lazy(() => import('../../pages/admin-user-edit'));
 const AdminRolesPage = lazy(() => import('../../pages/admin-roles'));
 
 function withPermission(
-  page: 'admin' | 'roles' | 'users' | 'pos' | 'products' | 'clients' | 'sales' | 'debts',
+  page: 'admin' | 'roles' | 'users' | 'pos' | 'products' | 'clients' | 'groups' | 'sales' | 'debts',
   action: 'read' | 'detail' | 'write',
   element: ReactElement
 ) {
@@ -77,11 +77,11 @@ export const dashboardRoutes = [
           },
           {
             path: 'groups',
-            element: withPermission('clients', 'read', <ClientsGroupsPage />),
+            element: withPermission('groups', 'read', <ClientsGroupsPage />),
           },
           {
             path: 'groups/:id',
-            element: withPermission('clients', 'detail', <ClientsGroupsDetailsPage />),
+            element: withPermission('groups', 'detail', <ClientsGroupsDetailsPage />),
           },
           {
             path: 'new',

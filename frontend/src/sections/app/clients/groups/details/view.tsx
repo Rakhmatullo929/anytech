@@ -15,6 +15,7 @@ import TableRow from '@mui/material/TableRow';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 
+import Can from 'src/auth/components/can';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import EmptyContent from 'src/components/empty-content';
 import Iconify from 'src/components/iconify';
@@ -182,9 +183,15 @@ export default function ClientGroupDetailsView() {
                 {rows.map((client) => (
                   <TableRow key={client.id} hover>
                     <TableCell>
-                      <Link component={RouterLink} href={paths.clients.details(client.id)} variant="subtitle2">
-                        {client.name}
-                      </Link>
+                      <Can
+                        page="clients"
+                        action="detail"
+                        fallback={<Typography variant="subtitle2">{client.name}</Typography>}
+                      >
+                        <Link component={RouterLink} href={paths.clients.details(client.id)} variant="subtitle2">
+                          {client.name}
+                        </Link>
+                      </Can>
                     </TableCell>
                     <TableCell>{client.phone}</TableCell>
                   </TableRow>
