@@ -11,7 +11,7 @@ from rest_framework.test import APIClient
 
 from auth_tenant.models import Tenant, User
 from clients.models import Client
-from products.models import Product
+from products.models import Category, Product
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -156,6 +156,14 @@ def product_no_sku(tenant):
     return Product.objects.create(
         tenant=tenant,
         name="No SKU Product",
+    )
+
+
+@pytest.fixture
+def category(tenant):
+    return Category.objects.create(
+        tenant=tenant,
+        name="Default Category",
     )
 
 

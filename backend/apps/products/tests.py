@@ -82,6 +82,13 @@ class TestProductCreate:
         assert resp.status_code == status.HTTP_201_CREATED
         assert resp.data["sku"] is None
 
+    def test_create_with_category(self, admin_client, category):
+        payload = {**self.PAYLOAD, "category": str(category.pk)}
+        resp = admin_client.post(LIST_URL, payload, format="json")
+        assert resp.status_code == status.HTTP_201_CREATED
+        assert resp.data["category"]["id"] == str(category.pk)
+        assert resp.data["category"]["name"] == category.name
+
 
 class TestProductUpdate:
     def test_admin_can_update(self, admin_client, product):

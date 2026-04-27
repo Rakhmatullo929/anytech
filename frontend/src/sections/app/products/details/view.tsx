@@ -43,6 +43,7 @@ export default function ProductDetailsView() {
   const hasImages = images.length > 0;
   const clampedIndex = Math.min(activeImageIndex, Math.max(images.length - 1, 0));
   const currentImage = hasImages ? images[clampedIndex] : null;
+  const primaryImage = hasImages ? images[0] : null;
 
   if (isPending) {
     return (
@@ -80,7 +81,7 @@ export default function ProductDetailsView() {
       <Stack spacing={3}>
         <Card sx={{ p: 3 }}>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'flex-start', sm: 'center' }}>
-            <Avatar src={product.image ?? undefined} sx={{ width: 72, height: 72, bgcolor: 'primary.main', fontWeight: 700 }}>
+            <Avatar src={primaryImage ?? undefined} sx={{ width: 72, height: 72, bgcolor: 'primary.main', fontWeight: 700 }}>
               {product.name.charAt(0).toUpperCase()}
             </Avatar>
             <Box sx={{ flexGrow: 1 }}>

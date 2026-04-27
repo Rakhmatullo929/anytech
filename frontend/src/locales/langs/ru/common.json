@@ -4,6 +4,8 @@
   },
   "navigation": {
     "clients": "Клиенты",
+    "catalog": "Каталог",
+    "categories": "Категории",
     "debts": "Долги",
     "group": "Магазин",
     "pos": "POS",
@@ -42,6 +44,7 @@
   "table": {
     "allOption": "Все",
     "amount": "Сумма",
+    "category": "Категория",
     "client": "Клиент",
     "created": "Создан",
     "date": "Дата",
@@ -69,6 +72,7 @@
     "passportSeries": "Серия паспорта"
   },
   "validation": {
+    "categoryNameRequired": "Название категории обязательно",
     "clientNameRequired": "Имя клиента обязательно",
     "emailInvalid": "Некорректный формат email",
     "numberInvalid": "Введите корректное число",

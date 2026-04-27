@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Product, ProductImage
+from .models import Category, Product, ProductImage
 
 
 class ProductImageInline(admin.TabularInline):
@@ -17,3 +17,11 @@ class ProductAdmin(admin.ModelAdmin):
     search_fields = ("name", "sku")
     readonly_fields = ("id", "created_at", "updated_at")
     inlines = (ProductImageInline,)
+
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ("name", "tenant", "created_at")
+    list_filter = ("tenant",)
+    search_fields = ("name",)
+    readonly_fields = ("id", "created_at", "updated_at")

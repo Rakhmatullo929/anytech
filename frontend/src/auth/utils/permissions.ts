@@ -4,6 +4,7 @@ export type PermissionPage =
   | 'users'
   | 'pos'
   | 'products'
+  | 'categories'
   | 'clients'
   | 'groups'
   | 'sales'

@@ -9,6 +9,9 @@ export const paths = {
     root: '/products',
     details: (id: string) => `/products/${id}`,
   },
+  categories: {
+    root: '/categories',
+  },
   clients: {
     root: '/clients',
     groups: '/clients/groups',

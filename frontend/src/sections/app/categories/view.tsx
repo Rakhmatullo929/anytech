@@ -10,22 +10,19 @@ import Table from '@mui/material/Table';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
-import Avatar from '@mui/material/Avatar';
 import TextField from '@mui/material/TextField';
 import LinearProgress from '@mui/material/LinearProgress';
 import IconButton from '@mui/material/IconButton';
 import MenuItem from '@mui/material/MenuItem';
 import Checkbox from '@mui/material/Checkbox';
-import Link from '@mui/material/Link';
-import ListItemText from '@mui/material/ListItemText';
 // utils
+import { fDateTime } from 'src/utils/format-time';
 import { useDebounce } from 'src/hooks/use-debounce';
 import { useUrlListState, useSyncTableWithUrlListState } from 'src/hooks/use-url-query-state';
 import { useCheckPermission } from 'src/auth/hooks/use-check-permission';
 import Can from 'src/auth/components/can';
 // routes
 import { paths } from 'src/routes/paths';
-import { RouterLink } from 'src/routes/components';
 // components
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
@@ -34,43 +31,37 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
 import { useSnackbar } from 'src/components/snackbar';
 import {
+  TableSelectedAction,
   useTable,
   TableNoData,
   TableHeadCustom,
-  TableSelectedAction,
   TablePaginationCustom,
 } from 'src/components/table';
 import {
   useCategoriesListQuery,
-  useBulkDeleteProductsMutation,
-  useCreateProductMutation,
-  useDeleteProductMutation,
-  useProductsListQuery,
-  useUpdateProductMutation,
-  type ProductListItem,
-} from 'src/sections/app/products/api';
-import { ProductUpsertDialog } from 'src/sections/app/products/components';
-import { ProductsListSkeleton } from 'src/sections/app/products/skeleton';
+  useBulkDeleteCategoriesMutation,
+  useCreateCategoryMutation,
+  useDeleteCategoryMutation,
+  useUpdateCategoryMutation,
+  type CategoryListItem,
+} from 'src/sections/app/categories/api';
+import { CategoryUpsertDialog } from 'src/sections/app/categories/components';
+import { CategoriesListSkeleton } from 'src/sections/app/categories/skeleton';
 
-// ----------------------------------------------------------------------
-
-export default function ProductsView() {
+export default function CategoriesView() {
   const { tx } = useLocales();
   const { canWritePage } = useCheckPermission();
   const { enqueueSnackbar } = useSnackbar();
   const actionsPopover = usePopover();
-  const createMutation = useCreateProductMutation();
-  const updateMutation = useUpdateProductMutation();
-  const deleteMutation = useDeleteProductMutation();
-  const bulkDeleteMutation = useBulkDeleteProductsMutation();
-  const { data: categoriesData } = useCategoriesListQuery();
-  const categories = useMemo(() => categoriesData?.results ?? [], [categoriesData?.results]);
+  const createMutation = useCreateCategoryMutation();
+  const updateMutation = useUpdateCategoryMutation();
+  const deleteMutation = useDeleteCategoryMutation();
+  const bulkDeleteMutation = useBulkDeleteCategoriesMutation();
 
   const tableHead = useMemo(
     () => [
-      { id: 'name', label: tx('common.table.name') },
-      { id: 'sku', label: tx('common.table.sku') },
-      { id: 'category', label: tx('common.table.category') },
+      { id: 'name', label: tx('common.table.category') },
+      { id: 'created', label: tx('common.table.created') },
       { id: '', label: '' },
     ],
     [tx]
@@ -103,19 +94,20 @@ export default function ProductsView() {
   const { setPage, setRowsPerPage } = table;
   const page = Math.max(0, pageParam - 1);
 
-  const { data, isPending, isFetching } = useProductsListQuery({
+  const { data, isPending, isFetching } = useCategoriesListQuery({
     page: page + 1,
     pageSize: rowsPerPage,
     search: debouncedSearch || undefined,
     ordering,
   });
+
   const rows = useMemo(() => data?.results ?? [], [data?.results]);
   const total = data?.count ?? 0;
   const showInitialLoader = isPending && !data;
-  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [upsertOpen, setUpsertOpen] = useState(false);
   const [upsertMode, setUpsertMode] = useState<'create' | 'edit'>('create');
-  const [editingProduct, setEditingProduct] = useState<ProductListItem | null>(null);
+  const [editingCategory, setEditingCategory] = useState<CategoryListItem | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const { selected: selectedIds, setSelected } = table;
@@ -140,25 +132,23 @@ export default function ProductsView() {
   const closeActions = (clearSelected = true) => {
     actionsPopover.onClose();
     if (clearSelected) {
-      setSelectedProductId(null);
+      setSelectedCategoryId(null);
     }
   };
 
-  const handleCloseActions = () => closeActions();
-
-  const openActions = (event: MouseEvent<HTMLElement>, productId: string) => {
-    setSelectedProductId(productId);
+  const openActions = (event: MouseEvent<HTMLElement>, categoryId: string) => {
+    setSelectedCategoryId(categoryId);
     actionsPopover.onOpen(event);
   };
 
   const handleEdit = () => {
-    if (!selectedProductId) return;
-    const product = rows.find((row) => row.id === selectedProductId);
-    if (!product) {
+    if (!selectedCategoryId) return;
+    const category = rows.find((row) => row.id === selectedCategoryId);
+    if (!category) {
       closeActions();
       return;
     }
-    setEditingProduct(product);
+    setEditingCategory(category);
     setUpsertMode('edit');
     setUpsertOpen(true);
     closeActions(false);
@@ -169,36 +159,36 @@ export default function ProductsView() {
     setDeleteOpen(true);
   };
 
-  const handleCloseDelete = () => {
-    setDeleteOpen(false);
-    setSelectedProductId(null);
+  const handleOpenCreate = () => {
+    setUpsertMode('create');
+    setEditingCategory(null);
+    setUpsertOpen(true);
   };
 
   const handleOpenBulkDelete = () => {
     setBulkDeleteOpen(true);
   };
 
+  const handleCloseUpsert = () => {
+    setUpsertOpen(false);
+    setEditingCategory(null);
+    setSelectedCategoryId(null);
+  };
+
+  const handleCloseDelete = () => {
+    setDeleteOpen(false);
+    setSelectedCategoryId(null);
+  };
+
   const handleCloseBulkDelete = () => {
     setBulkDeleteOpen(false);
   };
 
-  const handleOpenCreate = () => {
-    setUpsertMode('create');
-    setEditingProduct(null);
-    setUpsertOpen(true);
-  };
-
-  const handleCloseUpsert = () => {
-    setUpsertOpen(false);
-    setEditingProduct(null);
-    setSelectedProductId(null);
-  };
-
   const handleDelete = async () => {
-    if (!selectedProductId) return;
+    if (!selectedCategoryId) return;
     try {
-      await deleteMutation.mutateAsync(selectedProductId);
-      enqueueSnackbar(tx('products.toasts.deleted'), { variant: 'success' });
+      await deleteMutation.mutateAsync(selectedCategoryId);
+      enqueueSnackbar(tx('categories.toasts.deleted'), { variant: 'success' });
     } catch (error) {
       console.error(error);
     } finally {
@@ -210,7 +200,7 @@ export default function ProductsView() {
     if (!selectedIds.length) return;
     try {
       await bulkDeleteMutation.mutateAsync(selectedIds);
-      enqueueSnackbar(tx('products.toasts.bulkDeleted', { count: selectedIds.length }), {
+      enqueueSnackbar(tx('categories.toasts.bulkDeleted', { count: selectedIds.length }), {
         variant: 'success',
       });
       table.onUpdatePageDeleteRows({
@@ -225,38 +215,22 @@ export default function ProductsView() {
     }
   };
 
-  const handleSubmitUpsert = async (values: {
-    name: string;
-    sku: string;
-    category: string;
-    images: (File | string)[];
-  }) => {
+  const handleSubmitUpsert = async (values: { name: string }) => {
     const normalizedName = values.name.trim();
-    const normalizedSku = values.sku.trim();
-
     if (!normalizedName) {
-      enqueueSnackbar(tx('products.toasts.requiredFields'), { variant: 'warning' });
       return;
     }
 
     try {
       if (upsertMode === 'create') {
-        await createMutation.mutateAsync({
-          name: normalizedName,
-          sku: normalizedSku || undefined,
-          category: values.category || undefined,
-          images: values.images.filter((item): item is File => item instanceof File),
-        });
-        enqueueSnackbar(tx('products.toasts.created'), { variant: 'success' });
-      } else if (editingProduct) {
+        await createMutation.mutateAsync({ name: normalizedName });
+        enqueueSnackbar(tx('categories.toasts.created'), { variant: 'success' });
+      } else if (editingCategory) {
         await updateMutation.mutateAsync({
-          id: editingProduct.id,
+          id: editingCategory.id,
           name: normalizedName,
-          sku: normalizedSku || undefined,
-          category: values.category || undefined,
-          images: values.images.filter((item): item is File => item instanceof File),
         });
-        enqueueSnackbar(tx('products.toasts.updated'), { variant: 'success' });
+        enqueueSnackbar(tx('categories.toasts.updated'), { variant: 'success' });
       }
       handleCloseUpsert();
       setPage(0);
@@ -269,20 +243,20 @@ export default function ProductsView() {
   const upsertLoading = createMutation.isPending || updateMutation.isPending;
   const deletingCurrent =
     deleteMutation.isPending &&
-    selectedProductId !== null &&
-    deleteMutation.variables === selectedProductId;
+    selectedCategoryId !== null &&
+    deleteMutation.variables === selectedCategoryId;
   const deletingBulk = bulkDeleteMutation.isPending;
-  const canWriteProducts = canWritePage('products');
+  const canWriteCategories = canWritePage('categories');
 
   return (
     <>
       <CustomBreadcrumbs
-        heading={tx('common.navigation.products')}
-        links={[{ name: tx('common.navigation.products'), href: paths.products.root }]}
+        heading={tx('common.navigation.categories')}
+        links={[{ name: tx('common.navigation.categories'), href: paths.categories.root }]}
         action={
-          <Can page="products" action="write">
+          <Can page="categories" action="write">
             <Button variant="contained" startIcon={<Iconify icon="mingcute:add-line" />} onClick={handleOpenCreate}>
-              {tx('products.addButton')}
+              {tx('categories.addButton')}
             </Button>
           </Can>
         }
@@ -290,7 +264,7 @@ export default function ProductsView() {
       />
 
       {showInitialLoader ? (
-        <ProductsListSkeleton headLabel={tableHead} />
+        <CategoriesListSkeleton headLabel={tableHead} />
       ) : (
         <Card>
           {isFetching && data ? (
@@ -300,7 +274,7 @@ export default function ProductsView() {
           )}
 
           <Stack spacing={2} sx={{ p: 2 }}>
-            <Can page="products" action="write">
+            <Can page="categories" action="write">
               <TableSelectedAction
                 numSelected={selectedIds.length}
                 rowCount={rows.length}
@@ -314,7 +288,7 @@ export default function ProductsView() {
             </Can>
             <TextField
               size="small"
-              placeholder={tx('products.searchPlaceholder')}
+              placeholder={tx('categories.searchPlaceholder')}
               value={searchValue}
               onChange={(e) => setSearch(e.target.value)}
               sx={{ maxWidth: 360 }}
@@ -335,33 +309,13 @@ export default function ProductsView() {
                         <Checkbox
                           checked={selectedIds.includes(row.id)}
                           onClick={() => table.onSelectRow(row.id)}
-                          disabled={!canWriteProducts}
+                          disabled={!canWriteCategories}
                         />
                       </TableCell>
-                      <TableCell>
-                        <Stack direction="row" spacing={1.5} alignItems="center">
-                          <Avatar src={row.image ?? undefined} alt={row.name}>
-                            {row.name.charAt(0).toUpperCase()}
-                          </Avatar>
-                          <Can
-                            page="products"
-                            action="detail"
-                            fallback={<ListItemText primary={row.name} primaryTypographyProps={{ variant: 'subtitle2' }} />}
-                          >
-                            <ListItemText
-                              primary={
-                                <Link component={RouterLink} href={paths.products.details(row.id)} variant="subtitle2">
-                                  {row.name}
-                                </Link>
-                              }
-                            />
-                          </Can>
-                        </Stack>
-                      </TableCell>
-                      <TableCell>{row.sku || '-'}</TableCell>
-                      <TableCell>{row.category?.name || '-'}</TableCell>
+                      <TableCell>{row.name}</TableCell>
+                      <TableCell>{fDateTime(row.createdAt)}</TableCell>
                       <TableCell align="right">
-                        {canWriteProducts ? (
+                        {canWriteCategories ? (
                           <IconButton color="default" onClick={(event) => openActions(event, row.id)}>
                             <Iconify icon="eva:more-vertical-fill" />
                           </IconButton>
@@ -387,14 +341,14 @@ export default function ProductsView() {
         </Card>
       )}
 
-      <CustomPopover open={actionsPopover.open} onClose={handleCloseActions} sx={{ width: 180, p: 1 }}>
-        <Can page="products" action="write">
+      <CustomPopover open={actionsPopover.open} onClose={() => closeActions()} sx={{ width: 180, p: 1 }}>
+        <Can page="categories" action="write">
           <MenuItem onClick={handleEdit}>
             <Iconify icon="solar:pen-bold" />
             {tx('common.actions.edit')}
           </MenuItem>
         </Can>
-        <Can page="products" action="write">
+        <Can page="categories" action="write">
           <MenuItem onClick={handleAskDelete} sx={{ color: 'error.main' }} disabled={deletingCurrent}>
             <Iconify icon="solar:trash-bin-trash-bold" />
             {tx('common.actions.delete')}
@@ -402,33 +356,23 @@ export default function ProductsView() {
         </Can>
       </CustomPopover>
 
-      <Can page="products" action="write">
-        <ProductUpsertDialog
+      <Can page="categories" action="write">
+        <CategoryUpsertDialog
           open={upsertOpen}
           mode={upsertMode}
           loading={upsertLoading}
-          initialValues={
-            upsertMode === 'edit' && editingProduct
-              ? {
-                  name: editingProduct.name,
-                  sku: editingProduct.sku ?? '',
-                  category: editingProduct.category?.id ?? '',
-                  images: [],
-                }
-              : undefined
-          }
-          categories={categories.map((item) => ({ id: item.id, name: item.name }))}
+          initialValues={upsertMode === 'edit' && editingCategory ? { name: editingCategory.name } : undefined}
           onClose={handleCloseUpsert}
           onSubmit={handleSubmitUpsert}
         />
       </Can>
 
-      <Can page="products" action="write">
+      <Can page="categories" action="write">
         <ConfirmDialog
           open={deleteOpen}
           onClose={handleCloseDelete}
-          title={tx('products.dialogs.delete.title')}
-          content={tx('products.dialogs.delete.description')}
+          title={tx('categories.dialogs.delete.title')}
+          content={tx('categories.dialogs.delete.description')}
           cancelText={tx('common.actions.cancel')}
           action={
             <Button color="error" variant="contained" onClick={handleDelete} disabled={deletingCurrent}>
@@ -438,12 +382,12 @@ export default function ProductsView() {
         />
       </Can>
 
-      <Can page="products" action="write">
+      <Can page="categories" action="write">
         <ConfirmDialog
           open={bulkDeleteOpen}
           onClose={handleCloseBulkDelete}
-          title={tx('products.dialogs.delete.bulkTitle')}
-          content={tx('products.dialogs.delete.bulkDescription', { count: selectedIds.length })}
+          title={tx('categories.dialogs.delete.bulkTitle')}
+          content={tx('categories.dialogs.delete.bulkDescription', { count: selectedIds.length })}
           cancelText={tx('common.actions.cancel')}
           action={
             <Button color="error" variant="contained" onClick={handleBulkDelete} disabled={deletingBulk}>

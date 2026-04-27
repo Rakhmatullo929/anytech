@@ -8,11 +8,13 @@ import {
   bulkDeleteProducts,
   createProduct,
   deleteProduct,
+  fetchCategoriesList,
   fetchProductDetail,
   fetchProductsList,
   updateProduct,
 } from './products-requests';
 import type {
+  CategoryListItem,
   CreateProductPayload,
   FetchProductsListParams,
   ProductDetail,
@@ -61,6 +63,11 @@ export function useProductDetailQuery(id: string) {
   return useFetchOne<ProductDetail>(queryKey, () => fetchProductDetail(id), {
     enabled: Boolean(id),
   });
+}
+
+export function useCategoriesListQuery() {
+  const queryKey = useMemo(() => ['categories', 'list'] as const, []);
+  return useFetchList<CategoryListItem>(queryKey, fetchCategoriesList);
 }
 
 export function useCreateProductMutation() {

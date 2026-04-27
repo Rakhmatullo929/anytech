@@ -4,6 +4,8 @@
   },
   "navigation": {
     "clients": "Mijozlar",
+    "catalog": "Katalog",
+    "categories": "Kategoriyalar",
     "debts": "Qarzlar",
     "group": "Doʻkon",
     "pos": "POS",
@@ -42,6 +44,7 @@
   "table": {
     "allOption": "Barchasi",
     "amount": "Summa",
+    "category": "Kategoriya",
     "client": "Mijoz",
     "created": "Yaratilgan",
     "date": "Sana",
@@ -69,6 +72,7 @@
     "passportSeries": "Pasport seriyasi"
   },
   "validation": {
+    "categoryNameRequired": "Kategoriya nomi majburiy",
     "clientNameRequired": "Mijoz ismi majburiy",
     "emailInvalid": "Email noto‘g‘ri formatda",
     "numberInvalid": "Toʻgʻri son kiriting",

@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
+import { matchPath } from 'react-router-dom';
 // @mui
 import Collapse from '@mui/material/Collapse';
 // routes
 import { usePathname } from 'src/routes/hook';
-import { useActiveLink } from 'src/routes/hook/use-active-link';
 //
 import { NavListProps, NavConfigProps } from '../types';
 import NavItem from './nav-item';
@@ -17,11 +17,31 @@ type NavListRootProps = {
   config: NavConfigProps;
 };
 
+function hasActiveChild(items: NavListProps[] | undefined, pathname: string): boolean {
+  if (!items?.length) {
+    return false;
+  }
+
+  return items.some((item) => {
+    const selfActive = item.path
+      ? !!matchPath({ path: item.path, end: false }, pathname)
+      : false;
+
+    if (selfActive) {
+      return true;
+    }
+
+    return hasActiveChild(item.children as NavListProps[] | undefined, pathname);
+  });
+}
+
 export default function NavList({ data, depth, hasChild, config }: NavListRootProps) {
   const pathname = usePathname();
 
-  // Keep parent section active on nested detail routes (e.g. /products/:id/*).
-  const active = useActiveLink(data.path);
+  const selfActive = data.path
+    ? !!matchPath({ path: data.path, end: false }, pathname)
+    : false;
+  const active = selfActive || hasActiveChild(data.children as NavListProps[] | undefined, pathname);
 
   const externalLink = data.path.includes('http');
 

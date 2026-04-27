@@ -8,14 +8,16 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Stack from '@mui/material/Stack';
+import MenuItem from '@mui/material/MenuItem';
 
 import { useLocales } from 'src/locales';
-import FormProvider, { RHFTextField, RHFUpload } from 'src/components/hook-form';
+import FormProvider, { RHFSelect, RHFTextField, RHFUpload } from 'src/components/hook-form';
 import { getProductUpsertSchema } from './utils/product-upsert-schema';
 
 type ProductUpsertValues = {
   name: string;
   sku: string;
+  category: string;
   images: (File | string)[];
 };
 
@@ -23,6 +25,7 @@ type Props = {
   open: boolean;
   mode: 'create' | 'edit';
   loading: boolean;
+  categories: { id: string; name: string }[];
   initialValues?: ProductUpsertValues;
   onClose: () => void;
   onSubmit: (values: ProductUpsertValues) => void;
@@ -32,6 +35,7 @@ export default function ProductUpsertDialog({
   open,
   mode,
   loading,
+  categories,
   initialValues,
   onClose,
   onSubmit,
@@ -45,6 +49,7 @@ export default function ProductUpsertDialog({
     defaultValues: {
       name: '',
       sku: '',
+      category: '',
       images: [],
     },
   });
@@ -55,6 +60,7 @@ export default function ProductUpsertDialog({
     reset({
       name: initialValues?.name ?? '',
       sku: initialValues?.sku ?? '',
+      category: initialValues?.category ?? '',
       images: initialValues?.images ?? [],
     });
   }, [
@@ -62,6 +68,7 @@ export default function ProductUpsertDialog({
     reset,
     initialValues?.name,
     initialValues?.sku,
+    initialValues?.category,
     initialValues?.images,
   ]);
 
@@ -75,6 +82,14 @@ export default function ProductUpsertDialog({
           <Stack spacing={2} sx={{ mt: 1 }}>
             <RHFTextField name="name" label={`${tx('common.table.name')} *`} />
             <RHFTextField name="sku" label={tx('common.table.sku')} />
+            <RHFSelect name="category" label={tx('common.table.category')}>
+              <MenuItem value="">{tx('common.table.allOption')}</MenuItem>
+              {categories.map((item) => (
+                <MenuItem key={item.id} value={item.id}>
+                  {item.name}
+                </MenuItem>
+              ))}
+            </RHFSelect>
             <RHFUpload
               name="images"
               multiple

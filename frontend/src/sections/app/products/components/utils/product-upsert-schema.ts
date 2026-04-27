@@ -6,6 +6,7 @@ export function getProductUpsertSchema(tx: Translate, _mode: 'create' | 'edit') 
   return Yup.object({
     name: Yup.string().trim().required(tx('common.validation.productNameRequired')),
     sku: Yup.string().trim(),
+    category: Yup.string().nullable().optional(),
     images: Yup.array().of(Yup.mixed<File | string>().required()).optional(),
   });
 }

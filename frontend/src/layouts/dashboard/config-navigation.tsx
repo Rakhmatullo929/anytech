@@ -34,6 +34,7 @@ export function useNavData() {
   const canReadAdmin = canReadPage(permissions, 'admin');
   const canReadPos = canReadPage(permissions, 'pos');
   const canReadProducts = canReadPage(permissions, 'products');
+  const canReadCategories = canReadPage(permissions, 'categories');
   const canReadClients = canReadPage(permissions, 'clients');
   const canReadSales = canReadPage(permissions, 'sales');
   const canReadDebts = canReadPage(permissions, 'debts');
@@ -64,8 +65,31 @@ export function useNavData() {
           ...(canReadProducts
             ? [
                 {
-                  title: tx('common.navigation.products'),
+                  title: tx('common.navigation.catalog'),
                   path: paths.products.root,
+                  icon: ICONS.product,
+                  children: [
+                    {
+                      title: tx('common.navigation.products'),
+                      path: paths.products.root,
+                    },
+                    ...(canReadCategories
+                      ? [
+                          {
+                            title: tx('common.navigation.categories'),
+                            path: paths.categories.root,
+                          },
+                        ]
+                      : []),
+                  ],
+                },
+              ]
+            : []),
+          ...(!canReadProducts && canReadCategories
+            ? [
+                {
+                  title: tx('common.navigation.categories'),
+                  path: paths.categories.root,
                   icon: ICONS.product,
                 },
               ]
@@ -100,7 +124,7 @@ export function useNavData() {
         ],
       },
     ],
-    [canReadAdmin, canReadClients, canReadDebts, canReadPos, canReadProducts, canReadSales, tx]
+    [canReadAdmin, canReadCategories, canReadClients, canReadDebts, canReadPos, canReadProducts, canReadSales, tx]
   );
 
   return data;

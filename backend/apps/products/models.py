@@ -8,6 +8,13 @@ class Product(models.Model):
     tenant = models.ForeignKey(
         "auth_tenant.Tenant", on_delete=models.CASCADE, related_name="products"
     )
+    category = models.ForeignKey(
+        "products.Category",
+        on_delete=models.SET_NULL,
+        related_name="products",
+        null=True,
+        blank=True,
+    )
     name = models.CharField(max_length=255)
     sku = models.CharField(max_length=100, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -23,6 +30,31 @@ class Product(models.Model):
                 fields=["tenant", "sku"],
                 name="unique_sku_per_tenant",
                 condition=models.Q(sku__isnull=False),
+            ),
+        ]
+
+    def __str__(self):
+        return self.name
+
+
+class Category(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    tenant = models.ForeignKey(
+        "auth_tenant.Tenant", on_delete=models.CASCADE, related_name="categories"
+    )
+    name = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "categories"
+        indexes = [
+            models.Index(fields=["tenant", "-created_at"]),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["tenant", "name"],
+                name="unique_category_name_per_tenant",
             ),
         ]
 

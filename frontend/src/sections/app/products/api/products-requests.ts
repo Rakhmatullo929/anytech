@@ -2,6 +2,7 @@ import type { Pagination } from 'src/hooks/api';
 import { request, API_ENDPOINTS } from 'src/utils/axios';
 
 import type {
+  CategoryListItem,
   CreateProductPayload,
   FetchProductsListParams,
   ProductDetail,
@@ -28,6 +29,9 @@ export async function createProduct(payload: CreateProductPayload): Promise<Prod
   const formData = new FormData();
   formData.append('name', payload.name);
   formData.append('sku', payload.sku?.trim() ? payload.sku.trim() : '');
+  if (payload.category) {
+    formData.append('category', payload.category);
+  }
   payload.images?.forEach((file) => formData.append('uploaded_images', file));
 
   return request<ProductListItem>({
@@ -48,6 +52,9 @@ export async function updateProduct(payload: UpdateProductPayload): Promise<Prod
   const formData = new FormData();
   formData.append('name', payload.name);
   formData.append('sku', payload.sku?.trim() ? payload.sku.trim() : '');
+  if (payload.category) {
+    formData.append('category', payload.category);
+  }
   payload.images?.forEach((file) => formData.append('uploaded_images', file));
 
   return request<ProductListItem>({
@@ -69,5 +76,17 @@ export async function bulkDeleteProducts(ids: string[]): Promise<void> {
     method: 'POST',
     url: API_ENDPOINTS.products.bulkDelete,
     data: { ids },
+  });
+}
+
+export async function fetchCategoriesList(): Promise<Pagination<CategoryListItem>> {
+  return request<Pagination<CategoryListItem>>({
+    method: 'GET',
+    url: API_ENDPOINTS.categories.list,
+    params: {
+      page: 1,
+      pageSize: 200,
+      ordering: 'name',
+    },
   });
 }
