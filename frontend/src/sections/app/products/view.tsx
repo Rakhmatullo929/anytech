@@ -10,15 +10,15 @@ import Table from '@mui/material/Table';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
+import Avatar from '@mui/material/Avatar';
 import TextField from '@mui/material/TextField';
 import LinearProgress from '@mui/material/LinearProgress';
 import IconButton from '@mui/material/IconButton';
 import MenuItem from '@mui/material/MenuItem';
 import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
-import Typography from '@mui/material/Typography';
+import ListItemText from '@mui/material/ListItemText';
 // utils
-import { fCurrency } from 'src/utils/format-number';
 import { useDebounce } from 'src/hooks/use-debounce';
 import { useUrlListState, useSyncTableWithUrlListState } from 'src/hooks/use-url-query-state';
 import { useCheckPermission } from 'src/auth/hooks/use-check-permission';
@@ -67,9 +67,6 @@ export default function ProductsView() {
     () => [
       { id: 'name', label: tx('common.table.name') },
       { id: 'sku', label: tx('common.table.sku') },
-      { id: 'stock', label: tx('common.table.stock') },
-      { id: 'purchase', label: tx('common.table.purchase') },
-      { id: 'sale', label: tx('common.table.salePrice') },
       { id: '', label: '' },
     ],
     [tx]
@@ -227,33 +224,13 @@ export default function ProductsView() {
   const handleSubmitUpsert = async (values: {
     name: string;
     sku: string;
-    purchasePrice: string;
-    salePrice: string;
-    stock: string;
+    images: (File | string)[];
   }) => {
     const normalizedName = values.name.trim();
-    const normalizedPurchase = values.purchasePrice.trim();
-    const normalizedSale = values.salePrice.trim();
     const normalizedSku = values.sku.trim();
-    const parsedStock = Number(values.stock);
 
-    if (!normalizedName || !normalizedPurchase || !normalizedSale) {
+    if (!normalizedName) {
       enqueueSnackbar(tx('products.toasts.requiredFields'), { variant: 'warning' });
-      return;
-    }
-
-    if (
-      Number.isNaN(Number(normalizedPurchase)) ||
-      Number.isNaN(Number(normalizedSale)) ||
-      Number(normalizedPurchase) < 0 ||
-      Number(normalizedSale) < 0
-    ) {
-      enqueueSnackbar(tx('products.toasts.invalidPrices'), { variant: 'warning' });
-      return;
-    }
-
-    if (upsertMode === 'create' && (Number.isNaN(parsedStock) || parsedStock < 0)) {
-      enqueueSnackbar(tx('products.toasts.invalidStock'), { variant: 'warning' });
       return;
     }
 
@@ -262,9 +239,7 @@ export default function ProductsView() {
         await createMutation.mutateAsync({
           name: normalizedName,
           sku: normalizedSku || undefined,
-          purchasePrice: normalizedPurchase,
-          salePrice: normalizedSale,
-          stock: parsedStock,
+          images: values.images.filter((item): item is File => item instanceof File),
         });
         enqueueSnackbar(tx('products.toasts.created'), { variant: 'success' });
       } else if (editingProduct) {
@@ -272,8 +247,7 @@ export default function ProductsView() {
           id: editingProduct.id,
           name: normalizedName,
           sku: normalizedSku || undefined,
-          purchasePrice: normalizedPurchase,
-          salePrice: normalizedSale,
+          images: values.images.filter((item): item is File => item instanceof File),
         });
         enqueueSnackbar(tx('products.toasts.updated'), { variant: 'success' });
       }
@@ -358,20 +332,26 @@ export default function ProductsView() {
                         />
                       </TableCell>
                       <TableCell>
-                        <Can
-                          page="products"
-                          action="detail"
-                          fallback={<Typography variant="subtitle2">{row.name}</Typography>}
-                        >
-                          <Link component={RouterLink} href={paths.products.details(row.id)} variant="subtitle2">
-                            {row.name}
-                          </Link>
-                        </Can>
+                        <Stack direction="row" spacing={1.5} alignItems="center">
+                          <Avatar src={row.image ?? undefined} alt={row.name}>
+                            {row.name.charAt(0).toUpperCase()}
+                          </Avatar>
+                          <Can
+                            page="products"
+                            action="detail"
+                            fallback={<ListItemText primary={row.name} primaryTypographyProps={{ variant: 'subtitle2' }} />}
+                          >
+                            <ListItemText
+                              primary={
+                                <Link component={RouterLink} href={paths.products.details(row.id)} variant="subtitle2">
+                                  {row.name}
+                                </Link>
+                              }
+                            />
+                          </Can>
+                        </Stack>
                       </TableCell>
                       <TableCell>{row.sku || '-'}</TableCell>
-                      <TableCell>{row.stock}</TableCell>
-                      <TableCell>{fCurrency(row.purchasePrice)}</TableCell>
-                      <TableCell>{fCurrency(row.salePrice)}</TableCell>
                       <TableCell align="right">
                         {canWriteProducts ? (
                           <IconButton color="default" onClick={(event) => openActions(event, row.id)}>
@@ -424,9 +404,7 @@ export default function ProductsView() {
               ? {
                   name: editingProduct.name,
                   sku: editingProduct.sku ?? '',
-                  purchasePrice: editingProduct.purchasePrice,
-                  salePrice: editingProduct.salePrice,
-                  stock: String(editingProduct.stock),
+                  images: editingProduct.images.map((item) => item.image),
                 }
               : undefined
           }

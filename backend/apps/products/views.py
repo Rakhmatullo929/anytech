@@ -1,7 +1,4 @@
-from django.db import transaction
-from django.utils.translation import gettext as _
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
@@ -13,17 +10,16 @@ from .serializers import (
     ProductBulkDeleteSerializer,
     ProductSerializer,
     ProductUpdateSerializer,
-    StockAdjustmentSerializer,
 )
 
 
 class ProductViewSet(TenantQuerySetMixin, ModelViewSet):
-    queryset = Product.objects.all()
+    queryset = Product.objects.all().prefetch_related("images")
     serializer_class = ProductSerializer
     http_method_names = ["get", "post", "put", "patch", "delete", "head", "options"]
 
     search_fields = ["name", "sku"]
-    ordering_fields = ["name", "created_at", "sale_price", "stock"]
+    ordering_fields = ["name", "created_at"]
     ordering = ["-created_at"]
 
     def get_permissions(self):
@@ -36,8 +32,6 @@ class ProductViewSet(TenantQuerySetMixin, ModelViewSet):
     def get_serializer_class(self):
         if self.action in ("update", "partial_update"):
             return ProductUpdateSerializer
-        if self.action == "adjust_stock":
-            return StockAdjustmentSerializer
         return ProductSerializer
 
     @action(detail=False, methods=["get"], url_path="search")
@@ -52,30 +46,3 @@ class ProductViewSet(TenantQuerySetMixin, ModelViewSet):
         ids = serializer.validated_data["ids"]
         deleted_count, _details = self.get_queryset().filter(id__in=ids).delete()
         return Response({"deleted": deleted_count})
-
-    @action(detail=True, methods=["patch"], url_path="stock")
-    def adjust_stock(self, request, pk=None):
-        product = self.get_object()
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        quantity = serializer.validated_data["quantity"]
-        mode = serializer.validated_data["mode"]
-
-        with transaction.atomic():
-            product = Product.objects.select_for_update().get(pk=product.pk)
-            new_stock = quantity if mode == "set" else product.stock + quantity
-            if new_stock < 0:
-                raise ValidationError(
-                    {
-                        "detail": _(
-                            "Insufficient stock. Current: %(current)d, adjustment: %(adjustment)d."
-                        ) % {"current": product.stock, "adjustment": quantity}
-                    }
-                )
-            product.stock = new_stock
-            product.save(update_fields=["stock", "updated_at"])
-
-        return Response(
-            ProductSerializer(product, context=self.get_serializer_context()).data
-        )

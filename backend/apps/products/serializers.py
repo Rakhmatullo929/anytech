@@ -1,29 +1,58 @@
-from django.utils.translation import gettext as _, gettext_lazy
+from django.utils.translation import gettext as _
 from rest_framework import serializers
 
-from .models import Product
+from .models import Product, ProductImage
+
+
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = ("id", "image", "position")
+        read_only_fields = ("id", "position")
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    images = ProductImageSerializer(many=True, read_only=True)
+    image = serializers.SerializerMethodField(read_only=True)
+    uploaded_images = serializers.ListField(
+        child=serializers.ImageField(),
+        required=False,
+        write_only=True,
+        allow_empty=True,
+    )
+
     def validate_sku(self, value):
         if value is not None:
             value = value.strip()
         return value or None
 
-    def validate_purchase_price(self, value):
-        if value < 0:
-            raise serializers.ValidationError(_("Purchase price must be >= 0."))
-        return value
+    def get_image(self, obj):
+        first_image = obj.images.first()
+        return first_image.image.url if first_image else None
 
-    def validate_sale_price(self, value):
-        if value < 0:
-            raise serializers.ValidationError(_("Sale price must be >= 0."))
-        return value
+    def _replace_images(self, product: Product, files):
+        product.images.all().delete()
+        if not files:
+            return
+        ProductImage.objects.bulk_create(
+            [
+                ProductImage(product=product, image=file, position=index)
+                for index, file in enumerate(files)
+            ]
+        )
 
-    def validate_stock(self, value):
-        if value < 0:
-            raise serializers.ValidationError(_("Stock must be >= 0."))
-        return value
+    def create(self, validated_data):
+        uploaded_images = validated_data.pop("uploaded_images", [])
+        product = super().create(validated_data)
+        self._replace_images(product, uploaded_images)
+        return product
+
+    def update(self, instance, validated_data):
+        uploaded_images = validated_data.pop("uploaded_images", None)
+        product = super().update(instance, validated_data)
+        if uploaded_images is not None:
+            self._replace_images(product, uploaded_images)
+        return product
 
     class Meta:
         model = Product
@@ -32,9 +61,9 @@ class ProductSerializer(serializers.ModelSerializer):
             "tenant",
             "name",
             "sku",
-            "purchase_price",
-            "sale_price",
-            "stock",
+            "image",
+            "images",
+            "uploaded_images",
             "created_at",
             "updated_at",
         )
@@ -42,34 +71,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class ProductUpdateSerializer(ProductSerializer):
-    """Excludes stock — only modifiable via the /stock/ endpoint."""
-
-    class Meta(ProductSerializer.Meta):
-        fields = tuple(f for f in ProductSerializer.Meta.fields if f != "stock")
-
-
-class StockAdjustmentSerializer(serializers.Serializer):
-    MODE_CHOICES = (("increment", gettext_lazy("Increment")), ("set", gettext_lazy("Set")))
-
-    quantity = serializers.IntegerField(
-        help_text=gettext_lazy("Value to add/subtract (increment mode) or absolute value (set mode).")
-    )
-    mode = serializers.ChoiceField(
-        choices=MODE_CHOICES,
-        default="increment",
-        help_text=gettext_lazy("'increment' to add/subtract, 'set' to overwrite."),
-    )
-
-    def validate(self, attrs):
-        if attrs.get("mode", "increment") == "increment" and attrs["quantity"] == 0:
-            raise serializers.ValidationError(
-                {"quantity": _("Quantity must not be zero.")}
-            )
-        if attrs.get("mode") == "set" and attrs["quantity"] < 0:
-            raise serializers.ValidationError(
-                {"quantity": _("Stock value must be >= 0.")}
-            )
-        return attrs
+    pass
 
 
 class ProductBulkDeleteSerializer(serializers.Serializer):

@@ -23,9 +23,4 @@ urlpatterns = [
         ProductViewSet.as_view({"get": "retrieve", "put": "update", "delete": "destroy"}),
         name="product-detail",
     ),
-    path(
-        "<uuid:pk>/stock/",
-        ProductViewSet.as_view({"patch": "adjust_stock"}),
-        name="product-stock",
-    ),
 ]

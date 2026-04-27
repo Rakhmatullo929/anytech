@@ -1,8 +1,8 @@
 """
-Tests for sales app — Stage 5.
+Tests for sales app.
 
-Covers: sale creation (cash/card/debt), stock deduction, auto-debt creation,
-validation (insufficient stock, missing client for debt), list/detail,
+Covers: sale creation (cash/card/debt), auto-debt creation,
+validation (missing client for debt), list/detail,
 RBAC permissions, tenant isolation.
 """
 from decimal import Decimal
@@ -51,11 +51,6 @@ class TestCashSale:
         assert resp.status_code == status.HTTP_201_CREATED
         assert resp.data["payment_type"] == "cash"
         assert Decimal(resp.data["total_amount"]) == Decimal("200.00")  # 100 * 2
-
-    def test_stock_deducted(self, admin_client, product):
-        admin_client.post(LIST_URL, make_sale_payload(product), format="json")
-        product.refresh_from_db()
-        assert product.stock == 18  # 20 - 2
 
     def test_sale_items_created(self, admin_client, product):
         resp = admin_client.post(
@@ -127,16 +122,6 @@ class TestSaleValidation:
         )
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_insufficient_stock(self, admin_client, product):
-        resp = admin_client.post(
-            LIST_URL,
-            make_sale_payload(product, quantity=999),
-            format="json",
-        )
-        assert resp.status_code == status.HTTP_400_BAD_REQUEST
-        product.refresh_from_db()
-        assert product.stock == 20  # unchanged — atomic rollback
-
     def test_nonexistent_product(self, admin_client):
         import uuid
 
@@ -156,15 +141,14 @@ class TestSaleValidation:
             {
                 "payment_type": "cash",
                 "items": [
-                    {"product": str(product.pk), "quantity": 1},
-                    {"product": str(product_no_sku.pk), "quantity": 3},
+                    {"product": str(product.pk), "quantity": 1, "price": "100.00"},
+                    {"product": str(product_no_sku.pk), "quantity": 3, "price": "100.00"},
                 ],
             },
             format="json",
         )
         assert resp.status_code == status.HTTP_201_CREATED
-        # 100*1 + 60*3 = 280
-        assert Decimal(resp.data["total_amount"]) == Decimal("280.00")
+        assert Decimal(resp.data["total_amount"]) == Decimal("400.00")
         assert SaleItem.objects.filter(sale_id=resp.data["id"]).count() == 2
 
 
@@ -238,9 +222,6 @@ class TestSaleTenantIsolation:
         other_product = Product.objects.create(
             tenant=other_tenant,
             name="Other Product",
-            purchase_price="10.00",
-            sale_price="20.00",
-            stock=10,
         )
         resp = other_tenant_client.post(
             LIST_URL,

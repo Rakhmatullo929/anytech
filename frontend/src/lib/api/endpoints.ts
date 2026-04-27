@@ -27,7 +27,6 @@ export const API_ENDPOINTS = {
     search: `${API_V1}/products/search/`,
     bulkDelete: `${API_V1}/products/bulk-delete/`,
     detail: (id: string) => `${API_V1}/products/${id}/`,
-    stock: (id: string) => `${API_V1}/products/${id}/stock/`,
   },
   clients: {
     list: `${API_V1}/clients/`,

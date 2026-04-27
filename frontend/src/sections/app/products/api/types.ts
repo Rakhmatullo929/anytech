@@ -1,11 +1,16 @@
+export type ProductImage = {
+  id: string;
+  image: string;
+  position: number;
+};
+
 export type ProductListItem = {
   id: string;
   tenant: string;
   name: string;
   sku: string | null;
-  purchasePrice: string;
-  salePrice: string;
-  stock: number;
+  image: string | null;
+  images: ProductImage[];
   createdAt: string;
   updatedAt: string;
 };
@@ -22,15 +27,12 @@ export type FetchProductsListParams = {
 export type CreateProductPayload = {
   name: string;
   sku?: string;
-  purchasePrice: string;
-  salePrice: string;
-  stock: number;
+  images?: File[];
 };
 
 export type UpdateProductPayload = {
   id: string;
   name: string;
   sku?: string;
-  purchasePrice: string;
-  salePrice: string;
+  images?: File[];
 };

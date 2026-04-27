@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 // locales
 import { useLocales } from 'src/locales';
 // @mui
@@ -6,12 +6,13 @@ import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Chip from '@mui/material/Chip';
-import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import CardHeader from '@mui/material/CardHeader';
+import Divider from '@mui/material/Divider';
 // utils
-import { fCurrency } from 'src/utils/format-number';
 import { fDateTime } from 'src/utils/format-time';
 // routes
 import { paths } from 'src/routes/paths';
@@ -26,25 +27,22 @@ import { ProductDetailsSkeleton } from 'src/sections/app/products/skeleton';
 
 // ----------------------------------------------------------------------
 
+const PLACEHOLDER_BG = 'linear-gradient(135deg, #eef2ff 0%, #f8fafc 100%)';
+
 export default function ProductDetailsView() {
   const { tx } = useLocales();
   const { id = '' } = useParams();
   const { data: product, isPending } = useProductDetailQuery(id);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
-  const initials = useMemo(() => {
-    if (!product?.name) return 'P';
-    return product.name.charAt(0).toUpperCase();
-  }, [product?.name]);
-  const marginValue = useMemo(() => {
-    if (!product) return 0;
-    return Number(product.salePrice) - Number(product.purchasePrice);
+  const images = useMemo(() => {
+    if (!product) return [];
+    return product.images.map((item) => item.image).filter(Boolean);
   }, [product]);
-  const stockColor = useMemo(() => {
-    if (!product) return 'default' as const;
-    if (product.stock <= 0) return 'error' as const;
-    if (product.stock <= 10) return 'warning' as const;
-    return 'success' as const;
-  }, [product]);
+
+  const hasImages = images.length > 0;
+  const clampedIndex = Math.min(activeImageIndex, Math.max(images.length - 1, 0));
+  const currentImage = hasImages ? images[clampedIndex] : null;
 
   if (isPending) {
     return (
@@ -81,64 +79,146 @@ export default function ProductDetailsView() {
 
       <Stack spacing={3}>
         <Card sx={{ p: 3 }}>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2.5} alignItems={{ xs: 'flex-start', sm: 'center' }}>
-            <Avatar sx={{ width: 52, height: 52, bgcolor: 'primary.main', fontWeight: 700 }}>{initials}</Avatar>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'flex-start', sm: 'center' }}>
+            <Avatar src={product.image ?? undefined} sx={{ width: 72, height: 72, bgcolor: 'primary.main', fontWeight: 700 }}>
+              {product.name.charAt(0).toUpperCase()}
+            </Avatar>
             <Box sx={{ flexGrow: 1 }}>
-              <Typography variant="h6">{product.name}</Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="h5">{product.name}</Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
                 SKU: {product.sku || '-'}
               </Typography>
             </Box>
-            <Stack direction="row" spacing={1} alignItems="center">
-              <Chip
-                size="small"
-                variant="soft"
-                color={stockColor}
-                icon={<Iconify icon="solar:box-bold" />}
-                label={`${tx('common.table.stock')}: ${product.stock}`}
-              />
-              <Chip
-                size="small"
-                variant="soft"
-                color="default"
-                icon={<Iconify icon="solar:calendar-bold" />}
-                label={fDateTime(product.createdAt)}
-              />
-            </Stack>
+            <Chip
+              variant="soft"
+              color="default"
+              icon={<Iconify icon="solar:calendar-bold" />}
+              label={fDateTime(product.createdAt)}
+            />
           </Stack>
         </Card>
 
-        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems="stretch">
-          <Card sx={{ p: 2.5, flex: 1, border: (theme) => `1px dashed ${theme.palette.divider}` }}>
-            <Typography variant="caption" color="text.secondary">
-              {tx('common.table.purchase')}
-            </Typography>
-            <Typography variant="h5" sx={{ mt: 0.5 }}>
-              {fCurrency(product.purchasePrice)}
-            </Typography>
+        <Stack direction={{ xs: 'column', lg: 'row' }} spacing={3} alignItems="stretch">
+          <Card sx={{ flex: 1, p: 2.5 }}>
+            <CardHeader
+              title={tx('common.table.image')}
+              subheader={hasImages ? `${images.length} image(s)` : 'No images'}
+              sx={{ px: 0, pt: 0, pb: 2 }}
+            />
+
+            <Box
+              sx={{
+                position: 'relative',
+                borderRadius: 2,
+                overflow: 'hidden',
+                border: (theme) => `1px solid ${theme.palette.divider}`,
+                bgcolor: 'background.neutral',
+                minHeight: { xs: 260, md: 380 },
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {currentImage ? (
+                <Box
+                  component="img"
+                  src={currentImage}
+                  alt={product.name}
+                  sx={{
+                    width: '100%',
+                    height: { xs: 260, md: 380 },
+                    objectFit: 'cover',
+                  }}
+                />
+              ) : (
+                <Stack alignItems="center" spacing={1.5} sx={{ p: 3, width: '100%', height: '100%', justifyContent: 'center', background: PLACEHOLDER_BG }}>
+                  <Iconify icon="solar:gallery-remove-bold" width={52} />
+                  <Typography variant="subtitle2">{tx('common.table.noData')}</Typography>
+                </Stack>
+              )}
+
+              {hasImages ? (
+                <>
+                  <IconButton
+                    onClick={() => setActiveImageIndex((prev) => (prev <= 0 ? images.length - 1 : prev - 1))}
+                    sx={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', bgcolor: 'rgba(17,24,39,0.4)', color: 'common.white', '&:hover': { bgcolor: 'rgba(17,24,39,0.6)' } }}
+                  >
+                    <Iconify icon="eva:arrow-ios-back-fill" />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => setActiveImageIndex((prev) => (prev >= images.length - 1 ? 0 : prev + 1))}
+                    sx={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', bgcolor: 'rgba(17,24,39,0.4)', color: 'common.white', '&:hover': { bgcolor: 'rgba(17,24,39,0.6)' } }}
+                  >
+                    <Iconify icon="eva:arrow-ios-forward-fill" />
+                  </IconButton>
+                </>
+              ) : null}
+            </Box>
+
+            {hasImages ? (
+              <Stack direction="row" spacing={1} sx={{ mt: 2, overflowX: 'auto', pb: 0.5 }}>
+                {images.map((item, idx) => (
+                  <Box
+                    key={`${item}-${idx}`}
+                    onClick={() => setActiveImageIndex(idx)}
+                    sx={{
+                      width: 76,
+                      height: 76,
+                      borderRadius: 1.5,
+                      cursor: 'pointer',
+                      overflow: 'hidden',
+                      border: (theme) =>
+                        `2px solid ${idx === clampedIndex ? theme.palette.primary.main : theme.palette.divider}`,
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Box component="img" src={item} alt={`${product.name}-${idx + 1}`} sx={{ width: 1, height: 1, objectFit: 'cover' }} />
+                  </Box>
+                ))}
+              </Stack>
+            ) : null}
           </Card>
-          <Card sx={{ p: 2.5, flex: 1, border: (theme) => `1px dashed ${theme.palette.divider}` }}>
-            <Typography variant="caption" color="text.secondary">
-              {tx('common.table.salePrice')}
+
+          <Card sx={{ width: { xs: 1, lg: 360 }, p: 2.5 }}>
+            <Typography variant="h6" sx={{ mb: 2 }}>
+              Product Info
             </Typography>
-            <Typography variant="h5" sx={{ mt: 0.5 }}>
-              {fCurrency(product.salePrice)}
-            </Typography>
-          </Card>
-          <Card sx={{ p: 2.5, flex: 1 }}>
-            <Typography variant="caption" color="text.secondary">
-              Margin
-            </Typography>
-            <Typography variant="h5" sx={{ mt: 0.5 }}>
-              {fCurrency(String(marginValue))}
-            </Typography>
-            <Divider sx={{ my: 1.5 }} />
-            <Typography variant="caption" color="text.secondary">
-              {tx('common.table.created')}
-            </Typography>
-            <Typography variant="subtitle2" sx={{ mt: 0.5 }}>
-              {fDateTime(product.createdAt)}
-            </Typography>
+
+            <Stack spacing={1.5}>
+              <Stack spacing={0.5}>
+                <Typography variant="caption" color="text.secondary">
+                  {tx('common.table.name')}
+                </Typography>
+                <Typography variant="subtitle2">{product.name}</Typography>
+              </Stack>
+
+              <Divider />
+
+              <Stack spacing={0.5}>
+                <Typography variant="caption" color="text.secondary">
+                  {tx('common.table.sku')}
+                </Typography>
+                <Typography variant="subtitle2">{product.sku || '-'}</Typography>
+              </Stack>
+
+              <Divider />
+
+              <Stack spacing={0.5}>
+                <Typography variant="caption" color="text.secondary">
+                  {tx('common.table.created')}
+                </Typography>
+                <Typography variant="subtitle2">{fDateTime(product.createdAt)}</Typography>
+              </Stack>
+
+              <Divider />
+
+              <Stack spacing={0.5}>
+                <Typography variant="caption" color="text.secondary">
+                  {tx('common.table.updated')}
+                </Typography>
+                <Typography variant="subtitle2">{fDateTime(product.updatedAt)}</Typography>
+              </Stack>
+            </Stack>
           </Card>
         </Stack>
       </Stack>

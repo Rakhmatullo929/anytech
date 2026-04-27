@@ -10,9 +10,6 @@ class Product(models.Model):
     )
     name = models.CharField(max_length=255)
     sku = models.CharField(max_length=100, blank=True, null=True)
-    purchase_price = models.DecimalField(max_digits=12, decimal_places=2)
-    sale_price = models.DecimalField(max_digits=12, decimal_places=2)
-    stock = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -31,3 +28,23 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class ProductImage(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    product = models.ForeignKey(
+        "products.Product", on_delete=models.CASCADE, related_name="images"
+    )
+    image = models.ImageField(upload_to="products/")
+    position = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "product_images"
+        ordering = ["position", "created_at"]
+        indexes = [
+            models.Index(fields=["product", "position"]),
+        ]
+
+    def __str__(self):
+        return f"{self.product_id}:{self.position}"

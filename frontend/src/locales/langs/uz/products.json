@@ -8,9 +8,7 @@
   "documentTitle": "Mahsulotlar",
   "dialogs": {
     "create": {
-      "initialStock": "Boshlangʻich qoldiq",
-      "purchasePrice": "Xarid narxi",
-      "salePrice": "Sotuv narxi",
+      "image": "Rasm",
       "title": "Yangi mahsulot"
     },
     "edit": {
@@ -37,9 +35,7 @@
     "bulkDeleted": "O‘chirilgan mahsulotlar soni: {{count}}",
     "created": "Mahsulot muvaffaqiyatli yaratildi",
     "deleted": "Mahsulot o‘chirildi",
-    "invalidPrices": "Narxlarni tekshiring: qiymatlar 0 dan katta yoki teng son bo'lishi kerak",
-    "invalidStock": "Qoldiqni tekshiring: qiymat 0 dan katta yoki teng son bo'lishi kerak",
-    "requiredFields": "Nomi, xarid narxi va sotuv narxi majburiy",
+    "requiredFields": "Mahsulot nomi majburiy",
     "updated": "Mahsulot yangilandi"
   }
 }

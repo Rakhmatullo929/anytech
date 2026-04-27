@@ -25,16 +25,15 @@ export async function fetchProductsList(
 }
 
 export async function createProduct(payload: CreateProductPayload): Promise<ProductListItem> {
+  const formData = new FormData();
+  formData.append('name', payload.name);
+  formData.append('sku', payload.sku?.trim() ? payload.sku.trim() : '');
+  payload.images?.forEach((file) => formData.append('uploaded_images', file));
+
   return request<ProductListItem>({
     method: 'POST',
     url: API_ENDPOINTS.products.list,
-    data: {
-      name: payload.name,
-      sku: payload.sku?.trim() ? payload.sku.trim() : null,
-      purchasePrice: payload.purchasePrice,
-      salePrice: payload.salePrice,
-      stock: payload.stock,
-    },
+    data: formData,
   });
 }
 
@@ -46,15 +45,15 @@ export async function fetchProductDetail(id: string): Promise<ProductDetail> {
 }
 
 export async function updateProduct(payload: UpdateProductPayload): Promise<ProductListItem> {
+  const formData = new FormData();
+  formData.append('name', payload.name);
+  formData.append('sku', payload.sku?.trim() ? payload.sku.trim() : '');
+  payload.images?.forEach((file) => formData.append('uploaded_images', file));
+
   return request<ProductListItem>({
     method: 'PUT',
     url: API_ENDPOINTS.products.detail(payload.id),
-    data: {
-      name: payload.name,
-      sku: payload.sku?.trim() ? payload.sku.trim() : null,
-      purchasePrice: payload.purchasePrice,
-      salePrice: payload.salePrice,
-    },
+    data: formData,
   });
 }
 

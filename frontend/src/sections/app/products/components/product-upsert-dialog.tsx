@@ -10,15 +10,13 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Stack from '@mui/material/Stack';
 
 import { useLocales } from 'src/locales';
-import FormProvider, { RHFTextField } from 'src/components/hook-form';
+import FormProvider, { RHFTextField, RHFUpload } from 'src/components/hook-form';
 import { getProductUpsertSchema } from './utils/product-upsert-schema';
 
 type ProductUpsertValues = {
   name: string;
   sku: string;
-  purchasePrice: string;
-  salePrice: string;
-  stock: string;
+  images: (File | string)[];
 };
 
 type Props = {
@@ -47,30 +45,24 @@ export default function ProductUpsertDialog({
     defaultValues: {
       name: '',
       sku: '',
-      purchasePrice: '',
-      salePrice: '',
-      stock: '',
+      images: [],
     },
   });
-  const { reset, handleSubmit } = methods;
+  const { reset, handleSubmit, setValue } = methods;
 
   useEffect(() => {
     if (!open) return;
     reset({
       name: initialValues?.name ?? '',
       sku: initialValues?.sku ?? '',
-      purchasePrice: initialValues?.purchasePrice ?? '',
-      salePrice: initialValues?.salePrice ?? '',
-      stock: initialValues?.stock ?? '',
+      images: initialValues?.images ?? [],
     });
   }, [
     open,
     reset,
     initialValues?.name,
     initialValues?.sku,
-    initialValues?.purchasePrice,
-    initialValues?.salePrice,
-    initialValues?.stock,
+    initialValues?.images,
   ]);
 
   return (
@@ -83,11 +75,25 @@ export default function ProductUpsertDialog({
           <Stack spacing={2} sx={{ mt: 1 }}>
             <RHFTextField name="name" label={`${tx('common.table.name')} *`} />
             <RHFTextField name="sku" label={tx('common.table.sku')} />
-            <RHFTextField name="purchasePrice" label={`${tx('products.dialogs.create.purchasePrice')} *`} />
-            <RHFTextField name="salePrice" label={`${tx('products.dialogs.create.salePrice')} *`} />
-            {mode === 'create' ? (
-              <RHFTextField name="stock" label={`${tx('products.dialogs.create.initialStock')} *`} />
-            ) : null}
+            <RHFUpload
+              name="images"
+              multiple
+              thumbnail
+              maxSize={3145728}
+              onDrop={(acceptedFiles) => {
+                const nextFiles = acceptedFiles ?? [];
+                setValue('images', nextFiles, { shouldValidate: true });
+              }}
+              onRemove={(inputFile) => {
+                const current = methods.getValues('images');
+                setValue(
+                  'images',
+                  current.filter((file) => file !== inputFile),
+                  { shouldValidate: true }
+                );
+              }}
+              onRemoveAll={() => setValue('images', [], { shouldValidate: true })}
+            />
           </Stack>
         </DialogContent>
         <DialogActions>
