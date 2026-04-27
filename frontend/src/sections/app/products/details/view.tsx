@@ -2,10 +2,8 @@ import { useMemo, useState } from 'react';
 // locales
 import { useLocales } from 'src/locales';
 // @mui
-import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
-import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
@@ -22,6 +20,7 @@ import { RouterLink } from 'src/routes/components';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import EmptyContent from 'src/components/empty-content';
 import Iconify from 'src/components/iconify';
+import EntityDetailHeader from 'src/sections/app/components/entity-detail-header';
 import { useProductDetailQuery } from 'src/sections/app/products/api';
 import { ProductDetailsSkeleton } from 'src/sections/app/products/skeleton';
 
@@ -43,7 +42,6 @@ export default function ProductDetailsView() {
   const hasImages = images.length > 0;
   const clampedIndex = Math.min(activeImageIndex, Math.max(images.length - 1, 0));
   const currentImage = hasImages ? images[clampedIndex] : null;
-  const primaryImage = hasImages ? images[0] : null;
 
   if (isPending) {
     return (
@@ -79,25 +77,23 @@ export default function ProductDetailsView() {
       />
 
       <Stack spacing={3}>
-        <Card sx={{ p: 3 }}>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'flex-start', sm: 'center' }}>
-            <Avatar src={primaryImage ?? undefined} sx={{ width: 72, height: 72, bgcolor: 'primary.main', fontWeight: 700 }}>
-              {product.name.charAt(0).toUpperCase()}
-            </Avatar>
-            <Box sx={{ flexGrow: 1 }}>
-              <Typography variant="h5">{product.name}</Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                SKU: {product.sku || '-'}
-              </Typography>
-            </Box>
-            <Chip
-              variant="soft"
-              color="default"
-              icon={<Iconify icon="solar:calendar-bold" />}
-              label={fDateTime(product.createdAt)}
-            />
-          </Stack>
-        </Card>
+        <EntityDetailHeader
+          title={product.name}
+          description={`SKU: ${product.sku || '-'}`}
+          icon="solar:box-bold"
+          chips={[
+            {
+              icon: 'solar:gallery-bold',
+              label: `${images.length} image(s)`,
+              variant: 'soft',
+            },
+            {
+              icon: 'solar:calendar-mark-bold',
+              label: fDateTime(product.createdAt),
+              variant: 'outlined',
+            },
+          ]}
+        />
 
         <Stack direction={{ xs: 'column', lg: 'row' }} spacing={3} alignItems="stretch">
           <Card sx={{ flex: 1, p: 2.5 }}>

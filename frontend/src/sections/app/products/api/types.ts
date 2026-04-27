@@ -37,6 +37,7 @@ export type FetchProductsListParams = {
   pageSize: number;
   search?: string;
   ordering?: string;
+  categoryId?: string;
 };
 
 export type CreateProductPayload = {

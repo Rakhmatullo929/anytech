@@ -1,5 +1,16 @@
 {
   "addButton": "Добавить категорию",
+  "detailDocumentTitle": "Категория",
+  "detail": {
+    "notFound": "Категория не найдена",
+    "productsTitle": "Товары категории",
+    "productsHint": "Список товаров, которые относятся к этой категории.",
+    "productsCount": "Товаров: {{count}}"
+  },
+  "tabs": {
+    "info": "Инфо",
+    "products": "Товары"
+  },
   "searchPlaceholder": "Поиск по названию категории…",
   "dialogs": {
     "create": {

@@ -152,3 +152,18 @@ class TestProductSearch:
         resp = manager_client.get(SEARCH_URL, {"search": "NonExistent"})
         assert resp.status_code == status.HTTP_200_OK
         assert resp.data["count"] == 0
+
+
+class TestProductFiltering:
+    def test_filter_by_category(self, manager_client, tenant):
+        from products.models import Category
+
+        c1 = Category.objects.create(tenant=tenant, name="Phones")
+        c2 = Category.objects.create(tenant=tenant, name="Laptops")
+        Product.objects.create(tenant=tenant, category=c1, name="Phone A", sku="P-A")
+        Product.objects.create(tenant=tenant, category=c2, name="Laptop A", sku="L-A")
+
+        resp = manager_client.get(LIST_URL, {"category_id": str(c1.pk)})
+        assert resp.status_code == status.HTTP_200_OK
+        assert resp.data["count"] == 1
+        assert resp.data["results"][0]["name"] == "Phone A"

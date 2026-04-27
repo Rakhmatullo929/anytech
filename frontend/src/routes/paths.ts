@@ -11,6 +11,7 @@ export const paths = {
   },
   categories: {
     root: '/categories',
+    details: (id: string) => `/categories/${id}`,
   },
   clients: {
     root: '/clients',

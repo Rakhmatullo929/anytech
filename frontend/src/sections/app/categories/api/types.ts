@@ -13,6 +13,8 @@ export type FetchCategoriesListParams = {
   ordering?: string;
 };
 
+export type CategoryDetail = CategoryListItem;
+
 export type CreateCategoryPayload = {
   name: string;
 };

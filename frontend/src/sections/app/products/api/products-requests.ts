@@ -20,6 +20,7 @@ export async function fetchProductsList(
       page: params.page,
       pageSize: params.pageSize,
       ...(params.search ? { search: params.search } : {}),
+      ...(params.categoryId ? { categoryId: params.categoryId } : {}),
       ordering: params.ordering ?? '-created_at',
     },
   });

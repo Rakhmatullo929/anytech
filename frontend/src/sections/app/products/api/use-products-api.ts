@@ -27,6 +27,7 @@ type ProductsListKeyParams = {
   pageSize?: number;
   search?: string;
   ordering?: string;
+  categoryId?: string;
 };
 
 function getProductsListKeyParams(queryKey: QueryKey): ProductsListKeyParams {
@@ -40,16 +41,21 @@ function getProductsListKeyParams(queryKey: QueryKey): ProductsListKeyParams {
     pageSize: typeof params.pageSize === 'number' ? params.pageSize : undefined,
     search: typeof params.search === 'string' ? params.search : undefined,
     ordering: typeof params.ordering === 'string' ? params.ordering : undefined,
+    categoryId: typeof params.categoryId === 'string' ? params.categoryId : undefined,
   };
 }
 
 export function useProductsListQuery(params: FetchProductsListParams) {
-  const { page, pageSize, search, ordering } = params;
+  const { page, pageSize, search, ordering, categoryId } = params;
 
   const queryKey = useMemo(
     () =>
-      ['products', 'list', { page, pageSize, search: search ?? '', ordering: ordering ?? '-created_at' }] as const,
-    [page, pageSize, search, ordering]
+      [
+        'products',
+        'list',
+        { page, pageSize, search: search ?? '', ordering: ordering ?? '-created_at', categoryId: categoryId ?? '' },
+      ] as const,
+    [page, pageSize, search, ordering, categoryId]
   );
 
   return useFetchList<ProductListItem>(queryKey, () => fetchProductsList(params), {
@@ -82,10 +88,11 @@ export function useCreateProductMutation() {
       cachedLists.forEach(([queryKey, cachedPage]) => {
         if (!cachedPage) return;
 
-        const { page = 1, pageSize = cachedPage.results.length, search = '', ordering = '-created_at' } =
+        const { page = 1, pageSize = cachedPage.results.length, search = '', ordering = '-created_at', categoryId = '' } =
           getProductsListKeyParams(queryKey);
 
-        const shouldInsertIntoCurrentPage = page === 1 && ordering === '-created_at' && search.trim() === '';
+        const shouldInsertIntoCurrentPage =
+          page === 1 && ordering === '-created_at' && search.trim() === '' && categoryId.trim() === '';
         if (!shouldInsertIntoCurrentPage) return;
 
         const nextResults = [createdProduct, ...cachedPage.results];

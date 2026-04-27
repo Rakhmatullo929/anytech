@@ -2,10 +2,18 @@ import { useMemo } from 'react';
 import type { QueryKey } from '@tanstack/react-query';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { deleteFromList, type Pagination, updateList, useFetchList, useMutate } from 'src/hooks/api';
+import { deleteFromList, type Pagination, updateList, useFetchList, useFetchOne, useMutate } from 'src/hooks/api';
 
-import { bulkDeleteCategories, createCategory, deleteCategory, fetchCategoriesList, updateCategory } from './categories-requests';
+import {
+  bulkDeleteCategories,
+  createCategory,
+  deleteCategory,
+  fetchCategoryDetail,
+  fetchCategoriesList,
+  updateCategory,
+} from './categories-requests';
 import type {
+  CategoryDetail,
   CategoryListItem,
   CreateCategoryPayload,
   FetchCategoriesListParams,
@@ -48,6 +56,13 @@ export function useCategoriesListQuery(params: FetchCategoriesListParams) {
 
   return useFetchList<CategoryListItem>(queryKey, () => fetchCategoriesList(params), {
     placeholderData: (previousData) => previousData,
+  });
+}
+
+export function useCategoryDetailQuery(id: string) {
+  const queryKey = useMemo(() => ['categories', 'detail', id] as const, [id]);
+  return useFetchOne<CategoryDetail>(queryKey, () => fetchCategoryDetail(id), {
+    enabled: Boolean(id),
   });
 }
 

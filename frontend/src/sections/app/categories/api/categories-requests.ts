@@ -2,6 +2,7 @@ import type { Pagination } from 'src/hooks/api';
 import { request, API_ENDPOINTS } from 'src/utils/axios';
 
 import type {
+  CategoryDetail,
   CategoryListItem,
   CreateCategoryPayload,
   FetchCategoriesListParams,
@@ -30,6 +31,13 @@ export async function createCategory(payload: CreateCategoryPayload): Promise<Ca
     data: {
       name: payload.name,
     },
+  });
+}
+
+export async function fetchCategoryDetail(id: string): Promise<CategoryDetail> {
+  return request<CategoryDetail>({
+    method: 'GET',
+    url: API_ENDPOINTS.categories.detail(id),
   });
 }
 

@@ -13,6 +13,7 @@ const PosPage = lazy(() => import('../../pages/pos'));
 const ProfilePage = lazy(() => import('../../pages/profile'));
 const ProductsPage = lazy(() => import('../../pages/products'));
 const CategoriesPage = lazy(() => import('../../pages/categories'));
+const CategoryDetailsPage = lazy(() => import('../../sections/app/categories/details/view'));
 const ProductDetailsPage = lazy(() => import('../../pages/product-details'));
 const ClientsListPage = lazy(() => import('../../pages/clients'));
 const ClientsGroupsPage = lazy(() => import('../../pages/clients-groups'));
@@ -81,7 +82,16 @@ export const dashboardRoutes = [
       },
       {
         path: 'categories',
-        element: withPermission('categories', 'read', <CategoriesPage />),
+        children: [
+          {
+            index: true,
+            element: withPermission('categories', 'read', <CategoriesPage />),
+          },
+          {
+            path: ':id',
+            element: withPermission('categories', 'detail', <CategoryDetailsPage />),
+          },
+        ],
       },
       {
         path: 'clients',

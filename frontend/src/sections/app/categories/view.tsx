@@ -15,6 +15,8 @@ import LinearProgress from '@mui/material/LinearProgress';
 import IconButton from '@mui/material/IconButton';
 import MenuItem from '@mui/material/MenuItem';
 import Checkbox from '@mui/material/Checkbox';
+import Link from '@mui/material/Link';
+import Typography from '@mui/material/Typography';
 // utils
 import { fDateTime } from 'src/utils/format-time';
 import { useDebounce } from 'src/hooks/use-debounce';
@@ -23,6 +25,8 @@ import { useCheckPermission } from 'src/auth/hooks/use-check-permission';
 import Can from 'src/auth/components/can';
 // routes
 import { paths } from 'src/routes/paths';
+import { useRouter } from 'src/routes/hook';
+import { RouterLink } from 'src/routes/components';
 // components
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
@@ -50,7 +54,8 @@ import { CategoriesListSkeleton } from 'src/sections/app/categories/skeleton';
 
 export default function CategoriesView() {
   const { tx } = useLocales();
-  const { canWritePage } = useCheckPermission();
+  const { canWritePage, canDetailPage } = useCheckPermission();
+  const router = useRouter();
   const { enqueueSnackbar } = useSnackbar();
   const actionsPopover = usePopover();
   const createMutation = useCreateCategoryMutation();
@@ -154,6 +159,12 @@ export default function CategoriesView() {
     closeActions(false);
   };
 
+  const handleView = () => {
+    if (!selectedCategoryId) return;
+    router.push(paths.categories.details(selectedCategoryId));
+    closeActions();
+  };
+
   const handleAskDelete = () => {
     closeActions(false);
     setDeleteOpen(true);
@@ -247,6 +258,7 @@ export default function CategoriesView() {
     deleteMutation.variables === selectedCategoryId;
   const deletingBulk = bulkDeleteMutation.isPending;
   const canWriteCategories = canWritePage('categories');
+  const canDetailCategories = canDetailPage('categories');
 
   return (
     <>
@@ -312,10 +324,20 @@ export default function CategoriesView() {
                           disabled={!canWriteCategories}
                         />
                       </TableCell>
-                      <TableCell>{row.name}</TableCell>
+                      <TableCell>
+                        <Can
+                          page="categories"
+                          action="detail"
+                          fallback={<Typography variant="subtitle2">{row.name}</Typography>}
+                        >
+                          <Link component={RouterLink} href={paths.categories.details(row.id)} variant="subtitle2">
+                            {row.name}
+                          </Link>
+                        </Can>
+                      </TableCell>
                       <TableCell>{fDateTime(row.createdAt)}</TableCell>
                       <TableCell align="right">
-                        {canWriteCategories ? (
+                        {canWriteCategories || canDetailCategories ? (
                           <IconButton color="default" onClick={(event) => openActions(event, row.id)}>
                             <Iconify icon="eva:more-vertical-fill" />
                           </IconButton>
@@ -342,6 +364,12 @@ export default function CategoriesView() {
       )}
 
       <CustomPopover open={actionsPopover.open} onClose={() => closeActions()} sx={{ width: 180, p: 1 }}>
+        <Can page="categories" action="detail">
+          <MenuItem onClick={handleView}>
+            <Iconify icon="solar:eye-bold" />
+            {tx('common.actions.view')}
+          </MenuItem>
+        </Can>
         <Can page="categories" action="write">
           <MenuItem onClick={handleEdit}>
             <Iconify icon="solar:pen-bold" />
