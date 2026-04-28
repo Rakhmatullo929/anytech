@@ -16,12 +16,24 @@ export type ProductListItem = {
   name: string;
   sku: string | null;
   image: string | null;
+  totalQuantity: number;
+  totalPurchaseAmount: string;
   createdAt: string;
   updatedAt: string;
 };
 
 export type ProductDetail = Omit<ProductListItem, 'image'> & {
   images: ProductImage[];
+};
+
+export type ProductPurchaseListItem = {
+  id: string;
+  product: string;
+  productName: string;
+  quantity: number;
+  unitPrice: string;
+  currency: string;
+  createdAt: string;
 };
 
 export type CategoryListItem = {
@@ -40,6 +52,14 @@ export type FetchProductsListParams = {
   categoryId?: string;
 };
 
+export type FetchProductPurchasesListParams = {
+  page: number;
+  pageSize: number;
+  productId: string;
+  search?: string;
+  ordering?: string;
+};
+
 export type CreateProductPayload = {
   name: string;
   sku?: string;
@@ -53,4 +73,15 @@ export type UpdateProductPayload = {
   sku?: string;
   category?: string;
   images?: File[];
+};
+
+export type CreateProductPurchasePayload = {
+  product: string;
+  quantity: number;
+  unitPrice: string;
+  currency: string;
+};
+
+export type UpdateProductPurchasePayload = CreateProductPurchasePayload & {
+  id: string;
 };

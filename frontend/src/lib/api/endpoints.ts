@@ -28,6 +28,11 @@ export const API_ENDPOINTS = {
     bulkDelete: `${API_V1}/products/bulk-delete/`,
     detail: (id: string) => `${API_V1}/products/${id}/`,
   },
+  productPurchases: {
+    list: `${API_V1}/product-purchases/`,
+    bulkDelete: `${API_V1}/product-purchases/bulk-delete/`,
+    detail: (id: string) => `${API_V1}/product-purchases/${id}/`,
+  },
   categories: {
     list: `${API_V1}/categories/`,
     bulkDelete: `${API_V1}/categories/bulk-delete/`,

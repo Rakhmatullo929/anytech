@@ -5,20 +5,29 @@ import { useQueryClient } from '@tanstack/react-query';
 import { deleteFromList, type Pagination, updateList, useFetchList, useFetchOne, useMutate } from 'src/hooks/api';
 
 import {
+  bulkDeleteProductPurchases,
   bulkDeleteProducts,
+  createProductPurchase,
   createProduct,
+  deleteProductPurchase,
   deleteProduct,
   fetchCategoriesList,
+  fetchProductPurchasesList,
   fetchProductDetail,
   fetchProductsList,
+  updateProductPurchase,
   updateProduct,
 } from './products-requests';
 import type {
   CategoryListItem,
+  CreateProductPurchasePayload,
   CreateProductPayload,
+  FetchProductPurchasesListParams,
   FetchProductsListParams,
+  ProductPurchaseListItem,
   ProductDetail,
   ProductListItem,
+  UpdateProductPurchasePayload,
   UpdateProductPayload,
 } from './types';
 
@@ -152,6 +161,71 @@ export function useBulkDeleteProductsMutation() {
           };
         }
       );
+    },
+  });
+}
+
+export function useProductPurchasesListQuery(params: FetchProductPurchasesListParams) {
+  const { page, pageSize, productId, search, ordering } = params;
+  const queryKey = useMemo(
+    () =>
+      [
+        'product-purchases',
+        'list',
+        { page, pageSize, productId, search: search ?? '', ordering: ordering ?? '-created_at' },
+      ] as const,
+    [page, pageSize, productId, search, ordering]
+  );
+
+  return useFetchList<ProductPurchaseListItem>(queryKey, () => fetchProductPurchasesList(params), {
+    placeholderData: (previousData) => previousData,
+  });
+}
+
+export function useCreateProductPurchaseMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutate<ProductPurchaseListItem, CreateProductPurchasePayload>(createProductPurchase, {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['product-purchases', 'list'] });
+      queryClient.invalidateQueries({ queryKey: ['products', 'list'] });
+      queryClient.invalidateQueries({ queryKey: ['products', 'detail'] });
+    },
+  });
+}
+
+export function useUpdateProductPurchaseMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutate<ProductPurchaseListItem, UpdateProductPurchasePayload>(updateProductPurchase, {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['product-purchases', 'list'] });
+      queryClient.invalidateQueries({ queryKey: ['products', 'list'] });
+      queryClient.invalidateQueries({ queryKey: ['products', 'detail'] });
+    },
+  });
+}
+
+export function useDeleteProductPurchaseMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutate<void, string>(deleteProductPurchase, {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['product-purchases', 'list'] });
+      queryClient.invalidateQueries({ queryKey: ['products', 'list'] });
+      queryClient.invalidateQueries({ queryKey: ['products', 'detail'] });
+    },
+  });
+}
+
+export function useBulkDeleteProductPurchasesMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutate<void, string[]>(bulkDeleteProductPurchases, {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['product-purchases', 'list'] });
+      queryClient.invalidateQueries({ queryKey: ['products', 'list'] });
+      queryClient.invalidateQueries({ queryKey: ['products', 'detail'] });
     },
   });
 }

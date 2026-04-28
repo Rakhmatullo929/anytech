@@ -8,7 +8,7 @@ import pytest
 from django.urls import reverse
 from rest_framework import status
 
-from products.models import Product
+from products.models import Product, ProductPurchase
 
 pytestmark = pytest.mark.django_db
 
@@ -38,12 +38,51 @@ class TestProductModel:
         assert p1.pk != p2.pk
 
 
+class TestProductPurchaseModel:
+    def test_create_purchase_batch(self, product):
+        purchase = ProductPurchase.objects.create(
+            product=product,
+            quantity=10,
+            unit_price="900.00",
+            currency="USD",
+        )
+
+        assert purchase.product == product
+        assert purchase.quantity == 10
+        assert str(purchase.unit_price) == "900.00"
+        assert purchase.currency == "USD"
+
+    def test_purchase_str(self, product):
+        purchase = ProductPurchase.objects.create(
+            product=product,
+            quantity=10,
+            unit_price="800.00",
+            currency="USD",
+        )
+
+        assert f"{product.id}: 10 x 800.00 USD" == str(purchase)
+
+
 class TestProductList:
     def test_list_products(self, manager_client, product):
+        ProductPurchase.objects.create(
+            product=product,
+            quantity=10,
+            unit_price="900.00",
+            currency="USD",
+        )
+        ProductPurchase.objects.create(
+            product=product,
+            quantity=10,
+            unit_price="800.00",
+            currency="USD",
+        )
         resp = manager_client.get(LIST_URL)
         assert resp.status_code == status.HTTP_200_OK
         assert resp.data["count"] == 1
         assert resp.data["results"][0]["name"] == "Test Product"
+        assert resp.data["results"][0]["total_quantity"] == 20
+        assert resp.data["results"][0]["total_purchase_amount"] == "17000.00"
 
     def test_list_unauthenticated(self, anon_client):
         resp = anon_client.get(LIST_URL)

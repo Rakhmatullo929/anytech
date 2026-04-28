@@ -3,10 +3,14 @@ import { request, API_ENDPOINTS } from 'src/utils/axios';
 
 import type {
   CategoryListItem,
+  CreateProductPurchasePayload,
   CreateProductPayload,
+  FetchProductPurchasesListParams,
   FetchProductsListParams,
+  ProductPurchaseListItem,
   ProductDetail,
   ProductListItem,
+  UpdateProductPurchasePayload,
   UpdateProductPayload,
 } from './types';
 
@@ -89,5 +93,61 @@ export async function fetchCategoriesList(): Promise<Pagination<CategoryListItem
       pageSize: 200,
       ordering: 'name',
     },
+  });
+}
+
+export async function fetchProductPurchasesList(
+  params: FetchProductPurchasesListParams
+): Promise<Pagination<ProductPurchaseListItem>> {
+  return request<Pagination<ProductPurchaseListItem>>({
+    method: 'GET',
+    url: API_ENDPOINTS.productPurchases.list,
+    params: {
+      page: params.page,
+      pageSize: params.pageSize,
+      productId: params.productId,
+      ...(params.search ? { search: params.search } : {}),
+      ordering: params.ordering ?? '-created_at',
+    },
+  });
+}
+
+export async function createProductPurchase(
+  payload: CreateProductPurchasePayload
+): Promise<ProductPurchaseListItem> {
+  return request<ProductPurchaseListItem>({
+    method: 'POST',
+    url: API_ENDPOINTS.productPurchases.list,
+    data: payload,
+  });
+}
+
+export async function updateProductPurchase(
+  payload: UpdateProductPurchasePayload
+): Promise<ProductPurchaseListItem> {
+  return request<ProductPurchaseListItem>({
+    method: 'PUT',
+    url: API_ENDPOINTS.productPurchases.detail(payload.id),
+    data: {
+      product: payload.product,
+      quantity: payload.quantity,
+      unitPrice: payload.unitPrice,
+      currency: payload.currency,
+    },
+  });
+}
+
+export async function deleteProductPurchase(id: string): Promise<void> {
+  await request<void>({
+    method: 'DELETE',
+    url: API_ENDPOINTS.productPurchases.detail(id),
+  });
+}
+
+export async function bulkDeleteProductPurchases(ids: string[]): Promise<void> {
+  await request<void>({
+    method: 'POST',
+    url: API_ENDPOINTS.productPurchases.bulkDelete,
+    data: { ids },
   });
 }

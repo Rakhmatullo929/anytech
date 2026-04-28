@@ -4,6 +4,10 @@
   "detail": {
     "notFound": "Товар не найден"
   },
+  "tabs": {
+    "info": "Инфо",
+    "table": "Таблица"
+  },
   "detailDocumentTitle": "Товар",
   "documentTitle": "Товары",
   "dialogs": {

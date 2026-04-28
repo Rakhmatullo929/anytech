@@ -4,6 +4,10 @@
   "detail": {
     "notFound": "Mahsulot topilmadi"
   },
+  "tabs": {
+    "info": "Maʼlumot",
+    "table": "Jadval"
+  },
   "detailDocumentTitle": "Mahsulot",
   "documentTitle": "Mahsulotlar",
   "dialogs": {

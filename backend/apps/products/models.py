@@ -80,3 +80,34 @@ class ProductImage(models.Model):
 
     def __str__(self):
         return f"{self.product_id}:{self.position}"
+
+
+class ProductPurchase(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    product = models.ForeignKey(
+        "products.Product", on_delete=models.CASCADE, related_name="purchases"
+    )
+    quantity = models.PositiveIntegerField()
+    unit_price = models.DecimalField(max_digits=12, decimal_places=2)
+    currency = models.CharField(max_length=3, default="USD")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "product_purchases"
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["product", "-created_at"]),
+        ]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(quantity__gt=0),
+                name="product_purchase_quantity_gt_zero",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(unit_price__gte=0),
+                name="product_purchase_unit_price_gte_zero",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.product_id}: {self.quantity} x {self.unit_price} {self.currency}"

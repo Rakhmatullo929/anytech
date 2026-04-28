@@ -18,11 +18,16 @@ import MenuItem from '@mui/material/MenuItem';
 import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
 import ListItemText from '@mui/material/ListItemText';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
 // utils
 import { useDebounce } from 'src/hooks/use-debounce';
 import { useUrlListState, useSyncTableWithUrlListState } from 'src/hooks/use-url-query-state';
 import { useCheckPermission } from 'src/auth/hooks/use-check-permission';
 import Can from 'src/auth/components/can';
+import { fCurrency, fNumber } from 'src/utils/format-number';
 // routes
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
@@ -44,6 +49,7 @@ import {
   useCategoriesListQuery,
   useBulkDeleteProductsMutation,
   useCreateProductMutation,
+  useCreateProductPurchaseMutation,
   useDeleteProductMutation,
   useProductsListQuery,
   useUpdateProductMutation,
@@ -60,6 +66,7 @@ export default function ProductsView() {
   const { enqueueSnackbar } = useSnackbar();
   const actionsPopover = usePopover();
   const createMutation = useCreateProductMutation();
+  const createPurchaseMutation = useCreateProductPurchaseMutation();
   const updateMutation = useUpdateProductMutation();
   const deleteMutation = useDeleteProductMutation();
   const bulkDeleteMutation = useBulkDeleteProductsMutation();
@@ -71,6 +78,8 @@ export default function ProductsView() {
       { id: 'name', label: tx('common.table.name') },
       { id: 'sku', label: tx('common.table.sku') },
       { id: 'category', label: tx('common.table.category') },
+      { id: 'totalQuantity', label: tx('common.table.qty') },
+      { id: 'totalPurchaseAmount', label: tx('common.table.purchase') },
       { id: '', label: '' },
     ],
     [tx]
@@ -118,6 +127,11 @@ export default function ProductsView() {
   const [editingProduct, setEditingProduct] = useState<ProductListItem | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [purchaseOpen, setPurchaseOpen] = useState(false);
+  const [purchaseProduct, setPurchaseProduct] = useState<ProductListItem | null>(null);
+  const [purchaseQuantity, setPurchaseQuantity] = useState('1');
+  const [purchaseUnitPrice, setPurchaseUnitPrice] = useState('');
+  const [purchaseCurrency, setPurchaseCurrency] = useState('USD');
   const { selected: selectedIds, setSelected } = table;
 
   useEffect(() => {
@@ -186,6 +200,36 @@ export default function ProductsView() {
     setUpsertMode('create');
     setEditingProduct(null);
     setUpsertOpen(true);
+  };
+
+  const handleOpenPurchaseCreate = (product: ProductListItem) => {
+    setPurchaseProduct(product);
+    setPurchaseQuantity('1');
+    setPurchaseUnitPrice('');
+    setPurchaseCurrency('USD');
+    setPurchaseOpen(true);
+  };
+
+  const handleCreatePurchase = async () => {
+    if (!purchaseProduct) return;
+    const quantity = Number(purchaseQuantity);
+    const unitPrice = purchaseUnitPrice.trim();
+    const currency = purchaseCurrency.trim().toUpperCase();
+    if (!quantity || quantity <= 0 || !unitPrice) return;
+
+    try {
+      await createPurchaseMutation.mutateAsync({
+        product: purchaseProduct.id,
+        quantity,
+        unitPrice,
+        currency,
+      });
+      enqueueSnackbar(tx('products.toasts.created'), { variant: 'success' });
+      setPurchaseOpen(false);
+      setPurchaseProduct(null);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleCloseUpsert = () => {
@@ -267,6 +311,7 @@ export default function ProductsView() {
   };
 
   const upsertLoading = createMutation.isPending || updateMutation.isPending;
+  const purchaseLoading = createPurchaseMutation.isPending;
   const deletingCurrent =
     deleteMutation.isPending &&
     selectedProductId !== null &&
@@ -360,11 +405,18 @@ export default function ProductsView() {
                       </TableCell>
                       <TableCell>{row.sku || '-'}</TableCell>
                       <TableCell>{row.category?.name || '-'}</TableCell>
+                      <TableCell>{fNumber(row.totalQuantity)}</TableCell>
+                      <TableCell>{fCurrency(row.totalPurchaseAmount)}</TableCell>
                       <TableCell align="right">
                         {canWriteProducts ? (
-                          <IconButton color="default" onClick={(event) => openActions(event, row.id)}>
-                            <Iconify icon="eva:more-vertical-fill" />
-                          </IconButton>
+                          <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+                            <IconButton color="primary" onClick={() => handleOpenPurchaseCreate(row)}>
+                              <Iconify icon="mingcute:add-line" />
+                            </IconButton>
+                            <IconButton color="default" onClick={(event) => openActions(event, row.id)}>
+                              <Iconify icon="eva:more-vertical-fill" />
+                            </IconButton>
+                          </Stack>
                         ) : null}
                       </TableCell>
                     </TableRow>
@@ -421,6 +473,44 @@ export default function ProductsView() {
           onClose={handleCloseUpsert}
           onSubmit={handleSubmitUpsert}
         />
+      </Can>
+
+      <Can page="products" action="write">
+        <Dialog open={purchaseOpen} onClose={() => setPurchaseOpen(false)} fullWidth maxWidth="xs">
+          <DialogTitle>{tx('common.table.purchase')}</DialogTitle>
+          <DialogContent sx={{ pt: 2 }}>
+            <Stack spacing={2}>
+              <TextField
+                label={tx('common.table.product')}
+                value={purchaseProduct?.name ?? ''}
+                disabled
+              />
+              <TextField
+                label={tx('common.table.qty')}
+                type="number"
+                value={purchaseQuantity}
+                onChange={(e) => setPurchaseQuantity(e.target.value)}
+              />
+              <TextField
+                label={tx('common.table.price')}
+                value={purchaseUnitPrice}
+                onChange={(e) => setPurchaseUnitPrice(e.target.value)}
+              />
+              <TextField
+                label="Currency"
+                value={purchaseCurrency}
+                onChange={(e) => setPurchaseCurrency(e.target.value)}
+                inputProps={{ maxLength: 3 }}
+              />
+            </Stack>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setPurchaseOpen(false)}>{tx('common.actions.cancel')}</Button>
+            <Button variant="contained" onClick={handleCreatePurchase} disabled={purchaseLoading}>
+              {tx('common.actions.save')}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Can>
 
       <Can page="products" action="write">
