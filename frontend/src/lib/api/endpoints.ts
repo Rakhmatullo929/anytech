@@ -27,7 +27,16 @@ export const API_ENDPOINTS = {
     search: `${API_V1}/products/search/`,
     bulkDelete: `${API_V1}/products/bulk-delete/`,
     detail: (id: string) => `${API_V1}/products/${id}/`,
-    stock: (id: string) => `${API_V1}/products/${id}/stock/`,
+  },
+  productPurchases: {
+    list: `${API_V1}/product-purchases/`,
+    bulkDelete: `${API_V1}/product-purchases/bulk-delete/`,
+    detail: (id: string) => `${API_V1}/product-purchases/${id}/`,
+  },
+  categories: {
+    list: `${API_V1}/categories/`,
+    bulkDelete: `${API_V1}/categories/bulk-delete/`,
+    detail: (id: string) => `${API_V1}/categories/${id}/`,
   },
   clients: {
     list: `${API_V1}/clients/`,

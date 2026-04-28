@@ -1,10 +1,7 @@
 import { useMemo } from 'react';
 
-import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
-import Chip from '@mui/material/Chip';
-import Divider from '@mui/material/Divider';
 import LinearProgress from '@mui/material/LinearProgress';
 import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
@@ -18,9 +15,9 @@ import Typography from '@mui/material/Typography';
 import Can from 'src/auth/components/can';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import EmptyContent from 'src/components/empty-content';
-import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 import { TableHeadCustom, TableNoData, TablePaginationCustom, useTable } from 'src/components/table';
+import EntityDetailHeader from 'src/sections/app/components/entity-detail-header';
 import { useDebounce } from 'src/hooks/use-debounce';
 import { useSyncTableWithUrlListState, useUrlListState } from 'src/hooks/use-url-query-state';
 import { useLocales } from 'src/locales';
@@ -115,46 +112,23 @@ export default function ClientGroupDetailsView() {
       <ClientsTabs value="groups" />
 
       <Stack spacing={3}>
-        <Card sx={{ p: 3 }}>
-          <Stack spacing={2}>
-            <Stack direction="row" spacing={1.5} alignItems="center">
-              <Avatar
-                variant="rounded"
-                sx={{
-                  bgcolor: 'primary.lighter',
-                  color: 'primary.main',
-                  width: 44,
-                  height: 44,
-                }}
-              >
-                <Iconify icon="solar:users-group-rounded-bold" width={22} />
-              </Avatar>
-              <Stack spacing={0.5}>
-                <Typography variant="h5">{data.name}</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {data.description || tx('clients.groups.emptyDescription')}
-                </Typography>
-              </Stack>
-            </Stack>
-
-            <Divider />
-
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ sm: 'center' }}>
-              <Chip
-                icon={<Iconify icon="solar:user-id-bold" width={16} />}
-                size="small"
-                variant="soft"
-                label={tx('clients.groups.clientsCount', { count: data.clientsCount })}
-              />
-              <Chip
-                icon={<Iconify icon="solar:calendar-mark-bold" width={16} />}
-                size="small"
-                variant="outlined"
-                label={fDateTime(data.createdAt)}
-              />
-            </Stack>
-          </Stack>
-        </Card>
+        <EntityDetailHeader
+          title={data.name}
+          description={data.description || tx('clients.groups.emptyDescription')}
+          icon="solar:users-group-rounded-bold"
+          chips={[
+            {
+              icon: 'solar:user-id-bold',
+              label: tx('clients.groups.clientsCount', { count: data.clientsCount }),
+              variant: 'soft',
+            },
+            {
+              icon: 'solar:calendar-mark-bold',
+              label: fDateTime(data.createdAt),
+              variant: 'outlined',
+            },
+          ]}
+        />
 
         <Card sx={{ p: 2 }}>
           <Stack spacing={0.5} sx={{ px: 2, pt: 1 }}>

@@ -1,14 +1,62 @@
 [
   {
+    "model": "products.category",
+    "pk": "c2000000-0000-0000-0000-000000000001",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000001",
+      "name": "Смартфоны",
+      "created_at": "2025-01-10T10:00:00Z",
+      "updated_at": "2025-01-10T10:00:00Z"
+    }
+  },
+  {
+    "model": "products.category",
+    "pk": "c2000000-0000-0000-0000-000000000002",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000001",
+      "name": "Ноутбуки",
+      "created_at": "2025-01-10T10:00:00Z",
+      "updated_at": "2025-01-10T10:00:00Z"
+    }
+  },
+  {
+    "model": "products.category",
+    "pk": "c2000000-0000-0000-0000-000000000003",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000001",
+      "name": "Аксессуары",
+      "created_at": "2025-01-10T10:00:00Z",
+      "updated_at": "2025-01-10T10:00:00Z"
+    }
+  },
+  {
+    "model": "products.category",
+    "pk": "c2000000-0000-0000-0000-000000000004",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000002",
+      "name": "Смартфоны",
+      "created_at": "2025-01-10T10:00:00Z",
+      "updated_at": "2025-01-10T10:00:00Z"
+    }
+  },
+  {
+    "model": "products.category",
+    "pk": "c2000000-0000-0000-0000-000000000005",
+    "fields": {
+      "tenant": "a1000000-0000-0000-0000-000000000002",
+      "name": "Аксессуары",
+      "created_at": "2025-01-10T10:00:00Z",
+      "updated_at": "2025-01-10T10:00:00Z"
+    }
+  },
+  {
     "model": "products.product",
     "pk": "c1000000-0000-0000-0000-000000000001",
     "fields": {
       "tenant": "a1000000-0000-0000-0000-000000000001",
+      "category": "c2000000-0000-0000-0000-000000000001",
       "name": "iPhone 15 Pro",
       "sku": "IPH15PRO",
-      "purchase_price": "900.00",
-      "sale_price": "1100.00",
-      "stock": 25,
       "created_at": "2025-01-15T10:00:00Z",
       "updated_at": "2025-01-15T10:00:00Z"
     }
@@ -18,11 +66,9 @@
     "pk": "c1000000-0000-0000-0000-000000000002",
     "fields": {
       "tenant": "a1000000-0000-0000-0000-000000000001",
+      "category": "c2000000-0000-0000-0000-000000000001",
       "name": "Samsung Galaxy S24",
       "sku": "SGS24",
-      "purchase_price": "750.00",
-      "sale_price": "950.00",
-      "stock": 18,
       "created_at": "2025-01-15T10:00:00Z",
       "updated_at": "2025-01-15T10:00:00Z"
     }
@@ -32,11 +78,9 @@
     "pk": "c1000000-0000-0000-0000-000000000003",
     "fields": {
       "tenant": "a1000000-0000-0000-0000-000000000001",
+      "category": "c2000000-0000-0000-0000-000000000003",
       "name": "AirPods Pro 2",
       "sku": "APP2",
-      "purchase_price": "180.00",
-      "sale_price": "250.00",
-      "stock": 40,
       "created_at": "2025-01-15T10:00:00Z",
       "updated_at": "2025-01-15T10:00:00Z"
     }
@@ -46,11 +90,9 @@
     "pk": "c1000000-0000-0000-0000-000000000004",
     "fields": {
       "tenant": "a1000000-0000-0000-0000-000000000001",
+      "category": "c2000000-0000-0000-0000-000000000002",
       "name": "MacBook Air M3",
       "sku": "MBA-M3",
-      "purchase_price": "1050.00",
-      "sale_price": "1300.00",
-      "stock": 10,
       "created_at": "2025-01-15T10:00:00Z",
       "updated_at": "2025-01-15T10:00:00Z"
     }
@@ -60,11 +102,9 @@
     "pk": "c1000000-0000-0000-0000-000000000005",
     "fields": {
       "tenant": "a1000000-0000-0000-0000-000000000001",
+      "category": "c2000000-0000-0000-0000-000000000003",
       "name": "Чехол силиконовый iPhone 15",
       "sku": "CASE-IPH15",
-      "purchase_price": "5.00",
-      "sale_price": "15.00",
-      "stock": 100,
       "created_at": "2025-01-15T10:00:00Z",
       "updated_at": "2025-01-15T10:00:00Z"
     }
@@ -74,11 +114,9 @@
     "pk": "c1000000-0000-0000-0000-000000000006",
     "fields": {
       "tenant": "a1000000-0000-0000-0000-000000000002",
+      "category": "c2000000-0000-0000-0000-000000000004",
       "name": "Xiaomi 14 Ultra",
       "sku": "XI14U",
-      "purchase_price": "600.00",
-      "sale_price": "800.00",
-      "stock": 15,
       "created_at": "2025-01-15T10:00:00Z",
       "updated_at": "2025-01-15T10:00:00Z"
     }
@@ -88,11 +126,9 @@
     "pk": "c1000000-0000-0000-0000-000000000007",
     "fields": {
       "tenant": "a1000000-0000-0000-0000-000000000002",
+      "category": "c2000000-0000-0000-0000-000000000004",
       "name": "Redmi Note 13 Pro",
       "sku": "RN13PRO",
-      "purchase_price": "200.00",
-      "sale_price": "300.00",
-      "stock": 30,
       "created_at": "2025-01-15T10:00:00Z",
       "updated_at": "2025-01-15T10:00:00Z"
     }
@@ -102,13 +138,71 @@
     "pk": "c1000000-0000-0000-0000-000000000008",
     "fields": {
       "tenant": "a1000000-0000-0000-0000-000000000002",
+      "category": "c2000000-0000-0000-0000-000000000005",
       "name": "Защитное стекло универсальное",
       "sku": "GLASS-UNI",
-      "purchase_price": "3.00",
-      "sale_price": "10.00",
-      "stock": 200,
       "created_at": "2025-01-15T10:00:00Z",
       "updated_at": "2025-01-15T10:00:00Z"
+    }
+  },
+  {
+    "model": "products.productimage",
+    "pk": "c3000000-0000-0000-0000-000000000001",
+    "fields": {
+      "product": "c1000000-0000-0000-0000-000000000001",
+      "image": "products/iphone-15-pro-1.jpg",
+      "position": 0,
+      "created_at": "2025-01-15T10:00:00Z"
+    }
+  },
+  {
+    "model": "products.productimage",
+    "pk": "c3000000-0000-0000-0000-000000000002",
+    "fields": {
+      "product": "c1000000-0000-0000-0000-000000000001",
+      "image": "products/iphone-15-pro-2.jpg",
+      "position": 1,
+      "created_at": "2025-01-15T10:01:00Z"
+    }
+  },
+  {
+    "model": "products.productimage",
+    "pk": "c3000000-0000-0000-0000-000000000003",
+    "fields": {
+      "product": "c1000000-0000-0000-0000-000000000002",
+      "image": "products/galaxy-s24.jpg",
+      "position": 0,
+      "created_at": "2025-01-15T10:00:00Z"
+    }
+  },
+  {
+    "model": "products.productimage",
+    "pk": "c3000000-0000-0000-0000-000000000004",
+    "fields": {
+      "product": "c1000000-0000-0000-0000-000000000004",
+      "image": "products/macbook-air-m3.jpg",
+      "position": 0,
+      "created_at": "2025-01-15T10:00:00Z"
+    }
+  },
+  {
+    "model": "products.productimage",
+    "pk": "c3000000-0000-0000-0000-000000000005",
+    "fields": {
+      "product": "c1000000-0000-0000-0000-000000000006",
+      "image": "products/xiaomi-14-ultra.jpg",
+      "position": 0,
+      "created_at": "2025-01-15T10:00:00Z"
+    }
+  },
+  {
+    "model": "products.productimage",
+    "pk": "c3000000-0000-0000-0000-000000000006",
+    "fields": {
+      "product": "c1000000-0000-0000-0000-000000000008",
+      "image": "products/glass-uni.jpg",
+      "position": 0,
+      "created_at": "2025-01-15T10:00:00Z"
     }
   }
 ]

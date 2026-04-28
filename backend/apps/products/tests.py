@@ -1,16 +1,14 @@
 """
-Tests for products app — Stage 2.
+Tests for products app.
 
-Covers: CRUD, stock adjustment, SKU constraints,
-RBAC permissions, tenant data isolation.
+Covers: CRUD, SKU constraints, RBAC permissions,
+tenant data isolation and search.
 """
-from decimal import Decimal
-
 import pytest
 from django.urls import reverse
 from rest_framework import status
 
-from products.models import Product
+from products.models import Product, ProductPurchase
 
 pytestmark = pytest.mark.django_db
 
@@ -22,13 +20,6 @@ def detail_url(pk):
     return reverse("product-detail", args=[pk])
 
 
-def stock_url(pk):
-    return reverse("product-stock", args=[pk])
-
-
-# ── Model tests ───────────────────────────────────────────────────────
-
-
 class TestProductModel:
     def test_str(self, product):
         assert str(product) == "Test Product"
@@ -37,34 +28,56 @@ class TestProductModel:
         assert len(str(product.pk)) == 36
 
     def test_unique_sku_per_tenant(self, tenant):
-        Product.objects.create(
-            tenant=tenant, name="A", sku="DUP", purchase_price=10, sale_price=20, stock=1
-        )
+        Product.objects.create(tenant=tenant, name="A", sku="DUP")
         with pytest.raises(Exception):  # IntegrityError
-            Product.objects.create(
-                tenant=tenant, name="B", sku="DUP", purchase_price=10, sale_price=20, stock=1
-            )
+            Product.objects.create(tenant=tenant, name="B", sku="DUP")
 
     def test_null_sku_not_unique(self, tenant):
-        """Multiple products with NULL sku should be allowed."""
-        p1 = Product.objects.create(
-            tenant=tenant, name="A", sku=None, purchase_price=10, sale_price=20
-        )
-        p2 = Product.objects.create(
-            tenant=tenant, name="B", sku=None, purchase_price=10, sale_price=20
-        )
+        p1 = Product.objects.create(tenant=tenant, name="A", sku=None)
+        p2 = Product.objects.create(tenant=tenant, name="B", sku=None)
         assert p1.pk != p2.pk
 
 
-# ── List / Retrieve ──────────────────────────────────────────────────
+class TestProductPurchaseModel:
+    def test_create_purchase_batch(self, product):
+        purchase = ProductPurchase.objects.create(
+            product=product,
+            quantity=10,
+            unit_price="900.00",
+        )
+
+        assert purchase.product == product
+        assert purchase.quantity == 10
+        assert str(purchase.unit_price) == "900.00"
+
+    def test_purchase_str(self, product):
+        purchase = ProductPurchase.objects.create(
+            product=product,
+            quantity=10,
+            unit_price="800.00",
+        )
+
+        assert f"{product.id}: 10 x 800.00" == str(purchase)
 
 
 class TestProductList:
     def test_list_products(self, manager_client, product):
+        ProductPurchase.objects.create(
+            product=product,
+            quantity=10,
+            unit_price="900.00",
+        )
+        ProductPurchase.objects.create(
+            product=product,
+            quantity=10,
+            unit_price="800.00",
+        )
         resp = manager_client.get(LIST_URL)
         assert resp.status_code == status.HTTP_200_OK
         assert resp.data["count"] == 1
         assert resp.data["results"][0]["name"] == "Test Product"
+        assert resp.data["results"][0]["total_quantity"] == 20
+        assert resp.data["results"][0]["total_purchase_amount"] == "17000.00"
 
     def test_list_unauthenticated(self, anon_client):
         resp = anon_client.get(LIST_URL)
@@ -74,19 +87,13 @@ class TestProductList:
         resp = manager_client.get(detail_url(product.pk))
         assert resp.status_code == status.HTTP_200_OK
         assert resp.data["id"] == str(product.pk)
-        assert Decimal(resp.data["sale_price"]) == Decimal("100.00")
-
-
-# ── Create ────────────────────────────────────────────────────────────
+        assert resp.data["name"] == "Test Product"
 
 
 class TestProductCreate:
     PAYLOAD = {
         "name": "New Product",
         "sku": "NP-001",
-        "purchase_price": "25.00",
-        "sale_price": "50.00",
-        "stock": 100,
     }
 
     def test_admin_can_create(self, admin_client, tenant):
@@ -109,8 +116,12 @@ class TestProductCreate:
         assert resp.status_code == status.HTTP_201_CREATED
         assert resp.data["sku"] is None
 
-
-# ── Update ────────────────────────────────────────────────────────────
+    def test_create_with_category(self, admin_client, category):
+        payload = {**self.PAYLOAD, "category": str(category.pk)}
+        resp = admin_client.post(LIST_URL, payload, format="json")
+        assert resp.status_code == status.HTTP_201_CREATED
+        assert resp.data["category"]["id"] == str(category.pk)
+        assert resp.data["category"]["name"] == category.name
 
 
 class TestProductUpdate:
@@ -120,8 +131,6 @@ class TestProductUpdate:
             {
                 "name": "Updated",
                 "sku": "TP-001",
-                "purchase_price": "55.00",
-                "sale_price": "110.00",
             },
             format="json",
         )
@@ -131,78 +140,18 @@ class TestProductUpdate:
     def test_seller_cannot_update(self, seller_client, product):
         resp = seller_client.put(
             detail_url(product.pk),
-            {"name": "Hack", "sku": "X", "purchase_price": "1", "sale_price": "2"},
+            {"name": "Hack", "sku": "X"},
             format="json",
         )
         assert resp.status_code == status.HTTP_403_FORBIDDEN
 
-    def test_update_does_not_include_stock(self, admin_client, product):
-        """Stock field should not be modifiable via PUT."""
-        resp = admin_client.put(
-            detail_url(product.pk),
-            {
-                "name": "Updated",
-                "sku": "TP-001",
-                "purchase_price": "55.00",
-                "sale_price": "110.00",
-                "stock": 999,
-            },
-            format="json",
-        )
-        assert resp.status_code == status.HTTP_200_OK
-        product.refresh_from_db()
-        assert product.stock == 20  # unchanged
-
     def test_patch_on_detail_not_allowed(self, admin_client, product):
-        """PATCH on detail URL is not allowed — stock changes go via /stock/."""
         resp = admin_client.patch(
             detail_url(product.pk),
-            {"stock": 999},
+            {"name": "Patched"},
             format="json",
         )
         assert resp.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
-        product.refresh_from_db()
-        assert product.stock == 20  # unchanged
-
-
-# ── Stock adjustment ──────────────────────────────────────────────────
-
-
-class TestStockAdjustment:
-    def test_add_stock(self, admin_client, product):
-        resp = admin_client.patch(
-            stock_url(product.pk), {"quantity": 5}, format="json"
-        )
-        assert resp.status_code == status.HTTP_200_OK
-        assert resp.data["stock"] == 25
-
-    def test_subtract_stock(self, admin_client, product):
-        resp = admin_client.patch(
-            stock_url(product.pk), {"quantity": -10}, format="json"
-        )
-        assert resp.status_code == status.HTTP_200_OK
-        assert resp.data["stock"] == 10
-
-    def test_insufficient_stock(self, admin_client, product):
-        resp = admin_client.patch(
-            stock_url(product.pk), {"quantity": -100}, format="json"
-        )
-        assert resp.status_code == status.HTTP_400_BAD_REQUEST
-
-    def test_zero_quantity_rejected(self, admin_client, product):
-        resp = admin_client.patch(
-            stock_url(product.pk), {"quantity": 0}, format="json"
-        )
-        assert resp.status_code == status.HTTP_400_BAD_REQUEST
-
-    def test_seller_cannot_adjust_stock(self, seller_client, product):
-        resp = seller_client.patch(
-            stock_url(product.pk), {"quantity": 5}, format="json"
-        )
-        assert resp.status_code == status.HTTP_403_FORBIDDEN
-
-
-# ── Tenant isolation ─────────────────────────────────────────────────
 
 
 class TestProductTenantIsolation:
@@ -220,17 +169,11 @@ class TestProductTenantIsolation:
             LIST_URL,
             {
                 "name": "Auto Tenant",
-                "purchase_price": "10.00",
-                "sale_price": "20.00",
-                "stock": 5,
             },
             format="json",
         )
         assert resp.status_code == status.HTTP_201_CREATED
         assert str(resp.data["tenant"]) == str(tenant.pk)
-
-
-# ── Search ────────────────────────────────────────────────────────────
 
 
 class TestProductSearch:
@@ -243,3 +186,18 @@ class TestProductSearch:
         resp = manager_client.get(SEARCH_URL, {"search": "NonExistent"})
         assert resp.status_code == status.HTTP_200_OK
         assert resp.data["count"] == 0
+
+
+class TestProductFiltering:
+    def test_filter_by_category(self, manager_client, tenant):
+        from products.models import Category
+
+        c1 = Category.objects.create(tenant=tenant, name="Phones")
+        c2 = Category.objects.create(tenant=tenant, name="Laptops")
+        Product.objects.create(tenant=tenant, category=c1, name="Phone A", sku="P-A")
+        Product.objects.create(tenant=tenant, category=c2, name="Laptop A", sku="L-A")
+
+        resp = manager_client.get(LIST_URL, {"category_id": str(c1.pk)})
+        assert resp.status_code == status.HTTP_200_OK
+        assert resp.data["count"] == 1
+        assert resp.data["results"][0]["name"] == "Phone A"

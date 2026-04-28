@@ -1,7 +1,6 @@
 from decimal import Decimal
 
 from django.db import transaction
-from django.utils import timezone
 from django.utils.translation import gettext as _
 from rest_framework import serializers
 
@@ -17,6 +16,7 @@ from .models import Sale, SaleItem
 class SaleItemWriteSerializer(serializers.Serializer):
     product = serializers.UUIDField()
     quantity = serializers.IntegerField(min_value=1)
+    price = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=0)
 
 
 class SaleCreateSerializer(serializers.ModelSerializer):
@@ -69,41 +69,19 @@ class SaleCreateSerializer(serializers.ModelSerializer):
 
             total_amount = Decimal("0.00")
             sale_items = []
-            updated_products = []
 
             for item_data in items_data:
                 product = products_map[item_data["product"]]
-
-                if product.stock < item_data["quantity"]:
-                    raise serializers.ValidationError(
-                        {
-                            "items": _(
-                                "Insufficient stock for '%(name)s'. "
-                                "Available: %(available)d, requested: %(requested)d."
-                            ) % {
-                                "name": product.name,
-                                "available": product.stock,
-                                "requested": item_data["quantity"],
-                            }
-                        }
-                    )
-
-                product.stock -= item_data["quantity"]
-                product.updated_at = timezone.now()
-                updated_products.append(product)
-
-                line_total = product.sale_price * item_data["quantity"]
+                line_total = item_data["price"] * item_data["quantity"]
                 total_amount += line_total
 
                 sale_items.append(
                     SaleItem(
                         product=product,
                         quantity=item_data["quantity"],
-                        price=product.sale_price,
+                        price=item_data["price"],
                     )
                 )
-
-            Product.objects.bulk_update(updated_products, ["stock", "updated_at"])
             validated_data["total_amount"] = total_amount
             sale = Sale.objects.create(**validated_data)
 

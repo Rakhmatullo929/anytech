@@ -10,19 +10,24 @@ import Table from '@mui/material/Table';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
+import Avatar from '@mui/material/Avatar';
 import TextField from '@mui/material/TextField';
 import LinearProgress from '@mui/material/LinearProgress';
 import IconButton from '@mui/material/IconButton';
 import MenuItem from '@mui/material/MenuItem';
 import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
-import Typography from '@mui/material/Typography';
+import ListItemText from '@mui/material/ListItemText';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
 // utils
-import { fCurrency } from 'src/utils/format-number';
 import { useDebounce } from 'src/hooks/use-debounce';
 import { useUrlListState, useSyncTableWithUrlListState } from 'src/hooks/use-url-query-state';
 import { useCheckPermission } from 'src/auth/hooks/use-check-permission';
 import Can from 'src/auth/components/can';
+import { fCurrency, fNumber } from 'src/utils/format-number';
 // routes
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
@@ -41,11 +46,15 @@ import {
   TablePaginationCustom,
 } from 'src/components/table';
 import {
+  fetchProductDetail,
+  useCategoriesListQuery,
   useBulkDeleteProductsMutation,
   useCreateProductMutation,
+  useCreateProductPurchaseMutation,
   useDeleteProductMutation,
   useProductsListQuery,
   useUpdateProductMutation,
+  type ProductImageFormValue,
   type ProductListItem,
 } from 'src/sections/app/products/api';
 import { ProductUpsertDialog } from 'src/sections/app/products/components';
@@ -53,23 +62,31 @@ import { ProductsListSkeleton } from 'src/sections/app/products/skeleton';
 
 // ----------------------------------------------------------------------
 
+type EditingProductState = {
+  product: ProductListItem;
+  existingImages: ProductImageFormValue[];
+};
+
 export default function ProductsView() {
   const { tx } = useLocales();
   const { canWritePage } = useCheckPermission();
   const { enqueueSnackbar } = useSnackbar();
   const actionsPopover = usePopover();
   const createMutation = useCreateProductMutation();
+  const createPurchaseMutation = useCreateProductPurchaseMutation();
   const updateMutation = useUpdateProductMutation();
   const deleteMutation = useDeleteProductMutation();
   const bulkDeleteMutation = useBulkDeleteProductsMutation();
+  const { data: categoriesData } = useCategoriesListQuery();
+  const categories = useMemo(() => categoriesData?.results ?? [], [categoriesData?.results]);
 
   const tableHead = useMemo(
     () => [
       { id: 'name', label: tx('common.table.name') },
       { id: 'sku', label: tx('common.table.sku') },
-      { id: 'stock', label: tx('common.table.stock') },
-      { id: 'purchase', label: tx('common.table.purchase') },
-      { id: 'sale', label: tx('common.table.salePrice') },
+      { id: 'category', label: tx('common.table.category') },
+      { id: 'totalQuantity', label: tx('common.table.qty') },
+      { id: 'totalPurchaseAmount', label: tx('common.table.purchase') },
       { id: '', label: '' },
     ],
     [tx]
@@ -114,9 +131,13 @@ export default function ProductsView() {
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [upsertOpen, setUpsertOpen] = useState(false);
   const [upsertMode, setUpsertMode] = useState<'create' | 'edit'>('create');
-  const [editingProduct, setEditingProduct] = useState<ProductListItem | null>(null);
+  const [editingProduct, setEditingProduct] = useState<EditingProductState | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [purchaseOpen, setPurchaseOpen] = useState(false);
+  const [purchaseProduct, setPurchaseProduct] = useState<ProductListItem | null>(null);
+  const [purchaseQuantity, setPurchaseQuantity] = useState('1');
+  const [purchaseUnitPrice, setPurchaseUnitPrice] = useState('');
   const { selected: selectedIds, setSelected } = table;
 
   useEffect(() => {
@@ -150,17 +171,32 @@ export default function ProductsView() {
     actionsPopover.onOpen(event);
   };
 
-  const handleEdit = () => {
+  const handleEdit = async () => {
     if (!selectedProductId) return;
     const product = rows.find((row) => row.id === selectedProductId);
     if (!product) {
       closeActions();
       return;
     }
-    setEditingProduct(product);
-    setUpsertMode('edit');
-    setUpsertOpen(true);
-    closeActions(false);
+    try {
+      const detail = await fetchProductDetail(product.id);
+      setUpsertMode('edit');
+      const existingImages: ProductImageFormValue[] = detail.images.map((item) => ({
+        id: item.id,
+        preview: item.image,
+        name: item.image.split('/').pop() || 'image',
+        size: 0,
+        type: 'image/*',
+      }));
+      setEditingProduct({
+        product,
+        existingImages,
+      });
+      setUpsertOpen(true);
+      closeActions(false);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleAskDelete = () => {
@@ -185,6 +221,33 @@ export default function ProductsView() {
     setUpsertMode('create');
     setEditingProduct(null);
     setUpsertOpen(true);
+  };
+
+  const handleOpenPurchaseCreate = (product: ProductListItem) => {
+    setPurchaseProduct(product);
+    setPurchaseQuantity('1');
+    setPurchaseUnitPrice('');
+    setPurchaseOpen(true);
+  };
+
+  const handleCreatePurchase = async () => {
+    if (!purchaseProduct) return;
+    const quantity = Number(purchaseQuantity);
+    const unitPrice = purchaseUnitPrice.trim();
+    if (!quantity || quantity <= 0 || !unitPrice) return;
+
+    try {
+      await createPurchaseMutation.mutateAsync({
+        product: purchaseProduct.id,
+        quantity,
+        unitPrice,
+      });
+      enqueueSnackbar(tx('products.toasts.created'), { variant: 'success' });
+      setPurchaseOpen(false);
+      setPurchaseProduct(null);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleCloseUpsert = () => {
@@ -227,33 +290,14 @@ export default function ProductsView() {
   const handleSubmitUpsert = async (values: {
     name: string;
     sku: string;
-    purchasePrice: string;
-    salePrice: string;
-    stock: string;
+    category: string;
+    images: ProductImageFormValue[];
   }) => {
     const normalizedName = values.name.trim();
-    const normalizedPurchase = values.purchasePrice.trim();
-    const normalizedSale = values.salePrice.trim();
     const normalizedSku = values.sku.trim();
-    const parsedStock = Number(values.stock);
 
-    if (!normalizedName || !normalizedPurchase || !normalizedSale) {
+    if (!normalizedName) {
       enqueueSnackbar(tx('products.toasts.requiredFields'), { variant: 'warning' });
-      return;
-    }
-
-    if (
-      Number.isNaN(Number(normalizedPurchase)) ||
-      Number.isNaN(Number(normalizedSale)) ||
-      Number(normalizedPurchase) < 0 ||
-      Number(normalizedSale) < 0
-    ) {
-      enqueueSnackbar(tx('products.toasts.invalidPrices'), { variant: 'warning' });
-      return;
-    }
-
-    if (upsertMode === 'create' && (Number.isNaN(parsedStock) || parsedStock < 0)) {
-      enqueueSnackbar(tx('products.toasts.invalidStock'), { variant: 'warning' });
       return;
     }
 
@@ -262,18 +306,23 @@ export default function ProductsView() {
         await createMutation.mutateAsync({
           name: normalizedName,
           sku: normalizedSku || undefined,
-          purchasePrice: normalizedPurchase,
-          salePrice: normalizedSale,
-          stock: parsedStock,
+          category: values.category || undefined,
+          images: values.images.filter((item): item is File => item instanceof File),
         });
         enqueueSnackbar(tx('products.toasts.created'), { variant: 'success' });
       } else if (editingProduct) {
+        const keepImageIds = values.images
+          .filter((item): item is Extract<ProductImageFormValue, { id: string }> =>
+            typeof item === 'object' && item !== null && 'id' in item
+          )
+          .map((item) => item.id);
         await updateMutation.mutateAsync({
-          id: editingProduct.id,
+          id: editingProduct.product.id,
           name: normalizedName,
           sku: normalizedSku || undefined,
-          purchasePrice: normalizedPurchase,
-          salePrice: normalizedSale,
+          category: values.category || undefined,
+          images: values.images.filter((item): item is File => item instanceof File),
+          keepImageIds,
         });
         enqueueSnackbar(tx('products.toasts.updated'), { variant: 'success' });
       }
@@ -286,6 +335,7 @@ export default function ProductsView() {
   };
 
   const upsertLoading = createMutation.isPending || updateMutation.isPending;
+  const purchaseLoading = createPurchaseMutation.isPending;
   const deletingCurrent =
     deleteMutation.isPending &&
     selectedProductId !== null &&
@@ -358,25 +408,39 @@ export default function ProductsView() {
                         />
                       </TableCell>
                       <TableCell>
-                        <Can
-                          page="products"
-                          action="detail"
-                          fallback={<Typography variant="subtitle2">{row.name}</Typography>}
-                        >
-                          <Link component={RouterLink} href={paths.products.details(row.id)} variant="subtitle2">
-                            {row.name}
-                          </Link>
-                        </Can>
+                        <Stack direction="row" spacing={1.5} alignItems="center">
+                          <Avatar src={row.image ?? undefined} alt={row.name}>
+                            {row.name.charAt(0).toUpperCase()}
+                          </Avatar>
+                          <Can
+                            page="products"
+                            action="detail"
+                            fallback={<ListItemText primary={row.name} primaryTypographyProps={{ variant: 'subtitle2' }} />}
+                          >
+                            <ListItemText
+                              primary={
+                                <Link component={RouterLink} href={paths.products.details(row.id)} variant="subtitle2">
+                                  {row.name}
+                                </Link>
+                              }
+                            />
+                          </Can>
+                        </Stack>
                       </TableCell>
                       <TableCell>{row.sku || '-'}</TableCell>
-                      <TableCell>{row.stock}</TableCell>
-                      <TableCell>{fCurrency(row.purchasePrice)}</TableCell>
-                      <TableCell>{fCurrency(row.salePrice)}</TableCell>
+                      <TableCell>{row.category?.name || '-'}</TableCell>
+                      <TableCell>{fNumber(row.totalQuantity)}</TableCell>
+                      <TableCell>{fCurrency(row.totalPurchaseAmount)}</TableCell>
                       <TableCell align="right">
                         {canWriteProducts ? (
-                          <IconButton color="default" onClick={(event) => openActions(event, row.id)}>
-                            <Iconify icon="eva:more-vertical-fill" />
-                          </IconButton>
+                          <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+                            <IconButton color="primary" onClick={() => handleOpenPurchaseCreate(row)}>
+                              <Iconify icon="mingcute:add-line" />
+                            </IconButton>
+                            <IconButton color="default" onClick={(event) => openActions(event, row.id)}>
+                              <Iconify icon="eva:more-vertical-fill" />
+                            </IconButton>
+                          </Stack>
                         ) : null}
                       </TableCell>
                     </TableRow>
@@ -422,17 +486,50 @@ export default function ProductsView() {
           initialValues={
             upsertMode === 'edit' && editingProduct
               ? {
-                  name: editingProduct.name,
-                  sku: editingProduct.sku ?? '',
-                  purchasePrice: editingProduct.purchasePrice,
-                  salePrice: editingProduct.salePrice,
-                  stock: String(editingProduct.stock),
+                  name: editingProduct.product.name,
+                  sku: editingProduct.product.sku ?? '',
+                  category: editingProduct.product.category?.id ?? '',
+                  images: editingProduct.existingImages,
                 }
               : undefined
           }
+          categories={categories.map((item) => ({ id: item.id, name: item.name }))}
           onClose={handleCloseUpsert}
           onSubmit={handleSubmitUpsert}
         />
+      </Can>
+
+      <Can page="products" action="write">
+        <Dialog open={purchaseOpen} onClose={() => setPurchaseOpen(false)} fullWidth maxWidth="xs">
+          <DialogTitle>{tx('common.table.purchase')}</DialogTitle>
+          <DialogContent sx={{ pt: 3 }}>
+            <Stack spacing={2}>
+              <TextField
+                label={tx('common.table.product')}
+                value={purchaseProduct?.name ?? ''}
+                disabled
+                InputLabelProps={{ shrink: true }}
+              />
+              <TextField
+                label={tx('common.table.qty')}
+                type="number"
+                value={purchaseQuantity}
+                onChange={(e) => setPurchaseQuantity(e.target.value)}
+              />
+              <TextField
+                label={tx('common.table.price')}
+                value={purchaseUnitPrice}
+                onChange={(e) => setPurchaseUnitPrice(e.target.value)}
+              />
+            </Stack>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setPurchaseOpen(false)}>{tx('common.actions.cancel')}</Button>
+            <Button variant="contained" onClick={handleCreatePurchase} disabled={purchaseLoading}>
+              {tx('common.actions.save')}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Can>
 
       <Can page="products" action="write">

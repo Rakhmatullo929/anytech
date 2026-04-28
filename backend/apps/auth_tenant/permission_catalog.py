@@ -4,6 +4,7 @@ PERMISSION_ACTIONS_BY_PAGE = {
     "users": ("read", "detail", "write"),
     "pos": ("read", "write"),
     "products": ("read", "detail", "write"),
+    "categories": ("read", "detail", "write"),
     "clients": ("read", "detail", "write"),
     "groups": ("read", "detail", "write"),
     "sales": ("read", "detail", "write"),

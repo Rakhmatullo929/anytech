@@ -12,6 +12,8 @@ import { LoadingScreen } from 'src/components/loading-screen';
 const PosPage = lazy(() => import('../../pages/pos'));
 const ProfilePage = lazy(() => import('../../pages/profile'));
 const ProductsPage = lazy(() => import('../../pages/products'));
+const CategoriesPage = lazy(() => import('../../pages/categories'));
+const CategoryDetailsPage = lazy(() => import('../../sections/app/categories/details/view'));
 const ProductDetailsPage = lazy(() => import('../../pages/product-details'));
 const ClientsListPage = lazy(() => import('../../pages/clients'));
 const ClientsGroupsPage = lazy(() => import('../../pages/clients-groups'));
@@ -30,7 +32,17 @@ const AdminUserEditPage = lazy(() => import('../../pages/admin-user-edit'));
 const AdminRolesPage = lazy(() => import('../../pages/admin-roles'));
 
 function withPermission(
-  page: 'admin' | 'roles' | 'users' | 'pos' | 'products' | 'clients' | 'groups' | 'sales' | 'debts',
+  page:
+    | 'admin'
+    | 'roles'
+    | 'users'
+    | 'pos'
+    | 'products'
+    | 'categories'
+    | 'clients'
+    | 'groups'
+    | 'sales'
+    | 'debts',
   action: 'read' | 'detail' | 'write',
   element: ReactElement
 ) {
@@ -65,6 +77,19 @@ export const dashboardRoutes = [
           {
             path: ':id',
             element: withPermission('products', 'detail', <ProductDetailsPage />),
+          },
+        ],
+      },
+      {
+        path: 'categories',
+        children: [
+          {
+            index: true,
+            element: withPermission('categories', 'read', <CategoriesPage />),
+          },
+          {
+            path: ':id',
+            element: withPermission('categories', 'detail', <CategoryDetailsPage />),
           },
         ],
       },

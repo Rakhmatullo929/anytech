@@ -4,6 +4,8 @@
   },
   "navigation": {
     "clients": "Клиенты",
+    "catalog": "Каталог",
+    "categories": "Категории",
     "debts": "Долги",
     "group": "Магазин",
     "pos": "POS",
@@ -42,10 +44,12 @@
   "table": {
     "allOption": "Все",
     "amount": "Сумма",
+    "category": "Категория",
     "client": "Клиент",
     "created": "Создан",
     "date": "Дата",
     "email": "Email",
+    "image": "Изображение",
     "name": "Название",
     "noData": "Данные не найдены",
     "paid": "Оплачено",
@@ -61,12 +65,14 @@
     "salePrice": "Продажа",
     "sku": "SKU",
     "status": "Статус",
+    "updated": "Обновлён",
     "stock": "Остаток",
     "total": "Сумма",
     "password": "Пароль",
     "passportSeries": "Серия паспорта"
   },
   "validation": {
+    "categoryNameRequired": "Название категории обязательно",
     "clientNameRequired": "Имя клиента обязательно",
     "emailInvalid": "Некорректный формат email",
     "numberInvalid": "Введите корректное число",

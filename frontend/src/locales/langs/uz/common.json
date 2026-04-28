@@ -4,6 +4,8 @@
   },
   "navigation": {
     "clients": "Mijozlar",
+    "catalog": "Katalog",
+    "categories": "Kategoriyalar",
     "debts": "Qarzlar",
     "group": "Doʻkon",
     "pos": "POS",
@@ -42,10 +44,12 @@
   "table": {
     "allOption": "Barchasi",
     "amount": "Summa",
+    "category": "Kategoriya",
     "client": "Mijoz",
     "created": "Yaratilgan",
     "date": "Sana",
     "email": "Email",
+    "image": "Rasm",
     "name": "Nomi",
     "noData": "Ma'lumot topilmadi",
     "paid": "Toʻlangan",
@@ -61,12 +65,14 @@
     "salePrice": "Sotuv",
     "sku": "SKU",
     "status": "Holat",
+    "updated": "Yangilangan",
     "stock": "Qoldiq",
     "total": "Summa",
     "password": "Parol",
     "passportSeries": "Pasport seriyasi"
   },
   "validation": {
+    "categoryNameRequired": "Kategoriya nomi majburiy",
     "clientNameRequired": "Mijoz ismi majburiy",
     "emailInvalid": "Email noto‘g‘ri formatda",
     "numberInvalid": "Toʻgʻri son kiriting",

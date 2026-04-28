@@ -2,15 +2,20 @@
   "addButton": "Добавить товар",
   "createButton": "Создать товар",
   "detail": {
-    "notFound": "Товар не найден"
+    "notFound": "Товар не найден",
+    "imagesCount": "Изображений: {{count}}",
+    "noImages": "Нет изображений",
+    "averagePrice": "Сред. цена"
+  },
+  "tabs": {
+    "info": "Инфо",
+    "table": "Закупки"
   },
   "detailDocumentTitle": "Товар",
   "documentTitle": "Товары",
   "dialogs": {
     "create": {
-      "initialStock": "Начальный остаток",
-      "purchasePrice": "Закупочная цена",
-      "salePrice": "Цена продажи",
+      "image": "Изображение",
       "title": "Новый товар"
     },
     "edit": {
@@ -37,9 +42,7 @@
     "bulkDeleted": "Удалено товаров: {{count}}",
     "created": "Товар успешно создан",
     "deleted": "Товар удалён",
-    "invalidPrices": "Проверьте цены: значения должны быть числами >= 0",
-    "invalidStock": "Проверьте остаток: значение должно быть числом >= 0",
-    "requiredFields": "Название, закупка и продажа обязательны",
+    "requiredFields": "Название товара обязательно",
     "updated": "Товар обновлён"
   }
 }
