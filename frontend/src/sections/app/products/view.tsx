@@ -46,6 +46,7 @@ import {
   TablePaginationCustom,
 } from 'src/components/table';
 import {
+  fetchProductDetail,
   useCategoriesListQuery,
   useBulkDeleteProductsMutation,
   useCreateProductMutation,
@@ -53,12 +54,18 @@ import {
   useDeleteProductMutation,
   useProductsListQuery,
   useUpdateProductMutation,
+  type ProductImageFormValue,
   type ProductListItem,
 } from 'src/sections/app/products/api';
 import { ProductUpsertDialog } from 'src/sections/app/products/components';
 import { ProductsListSkeleton } from 'src/sections/app/products/skeleton';
 
 // ----------------------------------------------------------------------
+
+type EditingProductState = {
+  product: ProductListItem;
+  existingImages: ProductImageFormValue[];
+};
 
 export default function ProductsView() {
   const { tx } = useLocales();
@@ -124,7 +131,7 @@ export default function ProductsView() {
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [upsertOpen, setUpsertOpen] = useState(false);
   const [upsertMode, setUpsertMode] = useState<'create' | 'edit'>('create');
-  const [editingProduct, setEditingProduct] = useState<ProductListItem | null>(null);
+  const [editingProduct, setEditingProduct] = useState<EditingProductState | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [purchaseOpen, setPurchaseOpen] = useState(false);
@@ -164,17 +171,32 @@ export default function ProductsView() {
     actionsPopover.onOpen(event);
   };
 
-  const handleEdit = () => {
+  const handleEdit = async () => {
     if (!selectedProductId) return;
     const product = rows.find((row) => row.id === selectedProductId);
     if (!product) {
       closeActions();
       return;
     }
-    setEditingProduct(product);
-    setUpsertMode('edit');
-    setUpsertOpen(true);
-    closeActions(false);
+    try {
+      const detail = await fetchProductDetail(product.id);
+      setUpsertMode('edit');
+      const existingImages: ProductImageFormValue[] = detail.images.map((item) => ({
+        id: item.id,
+        preview: item.image,
+        name: item.image.split('/').pop() || 'image',
+        size: 0,
+        type: 'image/*',
+      }));
+      setEditingProduct({
+        product,
+        existingImages,
+      });
+      setUpsertOpen(true);
+      closeActions(false);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleAskDelete = () => {
@@ -269,7 +291,7 @@ export default function ProductsView() {
     name: string;
     sku: string;
     category: string;
-    images: (File | string)[];
+    images: ProductImageFormValue[];
   }) => {
     const normalizedName = values.name.trim();
     const normalizedSku = values.sku.trim();
@@ -289,12 +311,18 @@ export default function ProductsView() {
         });
         enqueueSnackbar(tx('products.toasts.created'), { variant: 'success' });
       } else if (editingProduct) {
+        const keepImageIds = values.images
+          .filter((item): item is Extract<ProductImageFormValue, { id: string }> =>
+            typeof item === 'object' && item !== null && 'id' in item
+          )
+          .map((item) => item.id);
         await updateMutation.mutateAsync({
-          id: editingProduct.id,
+          id: editingProduct.product.id,
           name: normalizedName,
           sku: normalizedSku || undefined,
           category: values.category || undefined,
           images: values.images.filter((item): item is File => item instanceof File),
+          keepImageIds,
         });
         enqueueSnackbar(tx('products.toasts.updated'), { variant: 'success' });
       }
@@ -458,10 +486,10 @@ export default function ProductsView() {
           initialValues={
             upsertMode === 'edit' && editingProduct
               ? {
-                  name: editingProduct.name,
-                  sku: editingProduct.sku ?? '',
-                  category: editingProduct.category?.id ?? '',
-                  images: [],
+                  name: editingProduct.product.name,
+                  sku: editingProduct.product.sku ?? '',
+                  category: editingProduct.product.category?.id ?? '',
+                  images: editingProduct.existingImages,
                 }
               : undefined
           }
@@ -474,12 +502,13 @@ export default function ProductsView() {
       <Can page="products" action="write">
         <Dialog open={purchaseOpen} onClose={() => setPurchaseOpen(false)} fullWidth maxWidth="xs">
           <DialogTitle>{tx('common.table.purchase')}</DialogTitle>
-          <DialogContent sx={{ pt: 2 }}>
+          <DialogContent sx={{ pt: 3 }}>
             <Stack spacing={2}>
               <TextField
                 label={tx('common.table.product')}
                 value={purchaseProduct?.name ?? ''}
                 disabled
+                InputLabelProps={{ shrink: true }}
               />
               <TextField
                 label={tx('common.table.qty')}

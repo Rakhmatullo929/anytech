@@ -12,13 +12,14 @@ import MenuItem from '@mui/material/MenuItem';
 
 import { useLocales } from 'src/locales';
 import FormProvider, { RHFSelect, RHFTextField, RHFUpload } from 'src/components/hook-form';
+import type { ProductImageFormValue } from 'src/sections/app/products/api';
 import { getProductUpsertSchema } from './utils/product-upsert-schema';
 
 type ProductUpsertValues = {
   name: string;
   sku: string;
   category: string;
-  images: (File | string)[];
+  images: ProductImageFormValue[];
 };
 
 type Props = {
@@ -96,18 +97,24 @@ export default function ProductUpsertDialog({
               thumbnail
               maxSize={3145728}
               onDrop={(acceptedFiles) => {
-                const nextFiles = acceptedFiles ?? [];
-                setValue('images', nextFiles, { shouldValidate: true });
+                const preparedFiles = (acceptedFiles ?? []).map((file) =>
+                  Object.assign(file, { preview: URL.createObjectURL(file) })
+                );
+                const current = methods.getValues('images') ?? [];
+                setValue('images', [...current, ...preparedFiles], {
+                  shouldValidate: true,
+                  shouldDirty: true,
+                });
               }}
               onRemove={(inputFile) => {
                 const current = methods.getValues('images');
                 setValue(
                   'images',
                   current.filter((file) => file !== inputFile),
-                  { shouldValidate: true }
+                  { shouldValidate: true, shouldDirty: true }
                 );
               }}
-              onRemoveAll={() => setValue('images', [], { shouldValidate: true })}
+              onRemoveAll={() => setValue('images', [], { shouldValidate: true, shouldDirty: true })}
             />
           </Stack>
         </DialogContent>

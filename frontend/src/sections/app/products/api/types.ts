@@ -4,6 +4,17 @@ export type ProductImage = {
   position: number;
 };
 
+export type ProductImageFormValue =
+  | string
+  | (File & { preview?: string })
+  | {
+      id: string;
+      preview: string;
+      name: string;
+      size: number;
+      type: string;
+    };
+
 export type ProductCategory = {
   id: string;
   name: string;
@@ -73,6 +84,7 @@ export type UpdateProductPayload = {
   sku?: string;
   category?: string;
   images?: File[];
+  keepImageIds?: string[];
 };
 
 export type CreateProductPurchasePayload = {

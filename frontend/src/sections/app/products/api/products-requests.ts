@@ -60,6 +60,7 @@ export async function updateProduct(payload: UpdateProductPayload): Promise<Prod
   if (payload.category) {
     formData.append('category', payload.category);
   }
+  payload.keepImageIds?.forEach((imageId) => formData.append('keep_image_ids', imageId));
   payload.images?.forEach((file) => formData.append('uploaded_images', file));
 
   return request<ProductListItem>({

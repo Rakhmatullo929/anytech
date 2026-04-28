@@ -75,6 +75,12 @@ class ProductSerializer(serializers.ModelSerializer):
         write_only=True,
         allow_empty=True,
     )
+    keep_image_ids = serializers.ListField(
+        child=serializers.UUIDField(),
+        required=False,
+        write_only=True,
+        allow_empty=True,
+    )
 
     def validate_sku(self, value):
         if value is not None:
@@ -98,28 +104,61 @@ class ProductSerializer(serializers.ModelSerializer):
             return request.build_absolute_uri(first_image.image.url)
         return first_image.image.url
 
-    def _replace_images(self, product: Product, files):
-        product.images.all().delete()
+    def validate_keep_image_ids(self, value):
+        if not self.instance:
+            return value
+        existing_ids = set(
+            self.instance.images.filter(id__in=value).values_list("id", flat=True)
+        )
+        requested_ids = set(value)
+        if existing_ids != requested_ids:
+            raise serializers.ValidationError(_("Some images were not found."))
+        return value
+
+    def _replace_images(self, product: Product, files, keep_image_ids=None):
+        files = files or []
+        kept_images = []
+
+        if keep_image_ids is None:
+            product.images.all().delete()
+        else:
+            product.images.exclude(id__in=keep_image_ids).delete()
+            kept_images = list(
+                product.images.filter(id__in=keep_image_ids).order_by("position", "created_at")
+            )
+            for index, image in enumerate(kept_images):
+                image.position = index
+            if kept_images:
+                ProductImage.objects.bulk_update(kept_images, ["position"])
+
         if not files:
             return
+
+        start_position = len(kept_images)
         ProductImage.objects.bulk_create(
             [
-                ProductImage(product=product, image=file, position=index)
+                ProductImage(product=product, image=file, position=start_position + index)
                 for index, file in enumerate(files)
             ]
         )
 
     def create(self, validated_data):
         uploaded_images = validated_data.pop("uploaded_images", [])
+        validated_data.pop("keep_image_ids", None)
         product = super().create(validated_data)
         self._replace_images(product, uploaded_images)
         return product
 
     def update(self, instance, validated_data):
         uploaded_images = validated_data.pop("uploaded_images", None)
+        keep_image_ids = validated_data.pop("keep_image_ids", None)
         product = super().update(instance, validated_data)
-        if uploaded_images is not None:
-            self._replace_images(product, uploaded_images)
+        if uploaded_images is not None or keep_image_ids is not None:
+            self._replace_images(
+                product,
+                uploaded_images or [],
+                keep_image_ids=keep_image_ids or [],
+            )
         return product
 
     class Meta:
@@ -136,6 +175,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "total_purchase_amount",
             "average_purchase_price",
             "uploaded_images",
+            "keep_image_ids",
             "created_at",
             "updated_at",
         )
