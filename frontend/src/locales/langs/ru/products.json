@@ -2,7 +2,10 @@
   "addButton": "Добавить товар",
   "createButton": "Создать товар",
   "detail": {
-    "notFound": "Товар не найден"
+    "notFound": "Товар не найден",
+    "imagesCount": "Изображений: {{count}}",
+    "noImages": "Нет изображений",
+    "averagePrice": "Сред. цена"
   },
   "tabs": {
     "info": "Инфо",

@@ -18,6 +18,7 @@ export type ProductListItem = {
   image: string | null;
   totalQuantity: number;
   totalPurchaseAmount: string;
+  averagePurchasePrice: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -32,7 +33,6 @@ export type ProductPurchaseListItem = {
   productName: string;
   quantity: number;
   unitPrice: string;
-  currency: string;
   createdAt: string;
 };
 
@@ -79,7 +79,6 @@ export type CreateProductPurchasePayload = {
   product: string;
   quantity: number;
   unitPrice: string;
-  currency: string;
 };
 
 export type UpdateProductPurchasePayload = CreateProductPurchasePayload & {

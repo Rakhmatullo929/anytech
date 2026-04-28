@@ -131,7 +131,6 @@ export default function ProductsView() {
   const [purchaseProduct, setPurchaseProduct] = useState<ProductListItem | null>(null);
   const [purchaseQuantity, setPurchaseQuantity] = useState('1');
   const [purchaseUnitPrice, setPurchaseUnitPrice] = useState('');
-  const [purchaseCurrency, setPurchaseCurrency] = useState('USD');
   const { selected: selectedIds, setSelected } = table;
 
   useEffect(() => {
@@ -206,7 +205,6 @@ export default function ProductsView() {
     setPurchaseProduct(product);
     setPurchaseQuantity('1');
     setPurchaseUnitPrice('');
-    setPurchaseCurrency('USD');
     setPurchaseOpen(true);
   };
 
@@ -214,7 +212,6 @@ export default function ProductsView() {
     if (!purchaseProduct) return;
     const quantity = Number(purchaseQuantity);
     const unitPrice = purchaseUnitPrice.trim();
-    const currency = purchaseCurrency.trim().toUpperCase();
     if (!quantity || quantity <= 0 || !unitPrice) return;
 
     try {
@@ -222,7 +219,6 @@ export default function ProductsView() {
         product: purchaseProduct.id,
         quantity,
         unitPrice,
-        currency,
       });
       enqueueSnackbar(tx('products.toasts.created'), { variant: 'success' });
       setPurchaseOpen(false);
@@ -495,12 +491,6 @@ export default function ProductsView() {
                 label={tx('common.table.price')}
                 value={purchaseUnitPrice}
                 onChange={(e) => setPurchaseUnitPrice(e.target.value)}
-              />
-              <TextField
-                label="Currency"
-                value={purchaseCurrency}
-                onChange={(e) => setPurchaseCurrency(e.target.value)}
-                inputProps={{ maxLength: 3 }}
               />
             </Stack>
           </DialogContent>

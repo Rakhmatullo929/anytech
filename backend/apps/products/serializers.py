@@ -61,6 +61,9 @@ class ProductSerializer(serializers.ModelSerializer):
     total_purchase_amount = serializers.DecimalField(
         max_digits=18, decimal_places=2, read_only=True
     )
+    average_purchase_price = serializers.DecimalField(
+        max_digits=18, decimal_places=2, read_only=True
+    )
     category = CategoryReferenceField(
         queryset=Category.objects.all(),
         required=False,
@@ -131,6 +134,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "images",
             "total_quantity",
             "total_purchase_amount",
+            "average_purchase_price",
             "uploaded_images",
             "created_at",
             "updated_at",
@@ -149,6 +153,7 @@ class ProductListSerializer(ProductSerializer):
             "image",
             "total_quantity",
             "total_purchase_amount",
+            "average_purchase_price",
             "created_at",
             "updated_at",
         )
@@ -165,6 +170,7 @@ class ProductDetailSerializer(ProductSerializer):
             "images",
             "total_quantity",
             "total_purchase_amount",
+            "average_purchase_price",
             "created_at",
             "updated_at",
         )
@@ -198,7 +204,6 @@ class ProductPurchaseSerializer(serializers.ModelSerializer):
             "product_name",
             "quantity",
             "unit_price",
-            "currency",
             "created_at",
         )
         read_only_fields = ("id", "product_name", "created_at")

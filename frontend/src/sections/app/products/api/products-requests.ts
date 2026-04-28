@@ -132,7 +132,6 @@ export async function updateProductPurchase(
       product: payload.product,
       quantity: payload.quantity,
       unitPrice: payload.unitPrice,
-      currency: payload.currency,
     },
   });
 }

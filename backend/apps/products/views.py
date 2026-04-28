@@ -1,7 +1,7 @@
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from django.db.models import DecimalField, F, Sum, Value
+from django.db.models import Avg, DecimalField, F, Sum, Value
 from django.db.models.functions import Coalesce
 
 from auth_tenant.mixins import TenantQuerySetMixin
@@ -32,6 +32,11 @@ class ProductViewSet(TenantQuerySetMixin, ModelViewSet):
                     F("purchases__quantity") * F("purchases__unit_price"),
                     output_field=DecimalField(max_digits=18, decimal_places=2),
                 ),
+                Value(0),
+                output_field=DecimalField(max_digits=18, decimal_places=2),
+            ),
+            average_purchase_price=Coalesce(
+                Avg("purchases__unit_price"),
                 Value(0),
                 output_field=DecimalField(max_digits=18, decimal_places=2),
             ),
@@ -112,7 +117,7 @@ class ProductPurchaseViewSet(ModelViewSet):
     serializer_class = ProductPurchaseSerializer
     http_method_names = ["get", "post", "put", "delete", "head", "options"]
 
-    search_fields = ["product__name", "currency"]
+    search_fields = ["product__name"]
     ordering_fields = ["created_at", "quantity", "unit_price"]
     ordering = ["-created_at"]
 

@@ -13,7 +13,7 @@ class ProductImageInline(admin.TabularInline):
 class ProductPurchaseInline(admin.TabularInline):
     model = ProductPurchase
     extra = 1
-    fields = ("quantity", "unit_price", "currency", "created_at")
+    fields = ("quantity", "unit_price", "created_at")
     readonly_fields = ("created_at",)
 
 

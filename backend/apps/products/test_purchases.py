@@ -19,7 +19,6 @@ class TestProductPurchaseCrud:
             product=product,
             quantity=10,
             unit_price="900.00",
-            currency="USD",
         )
         resp = manager_client.get(LIST_URL)
         assert resp.status_code == status.HTTP_200_OK
@@ -29,8 +28,8 @@ class TestProductPurchaseCrud:
     def test_list_purchases_filtered_by_product(self, manager_client, tenant):
         p1 = Product.objects.create(tenant=tenant, name="P1", sku="P1")
         p2 = Product.objects.create(tenant=tenant, name="P2", sku="P2")
-        ProductPurchase.objects.create(product=p1, quantity=10, unit_price="900.00", currency="USD")
-        ProductPurchase.objects.create(product=p2, quantity=5, unit_price="800.00", currency="USD")
+        ProductPurchase.objects.create(product=p1, quantity=10, unit_price="900.00")
+        ProductPurchase.objects.create(product=p2, quantity=5, unit_price="800.00")
 
         resp = manager_client.get(LIST_URL, {"product_id": str(p1.pk)})
         assert resp.status_code == status.HTTP_200_OK
@@ -42,7 +41,6 @@ class TestProductPurchaseCrud:
             "product": str(product.pk),
             "quantity": 10,
             "unit_price": "900.00",
-            "currency": "USD",
         }
         resp = admin_client.post(LIST_URL, payload, format="json")
         assert resp.status_code == status.HTTP_201_CREATED
@@ -54,7 +52,6 @@ class TestProductPurchaseCrud:
             "product": str(product.pk),
             "quantity": 10,
             "unit_price": "900.00",
-            "currency": "USD",
         }
         resp = seller_client.post(LIST_URL, payload, format="json")
         assert resp.status_code == status.HTTP_403_FORBIDDEN
@@ -64,7 +61,6 @@ class TestProductPurchaseCrud:
             product=product,
             quantity=10,
             unit_price="900.00",
-            currency="USD",
         )
         resp = admin_client.put(
             detail_url(purchase.pk),
@@ -72,7 +68,6 @@ class TestProductPurchaseCrud:
                 "product": str(product.pk),
                 "quantity": 5,
                 "unit_price": "800.00",
-                "currency": "USD",
             },
             format="json",
         )
@@ -85,7 +80,6 @@ class TestProductPurchaseCrud:
             product=product,
             quantity=10,
             unit_price="900.00",
-            currency="USD",
         )
         resp = admin_client.delete(detail_url(purchase.pk))
         assert resp.status_code == status.HTTP_204_NO_CONTENT
@@ -96,13 +90,11 @@ class TestProductPurchaseCrud:
             product=product,
             quantity=10,
             unit_price="900.00",
-            currency="USD",
         )
         p2 = ProductPurchase.objects.create(
             product=product,
             quantity=5,
             unit_price="800.00",
-            currency="USD",
         )
         resp = admin_client.post(
             reverse("product-purchase-bulk-delete"),
@@ -119,7 +111,6 @@ class TestProductPurchaseIsolation:
             product=product,
             quantity=10,
             unit_price="900.00",
-            currency="USD",
         )
         resp = other_tenant_client.get(LIST_URL)
         assert resp.status_code == status.HTTP_200_OK
@@ -130,7 +121,6 @@ class TestProductPurchaseIsolation:
             product=product,
             quantity=10,
             unit_price="900.00",
-            currency="USD",
         )
         resp = other_tenant_client.get(detail_url(purchase.pk))
         assert resp.status_code == status.HTTP_404_NOT_FOUND
@@ -147,7 +137,6 @@ class TestProductPurchaseIsolation:
             "product": str(other_product.pk),
             "quantity": 10,
             "unit_price": "900.00",
-            "currency": "USD",
         }
         resp = admin_client.post(LIST_URL, payload, format="json")
         assert resp.status_code == status.HTTP_400_BAD_REQUEST

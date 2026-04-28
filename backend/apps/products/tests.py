@@ -44,23 +44,20 @@ class TestProductPurchaseModel:
             product=product,
             quantity=10,
             unit_price="900.00",
-            currency="USD",
         )
 
         assert purchase.product == product
         assert purchase.quantity == 10
         assert str(purchase.unit_price) == "900.00"
-        assert purchase.currency == "USD"
 
     def test_purchase_str(self, product):
         purchase = ProductPurchase.objects.create(
             product=product,
             quantity=10,
             unit_price="800.00",
-            currency="USD",
         )
 
-        assert f"{product.id}: 10 x 800.00 USD" == str(purchase)
+        assert f"{product.id}: 10 x 800.00" == str(purchase)
 
 
 class TestProductList:
@@ -69,13 +66,11 @@ class TestProductList:
             product=product,
             quantity=10,
             unit_price="900.00",
-            currency="USD",
         )
         ProductPurchase.objects.create(
             product=product,
             quantity=10,
             unit_price="800.00",
-            currency="USD",
         )
         resp = manager_client.get(LIST_URL)
         assert resp.status_code == status.HTTP_200_OK

@@ -114,7 +114,6 @@ export default function ProductDetailsView() {
   const [imagePreviewOpen, setImagePreviewOpen] = useState(false);
   const [quantityInput, setQuantityInput] = useState('1');
   const [unitPriceInput, setUnitPriceInput] = useState('');
-  const [currencyInput, setCurrencyInput] = useState('USD');
 
   const images = useMemo(() => {
     if (!product) return [];
@@ -175,7 +174,6 @@ export default function ProductDetailsView() {
     setEditingPurchase(null);
     setQuantityInput('1');
     setUnitPriceInput('');
-    setCurrencyInput('USD');
     setUpsertOpen(true);
   };
 
@@ -187,7 +185,6 @@ export default function ProductDetailsView() {
     setEditingPurchase(target);
     setQuantityInput(String(target.quantity));
     setUnitPriceInput(target.unitPrice);
-    setCurrencyInput(target.currency);
     setUpsertOpen(true);
     closeActions(false);
   };
@@ -195,7 +192,6 @@ export default function ProductDetailsView() {
   const handleSavePurchase = async () => {
     const quantity = Number(quantityInput);
     const unitPrice = unitPriceInput.trim();
-    const currency = currencyInput.trim().toUpperCase();
     if (!quantity || quantity <= 0 || !unitPrice) return;
 
     try {
@@ -204,7 +200,6 @@ export default function ProductDetailsView() {
           product: product.id,
           quantity,
           unitPrice,
-          currency,
         });
         enqueueSnackbar(tx('products.toasts.created'), { variant: 'success' });
       } else if (editingPurchase) {
@@ -213,7 +208,6 @@ export default function ProductDetailsView() {
           product: product.id,
           quantity,
           unitPrice,
-          currency,
         });
         enqueueSnackbar(tx('products.toasts.updated'), { variant: 'success' });
       }
@@ -276,13 +270,18 @@ export default function ProductDetailsView() {
           icon="solar:box-bold"
           chips={[
             {
-              icon: 'solar:gallery-bold',
-              label: `${images.length} image(s)`,
+              icon: 'solar:box-bold',
+              label: `${tx('common.table.stock')}: ${fNumber(product.totalQuantity)}`,
               variant: 'soft',
             },
             {
-              icon: 'solar:calendar-mark-bold',
-              label: fDateTime(product.createdAt),
+              icon: 'solar:tag-price-bold',
+              label: `${tx('products.detail.averagePrice')}: ${fCurrency(product.averagePurchasePrice)}`,
+              variant: 'outlined',
+            },
+            {
+              icon: 'solar:wallet-money-bold',
+              label: `${tx('common.table.total')}: ${fCurrency(product.totalPurchaseAmount)}`,
               variant: 'outlined',
             },
           ]}
@@ -299,7 +298,11 @@ export default function ProductDetailsView() {
                 <Card sx={{ flex: 1, p: 2.5 }}>
                   <CardHeader
                     title={tx('common.table.image')}
-                    subheader={hasImages ? `${images.length} image(s)` : 'No images'}
+                    subheader={
+                      hasImages
+                        ? tx('products.detail.imagesCount', { count: images.length })
+                        : tx('products.detail.noImages')
+                    }
                     sx={{ px: 0, pt: 0, pb: 2 }}
                   />
 
@@ -540,7 +543,6 @@ export default function ProductDetailsView() {
           <Stack spacing={2}>
             <TextField label={tx('common.table.qty')} type="number" value={quantityInput} onChange={(e) => setQuantityInput(e.target.value)} />
             <TextField label={tx('common.table.price')} value={unitPriceInput} onChange={(e) => setUnitPriceInput(e.target.value)} />
-            <TextField label="Currency" value={currencyInput} onChange={(e) => setCurrencyInput(e.target.value)} inputProps={{ maxLength: 3 }} />
           </Stack>
         </DialogContent>
         <DialogActions>

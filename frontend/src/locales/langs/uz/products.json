@@ -2,7 +2,10 @@
   "addButton": "Mahsulot qoʻshish",
   "createButton": "Mahsulot yaratish",
   "detail": {
-    "notFound": "Mahsulot topilmadi"
+    "notFound": "Mahsulot topilmadi",
+    "imagesCount": "Rasmlar soni: {{count}}",
+    "noImages": "Rasm yo‘q",
+    "averagePrice": "O‘rt. narx"
   },
   "tabs": {
     "info": "Maʼlumot",
