@@ -2,10 +2,12 @@ import type { Pagination } from 'src/hooks/api';
 import { API_ENDPOINTS, request } from 'src/utils/axios';
 
 import type {
+  AddClientsToGroupPayload,
   CreateGroupPayload,
   FetchGroupsListParams,
   GroupDetail,
   GroupListItem,
+  RemoveClientsFromGroupPayload,
   UpdateGroupPayload,
 } from './types';
 
@@ -63,5 +65,21 @@ export async function bulkDeleteGroups(ids: string[]): Promise<void> {
     method: 'POST',
     url: API_ENDPOINTS.clients.groupsBulkDelete,
     data: { ids },
+  });
+}
+
+export async function addClientsToGroup(payload: AddClientsToGroupPayload): Promise<void> {
+  await request<void>({
+    method: 'POST',
+    url: API_ENDPOINTS.clients.groupsAddClients(payload.groupId),
+    data: { ids: payload.clientIds },
+  });
+}
+
+export async function removeClientsFromGroup(payload: RemoveClientsFromGroupPayload): Promise<void> {
+  await request<void>({
+    method: 'POST',
+    url: API_ENDPOINTS.clients.groupsRemoveClients(payload.groupId),
+    data: { ids: payload.clientIds },
   });
 }

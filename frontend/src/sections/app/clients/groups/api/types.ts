@@ -26,3 +26,10 @@ export type UpdateGroupPayload = {
   name: string;
   description?: string;
 };
+
+export type AddClientsToGroupPayload = {
+  groupId: string;
+  clientIds: string[];
+};
+
+export type RemoveClientsFromGroupPayload = AddClientsToGroupPayload;

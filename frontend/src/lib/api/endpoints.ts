@@ -43,6 +43,8 @@ export const API_ENDPOINTS = {
     groupsList: `${API_V1}/clients/groups/`,
     groupsBulkDelete: `${API_V1}/clients/groups/bulk-delete/`,
     groupsDetail: (id: string) => `${API_V1}/clients/groups/${id}/`,
+    groupsAddClients: (id: string) => `${API_V1}/clients/groups/${id}/add-clients/`,
+    groupsRemoveClients: (id: string) => `${API_V1}/clients/groups/${id}/remove-clients/`,
     search: `${API_V1}/clients/search/`,
     bulkDelete: `${API_V1}/clients/bulk-delete/`,
     bulkCreateExcel: `${API_V1}/clients/bulk-create-excel/`,

@@ -71,6 +71,20 @@
       "deleted": "Guruh o‘chirildi",
       "bulkDeleted": "O‘chirilgan guruhlar soni: {{count}}"
     },
+    "addClientsButton": "Mijoz qoʻshish",
+    "addClientsDialog": {
+      "title": "Guruhga mijozlar qoʻshish",
+      "searchLabel": "Mijozlarni tanlang",
+      "searchPlaceholder": "Ism yoki telefon boʻyicha qidirish…",
+      "submitButton": "Qoʻshish",
+      "successToast": "Guruhga mijozlar qoʻshildi: {{count}}"
+    },
+    "removeClientsButton": "Guruhdan chiqarish",
+    "removeClientsDialog": {
+      "title": "Guruhdan chiqarish",
+      "description": "Tanlangan mijozlarni guruhdan olib tashlamoqchimisiz? Soni: {{count}}",
+      "successToast": "Guruhdan chiqarildi: {{count}} ta mijoz"
+    },
     "table": {
       "name": "Guruh nomi",
       "clientsCount": "Mijozlar soni"

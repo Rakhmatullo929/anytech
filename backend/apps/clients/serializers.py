@@ -215,6 +215,13 @@ class GroupBulkDeleteSerializer(serializers.Serializer):
     )
 
 
+class GroupAddClientsSerializer(serializers.Serializer):
+    ids = serializers.ListField(
+        child=serializers.UUIDField(),
+        allow_empty=False,
+    )
+
+
 class GroupListSerializer(serializers.ModelSerializer):
     clients_count = serializers.IntegerField(read_only=True)
 
