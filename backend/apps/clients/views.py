@@ -17,6 +17,7 @@ from .serializers import (
     ClientBulkCreateExcelSerializer,
     ClientDetailSerializer,
     ClientSerializer,
+    GroupAddClientsSerializer,
     GroupBulkDeleteSerializer,
     GroupDetailSerializer,
     GroupListSerializer,
@@ -189,3 +190,25 @@ class GroupViewSet(TenantQuerySetMixin, ModelViewSet):
         ids = serializer.validated_data["ids"]
         deleted_count, _details = self.get_queryset().filter(id__in=ids).delete()
         return Response({"deleted": deleted_count}, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["post"], url_path="add-clients")
+    def add_clients(self, request, pk=None):
+        group = self.get_object()
+        serializer = GroupAddClientsSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        ids = serializer.validated_data["ids"]
+        clients = Client.objects.filter(tenant=request.user.tenant, id__in=ids)
+        group.clients.add(*clients)
+        return Response(status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["post"], url_path="remove-clients")
+    def remove_clients(self, request, pk=None):
+        group = self.get_object()
+        serializer = GroupAddClientsSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        ids = serializer.validated_data["ids"]
+        clients = Client.objects.filter(tenant=request.user.tenant, id__in=ids)
+        group.clients.remove(*clients)
+        return Response(status=status.HTTP_200_OK)

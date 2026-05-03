@@ -3,8 +3,8 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { deleteFromList, type Pagination, updateList, updateObject, useFetchList, useFetchOne, useMutate } from 'src/hooks/api';
 
-import { bulkDeleteGroups, createGroup, deleteGroup, fetchGroupDetail, fetchGroupsList, updateGroup } from './groups-requests';
-import type { CreateGroupPayload, FetchGroupsListParams, GroupDetail, GroupListItem, UpdateGroupPayload } from './types';
+import { addClientsToGroup, bulkDeleteGroups, createGroup, deleteGroup, fetchGroupDetail, fetchGroupsList, removeClientsFromGroup, updateGroup } from './groups-requests';
+import type { AddClientsToGroupPayload, CreateGroupPayload, FetchGroupsListParams, GroupDetail, GroupListItem, RemoveClientsFromGroupPayload, UpdateGroupPayload } from './types';
 
 export function useGroupsListQuery(params: FetchGroupsListParams) {
   const { page, pageSize, search, ordering } = params;
@@ -60,6 +60,26 @@ export function useDeleteGroupMutation() {
         deleteFromList(deletedGroupId)
       );
       queryClient.removeQueries({ queryKey: ['clients-groups', 'detail', deletedGroupId] });
+    },
+  });
+}
+
+export function useAddClientsToGroupMutation() {
+  const queryClient = useQueryClient();
+  return useMutate<void, AddClientsToGroupPayload>(addClientsToGroup, {
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['clients', 'list'] });
+      queryClient.invalidateQueries({ queryKey: ['clients-groups', 'detail', variables.groupId] });
+    },
+  });
+}
+
+export function useRemoveClientsFromGroupMutation() {
+  const queryClient = useQueryClient();
+  return useMutate<void, RemoveClientsFromGroupPayload>(removeClientsFromGroup, {
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['clients', 'list'] });
+      queryClient.invalidateQueries({ queryKey: ['clients-groups', 'detail', variables.groupId] });
     },
   });
 }

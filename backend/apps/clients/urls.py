@@ -14,6 +14,16 @@ urlpatterns = [
         name="group-bulk-delete",
     ),
     path(
+        "groups/<uuid:pk>/add-clients/",
+        GroupViewSet.as_view({"post": "add_clients"}),
+        name="group-add-clients",
+    ),
+    path(
+        "groups/<uuid:pk>/remove-clients/",
+        GroupViewSet.as_view({"post": "remove_clients"}),
+        name="group-remove-clients",
+    ),
+    path(
         "groups/<uuid:pk>/",
         GroupViewSet.as_view(
             {"get": "retrieve", "put": "update", "patch": "partial_update", "delete": "destroy"}

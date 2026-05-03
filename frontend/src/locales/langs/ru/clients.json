@@ -71,6 +71,20 @@
       "deleted": "Группа удалена",
       "bulkDeleted": "Удалено групп: {{count}}"
     },
+    "addClientsButton": "Добавить клиентов",
+    "addClientsDialog": {
+      "title": "Добавить клиентов в группу",
+      "searchLabel": "Выберите клиентов",
+      "searchPlaceholder": "Поиск по имени или телефону…",
+      "submitButton": "Добавить",
+      "successToast": "Клиентов добавлено в группу: {{count}}"
+    },
+    "removeClientsButton": "Удалить из группы",
+    "removeClientsDialog": {
+      "title": "Удалить из группы",
+      "description": "Удалить выбранных клиентов из группы? Количество: {{count}}",
+      "successToast": "Удалено из группы: {{count}} клиентов"
+    },
     "table": {
       "name": "Название группы",
       "clientsCount": "Количество клиентов"
