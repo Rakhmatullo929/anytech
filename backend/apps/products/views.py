@@ -50,7 +50,10 @@ class ProductViewSet(TenantQuerySetMixin, ModelViewSet):
     ordering = ["-created_at"]
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        # available_quantity = total_quantity: purchases are physically deducted on sale (FIFO).
+        queryset = super().get_queryset().annotate(
+            available_quantity=F("total_quantity")
+        )
         category_id = self.request.query_params.get("category_id")
         if category_id:
             queryset = queryset.filter(category_id=category_id)

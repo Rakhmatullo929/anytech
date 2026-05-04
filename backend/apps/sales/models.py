@@ -36,6 +36,7 @@ class SaleItem(models.Model):
     )
     quantity = models.PositiveIntegerField()
     price = models.DecimalField(max_digits=12, decimal_places=2)
+    cost = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
 
     class Meta:
         db_table = "sale_items"

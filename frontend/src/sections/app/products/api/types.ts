@@ -28,6 +28,7 @@ export type ProductListItem = {
   sku: string | null;
   image: string | null;
   totalQuantity: number;
+  availableQuantity: number;
   totalPurchaseAmount: string;
   averagePurchasePrice: string;
   createdAt: string;
