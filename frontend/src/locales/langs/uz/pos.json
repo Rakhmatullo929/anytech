@@ -5,6 +5,8 @@
   "documentTitle": "POS",
   "emptyCart": "Chapdagi roʻyxatdan mahsulot qoʻshing.",
   "productsHeading": "Mahsulotlar",
+  "saleSuccess": "Savdo muvaffaqiyatli yakunlandi",
+  "selectClient": "Mijozni tanlang",
   "searchPlaceholder": "Nom yoki SKU boʻyicha qidiruv…",
   "stockShort": "qoldiq"
 }

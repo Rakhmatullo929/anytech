@@ -46,14 +46,20 @@ class ProductViewSet(TenantQuerySetMixin, ModelViewSet):
     http_method_names = ["get", "post", "put", "patch", "delete", "head", "options"]
 
     search_fields = ["name", "sku"]
-    ordering_fields = ["name", "created_at"]
+    ordering_fields = ["name", "created_at", "total_quantity"]
     ordering = ["-created_at"]
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        # available_quantity = total_quantity: purchases are physically deducted on sale (FIFO).
+        queryset = super().get_queryset().annotate(
+            available_quantity=F("total_quantity")
+        )
         category_id = self.request.query_params.get("category_id")
         if category_id:
             queryset = queryset.filter(category_id=category_id)
+        in_stock = self.request.query_params.get("in_stock")
+        if in_stock == "true":
+            queryset = queryset.filter(total_quantity__gt=0)
         return queryset
 
     def get_permissions(self):
