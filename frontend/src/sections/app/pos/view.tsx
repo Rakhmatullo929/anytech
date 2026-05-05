@@ -46,7 +46,11 @@ export default function PosView() {
         page: pageParam,
         pageSize: 20,
         search: debouncedSearch || undefined,
-        ordering: 'name',
+        // Without search: only in-stock products, sorted alphabetically.
+        // With search: all products (so cashier can see out-of-stock too),
+        // in-stock first via -total_quantity ordering.
+        ordering: debouncedSearch ? '-total_quantity,name' : 'name',
+        inStock: !debouncedSearch,
       }),
     [debouncedSearch]
   );

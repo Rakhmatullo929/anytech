@@ -62,6 +62,7 @@ export type FetchProductsListParams = {
   search?: string;
   ordering?: string;
   categoryId?: string;
+  inStock?: boolean;
 };
 
 export type FetchProductPurchasesListParams = {

@@ -51,7 +51,7 @@ export default function SaleDetailsView() {
     }),
     [tx]
   );
-  const itemCount = sale?.items?.length ?? 0;
+  const itemCount = sale?.items?.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
 
   if (isPending) {
     return (
