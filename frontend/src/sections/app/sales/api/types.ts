@@ -1,4 +1,4 @@
-export type SalePaymentType = 'cash' | 'card' | 'debt';
+export type SalePaymentType = 'cash' | 'card' | 'transfer' | 'debt';
 
 export type SaleListItem = {
   id: string;

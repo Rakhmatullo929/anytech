@@ -4,17 +4,20 @@ import { useLocales } from 'src/locales';
 // @mui
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
+import Chip from '@mui/material/Chip';
+import Link from '@mui/material/Link';
+import LinearProgress from '@mui/material/LinearProgress';
+import MenuItem from '@mui/material/MenuItem';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
-import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
-import Link from '@mui/material/Link';
+import TableRow from '@mui/material/TableRow';
 import TextField from '@mui/material/TextField';
-import MenuItem from '@mui/material/MenuItem';
-import LinearProgress from '@mui/material/LinearProgress';
+import Typography from '@mui/material/Typography';
 // utils
 import { fCurrency } from 'src/utils/format-number';
+import { fDate } from 'src/utils/format-time';
 import { intParam, stringParam, useSyncTableWithUrlListState, useUrlQueryState } from 'src/hooks/use-url-query-state';
 import { useCheckPermission } from 'src/auth/hooks/use-check-permission';
 // routes
@@ -29,8 +32,67 @@ import {
   TableHeadCustom,
   TablePaginationCustom,
 } from 'src/components/table';
-import { useDebtsListQuery, type DebtStatus } from 'src/sections/app/depts/api';
+import { useDebtsListQuery, type DebtStatus, type DebtListItem } from 'src/sections/app/depts/api';
 import { DebtsListSkeleton } from 'src/sections/app/depts/skeleton';
+
+// ----------------------------------------------------------------------
+
+function getDeadlineInfo(deadline: string | null): { diff: number } | null {
+  if (!deadline) return null;
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const due = new Date(deadline);
+  due.setHours(0, 0, 0, 0);
+  return { diff: Math.round((due.getTime() - now.getTime()) / 86400000) };
+}
+
+function DeadlineCell({ row, tx }: { row: DebtListItem; tx: (k: string, o?: Record<string, string | number>) => string }) {
+  if (!row.deadline) return <TableCell>—</TableCell>;
+
+  const info = getDeadlineInfo(row.deadline);
+  if (!info) return <TableCell>—</TableCell>;
+
+  const { diff } = info;
+
+  if (row.status === 'closed') {
+    return (
+      <TableCell>
+        <Typography variant="body2" color="text.secondary">
+          {fDate(row.deadline)}
+        </Typography>
+      </TableCell>
+    );
+  }
+
+  if (diff > 0) {
+    return (
+      <TableCell>
+        <Stack spacing={0.5}>
+          <Typography variant="caption" color="text.secondary">{fDate(row.deadline)}</Typography>
+          <Chip size="small" label={tx('debts.list.daysLeft', { count: diff })} color="success" variant="soft" />
+        </Stack>
+      </TableCell>
+    );
+  }
+  if (diff === 0) {
+    return (
+      <TableCell>
+        <Stack spacing={0.5}>
+          <Typography variant="caption" color="text.secondary">{fDate(row.deadline)}</Typography>
+          <Chip size="small" label={tx('debts.detail.dueToday')} color="warning" variant="soft" />
+        </Stack>
+      </TableCell>
+    );
+  }
+  return (
+    <TableCell>
+      <Stack spacing={0.5}>
+        <Typography variant="caption" color="text.secondary">{fDate(row.deadline)}</Typography>
+        <Chip size="small" label={tx('debts.list.daysOverdue', { count: Math.abs(diff) })} color="error" variant="soft" />
+      </Stack>
+    </TableCell>
+  );
+}
 
 // ----------------------------------------------------------------------
 
@@ -44,6 +106,7 @@ export default function DebtsView() {
       { id: 'total', label: tx('common.table.total') },
       { id: 'paid', label: tx('common.table.paid') },
       { id: 'rem', label: tx('common.table.rem') },
+      { id: 'deadline', label: tx('debts.list.deadline') },
       { id: 'status', label: tx('common.table.status') },
     ],
     [tx]
@@ -137,27 +200,39 @@ export default function DebtsView() {
               <Table size="small">
                 <TableHeadCustom headLabel={tableHead} />
                 <TableBody>
-                  {rows.map((row) => (
-                    <TableRow key={row.id} hover>
-                      <TableCell>
-                        {canDetailDebts ? (
-                          <Link component={RouterLink} href={paths.debts.details(row.id)} variant="subtitle2">
-                            {row.clientName}
-                          </Link>
-                        ) : (
-                          row.clientName
-                        )}
-                      </TableCell>
-                      <TableCell>{fCurrency(row.totalAmount)}</TableCell>
-                      <TableCell>{fCurrency(row.paidAmount)}</TableCell>
-                      <TableCell>{fCurrency(row.remaining)}</TableCell>
-                      <TableCell>
-                        {row.status === 'active'
-                          ? tx('common.status.rowActive')
-                          : tx('common.status.rowClosed')}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {rows.map((row) => {
+                    const isOverdue =
+                      row.status === 'active' &&
+                      row.deadline != null &&
+                      (getDeadlineInfo(row.deadline)?.diff ?? 1) < 0;
+
+                    return (
+                      <TableRow
+                        key={row.id}
+                        hover
+                        sx={isOverdue ? { bgcolor: 'error.lighter' } : undefined}
+                      >
+                        <TableCell>
+                          {canDetailDebts ? (
+                            <Link component={RouterLink} href={paths.debts.details(row.id)} variant="subtitle2">
+                              {row.clientName}
+                            </Link>
+                          ) : (
+                            row.clientName
+                          )}
+                        </TableCell>
+                        <TableCell>{fCurrency(row.totalAmount)}</TableCell>
+                        <TableCell>{fCurrency(row.paidAmount)}</TableCell>
+                        <TableCell>{fCurrency(row.remaining)}</TableCell>
+                        <DeadlineCell row={row} tx={tx} />
+                        <TableCell>
+                          {row.status === 'active'
+                            ? tx('common.status.rowActive')
+                            : tx('common.status.rowClosed')}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                   <TableNoData notFound={!rows.length} title={tx('common.table.noData')} />
                 </TableBody>
               </Table>

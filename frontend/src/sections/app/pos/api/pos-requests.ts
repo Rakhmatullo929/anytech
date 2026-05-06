@@ -10,6 +10,7 @@ export async function createSale(payload: CreateSalePayload): Promise<SaleListIt
       client: payload.client,
       paymentType: payload.paymentType,
       items: payload.items,
+      ...(payload.debtDeadlineDays != null ? { debtDeadlineDays: payload.debtDeadlineDays } : {}),
     },
   });
 }

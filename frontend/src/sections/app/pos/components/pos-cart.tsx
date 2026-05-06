@@ -23,6 +23,8 @@ type Props = {
   onClientChange: (client: ClientListItem | null) => void;
   paymentType: SalePaymentType;
   onPaymentTypeChange: (type: SalePaymentType) => void;
+  debtDeadlineDays: number | '';
+  onDebtDeadlineDaysChange: (days: number | '') => void;
   subtotal: number;
   canComplete: boolean;
   isCreating: boolean;
@@ -38,6 +40,8 @@ export default function PosCart({
   onClientChange,
   paymentType,
   onPaymentTypeChange,
+  debtDeadlineDays,
+  onDebtDeadlineDaysChange,
   subtotal,
   canComplete,
   isCreating,
@@ -85,6 +89,8 @@ export default function PosCart({
         onClientChange={onClientChange}
         paymentType={paymentType}
         onPaymentTypeChange={onPaymentTypeChange}
+        debtDeadlineDays={debtDeadlineDays}
+        onDebtDeadlineDaysChange={onDebtDeadlineDaysChange}
         subtotal={subtotal}
         canComplete={canComplete}
         isCreating={isCreating}

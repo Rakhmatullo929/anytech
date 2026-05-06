@@ -2,6 +2,8 @@
   "cart": "Savatcha",
   "client": "Mijoz",
   "completeSale": "Savdoni yakunlash",
+  "debtDeadlineDays": "Muddat (kunlarda)",
+  "debtDeadlineDaysUnit": "kun",
   "documentTitle": "POS",
   "emptyCart": "Chapdagi roʻyxatdan mahsulot qoʻshing.",
   "productsHeading": "Mahsulotlar",

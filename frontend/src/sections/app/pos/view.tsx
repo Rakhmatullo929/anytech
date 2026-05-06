@@ -27,6 +27,7 @@ export default function PosView() {
 
   const [client, setClient] = useState<ClientListItem | null>(null);
   const [paymentType, setPaymentType] = useState<SalePaymentType>('cash');
+  const [debtDeadlineDays, setDebtDeadlineDays] = useState<number | ''>('');
   const [search, setSearch] = useState('');
 
   const debouncedSearch = useDebounce(search, 400);
@@ -93,15 +94,17 @@ export default function PosView() {
           quantity: l.quantity,
           price: l.unitPrice.toFixed(2),
         })),
+        ...(paymentType === 'debt' && debtDeadlineDays !== '' ? { debtDeadlineDays } : {}),
       });
       enqueueSnackbar(tx('pos.saleSuccess'), { variant: 'success' });
       clear();
       setClient(null);
       setPaymentType('cash');
+      setDebtDeadlineDays('');
     } catch {
       // useMutate global handler shows the error snackbar
     }
-  }, [cart, client, paymentType, createSaleMutation, enqueueSnackbar, tx, clear]);
+  }, [cart, client, paymentType, debtDeadlineDays, createSaleMutation, enqueueSnackbar, tx, clear]);
 
   // ── Render ─────────────────────────────────────────────────────────
 
@@ -137,6 +140,8 @@ export default function PosView() {
             onClientChange={setClient}
             paymentType={paymentType}
             onPaymentTypeChange={setPaymentType}
+            debtDeadlineDays={debtDeadlineDays}
+            onDebtDeadlineDaysChange={setDebtDeadlineDays}
             subtotal={subtotal}
             canComplete={canComplete}
             isCreating={createSaleMutation.isPending}

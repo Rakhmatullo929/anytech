@@ -32,7 +32,7 @@ export default memo(NavSectionVertical);
 // ----------------------------------------------------------------------
 
 type GroupProps = {
-  subheader: string;
+  subheader?: string;
   items: NavListProps[];
   config: NavConfigProps;
 };

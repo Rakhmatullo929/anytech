@@ -15,8 +15,8 @@ export const paths = {
   },
   clients: {
     root: '/clients',
-    groups: '/clients/groups',
-    groupsDetails: (id: string) => `/clients/groups/${id}`,
+    groups: '/groups',
+    groupsDetails: (id: string) => `/groups/${id}`,
     create: '/clients/new',
     edit: (id: string) => `/clients/${id}/edit`,
     details: (id: string) => `/clients/${id}`,

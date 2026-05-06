@@ -18,4 +18,5 @@ export type CreateSalePayload = {
     quantity: number;
     price: string;
   }>;
+  debtDeadlineDays?: number;
 };

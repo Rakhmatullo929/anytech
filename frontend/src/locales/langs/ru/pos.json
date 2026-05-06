@@ -2,6 +2,8 @@
   "cart": "Корзина",
   "client": "Клиент",
   "completeSale": "Завершить продажу",
+  "debtDeadlineDays": "Срок (в днях)",
+  "debtDeadlineDaysUnit": "дн.",
   "documentTitle": "POS",
   "emptyCart": "Добавьте товар из списка слева.",
   "productsHeading": "Товары",

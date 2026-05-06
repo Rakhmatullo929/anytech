@@ -2,6 +2,7 @@ import { useCallback, useMemo } from 'react';
 
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
+import InputAdornment from '@mui/material/InputAdornment';
 import MenuItem from '@mui/material/MenuItem';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
@@ -21,6 +22,8 @@ type Props = {
   onClientChange: (client: ClientListItem | null) => void;
   paymentType: SalePaymentType;
   onPaymentTypeChange: (type: SalePaymentType) => void;
+  debtDeadlineDays: number | '';
+  onDebtDeadlineDaysChange: (days: number | '') => void;
   subtotal: number;
   canComplete: boolean;
   isCreating: boolean;
@@ -32,6 +35,8 @@ export default function PosCartSummary({
   onClientChange,
   paymentType,
   onPaymentTypeChange,
+  debtDeadlineDays,
+  onDebtDeadlineDaysChange,
   subtotal,
   canComplete,
   isCreating,
@@ -93,8 +98,38 @@ export default function PosCartSummary({
       >
         <MenuItem value="cash">{tx('common.payment.cash')}</MenuItem>
         <MenuItem value="card">{tx('common.payment.card')}</MenuItem>
+        <MenuItem value="transfer">{tx('common.payment.transfer')}</MenuItem>
         <MenuItem value="debt">{tx('common.payment.debt')}</MenuItem>
       </TextField>
+
+      {paymentType === 'debt' && (
+        <TextField
+          fullWidth
+          size="small"
+          label={tx('pos.debtDeadlineDays')}
+          type="number"
+          value={debtDeadlineDays}
+          onChange={(e) => {
+            const raw = e.target.value;
+            if (raw === '') {
+              onDebtDeadlineDaysChange('');
+            } else {
+              const n = parseInt(raw, 10);
+              if (!Number.isNaN(n) && n > 0) onDebtDeadlineDaysChange(n);
+            }
+          }}
+          inputProps={{ min: 1 }}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <Typography variant="caption" color="text.secondary">
+                  {tx('pos.debtDeadlineDaysUnit')}
+                </Typography>
+              </InputAdornment>
+            ),
+          }}
+        />
+      )}
 
       <Stack direction="row" justifyContent="space-between" alignItems="center">
         <Typography variant="body2" color="text.secondary">
