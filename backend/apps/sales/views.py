@@ -36,6 +36,7 @@ class SaleViewSet(TenantQuerySetMixin, ModelViewSet):
         if payment_type in {
             Sale.PaymentType.CASH,
             Sale.PaymentType.CARD,
+            Sale.PaymentType.TRANSFER,
             Sale.PaymentType.DEBT,
         }:
             qs = qs.filter(payment_type=payment_type)

@@ -28,6 +28,7 @@ export type ProductListItem = {
   sku: string | null;
   image: string | null;
   totalQuantity: number;
+  availableQuantity: number;
   totalPurchaseAmount: string;
   averagePurchasePrice: string;
   createdAt: string;
@@ -61,6 +62,7 @@ export type FetchProductsListParams = {
   search?: string;
   ordering?: string;
   categoryId?: string;
+  inStock?: boolean;
 };
 
 export type FetchProductPurchasesListParams = {

@@ -47,11 +47,12 @@ export default function SaleDetailsView() {
     () => ({
       cash: tx('common.payment.cash'),
       card: tx('common.payment.card'),
+      transfer: tx('common.payment.transfer'),
       debt: tx('common.payment.debt'),
     }),
     [tx]
   );
-  const itemCount = sale?.items?.length ?? 0;
+  const itemCount = sale?.items?.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
 
   if (isPending) {
     return (

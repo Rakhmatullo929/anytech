@@ -4,6 +4,7 @@
   },
   "navigation": {
     "clients": "Mijozlar",
+    "groups": "Guruhlar",
     "catalog": "Katalog",
     "categories": "Kategoriyalar",
     "debts": "Qarzlar",
@@ -31,6 +32,7 @@
     "card": "Karta",
     "cash": "Naqd",
     "debt": "Qarzga",
+    "transfer": "O'tkazma",
     "method": "Toʻlov"
   },
   "status": {

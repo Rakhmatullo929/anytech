@@ -96,6 +96,7 @@ export default function SalesView() {
     () => ({
       cash: tx('common.payment.cash'),
       card: tx('common.payment.card'),
+      transfer: tx('common.payment.transfer'),
       debt: tx('common.payment.debt'),
     }),
     [tx]

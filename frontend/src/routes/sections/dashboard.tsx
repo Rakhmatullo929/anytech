@@ -101,14 +101,6 @@ export const dashboardRoutes = [
             element: withPermission('clients', 'read', <ClientsListPage />),
           },
           {
-            path: 'groups',
-            element: withPermission('groups', 'read', <ClientsGroupsPage />),
-          },
-          {
-            path: 'groups/:id',
-            element: withPermission('groups', 'detail', <ClientsGroupsDetailsPage />),
-          },
-          {
             path: 'new',
             element: withPermission('clients', 'write', <ClientCreatePage />),
           },
@@ -119,6 +111,19 @@ export const dashboardRoutes = [
           {
             path: ':id',
             element: withPermission('clients', 'detail', <ClientDetailsPage />),
+          },
+        ],
+      },
+      {
+        path: 'groups',
+        children: [
+          {
+            index: true,
+            element: withPermission('groups', 'read', <ClientsGroupsPage />),
+          },
+          {
+            path: ':id',
+            element: withPermission('groups', 'detail', <ClientsGroupsDetailsPage />),
           },
         ],
       },

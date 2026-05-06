@@ -36,13 +36,13 @@ export function useNavData() {
   const canReadProducts = canReadPage(permissions, 'products');
   const canReadCategories = canReadPage(permissions, 'categories');
   const canReadClients = canReadPage(permissions, 'clients');
+  const canReadGroups = canReadPage(permissions, 'groups');
   const canReadSales = canReadPage(permissions, 'sales');
   const canReadDebts = canReadPage(permissions, 'debts');
 
   const data = useMemo(
     () => [
       {
-        subheader: tx('common.navigation.group'),
         items: [
           ...(canReadAdmin
             ? [
@@ -100,6 +100,20 @@ export function useNavData() {
                   title: tx('common.navigation.clients'),
                   path: paths.clients.root,
                   icon: ICONS.user,
+                  children: [
+                    ...(canReadGroups
+                      ? [
+                          {
+                            title: tx('common.navigation.groups'),
+                            path: paths.clients.groups,
+                          },
+                        ]
+                      : []),
+                    {
+                      title: tx('common.navigation.clients'),
+                      path: paths.clients.root,
+                    },
+                  ],
                 },
               ]
             : []),
@@ -124,7 +138,7 @@ export function useNavData() {
         ],
       },
     ],
-    [canReadAdmin, canReadCategories, canReadClients, canReadDebts, canReadPos, canReadProducts, canReadSales, tx]
+    [canReadAdmin, canReadCategories, canReadClients, canReadDebts, canReadGroups, canReadPos, canReadProducts, canReadSales, tx]
   );
 
   return data;

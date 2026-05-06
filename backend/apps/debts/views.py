@@ -76,7 +76,10 @@ class DebtViewSet(TenantQuerySetMixin, ListModelMixin, RetrieveModelMixin, Gener
                     }}
                 )
 
-            Payment.objects.create(debt=debt, amount=amount)
+            payment_method = serializer.validated_data.get(
+                "payment_method", Payment.PaymentMethod.CASH
+            )
+            Payment.objects.create(debt=debt, amount=amount, payment_method=payment_method)
 
             debt.paid_amount += amount
             if debt.paid_amount >= debt.total_amount:

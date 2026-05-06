@@ -8,6 +8,7 @@ class Sale(models.Model):
     class PaymentType(models.TextChoices):
         CASH = "cash", _("Cash")
         CARD = "card", _("Card")
+        TRANSFER = "transfer", _("Transfer")
         DEBT = "debt", _("Debt")
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -36,6 +37,7 @@ class SaleItem(models.Model):
     )
     quantity = models.PositiveIntegerField()
     price = models.DecimalField(max_digits=12, decimal_places=2)
+    cost = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
 
     class Meta:
         db_table = "sale_items"

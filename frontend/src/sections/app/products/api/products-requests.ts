@@ -25,6 +25,7 @@ export async function fetchProductsList(
       pageSize: params.pageSize,
       ...(params.search ? { search: params.search } : {}),
       ...(params.categoryId ? { categoryId: params.categoryId } : {}),
+      ...(params.inStock ? { inStock: true } : {}),
       ordering: params.ordering ?? '-created_at',
     },
   });

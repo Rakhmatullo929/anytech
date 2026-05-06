@@ -58,6 +58,7 @@ class ProductSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(many=True, read_only=True)
     image = serializers.SerializerMethodField(read_only=True)
     total_quantity = serializers.IntegerField(read_only=True)
+    available_quantity = serializers.IntegerField(read_only=True, default=0)
     total_purchase_amount = serializers.DecimalField(
         max_digits=18, decimal_places=2, read_only=True
     )
@@ -192,6 +193,7 @@ class ProductListSerializer(ProductSerializer):
             "sku",
             "image",
             "total_quantity",
+            "available_quantity",
             "total_purchase_amount",
             "average_purchase_price",
             "created_at",

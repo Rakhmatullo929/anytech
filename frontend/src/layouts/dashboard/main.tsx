@@ -28,13 +28,17 @@ export default function Main({ children, sx, ...other }: BoxProps) {
           minHeight: 1,
           display: 'flex',
           flexDirection: 'column',
+          px: 2,
           pt: `${HEADER.H_MOBILE + 24}px`,
           pb: 10,
           ...(lgUp && {
+            px: 5,
             pt: `${HEADER.H_MOBILE * 2 + 40}px`,
             pb: 15,
           }),
+          ...sx,
         }}
+        {...other}
       >
         {children}
       </Box>
@@ -46,9 +50,10 @@ export default function Main({ children, sx, ...other }: BoxProps) {
       component="main"
       sx={{
         flexGrow: 1,
+        px: 2,
         py: `${HEADER.H_MOBILE + SPACING}px`,
         ...(lgUp && {
-          px: 2,
+          px: 5,
           py: `${HEADER.H_DESKTOP + SPACING}px`,
           width: `calc(100% - ${NAV.W_VERTICAL}px)`,
           ...(isNavMini && {

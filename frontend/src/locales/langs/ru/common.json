@@ -4,6 +4,7 @@
   },
   "navigation": {
     "clients": "Клиенты",
+    "groups": "Группы",
     "catalog": "Каталог",
     "categories": "Категории",
     "debts": "Долги",
@@ -31,6 +32,7 @@
     "card": "Карта",
     "cash": "Наличные",
     "debt": "В долг",
+    "transfer": "Перечисление",
     "method": "Оплата"
   },
   "status": {
