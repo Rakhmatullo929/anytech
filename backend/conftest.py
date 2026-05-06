@@ -11,7 +11,7 @@ from rest_framework.test import APIClient
 
 from auth_tenant.models import Tenant, User
 from clients.models import Client
-from products.models import Category, Product
+from products.models import Category, Product, ProductPurchase
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -144,19 +144,23 @@ def anon_client():
 
 @pytest.fixture
 def product(tenant):
-    return Product.objects.create(
+    p = Product.objects.create(
         tenant=tenant,
         name="Test Product",
         sku="TP-001",
     )
+    ProductPurchase.objects.create(product=p, quantity=100, unit_price="50.00")
+    return p
 
 
 @pytest.fixture
 def product_no_sku(tenant):
-    return Product.objects.create(
+    p = Product.objects.create(
         tenant=tenant,
         name="No SKU Product",
     )
+    ProductPurchase.objects.create(product=p, quantity=100, unit_price="50.00")
+    return p
 
 
 @pytest.fixture

@@ -10,7 +10,7 @@ from .models import Debt, Payment
 class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment
-        fields = ("id", "amount", "created_at")
+        fields = ("id", "amount", "payment_method", "created_at")
         read_only_fields = ("id", "created_at")
 
 
@@ -25,7 +25,7 @@ class DebtListSerializer(serializers.ModelSerializer):
         fields = (
             "id", "client", "client_name", "sale",
             "total_amount", "paid_amount", "remaining",
-            "status", "created_at",
+            "status", "deadline", "created_at",
         )
 
 
@@ -41,6 +41,10 @@ class DebtDetailSerializer(DebtListSerializer):
 
 class PaymentCreateSerializer(serializers.Serializer):
     amount = serializers.DecimalField(max_digits=14, decimal_places=2)
+    payment_method = serializers.ChoiceField(
+        choices=Payment.PaymentMethod.choices,
+        default=Payment.PaymentMethod.CASH,
+    )
 
     def validate_amount(self, value):
         if value <= 0:

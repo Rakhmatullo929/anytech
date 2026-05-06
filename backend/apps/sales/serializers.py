@@ -1,3 +1,4 @@
+from datetime import date, timedelta
 from decimal import Decimal
 
 from django.db import transaction
@@ -21,10 +22,16 @@ class SaleItemWriteSerializer(serializers.Serializer):
 
 class SaleCreateSerializer(serializers.ModelSerializer):
     items = SaleItemWriteSerializer(many=True, write_only=True)
+    debt_deadline_days = serializers.IntegerField(
+        write_only=True, required=False, min_value=1, allow_null=True
+    )
 
     class Meta:
         model = Sale
-        fields = ("id", "tenant", "client", "payment_type", "total_amount", "items", "created_at")
+        fields = (
+            "id", "tenant", "client", "payment_type", "total_amount",
+            "items", "debt_deadline_days", "created_at",
+        )
         read_only_fields = ("id", "tenant", "total_amount", "created_at")
 
     def validate(self, attrs):
@@ -32,11 +39,13 @@ class SaleCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"items": _("At least one item is required.")})
 
         client = attrs.get("client")
-        if not client:
-            raise serializers.ValidationError({"client": _("Client is required.")})
+        payment_type = attrs.get("payment_type")
+
+        if payment_type == Sale.PaymentType.DEBT and not client:
+            raise serializers.ValidationError({"client": _("Client is required for debt sales.")})
 
         tenant = self.context["request"].user.tenant
-        if client.tenant_id != tenant.pk:
+        if client and client.tenant_id != tenant.pk:
             raise serializers.ValidationError({"client": _("Client not found.")})
 
         return attrs
@@ -88,6 +97,7 @@ class SaleCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         items_data = validated_data.pop("items")
+        debt_deadline_days = validated_data.pop("debt_deadline_days", None)
         tenant = validated_data["tenant"]
 
         product_ids = [item["product"] for item in items_data]
@@ -139,11 +149,17 @@ class SaleCreateSerializer(serializers.ModelSerializer):
             SaleItem.objects.bulk_create(sale_items)
 
             if sale.payment_type == Sale.PaymentType.DEBT:
+                deadline = (
+                    date.today() + timedelta(days=debt_deadline_days)
+                    if debt_deadline_days
+                    else None
+                )
                 Debt.objects.create(
                     tenant=tenant,
                     client=sale.client,
                     sale=sale,
                     total_amount=total_amount,
+                    deadline=deadline,
                 )
 
         return sale

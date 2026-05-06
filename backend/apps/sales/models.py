@@ -8,6 +8,7 @@ class Sale(models.Model):
     class PaymentType(models.TextChoices):
         CASH = "cash", _("Cash")
         CARD = "card", _("Card")
+        TRANSFER = "transfer", _("Transfer")
         DEBT = "debt", _("Debt")
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

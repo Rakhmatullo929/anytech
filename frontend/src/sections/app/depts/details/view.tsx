@@ -167,7 +167,7 @@ export default function DebtDetailsView() {
               {debt.payments.map((p) => (
                 <TableRow key={p.id}>
                   <TableCell>{fCurrency(p.amount)}</TableCell>
-                  <TableCell>{tx(`common.payment.${p.paymentMethod}`)}</TableCell>
+                  <TableCell>{p.paymentMethod ? tx(`common.payment.${p.paymentMethod}`) : '—'}</TableCell>
                   <TableCell>{fDateTime(p.createdAt)}</TableCell>
                 </TableRow>
               ))}
