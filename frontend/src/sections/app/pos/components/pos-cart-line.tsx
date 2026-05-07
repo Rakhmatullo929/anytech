@@ -1,5 +1,5 @@
 import { memo, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useController, useForm } from 'react-hook-form';
 
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
@@ -20,45 +20,85 @@ type Props = {
   onRemove: (productId: string) => void;
 };
 
-type FormValues = {
-  qty: string;
-  price: string;
-};
+type FormValues = { qty: string; price: string };
 
 function PosCartLine({ line, onSetQty, onSetPrice, onRemove }: Props) {
   const { tx } = useLocales();
 
-  const { register, reset, getValues } = useForm<FormValues>({
-    defaultValues: {
-      qty: String(line.quantity),
-      price: String(line.unitPrice),
-    },
+  const { control, reset, setError, clearErrors } = useForm<FormValues>({
+    defaultValues: { qty: String(line.quantity), price: String(line.unitPrice) },
   });
 
-  // Sync display when cart state changes externally (e.g. add same product again)
+  const { field: qtyField, fieldState: qtyState } = useController({ name: 'qty', control });
+  const { field: priceField, fieldState: priceState } = useController({ name: 'price', control });
+
+  // Sync display when cart state changes externally (e.g. tapping product again)
   useEffect(() => {
     reset({ qty: String(line.quantity), price: String(line.unitPrice) });
   }, [line.quantity, line.unitPrice, reset]);
 
+  // ── Qty ──────────────────────────────────────────────────────────────
+
+  const validateQty = (raw: string): string | null => {
+    const n = parseInt(raw, 10);
+    if (!raw || Number.isNaN(n) || n < 1) return tx('pos.validation.qtyMin');
+    if (n > line.availableStock) return tx('pos.validation.qtyExceedsStock', { max: line.availableStock });
+    return null;
+  };
+
+  const handleQtyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Strip anything that isn't a digit
+    const filtered = e.target.value.replace(/\D/g, '');
+    qtyField.onChange(filtered);
+    const err = validateQty(filtered);
+    if (err) setError('qty', { message: err });
+    else clearErrors('qty');
+  };
+
   const commitQty = () => {
-    const n = parseInt(getValues('qty'), 10);
-    if (!Number.isNaN(n) && n >= 1) {
-      onSetQty(line.productId, n);
-    } else {
-      reset({ qty: String(line.quantity), price: getValues('price') });
+    const err = validateQty(qtyField.value);
+    if (err) {
+      // Invalid on blur → snap back to last committed value
+      reset({ qty: String(line.quantity), price: priceField.value });
+      clearErrors('qty');
+      return;
     }
+    onSetQty(line.productId, parseInt(qtyField.value, 10));
+  };
+
+  // ── Price ─────────────────────────────────────────────────────────────
+
+  const validatePrice = (raw: string): string | null => {
+    if (!raw || raw === '.') return tx('pos.validation.priceInvalid');
+    const n = parseFloat(raw);
+    if (Number.isNaN(n) || n < 0) return tx('pos.validation.priceMin');
+    return null;
+  };
+
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Allow digits and a single decimal point
+    const filtered = e.target.value
+      .replace(/[^0-9.]/g, '')
+      .replace(/(\..*)\./g, '$1');
+    priceField.onChange(filtered);
+    const err = validatePrice(filtered);
+    if (err) setError('price', { message: err });
+    else clearErrors('price');
   };
 
   const commitPrice = () => {
-    const n = parseFloat(getValues('price'));
-    if (!Number.isNaN(n) && n >= 0) {
-      onSetPrice(line.productId, n);
-    } else {
-      reset({ qty: getValues('qty'), price: String(line.unitPrice) });
+    const err = validatePrice(priceField.value);
+    if (err) {
+      reset({ qty: qtyField.value, price: String(line.unitPrice) });
+      clearErrors('price');
+      return;
     }
+    onSetPrice(line.productId, parseFloat(priceField.value));
   };
 
-  const onEnter = (commit: () => void) => (e: React.KeyboardEvent) => {
+  // ── Helpers ───────────────────────────────────────────────────────────
+
+  const onKeyDown = (commit: () => void) => (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') commit();
   };
 
@@ -73,33 +113,34 @@ function PosCartLine({ line, onSetQty, onSetPrice, onRemove }: Props) {
             {fCurrency(line.unitPrice)} × {line.quantity} = {fCurrency(line.unitPrice * line.quantity)}
           </Typography>
         </Box>
-        <IconButton
-          size="small"
-          color="error"
-          onClick={() => onRemove(line.productId)}
-          sx={{ flexShrink: 0 }}
-        >
+        <IconButton size="small" color="error" onClick={() => onRemove(line.productId)} sx={{ flexShrink: 0 }}>
           <Iconify icon="solar:trash-bin-trash-bold" />
         </IconButton>
       </Stack>
 
       <Stack direction="row" spacing={1}>
         <TextField
-          {...register('qty')}
+          {...qtyField}
           size="small"
           label={tx('common.table.qty')}
-          inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+          inputProps={{ inputMode: 'numeric' }}
+          error={!!qtyState.error}
+          helperText={qtyState.error?.message}
+          onChange={handleQtyChange}
           onBlur={commitQty}
-          onKeyDown={onEnter(commitQty)}
+          onKeyDown={onKeyDown(commitQty)}
           sx={{ flex: 1 }}
         />
         <TextField
-          {...register('price')}
+          {...priceField}
           size="small"
           label={tx('common.table.price')}
           inputProps={{ inputMode: 'decimal' }}
+          error={!!priceState.error}
+          helperText={priceState.error?.message}
+          onChange={handlePriceChange}
           onBlur={commitPrice}
-          onKeyDown={onEnter(commitPrice)}
+          onKeyDown={onKeyDown(commitPrice)}
           sx={{ flex: 1.4 }}
         />
       </Stack>
