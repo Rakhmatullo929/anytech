@@ -1,4 +1,5 @@
-import { memo } from 'react';
+import { memo, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
@@ -19,8 +20,47 @@ type Props = {
   onRemove: (productId: string) => void;
 };
 
+type FormValues = {
+  qty: string;
+  price: string;
+};
+
 function PosCartLine({ line, onSetQty, onSetPrice, onRemove }: Props) {
   const { tx } = useLocales();
+
+  const { register, reset, getValues } = useForm<FormValues>({
+    defaultValues: {
+      qty: String(line.quantity),
+      price: String(line.unitPrice),
+    },
+  });
+
+  // Sync display when cart state changes externally (e.g. add same product again)
+  useEffect(() => {
+    reset({ qty: String(line.quantity), price: String(line.unitPrice) });
+  }, [line.quantity, line.unitPrice, reset]);
+
+  const commitQty = () => {
+    const n = parseInt(getValues('qty'), 10);
+    if (!Number.isNaN(n) && n >= 1) {
+      onSetQty(line.productId, n);
+    } else {
+      reset({ qty: String(line.quantity), price: getValues('price') });
+    }
+  };
+
+  const commitPrice = () => {
+    const n = parseFloat(getValues('price'));
+    if (!Number.isNaN(n) && n >= 0) {
+      onSetPrice(line.productId, n);
+    } else {
+      reset({ qty: getValues('qty'), price: String(line.unitPrice) });
+    }
+  };
+
+  const onEnter = (commit: () => void) => (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') commit();
+  };
 
   return (
     <Stack spacing={1}>
@@ -45,21 +85,21 @@ function PosCartLine({ line, onSetQty, onSetPrice, onRemove }: Props) {
 
       <Stack direction="row" spacing={1}>
         <TextField
-          type="number"
+          {...register('qty')}
           size="small"
           label={tx('common.table.qty')}
-          value={line.quantity}
-          onChange={(e) => onSetQty(line.productId, Number(e.target.value))}
-          inputProps={{ min: 1, max: line.availableStock }}
+          inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+          onBlur={commitQty}
+          onKeyDown={onEnter(commitQty)}
           sx={{ flex: 1 }}
         />
         <TextField
-          type="number"
+          {...register('price')}
           size="small"
           label={tx('common.table.price')}
-          value={line.unitPrice}
-          onChange={(e) => onSetPrice(line.productId, Number(e.target.value))}
-          inputProps={{ min: 0 }}
+          inputProps={{ inputMode: 'decimal' }}
+          onBlur={commitPrice}
+          onKeyDown={onEnter(commitPrice)}
           sx={{ flex: 1.4 }}
         />
       </Stack>
