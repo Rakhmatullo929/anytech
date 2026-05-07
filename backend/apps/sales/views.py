@@ -40,6 +40,9 @@ class SaleViewSet(TenantQuerySetMixin, ModelViewSet):
             Sale.PaymentType.DEBT,
         }:
             qs = qs.filter(payment_type=payment_type)
+        client_id = self.request.query_params.get("client")
+        if client_id:
+            qs = qs.filter(client__id=client_id)
         if self.action == "retrieve":
             qs = qs.prefetch_related("items__product")
         return qs

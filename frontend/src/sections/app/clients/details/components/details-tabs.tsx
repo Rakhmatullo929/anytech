@@ -9,7 +9,7 @@ type Props = {
   labels: Record<ClientDetailsTabValue, string>;
 };
 
-const ORDER: ClientDetailsTabValue[] = ['overview', 'contacts', 'addresses', 'purchases'];
+const ORDER: ClientDetailsTabValue[] = ['overview', 'contacts', 'addresses', 'purchases', 'debts'];
 
 export default function DetailsTabs({ value, onChange, labels }: Props) {
   return (

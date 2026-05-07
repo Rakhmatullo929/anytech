@@ -12,6 +12,7 @@ export async function fetchDebtsList(params: FetchDebtsListParams): Promise<Pagi
       pageSize: params.pageSize,
       ordering: params.ordering ?? '-created_at',
       ...(params.status ? { status: params.status } : {}),
+      ...(params.clientId ? { client: params.clientId } : {}),
     },
   });
 }

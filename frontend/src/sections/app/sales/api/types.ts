@@ -26,4 +26,5 @@ export type FetchSalesListParams = {
   pageSize: number;
   ordering?: string;
   paymentType?: SalePaymentType;
+  clientId?: string;
 };

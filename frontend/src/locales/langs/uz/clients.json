@@ -21,8 +21,10 @@
       "overview": "Umumiy",
       "contacts": "Kontaktlar",
       "addresses": "Manzillar",
-      "purchases": "Xaridlar"
-    }
+      "purchases": "Xaridlar",
+      "debts": "Qarzlar"
+    },
+    "totalPurchasesAmount": "Jami xaridlar"
   },
   "detailDocumentTitle": "Mijoz",
   "documentTitle": "Mijozlar",

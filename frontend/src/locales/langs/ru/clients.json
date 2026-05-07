@@ -21,8 +21,10 @@
       "overview": "Обзор",
       "contacts": "Контакты",
       "addresses": "Адреса",
-      "purchases": "Покупки"
-    }
+      "purchases": "Покупки",
+      "debts": "Долги"
+    },
+    "totalPurchasesAmount": "Итого покупок"
   },
   "detailDocumentTitle": "Клиент",
   "documentTitle": "Клиенты",

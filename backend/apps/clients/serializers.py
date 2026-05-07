@@ -1,13 +1,13 @@
-from django.db.models import F, Sum
 from django.utils.translation import gettext as _
 from rest_framework import serializers
 import re
 
-from debts.models import Debt
-from sales.models import Sale
-from sales.serializers import SaleItemReadSerializer
-
 from .models import Client, Group
+
+
+def _get_annotated(obj, attr, default=None):
+    """Return annotated attribute from a queryset instance, or *default* if absent."""
+    return getattr(obj, attr, default)
 
 
 class ClientSerializer(serializers.ModelSerializer):
@@ -137,6 +137,30 @@ class ClientSerializer(serializers.ModelSerializer):
             client.groups.set(groups)
         return client
 
+    last_purchase_at = serializers.SerializerMethodField()
+    first_purchase_at = serializers.SerializerMethodField()
+    total_purchases_amount = serializers.SerializerMethodField()
+    sales_count = serializers.SerializerMethodField()
+
+    def get_last_purchase_at(self, obj):
+        val = _get_annotated(obj, 'last_purchase_at')
+        if val is None:
+            return None
+        return val.isoformat() if hasattr(val, 'isoformat') else str(val)
+
+    def get_first_purchase_at(self, obj):
+        val = _get_annotated(obj, 'first_purchase_at')
+        if val is None:
+            return None
+        return val.isoformat() if hasattr(val, 'isoformat') else str(val)
+
+    def get_total_purchases_amount(self, obj):
+        val = _get_annotated(obj, 'total_purchases_amount')
+        return str(val) if val is not None else '0.00'
+
+    def get_sales_count(self, obj):
+        return _get_annotated(obj, 'sales_count', 0)
+
     class Meta:
         model = Client
         fields = (
@@ -154,47 +178,20 @@ class ClientSerializer(serializers.ModelSerializer):
             "social_networks",
             "groups",
             "created_at",
+            "last_purchase_at",
+            "first_purchase_at",
+            "total_purchases_amount",
+            "sales_count",
         )
-        read_only_fields = ("id", "tenant", "created_at")
+        read_only_fields = (
+            "id", "tenant", "created_at",
+            "last_purchase_at", "first_purchase_at",
+            "total_purchases_amount", "sales_count",
+        )
         extra_kwargs = {
             "phone": {"required": False},
         }
 
-
-# ── Inline serializers for client detail (purchase history) ──────────
-
-
-class DebtInlineSerializer(serializers.ModelSerializer):
-    remaining = serializers.DecimalField(
-        max_digits=14, decimal_places=2, read_only=True
-    )
-
-    class Meta:
-        model = Debt
-        fields = ("total_amount", "paid_amount", "remaining", "status")
-
-
-class SaleInlineSerializer(serializers.ModelSerializer):
-    items = SaleItemReadSerializer(many=True, read_only=True)
-    debt = DebtInlineSerializer(read_only=True, allow_null=True, default=None)
-
-    class Meta:
-        model = Sale
-        fields = ("id", "total_amount", "payment_type", "created_at", "items", "debt")
-
-
-class ClientDetailSerializer(ClientSerializer):
-    sales = SaleInlineSerializer(many=True, read_only=True)
-    total_debt = serializers.SerializerMethodField()
-
-    def get_total_debt(self, obj):
-        result = obj.debts.filter(status=Debt.Status.ACTIVE).aggregate(
-            total=Sum(F("total_amount") - F("paid_amount"))
-        )
-        return result["total"] or 0
-
-    class Meta(ClientSerializer.Meta):
-        fields = ClientSerializer.Meta.fields + ("sales", "total_debt")
 
 
 class ClientBulkDeleteSerializer(serializers.Serializer):
