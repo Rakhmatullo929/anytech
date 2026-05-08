@@ -8,7 +8,7 @@ from .serializers import SaleCreateSerializer, SaleDetailSerializer, SaleListSer
 
 
 class SaleViewSet(TenantQuerySetMixin, ModelViewSet):
-    queryset = Sale.objects.select_related("client").all()
+    queryset = Sale.objects.select_related("client", "created_by").all()
     serializer_class = SaleListSerializer
     http_method_names = ["get", "post", "head", "options"]
 
@@ -43,6 +43,9 @@ class SaleViewSet(TenantQuerySetMixin, ModelViewSet):
         client_id = self.request.query_params.get("client")
         if client_id:
             qs = qs.filter(client__id=client_id)
+        created_by_id = self.request.query_params.get("created_by")
+        if created_by_id:
+            qs = qs.filter(created_by__id=created_by_id)
         if self.action == "retrieve":
             qs = qs.prefetch_related("items__product")
         return qs

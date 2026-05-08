@@ -25,12 +25,13 @@ class SaleCreateSerializer(serializers.ModelSerializer):
     debt_deadline_days = serializers.IntegerField(
         write_only=True, required=False, min_value=1, allow_null=True
     )
+    created_by_user_id = serializers.UUIDField(write_only=True, required=True)
 
     class Meta:
         model = Sale
         fields = (
             "id", "tenant", "client", "payment_type", "total_amount",
-            "items", "debt_deadline_days", "created_at",
+            "items", "debt_deadline_days", "created_by_user_id", "created_at",
         )
         read_only_fields = ("id", "tenant", "total_amount", "created_at")
 
@@ -98,7 +99,13 @@ class SaleCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         items_data = validated_data.pop("items")
         debt_deadline_days = validated_data.pop("debt_deadline_days", None)
+        created_by_user_id = validated_data.pop("created_by_user_id")
         tenant = validated_data["tenant"]
+        from auth_tenant.models import User as TenantUser
+        try:
+            validated_data["created_by"] = TenantUser.objects.get(pk=created_by_user_id, tenant=tenant)
+        except TenantUser.DoesNotExist:
+            raise serializers.ValidationError({"created_by_user_id": _("User not found.")})
 
         product_ids = [item["product"] for item in items_data]
 
@@ -177,13 +184,19 @@ class SaleItemReadSerializer(serializers.ModelSerializer):
 
 
 class SaleListSerializer(serializers.ModelSerializer):
-    client_name = serializers.CharField(
-        source="client.name", read_only=True, default=None
-    )
+    client_name = serializers.CharField(source="client.name", read_only=True, default=None)
+    created_by_id = serializers.UUIDField(read_only=True)
+    created_by_name = serializers.SerializerMethodField()
+
+    def get_created_by_name(self, obj):
+        u = obj.created_by
+        if not u:
+            return None
+        return ' '.join(filter(None, [u.first_name, getattr(u, 'last_name', '') or ''])) or None
 
     class Meta:
         model = Sale
-        fields = ("id", "client", "client_name", "total_amount", "payment_type", "created_at")
+        fields = ("id", "client", "client_name", "created_by_id", "created_by_name", "total_amount", "payment_type", "created_at")
 
 
 class SaleDetailSerializer(SaleListSerializer):

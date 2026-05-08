@@ -5,7 +5,8 @@
     "headingDetail": "Продажа {{id}}",
     "linesTitle": "Состав",
     "notFound": "Продажа не найдена",
-    "payLine": "Оплата:"
+    "payLine": "Оплата:",
+    "createdByLine": "Продавец:"
   },
   "detailDocumentTitle": "Продажа",
   "documentTitle": "Продажи",

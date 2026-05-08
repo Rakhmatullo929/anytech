@@ -11,6 +11,8 @@
   "selectClient": "Выберите клиента",
   "searchPlaceholder": "Поиск по названию или SKU…",
   "stockShort": "остаток",
+  "createdBy": "Продавец",
+  "selectCreatedBy": "Выберите продавца",
   "validation": {
     "qtyMin": "Минимум 1",
     "qtyExceedsStock": "В наличии: {{max}}",

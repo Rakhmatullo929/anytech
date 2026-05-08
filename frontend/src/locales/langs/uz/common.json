@@ -71,7 +71,8 @@
     "stock": "Qoldiq",
     "total": "Summa",
     "password": "Parol",
-    "passportSeries": "Pasport seriyasi"
+    "passportSeries": "Pasport seriyasi",
+    "createdBy": "Sotuvchi"
   },
   "validation": {
     "categoryNameRequired": "Kategoriya nomi majburiy",

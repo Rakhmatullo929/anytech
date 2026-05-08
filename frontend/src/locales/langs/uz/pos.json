@@ -11,6 +11,8 @@
   "selectClient": "Mijozni tanlang",
   "searchPlaceholder": "Nom yoki SKU boʻyicha qidiruv…",
   "stockShort": "qoldiq",
+  "createdBy": "Sotuvchi",
+  "selectCreatedBy": "Sotuvchini tanlang",
   "validation": {
     "qtyMin": "Kamida 1",
     "qtyExceedsStock": "Mavjud: {{max}}",

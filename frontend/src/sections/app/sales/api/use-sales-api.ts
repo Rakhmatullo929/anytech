@@ -6,11 +6,11 @@ import { fetchSaleDetail, fetchSalesList } from './sales-requests';
 import type { FetchSalesListParams, SaleDetail, SaleListItem } from './types';
 
 export function useSalesListQuery(params: FetchSalesListParams) {
-  const { page, pageSize, ordering, paymentType, clientId } = params;
+  const { page, pageSize, ordering, paymentType, clientId, createdBy } = params;
 
   const queryKey = useMemo(
-    () => ['sales', 'list', { page, pageSize, ordering: ordering ?? '-created_at', paymentType: paymentType ?? '', clientId: clientId ?? '' }] as const,
-    [page, pageSize, ordering, paymentType, clientId]
+    () => ['sales', 'list', { page, pageSize, ordering: ordering ?? '-created_at', paymentType: paymentType ?? '', clientId: clientId ?? '', createdBy: createdBy ?? '' }] as const,
+    [page, pageSize, ordering, paymentType, clientId, createdBy]
   );
 
   return useFetchList<SaleListItem>(queryKey, () => fetchSalesList(params), {

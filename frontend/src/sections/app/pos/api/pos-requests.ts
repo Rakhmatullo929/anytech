@@ -11,6 +11,7 @@ export async function createSale(payload: CreateSalePayload): Promise<SaleListIt
       paymentType: payload.paymentType,
       items: payload.items,
       ...(payload.debtDeadlineDays != null ? { debtDeadlineDays: payload.debtDeadlineDays } : {}),
+      ...(payload.createdByUserId ? { createdByUserId: payload.createdByUserId } : {}),
     },
   });
 }

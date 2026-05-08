@@ -14,12 +14,16 @@ import { fCurrency } from 'src/utils/format-number';
 
 import { fetchClientsList } from 'src/sections/app/clients/api/clients-requests';
 import type { ClientListItem } from 'src/sections/app/clients/api/types';
+import { fetchTenantUsers } from 'src/sections/app/admin/users/api/users-requests';
+import type { TenantUserListItem } from 'src/sections/app/admin/users/api/types';
 
 import type { SalePaymentType } from '../api/types';
 
 type Props = {
   client: ClientListItem | null;
   onClientChange: (client: ClientListItem | null) => void;
+  createdBy: TenantUserListItem | null;
+  onCreatedByChange: (user: TenantUserListItem | null) => void;
   paymentType: SalePaymentType;
   onPaymentTypeChange: (type: SalePaymentType) => void;
   debtDeadlineDays: number | '';
@@ -33,6 +37,8 @@ type Props = {
 export default function PosCartSummary({
   client,
   onClientChange,
+  createdBy,
+  onCreatedByChange,
   paymentType,
   onPaymentTypeChange,
   debtDeadlineDays,
@@ -45,6 +51,7 @@ export default function PosCartSummary({
   const { tx } = useLocales();
 
   const clientQueryKeyBase = useMemo(() => ['pos', 'clients-search'], []);
+  const userQueryKeyBase = useMemo(() => ['pos', 'users-search'], []);
 
   const clientFetcher = useCallback(
     ({ page, search }: { page: number; search: string; signal: AbortSignal }) =>
@@ -52,8 +59,19 @@ export default function PosCartSummary({
     []
   );
 
+  const userFetcher = useCallback(
+    ({ page, search }: { page: number; search: string; signal: AbortSignal }) =>
+      fetchTenantUsers({ page, pageSize: 20, search: search || undefined }),
+    []
+  );
+
   const getClientLabel = useCallback(
     (c: ClientListItem) => [c.name, c.lastName].filter(Boolean).join(' '),
+    []
+  );
+
+  const getUserLabel = useCallback(
+    (u: TenantUserListItem) => [u.firstName, u.lastName].filter(Boolean).join(' '),
     []
   );
 
@@ -73,6 +91,22 @@ export default function PosCartSummary({
     []
   );
 
+  const renderUserOption = useCallback(
+    (u: TenantUserListItem) => (
+      <Stack>
+        <Typography variant="body2">
+          {[u.firstName, u.lastName].filter(Boolean).join(' ')}
+        </Typography>
+        {u.phone && (
+          <Typography variant="caption" color="text.secondary">
+            {u.phone}
+          </Typography>
+        )}
+      </Stack>
+    ),
+    []
+  );
+
   return (
     <Stack spacing={2}>
       <AutocompleteInfiniteSingle<ClientListItem>
@@ -84,6 +118,19 @@ export default function PosCartSummary({
         renderOptionContent={renderClientOption}
         label={tx('pos.client')}
         placeholder={tx('pos.selectClient')}
+        noOptionsText={tx('common.table.noData')}
+        required
+      />
+
+      <AutocompleteInfiniteSingle<TenantUserListItem>
+        queryKeyBase={userQueryKeyBase}
+        fetcher={userFetcher}
+        value={createdBy}
+        onChange={onCreatedByChange}
+        getOptionLabel={getUserLabel}
+        renderOptionContent={renderUserOption}
+        label={tx('pos.createdBy')}
+        placeholder={tx('pos.selectCreatedBy')}
         noOptionsText={tx('common.table.noData')}
         required
       />

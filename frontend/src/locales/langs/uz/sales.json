@@ -5,7 +5,8 @@
     "headingDetail": "Savdo {{id}}",
     "linesTitle": "Tarkib",
     "notFound": "Savdo topilmadi",
-    "payLine": "Toʻlov:"
+    "payLine": "Toʻlov:",
+    "createdByLine": "Sotuvchi:"
   },
   "detailDocumentTitle": "Savdo",
   "documentTitle": "Savdolar",
