@@ -99,14 +99,6 @@ class ClientSerializer(serializers.ModelSerializer):
                 _("Phone must match one of: %(examples)s.")
                 % {"examples": self.supported_phone_examples()}
             )
-        tenant = self.context["request"].user.tenant
-        qs = Client.objects.filter(tenant=tenant, phone=value)
-        if self.instance:
-            qs = qs.exclude(pk=self.instance.pk)
-        if qs.exists():
-            raise serializers.ValidationError(
-                _("Client with this phone number already exists.")
-            )
         return value
 
     def validate_groups(self, value):

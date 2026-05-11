@@ -107,6 +107,9 @@ export default function ProductUpsertDialog({
                 });
               }}
               onRemove={(inputFile) => {
+                if (typeof inputFile !== 'string' && inputFile.preview?.startsWith('blob:')) {
+                  URL.revokeObjectURL(inputFile.preview);
+                }
                 const current = methods.getValues('images');
                 setValue(
                   'images',
@@ -114,7 +117,14 @@ export default function ProductUpsertDialog({
                   { shouldValidate: true, shouldDirty: true }
                 );
               }}
-              onRemoveAll={() => setValue('images', [], { shouldValidate: true, shouldDirty: true })}
+              onRemoveAll={() => {
+                methods.getValues('images').forEach((file) => {
+                  if (typeof file !== 'string' && file.preview?.startsWith('blob:')) {
+                    URL.revokeObjectURL(file.preview);
+                  }
+                });
+                setValue('images', [], { shouldValidate: true, shouldDirty: true });
+              }}
             />
           </Stack>
         </DialogContent>

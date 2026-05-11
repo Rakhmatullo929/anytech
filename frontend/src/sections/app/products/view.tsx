@@ -48,16 +48,18 @@ import {
 import {
   fetchProductDetail,
   useCategoriesListQuery,
+  useBulkCreateProductsMutation,
   useBulkDeleteProductsMutation,
   useCreateProductMutation,
   useCreateProductPurchaseMutation,
   useDeleteProductMutation,
   useProductsListQuery,
   useUpdateProductMutation,
+  type BulkCreateProductsResult,
   type ProductImageFormValue,
   type ProductListItem,
 } from 'src/sections/app/products/api';
-import { ProductUpsertDialog } from 'src/sections/app/products/components';
+import { ProductBulkImportDialog, ProductUpsertDialog } from 'src/sections/app/products/components';
 import { ProductsListSkeleton } from 'src/sections/app/products/skeleton';
 
 // ----------------------------------------------------------------------
@@ -77,6 +79,7 @@ export default function ProductsView() {
   const updateMutation = useUpdateProductMutation();
   const deleteMutation = useDeleteProductMutation();
   const bulkDeleteMutation = useBulkDeleteProductsMutation();
+  const bulkImportMutation = useBulkCreateProductsMutation();
   const { data: categoriesData } = useCategoriesListQuery();
   const categories = useMemo(() => categoriesData?.results ?? [], [categoriesData?.results]);
 
@@ -138,6 +141,8 @@ export default function ProductsView() {
   const [purchaseProduct, setPurchaseProduct] = useState<ProductListItem | null>(null);
   const [purchaseQuantity, setPurchaseQuantity] = useState('1');
   const [purchaseUnitPrice, setPurchaseUnitPrice] = useState('');
+  const [bulkImportOpen, setBulkImportOpen] = useState(false);
+  const [bulkImportResult, setBulkImportResult] = useState<BulkCreateProductsResult | null>(null);
   const { selected: selectedIds, setSelected } = table;
 
   useEffect(() => {
@@ -287,6 +292,30 @@ export default function ProductsView() {
     }
   };
 
+  const handleOpenBulkImport = () => {
+    setBulkImportResult(null);
+    setBulkImportOpen(true);
+  };
+
+  const handleCloseBulkImport = () => {
+    setBulkImportOpen(false);
+    setBulkImportResult(null);
+  };
+
+  const handleBulkImport = async (file: File) => {
+    try {
+      const result = await bulkImportMutation.mutateAsync(file);
+      setBulkImportResult(result);
+      if (result.created > 0) {
+        enqueueSnackbar(tx('products.bulkImport.toastSuccess', { count: result.created }), {
+          variant: 'success',
+        });
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const handleSubmitUpsert = async (values: {
     name: string;
     sku: string;
@@ -350,9 +379,18 @@ export default function ProductsView() {
         links={[{ name: tx('common.navigation.products'), href: paths.products.root }]}
         action={
           <Can page="products" action="write">
-            <Button variant="contained" startIcon={<Iconify icon="mingcute:add-line" />} onClick={handleOpenCreate}>
-              {tx('products.addButton')}
-            </Button>
+            <Stack direction="row" spacing={1}>
+              <Button
+                variant="outlined"
+                startIcon={<Iconify icon="eva:cloud-upload-fill" />}
+                onClick={handleOpenBulkImport}
+              >
+                {tx('products.bulkImport.button')}
+              </Button>
+              <Button variant="contained" startIcon={<Iconify icon="mingcute:add-line" />} onClick={handleOpenCreate}>
+                {tx('products.addButton')}
+              </Button>
+            </Stack>
           </Can>
         }
         sx={{ mb: { xs: 3, md: 5 } }}
@@ -559,6 +597,16 @@ export default function ProductsView() {
               {tx('common.actions.delete')}
             </Button>
           }
+        />
+      </Can>
+
+      <Can page="products" action="write">
+        <ProductBulkImportDialog
+          open={bulkImportOpen}
+          loading={bulkImportMutation.isPending}
+          result={bulkImportResult}
+          onClose={handleCloseBulkImport}
+          onImport={handleBulkImport}
         />
       </Can>
     </>

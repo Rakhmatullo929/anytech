@@ -7,13 +7,12 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from django.db import transaction
-from django.db.models import Count, DecimalField, IntegerField, OuterRef, Subquery, Sum, Value
+from django.db.models import Count, DecimalField, Max, Min, Sum, Value
 from django.db.models.functions import Coalesce
 from django.utils.translation import gettext as _
 
 from auth_tenant.mixins import TenantQuerySetMixin
 from auth_tenant.permissions import page_action_permission
-from sales.models import Sale
 
 from .models import Client, Group
 from .serializers import (
@@ -53,34 +52,15 @@ class ClientViewSet(TenantQuerySetMixin, ModelViewSet):
             qs = qs.filter(groups__id=group_id)
 
         if self.action in ("list", "retrieve", "search"):
-            _sale_qs = Sale.objects.filter(client=OuterRef("pk"))
             qs = qs.annotate(
-                last_purchase_at=Subquery(
-                    _sale_qs.order_by("-created_at").values("created_at")[:1]
-                ),
-                first_purchase_at=Subquery(
-                    _sale_qs.order_by("created_at").values("created_at")[:1]
-                ),
+                last_purchase_at=Max("sales__created_at"),
+                first_purchase_at=Min("sales__created_at"),
                 total_purchases_amount=Coalesce(
-                    Subquery(
-                        _sale_qs.values("client")
-                        .annotate(total=Sum("total_amount"))
-                        .values("total")[:1],
-                        output_field=DecimalField(max_digits=14, decimal_places=2),
-                    ),
+                    Sum("sales__total_amount"),
                     Value(Decimal("0.00")),
                     output_field=DecimalField(max_digits=14, decimal_places=2),
                 ),
-                sales_count=Coalesce(
-                    Subquery(
-                        _sale_qs.values("client")
-                        .annotate(cnt=Count("id"))
-                        .values("cnt")[:1],
-                        output_field=IntegerField(),
-                    ),
-                    Value(0),
-                    output_field=IntegerField(),
-                ),
+                sales_count=Count("sales", distinct=True),
             )
 
         if self.action == "retrieve":

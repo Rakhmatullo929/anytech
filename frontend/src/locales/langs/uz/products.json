@@ -38,10 +38,24 @@
     }
   },
   "searchPlaceholder": "Nom yoki SKU boʻyicha qidiruv…",
+  "bulkImport": {
+    "button": "Excel import",
+    "title": "Mahsulotlarni ommaviy import qilish",
+    "stepTemplate": "1-qadam. Excel shablonini yuklab oling",
+    "downloadTemplate": "Shablonni yuklab olish",
+    "stepUpload": "2-qadam. To’ldirilgan faylni yuklang",
+    "chooseFile": "Fayl tanlash",
+    "importButton": "Import qilish",
+    "successSummary": "Import qilingan mahsulotlar: {{count}}",
+    "errorsSummary": "Xatolik bo’lgan qatorlar: {{count}}",
+    "rowLabel": "Qator {{row}}:",
+    "nothingImported": "Hech qanday mahsulot import qilinmadi.",
+    "toastSuccess": "Import qilingan mahsulotlar: {{count}}"
+  },
   "toasts": {
-    "bulkDeleted": "O‘chirilgan mahsulotlar soni: {{count}}",
+    "bulkDeleted": "O’chirilgan mahsulotlar soni: {{count}}",
     "created": "Mahsulot muvaffaqiyatli yaratildi",
-    "deleted": "Mahsulot o‘chirildi",
+    "deleted": "Mahsulot o’chirildi",
     "requiredFields": "Mahsulot nomi majburiy",
     "updated": "Mahsulot yangilandi"
   }

@@ -256,3 +256,7 @@ class ProductPurchaseBulkDeleteSerializer(serializers.Serializer):
         child=serializers.UUIDField(),
         allow_empty=False,
     )
+
+
+class ProductBulkCreateExcelSerializer(serializers.Serializer):
+    file = serializers.FileField()

@@ -1,9 +1,9 @@
 {
-  "name": "Minimal UI",
-  "short_name": "Minimal UI",
+  "name": "NOK",
+  "short_name": "NOK",
   "display": "standalone",
   "start_url": "/",
-  "theme_color": "#000000",
+  "theme_color": "#004b87",
   "background_color": "#ffffff",
   "icons": [
     {

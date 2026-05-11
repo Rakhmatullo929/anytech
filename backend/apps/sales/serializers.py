@@ -57,7 +57,7 @@ class SaleCreateSerializer(serializers.ModelSerializer):
         Deletes fully-consumed batches; partially consumed batches are updated.
         Returns FIFO average cost per unit.
         Raises ValidationError if available stock is insufficient.
-        Must be called inside an atomic transaction.
+        Must be called inside an atomic transaction with the product row already locked.
         """
         purchases = list(
             ProductPurchase.objects.select_for_update()

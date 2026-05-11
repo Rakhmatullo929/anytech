@@ -46,8 +46,8 @@ export const paths = {
   page404: '/404',
   page500: '/500',
 
-  docs: 'https://docs.minimals.cc',
-  changelog: 'https://docs.minimals.cc/changelog',
+  docs: '#',
+  changelog: '#',
 
   auth: {
     jwt: {

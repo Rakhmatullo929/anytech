@@ -1,7 +1,8 @@
 import type { Pagination } from 'src/hooks/api';
-import { request, API_ENDPOINTS } from 'src/utils/axios';
+import { request, apiClient, API_ENDPOINTS } from 'src/utils/axios';
 
 import type {
+  BulkCreateProductsResult,
   CategoryListItem,
   CreateProductPurchasePayload,
   CreateProductPayload,
@@ -151,4 +152,33 @@ export async function bulkDeleteProductPurchases(ids: string[]): Promise<void> {
     url: API_ENDPOINTS.productPurchases.bulkDelete,
     data: { ids },
   });
+}
+
+export async function bulkCreateProductsFromExcel(file: File): Promise<BulkCreateProductsResult> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  return request<BulkCreateProductsResult>({
+    method: 'POST',
+    url: API_ENDPOINTS.products.bulkCreateExcel,
+    data: formData,
+  });
+}
+
+export async function downloadProductExcelTemplate(): Promise<void> {
+  const response = await apiClient.get(API_ENDPOINTS.products.downloadExcelTemplate, {
+    responseType: 'blob',
+  });
+
+  const url = window.URL.createObjectURL(new Blob([response.data]));
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', 'products_template.xlsx');
+  document.body.appendChild(link);
+  try {
+    link.click();
+  } finally {
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  }
 }
