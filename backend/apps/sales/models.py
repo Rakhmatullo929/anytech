@@ -27,6 +27,11 @@ class Sale(models.Model):
 
     class Meta:
         db_table = "sales"
+        indexes = [
+            models.Index(fields=["tenant", "-created_at"], name="sales_tenant_created_idx"),
+            models.Index(fields=["tenant", "payment_type"], name="sales_tenant_payment_idx"),
+            models.Index(fields=["client"], name="sales_client_idx"),
+        ]
 
     def __str__(self):
         return f"Sale {self.id}"

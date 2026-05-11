@@ -21,7 +21,7 @@ import Iconify from 'src/components/iconify';
 
 const LINKS = [
   {
-    headline: 'Minimal',
+    headline: 'NOK',
     children: [
       { name: 'Components', href: paths.components },
       { name: 'Documentation', href: paths.docs },
@@ -36,7 +36,7 @@ const LINKS = [
   },
   {
     headline: 'Contact',
-    children: [{ name: 'support@minimals.cc', href: '#' }],
+    children: [{ name: 'support@nok.uz', href: '#' }],
   },
 ];
 
@@ -77,8 +77,7 @@ export default function Footer() {
                 mx: { xs: 'auto', md: 'unset' },
               }}
             >
-              The starting point for your next project with Minimal UI Kit, built on the newest
-              version of Material-UI ©, ready to be customized to your style.
+              NOK — business management platform for modern enterprises.
             </Typography>
 
             <Stack

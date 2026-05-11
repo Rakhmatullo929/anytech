@@ -38,6 +38,20 @@
     }
   },
   "searchPlaceholder": "Поиск по названию или SKU…",
+  "bulkImport": {
+    "button": "Импорт Excel",
+    "title": "Массовый импорт товаров",
+    "stepTemplate": "Шаг 1. Скачайте шаблон Excel",
+    "downloadTemplate": "Скачать шаблон",
+    "stepUpload": "Шаг 2. Загрузите заполненный файл",
+    "chooseFile": "Выбрать файл",
+    "importButton": "Импортировать",
+    "successSummary": "Импортировано товаров: {{count}}",
+    "errorsSummary": "Строк с ошибками: {{count}}",
+    "rowLabel": "Строка {{row}}:",
+    "nothingImported": "Ни одного товара не импортировано.",
+    "toastSuccess": "Импортировано товаров: {{count}}"
+  },
   "toasts": {
     "bulkDeleted": "Удалено товаров: {{count}}",
     "created": "Товар успешно создан",

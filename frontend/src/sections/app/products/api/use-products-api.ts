@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { deleteFromList, type Pagination, updateList, useFetchList, useFetchOne, useMutate } from 'src/hooks/api';
 
 import {
+  bulkCreateProductsFromExcel,
   bulkDeleteProductPurchases,
   bulkDeleteProducts,
   createProductPurchase,
@@ -19,6 +20,7 @@ import {
   updateProduct,
 } from './products-requests';
 import type {
+  BulkCreateProductsResult,
   CategoryListItem,
   CreateProductPurchasePayload,
   CreateProductPayload,
@@ -161,6 +163,16 @@ export function useBulkDeleteProductsMutation() {
           };
         }
       );
+    },
+  });
+}
+
+export function useBulkCreateProductsMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutate<BulkCreateProductsResult, File>(bulkCreateProductsFromExcel, {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products', 'list'] });
     },
   });
 }

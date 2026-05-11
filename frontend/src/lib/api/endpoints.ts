@@ -26,6 +26,8 @@ export const API_ENDPOINTS = {
     list: `${API_V1}/products/`,
     search: `${API_V1}/products/search/`,
     bulkDelete: `${API_V1}/products/bulk-delete/`,
+    bulkCreateExcel: `${API_V1}/products/bulk-create-excel/`,
+    downloadExcelTemplate: `${API_V1}/products/download-excel-template/`,
     detail: (id: string) => `${API_V1}/products/${id}/`,
   },
   productPurchases: {

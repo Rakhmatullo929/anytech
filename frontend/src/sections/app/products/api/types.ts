@@ -98,3 +98,14 @@ export type CreateProductPurchasePayload = {
 export type UpdateProductPurchasePayload = CreateProductPurchasePayload & {
   id: string;
 };
+
+export type BulkImportProductRowError = {
+  row: number;
+  errors: string[];
+};
+
+export type BulkCreateProductsResult = {
+  created: number;
+  errors: BulkImportProductRowError[];
+  results: ProductListItem[];
+};
