@@ -4,6 +4,8 @@ import Stack from '@mui/material/Stack';
 
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import { useSnackbar } from 'src/components/snackbar';
+import { useAuthContext } from 'src/auth/hooks/use-auth-context';
+import type { TenantUser } from 'src/auth/api/types';
 import { useInfiniteFetch, type InfinitePageFetcher } from 'src/hooks/api';
 import { useDebounce } from 'src/hooks/use-debounce';
 import { useLocales } from 'src/locales';
@@ -12,6 +14,7 @@ import { paths } from 'src/routes/paths';
 import type { ClientListItem } from '../clients/api/types';
 import { fetchProductsList } from '../products/api/products-requests';
 import type { ProductListItem } from '../products/api/types';
+import type { TenantUserListItem } from '../admin/users/api/types';
 
 import { useCreateSaleMutation } from './api/use-pos-api';
 import type { SalePaymentType } from './api/types';
@@ -19,13 +22,35 @@ import { PosCart, PosProductList } from './components';
 import { PosViewSkeleton } from './skeleton';
 import { usePosCart } from './hooks/use-pos-cart';
 
+function tenantUserToListItem(u: TenantUser): TenantUserListItem {
+  return {
+    id: u.id,
+    tenantId: u.tenantId,
+    firstName: u.firstName,
+    lastName: u.lastName,
+    middleName: u.middleName,
+    birthDate: u.birthDate ?? null,
+    phone: u.phone,
+    email: u.email,
+    passportSeries: u.passportSeries ?? null,
+    gender: u.gender ?? null,
+    role: u.role,
+    createdAt: u.createdAt,
+  };
+}
+
 // ---------------------------------------------------------------------------
 
 export default function PosView() {
   const { tx } = useLocales();
   const { enqueueSnackbar } = useSnackbar();
+  const { user: authUser } = useAuthContext();
 
   const [client, setClient] = useState<ClientListItem | null>(null);
+  const [createdBy, setCreatedBy] = useState<TenantUserListItem | null>(() => {
+    if (!authUser || !('id' in authUser)) return null;
+    return tenantUserToListItem(authUser as TenantUser);
+  });
   const [paymentType, setPaymentType] = useState<SalePaymentType>('cash');
   const [debtDeadlineDays, setDebtDeadlineDays] = useState<number | ''>('');
   const [search, setSearch] = useState('');
@@ -81,7 +106,7 @@ export default function PosView() {
 
   const createSaleMutation = useCreateSaleMutation();
 
-  const canComplete = cart.length > 0 && client !== null;
+  const canComplete = cart.length > 0 && client !== null && createdBy !== null;
 
   const completeSale = useCallback(async () => {
     if (!client) return;
@@ -95,16 +120,20 @@ export default function PosView() {
           price: l.unitPrice.toFixed(2),
         })),
         ...(paymentType === 'debt' && debtDeadlineDays !== '' ? { debtDeadlineDays } : {}),
+        ...(createdBy ? { createdByUserId: createdBy.id } : {}),
       });
       enqueueSnackbar(tx('pos.saleSuccess'), { variant: 'success' });
       clear();
       setClient(null);
       setPaymentType('cash');
       setDebtDeadlineDays('');
+      if (authUser && 'id' in authUser) {
+        setCreatedBy(tenantUserToListItem(authUser as TenantUser));
+      }
     } catch {
       // useMutate global handler shows the error snackbar
     }
-  }, [cart, client, paymentType, debtDeadlineDays, createSaleMutation, enqueueSnackbar, tx, clear]);
+  }, [cart, client, createdBy, paymentType, debtDeadlineDays, createSaleMutation, enqueueSnackbar, tx, clear, authUser]);
 
   // ── Render ─────────────────────────────────────────────────────────
 
@@ -138,6 +167,8 @@ export default function PosView() {
             onRemove={removeLine}
             client={client}
             onClientChange={setClient}
+            createdBy={createdBy}
+            onCreatedByChange={setCreatedBy}
             paymentType={paymentType}
             onPaymentTypeChange={setPaymentType}
             debtDeadlineDays={debtDeadlineDays}

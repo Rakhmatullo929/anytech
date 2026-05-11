@@ -18,6 +18,9 @@ class Sale(models.Model):
     client = models.ForeignKey(
         "clients.Client", on_delete=models.SET_NULL, null=True, blank=True, related_name="sales"
     )
+    created_by = models.ForeignKey(
+        "auth_tenant.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="created_sales"
+    )
     total_amount = models.DecimalField(max_digits=14, decimal_places=2)
     payment_type = models.CharField(max_length=10, choices=PaymentType.choices)
     created_at = models.DateTimeField(auto_now_add=True)

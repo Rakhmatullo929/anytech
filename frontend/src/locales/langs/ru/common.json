@@ -71,7 +71,8 @@
     "stock": "Остаток",
     "total": "Сумма",
     "password": "Пароль",
-    "passportSeries": "Серия паспорта"
+    "passportSeries": "Серия паспорта",
+    "createdBy": "Продавец"
   },
   "validation": {
     "categoryNameRequired": "Название категории обязательно",

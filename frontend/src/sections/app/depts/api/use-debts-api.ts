@@ -7,11 +7,11 @@ import { fetchDebtDetail, fetchDebtsList, payDebt } from './debts-requests';
 import type { DebtDetail, DebtListItem, FetchDebtsListParams, PayDebtPayload } from './types';
 
 export function useDebtsListQuery(params: FetchDebtsListParams) {
-  const { page, pageSize, ordering, status } = params;
+  const { page, pageSize, ordering, status, clientId } = params;
 
   const queryKey = useMemo(
-    () => ['debts', 'list', { page, pageSize, ordering: ordering ?? '-created_at', status: status ?? '' }] as const,
-    [page, pageSize, ordering, status]
+    () => ['debts', 'list', { page, pageSize, ordering: ordering ?? '-created_at', status: status ?? '', clientId: clientId ?? '' }] as const,
+    [page, pageSize, ordering, status, clientId]
   );
 
   return useFetchList<DebtListItem>(queryKey, () => fetchDebtsList(params), {

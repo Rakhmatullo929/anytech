@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -5,17 +7,18 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from django.db import transaction
-from django.db.models import Count
+from django.db.models import Count, DecimalField, IntegerField, OuterRef, Subquery, Sum, Value
+from django.db.models.functions import Coalesce
 from django.utils.translation import gettext as _
 
 from auth_tenant.mixins import TenantQuerySetMixin
 from auth_tenant.permissions import page_action_permission
+from sales.models import Sale
 
 from .models import Client, Group
 from .serializers import (
     ClientBulkDeleteSerializer,
     ClientBulkCreateExcelSerializer,
-    ClientDetailSerializer,
     ClientSerializer,
     GroupAddClientsSerializer,
     GroupBulkDeleteSerializer,
@@ -41,8 +44,6 @@ class ClientViewSet(TenantQuerySetMixin, ModelViewSet):
         return [page_action_permission("clients", "write")()]
 
     def get_serializer_class(self):
-        if self.action == "retrieve":
-            return ClientDetailSerializer
         return ClientSerializer
 
     def get_queryset(self):
@@ -50,13 +51,40 @@ class ClientViewSet(TenantQuerySetMixin, ModelViewSet):
         group_id = self.request.query_params.get("group_id")
         if group_id:
             qs = qs.filter(groups__id=group_id)
-        if self.action == "retrieve":
-            qs = qs.prefetch_related(
-                "sales__items__product",
-                "sales__debt",
-                "debts",
-                "groups",
+
+        if self.action in ("list", "retrieve", "search"):
+            _sale_qs = Sale.objects.filter(client=OuterRef("pk"))
+            qs = qs.annotate(
+                last_purchase_at=Subquery(
+                    _sale_qs.order_by("-created_at").values("created_at")[:1]
+                ),
+                first_purchase_at=Subquery(
+                    _sale_qs.order_by("created_at").values("created_at")[:1]
+                ),
+                total_purchases_amount=Coalesce(
+                    Subquery(
+                        _sale_qs.values("client")
+                        .annotate(total=Sum("total_amount"))
+                        .values("total")[:1],
+                        output_field=DecimalField(max_digits=14, decimal_places=2),
+                    ),
+                    Value(Decimal("0.00")),
+                    output_field=DecimalField(max_digits=14, decimal_places=2),
+                ),
+                sales_count=Coalesce(
+                    Subquery(
+                        _sale_qs.values("client")
+                        .annotate(cnt=Count("id"))
+                        .values("cnt")[:1],
+                        output_field=IntegerField(),
+                    ),
+                    Value(0),
+                    output_field=IntegerField(),
+                ),
             )
+
+        if self.action == "retrieve":
+            qs = qs.prefetch_related("groups")
         return qs
 
     @action(detail=False, methods=["get"], url_path="search")

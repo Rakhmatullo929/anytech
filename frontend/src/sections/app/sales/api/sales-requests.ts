@@ -12,6 +12,8 @@ export async function fetchSalesList(params: FetchSalesListParams): Promise<Pagi
       pageSize: params.pageSize,
       ordering: params.ordering ?? '-created_at',
       ...(params.paymentType ? { paymentType: params.paymentType } : {}),
+      ...(params.clientId ? { client: params.clientId } : {}),
+      ...(params.createdBy ? { createdBy: params.createdBy } : {}),
     },
   });
 }

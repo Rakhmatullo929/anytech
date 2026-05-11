@@ -18,7 +18,8 @@ import Checkbox from '@mui/material/Checkbox';
 import LinearProgress from '@mui/material/LinearProgress';
 import Typography from '@mui/material/Typography';
 // utils
-import { fDateTime } from 'src/utils/format-time';
+import { fCurrency } from 'src/utils/format-number';
+import { fDate, fDateTime } from 'src/utils/format-time';
 // routes
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hook';
@@ -68,6 +69,8 @@ export default function ClientsView() {
     () => [
       { id: 'name', label: tx('common.table.client') },
       { id: 'phone', label: tx('common.table.phone') },
+      { id: 'last_purchase', label: tx('clients.detail.lastPurchase') },
+      { id: 'total_purchases', label: tx('clients.detail.totalPurchasesAmount') },
       { id: 'created', label: tx('common.table.created') },
       { id: '', label: '' },
     ],
@@ -331,6 +334,8 @@ export default function ClientsView() {
                         </Can>
                       </TableCell>
                       <TableCell>{row.phone}</TableCell>
+                      <TableCell>{row.lastPurchaseAt ? fDate(row.lastPurchaseAt) : '—'}</TableCell>
+                      <TableCell>{fCurrency(row.totalPurchasesAmount)}</TableCell>
                       <TableCell>{fDateTime(row.createdAt)}</TableCell>
                       <TableCell align="right">
                         {canDetailClients || canWriteClients ? (

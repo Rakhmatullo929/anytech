@@ -4,6 +4,8 @@ export type SaleListItem = {
   id: string;
   client: string | null;
   clientName: string | null;
+  createdById: string | null;
+  createdByName: string | null;
   totalAmount: string;
   paymentType: SalePaymentType;
   createdAt: string;
@@ -26,4 +28,6 @@ export type FetchSalesListParams = {
   pageSize: number;
   ordering?: string;
   paymentType?: SalePaymentType;
+  clientId?: string;
+  createdBy?: string;
 };

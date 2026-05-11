@@ -7,6 +7,7 @@ import { useLocales } from 'src/locales';
 import { useSettingsContext } from 'src/components/settings';
 
 import type { ClientListItem } from 'src/sections/app/clients/api/types';
+import type { TenantUserListItem } from 'src/sections/app/admin/users/api/types';
 
 import type { CartLine, SalePaymentType } from '../api/types';
 
@@ -21,6 +22,8 @@ type Props = {
 
   client: ClientListItem | null;
   onClientChange: (client: ClientListItem | null) => void;
+  createdBy: TenantUserListItem | null;
+  onCreatedByChange: (user: TenantUserListItem | null) => void;
   paymentType: SalePaymentType;
   onPaymentTypeChange: (type: SalePaymentType) => void;
   debtDeadlineDays: number | '';
@@ -38,6 +41,8 @@ export default function PosCart({
   onRemove,
   client,
   onClientChange,
+  createdBy,
+  onCreatedByChange,
   paymentType,
   onPaymentTypeChange,
   debtDeadlineDays,
@@ -87,6 +92,8 @@ export default function PosCart({
       <PosCartSummary
         client={client}
         onClientChange={onClientChange}
+        createdBy={createdBy}
+        onCreatedByChange={onCreatedByChange}
         paymentType={paymentType}
         onPaymentTypeChange={onPaymentTypeChange}
         debtDeadlineDays={debtDeadlineDays}

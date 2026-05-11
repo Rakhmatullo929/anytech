@@ -22,7 +22,7 @@ class DebtViewSet(TenantQuerySetMixin, ListModelMixin, RetrieveModelMixin, Gener
     queryset = Debt.objects.select_related("client").all()
     serializer_class = DebtListSerializer
 
-    filterset_fields = ["status"]
+    filterset_fields = ["status", "client"]
     ordering_fields = ["created_at", "total_amount"]
     ordering = ["-created_at"]
 

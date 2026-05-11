@@ -95,6 +95,9 @@ export default function SaleDetailsView() {
                 {tx('sales.detail.clientLine')} <strong>{sale.clientName || '-'}</strong>
               </Typography>
               <Typography variant="body2" color="text.secondary">
+                {tx('sales.detail.createdByLine')} <strong>{sale.createdByName || '-'}</strong>
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
                 {tx('sales.detail.dateLine')} {fDateTime(sale.createdAt)}
               </Typography>
               <Typography variant="body2" color="text.secondary">

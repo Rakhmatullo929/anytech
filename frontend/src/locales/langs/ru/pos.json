@@ -10,5 +10,13 @@
   "saleSuccess": "Продажа успешно завершена",
   "selectClient": "Выберите клиента",
   "searchPlaceholder": "Поиск по названию или SKU…",
-  "stockShort": "остаток"
+  "stockShort": "остаток",
+  "createdBy": "Продавец",
+  "selectCreatedBy": "Выберите продавца",
+  "validation": {
+    "qtyMin": "Минимум 1",
+    "qtyExceedsStock": "В наличии: {{max}}",
+    "priceMin": "Минимум 0",
+    "priceInvalid": "Введите корректную цену"
+  }
 }

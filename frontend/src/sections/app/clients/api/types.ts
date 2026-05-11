@@ -13,6 +13,10 @@ export type ClientListItem = {
   socialNetworks: ClientSocialNetworks;
   groups: string[];
   createdAt: string;
+  lastPurchaseAt: string | null;
+  firstPurchaseAt: string | null;
+  totalPurchasesAmount: string;
+  salesCount: number;
 };
 
 export type FetchClientsListParams = {
@@ -70,31 +74,4 @@ export type BulkCreateClientsResult = {
   results: ClientListItem[];
 };
 
-export type ClientSaleItem = {
-  id: string;
-  productName: string;
-  quantity: number;
-  price: string;
-};
-
-export type ClientSaleDebt = {
-  totalAmount: string;
-  paidAmount: string;
-  remaining: string;
-  status: string;
-};
-
-export type ClientSale = {
-  id: string;
-  totalAmount: string;
-  paymentType: 'cash' | 'card' | 'debt';
-  createdAt: string;
-  items: ClientSaleItem[];
-  debt: ClientSaleDebt | null;
-};
-
-/** Client detail from `GET /api/v1/clients/{id}/` (camelCase after axios transform). */
-export type ClientDetail = ClientListItem & {
-  sales: ClientSale[];
-  totalDebt: string;
-};
+export type ClientDetail = ClientListItem;

@@ -1,1 +1,1 @@
-export type ClientDetailsTabValue = 'overview' | 'contacts' | 'addresses' | 'purchases';
+export type ClientDetailsTabValue = 'overview' | 'contacts' | 'addresses' | 'purchases' | 'debts';

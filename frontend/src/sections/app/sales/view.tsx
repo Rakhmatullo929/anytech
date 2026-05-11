@@ -65,6 +65,7 @@ export default function SalesView() {
     () => [
       { id: 'id', label: tx('common.table.saleId') },
       { id: 'client', label: tx('common.table.client') },
+      { id: 'created_by', label: tx('common.table.createdBy') },
       { id: 'total', label: tx('common.table.total') },
       { id: 'pay', label: tx('common.table.pay') },
       { id: 'date', label: tx('common.table.date') },
@@ -175,6 +176,7 @@ export default function SalesView() {
                         )}
                       </TableCell>
                       <TableCell>{row.clientName || '-'}</TableCell>
+                      <TableCell>{row.createdByName || '-'}</TableCell>
                       <TableCell>{fCurrency(row.totalAmount)}</TableCell>
                       <TableCell>{payLabel[row.paymentType]}</TableCell>
                       <TableCell>{fDateTime(row.createdAt)}</TableCell>
