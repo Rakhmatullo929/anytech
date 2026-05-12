@@ -1,9 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import CardHeader from '@mui/material/CardHeader';
-import LinearProgress from '@mui/material/LinearProgress';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -12,6 +7,7 @@ import Typography from '@mui/material/Typography';
 import { fCurrency } from 'src/utils/format-number';
 import { useLocales } from 'src/locales';
 import { TableHeadCustom, TableNoData, TablePaginationCustom, TableSkeleton } from 'src/components/table';
+import { ReportChartCard } from '../../components';
 import { useTopCustomersQuery } from '../../api';
 
 type Props = {
@@ -46,49 +42,50 @@ export default function TopCustomersTable({ dateFrom, dateTo }: Props) {
   const rows = data?.results ?? [];
 
   return (
-    <Card>
-      {isFetching && !!data ? <LinearProgress sx={{ borderRadius: 1 }} /> : <Box sx={{ height: 4 }} />}
-      <CardHeader title={tx('reports.tables.topCustomers')} />
-      <CardContent sx={{ pt: 0 }}>
-        <Table size="small">
-          <TableHeadCustom headLabel={tableHead} />
-          <TableBody>
-            {isPending && !data ? (
-              Array.from({ length: pageSize }).map((_, i) => <TableSkeleton key={i} />)
-            ) : (
-              <>
-                {rows.map((row, idx) => (
-                  <TableRow key={row.id} hover>
-                    <TableCell>
-                      <Typography variant="body2" color="text.secondary">
-                        {(page - 1) * pageSize + idx + 1}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="subtitle2">{row.name || '—'}</Typography>
-                    </TableCell>
-                    <TableCell>{row.phone || '—'}</TableCell>
-                    <TableCell>{row.salesCount}</TableCell>
-                    <TableCell>{fCurrency(row.totalSpent)}</TableCell>
-                  </TableRow>
-                ))}
-                <TableNoData notFound={!rows.length} title={tx('common.table.noData')} />
-              </>
-            )}
-          </TableBody>
-        </Table>
-        <TablePaginationCustom
-          count={data?.count ?? 0}
-          page={page - 1}
-          rowsPerPage={pageSize}
-          rowsPerPageOptions={[5, 10, 20, 50]}
-          onPageChange={(_, newPage) => setPage(newPage + 1)}
-          onRowsPerPageChange={(e) => {
-            setPageSize(parseInt(e.target.value, 10));
-            setPage(1);
-          }}
-        />
-      </CardContent>
-    </Card>
+    <ReportChartCard
+      title={tx('reports.tables.topCustomers')}
+      isFetching={isFetching}
+      hasPreviousData={!!data}
+      contentSx={{ pt: 0 }}
+    >
+      <Table size="small">
+        <TableHeadCustom headLabel={tableHead} />
+        <TableBody>
+          {isPending && !data ? (
+            Array.from({ length: pageSize }).map((_, i) => <TableSkeleton key={i} />)
+          ) : (
+            <>
+              {rows.map((row, idx) => (
+                <TableRow key={row.id} hover>
+                  <TableCell>
+                    <Typography variant="body2" color="text.secondary">
+                      {(page - 1) * pageSize + idx + 1}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="subtitle2">{row.name || '—'}</Typography>
+                  </TableCell>
+                  <TableCell>{row.phone || '—'}</TableCell>
+                  <TableCell>{row.salesCount}</TableCell>
+                  <TableCell>{fCurrency(row.totalSpent)}</TableCell>
+                </TableRow>
+              ))}
+              <TableNoData notFound={!rows.length} title={tx('common.table.noData')} />
+            </>
+          )}
+        </TableBody>
+      </Table>
+      <TablePaginationCustom
+        count={data?.count ?? 0}
+        page={page - 1}
+        rowsPerPage={pageSize}
+        rowsPerPageOptions={[5, 10, 20, 50]}
+        onPageChange={(_, newPage) => setPage(newPage + 1)}
+        onRowsPerPageChange={(e) => {
+          setPageSize(parseInt(e.target.value, 10));
+          setPage(1);
+        }}
+      />
+    </ReportChartCard>
   );
 }

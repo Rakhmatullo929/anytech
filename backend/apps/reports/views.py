@@ -10,7 +10,7 @@ from django.db.models.functions import Coalesce, TruncDate, TruncMonth
 from auth_tenant.permissions import page_action_permission
 from clients.models import Client
 from config.pagination import StandardResultsSetPagination
-from debts.models import Debt
+from debts.models import Debt, Payment
 from sales.models import Sale, SaleItem
 
 
@@ -165,7 +165,7 @@ class EmployeeReportView(APIView):
         )
 
         revenue_trend = list(
-            Sale.objects.filter(tenant=tenant, created_at__date__range=(date_from, date_to))
+            sale_qs
             .annotate(day=TruncDate("created_at"))
             .values("day")
             .annotate(
@@ -234,7 +234,6 @@ class DebtReportView(APIView):
             )
         )
 
-        from debts.models import Payment
         payment_trend = list(
             Payment.objects.filter(
                 debt__tenant=tenant,
@@ -315,8 +314,8 @@ class TopDebtorsListView(APIView):
             Debt.objects.filter(tenant=tenant, status=Debt.Status.ACTIVE)
             .values("client__id", "client__name", "client__last_name", "client__phone")
             .annotate(
-                total_debt=Sum("total_amount"),
-                total_paid=Sum("paid_amount"),
+                total_debt=Coalesce(Sum("total_amount"), Decimal("0"), output_field=DecimalField()),
+                total_paid=Coalesce(Sum("paid_amount"), Decimal("0"), output_field=DecimalField()),
             )
             .annotate(
                 remaining=ExpressionWrapper(
@@ -334,7 +333,7 @@ class TopDebtorsListView(APIView):
                 "id": str(d["client__id"]),
                 "name": " ".join(filter(None, [d["client__name"], d["client__last_name"]])),
                 "phone": d["client__phone"] or "",
-                "remaining": str(d["remaining"] or Decimal("0")),
+                "remaining": str(d["remaining"]),
             }
             for d in page
         ])
@@ -356,7 +355,7 @@ class TopProductsListView(APIView):
             )
             .values("product__id", "product__name")
             .annotate(
-                total_qty=Sum("quantity"),
+                total_qty=Coalesce(Sum("quantity"), 0),
                 total_revenue=Coalesce(
                     Sum(ExpressionWrapper(F("price") * F("quantity"), output_field=DecimalField())),
                     Decimal("0"),

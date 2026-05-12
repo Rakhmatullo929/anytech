@@ -4,10 +4,9 @@ import CardContent from '@mui/material/CardContent';
 import Grid from '@mui/material/Unstable_Grid2';
 import { paths } from 'src/routes/paths';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
-import { DateRangeFilter } from '../components';
+import { DateRangeFilter, RevenueTrendChart } from '../components';
 import { useSalesReportQuery, useReportDateRange } from '../api';
 import SalesStatCards from './components/stat-cards';
-import SalesRevenueTrend from './components/revenue-trend';
 import PaymentTypeChart from './components/payment-type-chart';
 import TopProductsTable from './components/top-products-table';
 import ByCategoryTable from './components/by-category-table';
@@ -48,10 +47,11 @@ export default function SalesReportView() {
         <>
           <SalesStatCards data={data} loading={isPending} />
 
-          <SalesRevenueTrend
+          <RevenueTrendChart
             data={data?.revenueTrend ?? []}
             isFetching={isFetching}
             hasPreviousData={!!data}
+            sx={{ mb: 3 }}
           />
 
           <Grid container spacing={3} sx={{ mb: 3 }}>

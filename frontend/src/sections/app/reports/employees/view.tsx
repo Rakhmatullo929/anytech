@@ -4,11 +4,10 @@ import CardContent from '@mui/material/CardContent';
 import Grid from '@mui/material/Unstable_Grid2';
 import { paths } from 'src/routes/paths';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
-import { DateRangeFilter } from '../components';
+import { DateRangeFilter, RevenueTrendChart } from '../components';
 import { useEmployeeReportQuery, useReportDateRange } from '../api';
 import EmployeeStatCards from './components/stat-cards';
 import EmployeePerformanceChart from './components/performance-chart';
-import EmployeeRevenueTrend from './components/revenue-trend';
 import EmployeesTable from './components/employees-table';
 import { EmployeeReportSkeleton } from './skeleton';
 
@@ -56,10 +55,12 @@ export default function EmployeeReportView() {
               />
             </Grid>
             <Grid xs={12} md={6}>
-              <EmployeeRevenueTrend
+              <RevenueTrendChart
                 data={data?.revenueTrend ?? []}
                 isFetching={isFetching}
                 hasPreviousData={!!data}
+                height={240}
+                sx={{ height: '100%' }}
               />
             </Grid>
           </Grid>
