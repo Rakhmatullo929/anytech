@@ -40,6 +40,14 @@ export const paths = {
     roles: '/admin/roles',
   },
 
+  reports: {
+    root: '/reports/sales',
+    customers: '/reports/customers',
+    sales: '/reports/sales',
+    employees: '/reports/employees',
+    debts: '/reports/debts',
+  },
+
   components: '/components',
   maintenance: '/maintenance',
   page403: '/403',

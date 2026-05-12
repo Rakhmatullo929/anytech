@@ -8,7 +8,8 @@ export type PermissionPage =
   | 'clients'
   | 'groups'
   | 'sales'
-  | 'debts';
+  | 'debts'
+  | 'reports';
 
 export type PermissionAction = 'read' | 'detail' | 'write';
 

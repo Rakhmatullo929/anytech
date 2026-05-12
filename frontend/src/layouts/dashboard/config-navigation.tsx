@@ -21,6 +21,7 @@ const ICONS = {
   user: icon('ic_user'),
   order: icon('ic_order'),
   invoice: icon('ic_invoice'),
+  analytics: icon('ic_analytics'),
 };
 
 // ----------------------------------------------------------------------
@@ -39,6 +40,7 @@ export function useNavData() {
   const canReadGroups = canReadPage(permissions, 'groups');
   const canReadSales = canReadPage(permissions, 'sales');
   const canReadDebts = canReadPage(permissions, 'debts');
+  const canReadReports = canReadPage(permissions, 'reports');
 
   const data = useMemo(
     () => [
@@ -135,10 +137,25 @@ export function useNavData() {
                 },
               ]
             : []),
+          ...(canReadReports
+            ? [
+                {
+                  title: tx('common.navigation.reports'),
+                  path: paths.reports.root,
+                  icon: ICONS.analytics,
+                  children: [
+                    { title: tx('common.navigation.reportCustomers'), path: paths.reports.customers },
+                    { title: tx('common.navigation.reportSales'), path: paths.reports.sales },
+                    { title: tx('common.navigation.reportEmployees'), path: paths.reports.employees },
+                    { title: tx('common.navigation.reportDebts'), path: paths.reports.debts },
+                  ],
+                },
+              ]
+            : []),
         ],
       },
     ],
-    [canReadAdmin, canReadCategories, canReadClients, canReadDebts, canReadGroups, canReadPos, canReadProducts, canReadSales, tx]
+    [canReadAdmin, canReadCategories, canReadClients, canReadDebts, canReadGroups, canReadPos, canReadProducts, canReadReports, canReadSales, tx]
   );
 
   return data;

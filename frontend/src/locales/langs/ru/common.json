@@ -13,7 +13,12 @@
     "products": "Товары",
     "sales": "Продажи",
     "admin": "Админ",
-    "users": "Пользователи"
+    "users": "Пользователи",
+    "reports": "Отчёты",
+    "reportCustomers": "Клиенты",
+    "reportSales": "Продажи и товары",
+    "reportEmployees": "Сотрудники",
+    "reportDebts": "Долги"
   },
   "actions": {
     "apply": "Применить",

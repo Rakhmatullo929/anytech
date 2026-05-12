@@ -13,7 +13,12 @@
     "products": "Mahsulotlar",
     "sales": "Savdolar",
     "admin": "Admin",
-    "users": "Foydalanuvchilar"
+    "users": "Foydalanuvchilar",
+    "reports": "Hisobotlar",
+    "reportCustomers": "Mijozlar",
+    "reportSales": "Savdo va mahsulotlar",
+    "reportEmployees": "Xodimlar",
+    "reportDebts": "Qarzlar"
   },
   "actions": {
     "apply": "Qoʻllash",

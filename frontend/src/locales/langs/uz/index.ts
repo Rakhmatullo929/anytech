@@ -9,6 +9,7 @@ import admin from './admin.json';
 import profile from './profile.json';
 import errors from './errors.json';
 import users from './users.json';
+import reports from './reports.json';
 
 const translation = {
   common,
@@ -22,6 +23,7 @@ const translation = {
   profile,
   errors,
   users,
+  reports,
 };
 
 export default translation;

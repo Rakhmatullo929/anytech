@@ -9,6 +9,7 @@ PERMISSION_ACTIONS_BY_PAGE = {
     "groups": ("read", "detail", "write"),
     "sales": ("read", "detail", "write"),
     "debts": ("read", "detail", "write"),
+    "reports": ("read",),
 }
 
 
