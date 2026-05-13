@@ -1,0 +1,61 @@
+{
+  "documentTitle": {
+    "customers": "Отчёт по клиентам",
+    "sales": "Отчёт по продажам",
+    "employees": "Отчёт по сотрудникам",
+    "debts": "Отчёт по долгам"
+  },
+  "heading": {
+    "customers": "Отчёт по клиентам",
+    "sales": "Отчёт по продажам и товарам",
+    "employees": "Отчёт по сотрудникам",
+    "debts": "Отчёт по долгам"
+  },
+  "filters": {
+    "dateFrom": "С",
+    "dateTo": "По"
+  },
+  "stats": {
+    "totalCustomers": "Всего клиентов",
+    "newInPeriod": "Новых за период",
+    "totalSales": "Всего продаж",
+    "totalRevenue": "Выручка",
+    "totalProfit": "Прибыль",
+    "avgOrderValue": "Средний чек",
+    "totalEmployees": "Сотрудников",
+    "totalDebts": "Всего долгов",
+    "paidDebts": "Оплачено",
+    "remainingDebts": "Остаток",
+    "overdueDebts": "Просрочено"
+  },
+  "charts": {
+    "registrationTrend": "Регистрации по месяцам",
+    "revenueTrend": "Выручка по дням",
+    "paymentTrend": "Платежи по дням",
+    "byPaymentType": "По типу оплаты",
+    "byCategory": "По категориям",
+    "employeePerformance": "Выручка по сотрудникам",
+    "debtStatus": "Статус долгов"
+  },
+  "tables": {
+    "topCustomers": "Топ клиентов",
+    "topDebtors": "Крупнейшие должники",
+    "topProducts": "Топ товаров",
+    "employeeStats": "Статистика сотрудников",
+    "rank": "№",
+    "name": "Имя",
+    "phone": "Телефон",
+    "salesCount": "Продаж",
+    "totalSpent": "Сумма покупок",
+    "remaining": "Остаток долга",
+    "product": "Товар",
+    "qtySold": "Продано (шт.)",
+    "revenue": "Выручка",
+    "category": "Категория",
+    "employee": "Сотрудник",
+    "avgAmount": "Средний чек",
+    "status": "Статус",
+    "count": "Кол-во",
+    "amount": "Сумма"
+  }
+}

@@ -30,6 +30,10 @@ const AdminUserDetailsPage = lazy(() => import('../../pages/admin-users-details'
 const AdminUserCreatePage = lazy(() => import('../../pages/admin-users-create'));
 const AdminUserEditPage = lazy(() => import('../../pages/admin-user-edit'));
 const AdminRolesPage = lazy(() => import('../../pages/admin-roles'));
+const ReportCustomersPage = lazy(() => import('../../pages/report-customers'));
+const ReportSalesPage = lazy(() => import('../../pages/report-sales'));
+const ReportEmployeesPage = lazy(() => import('../../pages/report-employees'));
+const ReportDebtsPage = lazy(() => import('../../pages/report-debts'));
 
 function withPermission(
   page:
@@ -42,7 +46,8 @@ function withPermission(
     | 'clients'
     | 'groups'
     | 'sales'
-    | 'debts',
+    | 'debts'
+    | 'reports',
   action: 'read' | 'detail' | 'write',
   element: ReactElement
 ) {
@@ -151,6 +156,15 @@ export const dashboardRoutes = [
             path: ':id',
             element: withPermission('debts', 'detail', <DebtDetailsPage />),
           },
+        ],
+      },
+      {
+        path: 'reports',
+        children: [
+          { path: 'customers', element: withPermission('reports', 'read', <ReportCustomersPage />) },
+          { path: 'sales', element: withPermission('reports', 'read', <ReportSalesPage />) },
+          { path: 'employees', element: withPermission('reports', 'read', <ReportEmployeesPage />) },
+          { path: 'debts', element: withPermission('reports', 'read', <ReportDebtsPage />) },
         ],
       },
       {

@@ -42,7 +42,8 @@
       "clients": "Mijozlar",
       "groups": "Guruhlar",
       "sales": "Savdolar",
-      "debts": "Qarzlar"
+      "debts": "Qarzlar",
+      "reports": "Hisobotlar"
     },
     "items": {
       "admin": "Tizim va sozlamalarni to'liq boshqarish huquqi",

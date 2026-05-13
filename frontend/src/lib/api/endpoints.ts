@@ -61,6 +61,17 @@ export const API_ENDPOINTS = {
     detail: (id: string) => `${API_V1}/debts/${id}/`,
     pay: (id: string) => `${API_V1}/debts/${id}/pay/`,
   },
+  reports: {
+    customers: `${API_V1}/reports/customers/`,
+    sales: `${API_V1}/reports/sales/`,
+    employees: `${API_V1}/reports/employees/`,
+    debts: `${API_V1}/reports/debts/`,
+    topCustomers: `${API_V1}/reports/top-customers/`,
+    topDebtors: `${API_V1}/reports/top-debtors/`,
+    topProducts: `${API_V1}/reports/top-products/`,
+    topCategories: `${API_V1}/reports/top-categories/`,
+    employeeStats: `${API_V1}/reports/employee-stats/`,
+  },
   // Minimals shop aliases
   product: {
     list: `${API_V1}/products/`,

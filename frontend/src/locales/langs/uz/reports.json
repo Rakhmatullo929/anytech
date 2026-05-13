@@ -1,0 +1,61 @@
+{
+  "documentTitle": {
+    "customers": "Mijozlar hisoboti",
+    "sales": "Savdo hisoboti",
+    "employees": "Xodimlar hisoboti",
+    "debts": "Qarzlar hisoboti"
+  },
+  "heading": {
+    "customers": "Mijozlar hisoboti",
+    "sales": "Savdo va mahsulotlar hisoboti",
+    "employees": "Xodimlar hisoboti",
+    "debts": "Qarzlar hisoboti"
+  },
+  "filters": {
+    "dateFrom": "Dan",
+    "dateTo": "Gacha"
+  },
+  "stats": {
+    "totalCustomers": "Jami mijozlar",
+    "newInPeriod": "Davrda yangi",
+    "totalSales": "Jami savdolar",
+    "totalRevenue": "Tushum",
+    "totalProfit": "Foyda",
+    "avgOrderValue": "O'rtacha chek",
+    "totalEmployees": "Xodimlar",
+    "totalDebts": "Jami qarzlar",
+    "paidDebts": "To'langan",
+    "remainingDebts": "Qoldiq",
+    "overdueDebts": "Muddati o'tgan"
+  },
+  "charts": {
+    "registrationTrend": "Oylar bo'yicha ro'yxatga olish",
+    "revenueTrend": "Kunlik tushum",
+    "paymentTrend": "Kunlik to'lovlar",
+    "byPaymentType": "To'lov turi bo'yicha",
+    "byCategory": "Kategoriyalar bo'yicha",
+    "employeePerformance": "Xodimlar bo'yicha tushum",
+    "debtStatus": "Qarz holati"
+  },
+  "tables": {
+    "topCustomers": "Top mijozlar",
+    "topDebtors": "Eng katta qarzdorlar",
+    "topProducts": "Top mahsulotlar",
+    "employeeStats": "Xodimlar statistikasi",
+    "rank": "№",
+    "name": "Ism",
+    "phone": "Telefon",
+    "salesCount": "Savdolar",
+    "totalSpent": "Xaridlar summasi",
+    "remaining": "Qarz qoldig'i",
+    "product": "Mahsulot",
+    "qtySold": "Sotilgan (dona)",
+    "revenue": "Tushum",
+    "category": "Kategoriya",
+    "employee": "Xodim",
+    "avgAmount": "O'rtacha chek",
+    "status": "Holat",
+    "count": "Miqdor",
+    "amount": "Summa"
+  }
+}
