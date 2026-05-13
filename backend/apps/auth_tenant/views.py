@@ -198,7 +198,7 @@ class TenantRolesListView(generics.GenericAPIView):
             roles.append(
                 {
                     "value": role.code,
-                    "label": role.name,
+                    "label": _(role.name),
                     "permissions": role_to_permissions.get(role.code, []),
                     "is_system": role.is_system,
                 }
@@ -223,7 +223,7 @@ class TenantRoleCreateView(generics.GenericAPIView):
         return Response(
             {
                 "value": role.code,
-                "label": role.name,
+                "label": _(role.name),
                 "permissions": permissions,
                 "is_system": role.is_system,
             },
@@ -255,7 +255,7 @@ class TenantRoleDeleteView(generics.GenericAPIView):
         return Response(
             {
                 "value": role_obj.code,
-                "label": role_obj.name,
+                "label": _(role_obj.name),
                 "permissions": permissions,
                 "is_system": role_obj.is_system,
             },
@@ -294,7 +294,7 @@ class TenantRolePermissionsUpdateView(generics.GenericAPIView):
         return Response(
             {
                 "value": role,
-                "label": role_obj.name,
+                "label": _(role_obj.name),
                 "permissions": permissions,
                 "is_system": role_obj.is_system,
             },

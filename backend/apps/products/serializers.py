@@ -173,6 +173,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "image",
             "images",
             "total_quantity",
+            "available_quantity",
             "total_purchase_amount",
             "average_purchase_price",
             "uploaded_images",

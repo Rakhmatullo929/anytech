@@ -18,6 +18,8 @@ alwaysApply: false
   - Когда использовать: таблицы/списки с `search`, `page`, `page_size`, `ordering`, filters через URL.
 - `frontend/cursor/rules/frontend-rbac-permissions.mdc`
   - Когда использовать: permissions, guards, navbar visibility, role management, access control UX.
+- `frontend/cursor/rules/frontend-testing.mdc`
+  - Когда использовать: написание тестов компонентов, хуков, таблиц; моки useLocales/API/table, test-utils.
 
 ## Как правильно писать prompt (выбрать ОДИН rule)
 
@@ -75,6 +77,18 @@ alwaysApply: false
 - "Добавить API вызовы/мутации/кэш" -> `frontend-api-requests.mdc`
 - "Сделать URL как source of truth для таблицы" -> `frontend-url-list-state.mdc`
 - "Ограничить доступ по permissions/RBAC" -> `frontend-rbac-permissions.mdc`
+- "Написать тесты для компонента/хука/таблицы" -> `frontend-testing.mdc`
+
+### 5) Для тестов
+
+```text
+Сделай задачу по правилу @frontend/cursor/rules/frontend-testing.mdc.
+Нужно: написать тесты для <компонент/хук>.
+Файл: <путь к файлу>.
+Покрыть: loading-состояние, empty-состояние, рендер данных, callback-пропсы.
+Моки: useLocales, useSettingsContext, доменный хук <useXxxQuery>.
+После написания запусти yarn test --watchAll=false --testPathPattern="<имя файла>" и убедись что все проходят.
+```
 
 ## Важно
 

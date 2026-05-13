@@ -27,6 +27,7 @@
     "useUnknownInCatchVariables": false,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
+    "types": ["jest", "@testing-library/jest-dom"]
   },
   "exclude": [
     "node_modules",

@@ -31,10 +31,10 @@ def pay_url(pk):
 
 
 @pytest.fixture
-def debt_sale(tenant, client_obj, product, admin_client):
+def debt_sale(tenant, client_obj, product, admin_client, admin_user):
     resp = admin_client.post(
         reverse("sale-list"),
-        make_sale_payload(product, payment_type="debt", client_id=client_obj.pk),
+        make_sale_payload(product, admin_user.pk, payment_type="debt", client_id=client_obj.pk),
         format="json",
     )
     return Debt.objects.get(sale_id=resp.data["id"])
