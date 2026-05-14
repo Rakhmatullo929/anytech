@@ -204,5 +204,85 @@
       "position": 0,
       "created_at": "2025-01-15T10:00:00Z"
     }
+  },
+  {
+    "model": "products.productpurchase",
+    "pk": "ee000000-0000-0000-0000-000000000001",
+    "fields": {
+      "product": "c1000000-0000-0000-0000-000000000001",
+      "quantity": 50,
+      "unit_price": "900.00",
+      "created_at": "2025-01-20T10:00:00Z"
+    }
+  },
+  {
+    "model": "products.productpurchase",
+    "pk": "ee000000-0000-0000-0000-000000000002",
+    "fields": {
+      "product": "c1000000-0000-0000-0000-000000000002",
+      "quantity": 50,
+      "unit_price": "800.00",
+      "created_at": "2025-01-20T10:00:00Z"
+    }
+  },
+  {
+    "model": "products.productpurchase",
+    "pk": "ee000000-0000-0000-0000-000000000003",
+    "fields": {
+      "product": "c1000000-0000-0000-0000-000000000003",
+      "quantity": 100,
+      "unit_price": "200.00",
+      "created_at": "2025-01-20T10:00:00Z"
+    }
+  },
+  {
+    "model": "products.productpurchase",
+    "pk": "ee000000-0000-0000-0000-000000000004",
+    "fields": {
+      "product": "c1000000-0000-0000-0000-000000000004",
+      "quantity": 30,
+      "unit_price": "1100.00",
+      "created_at": "2025-01-20T10:00:00Z"
+    }
+  },
+  {
+    "model": "products.productpurchase",
+    "pk": "ee000000-0000-0000-0000-000000000005",
+    "fields": {
+      "product": "c1000000-0000-0000-0000-000000000005",
+      "quantity": 200,
+      "unit_price": "10.00",
+      "created_at": "2025-01-20T10:00:00Z"
+    }
+  },
+  {
+    "model": "products.productpurchase",
+    "pk": "ee000000-0000-0000-0000-000000000006",
+    "fields": {
+      "product": "c1000000-0000-0000-0000-000000000006",
+      "quantity": 50,
+      "unit_price": "650.00",
+      "created_at": "2025-01-20T10:00:00Z"
+    }
+  },
+  {
+    "model": "products.productpurchase",
+    "pk": "ee000000-0000-0000-0000-000000000007",
+    "fields": {
+      "product": "c1000000-0000-0000-0000-000000000007",
+      "quantity": 50,
+      "unit_price": "250.00",
+      "created_at": "2025-01-20T10:00:00Z"
+    }
+  },
+  {
+    "model": "products.productpurchase",
+    "pk": "ee000000-0000-0000-0000-000000000008",
+    "fields": {
+      "product": "c1000000-0000-0000-0000-000000000008",
+      "quantity": 500,
+      "unit_price": "7.00",
+      "created_at": "2025-01-20T10:00:00Z"
+    }
   }
 ]

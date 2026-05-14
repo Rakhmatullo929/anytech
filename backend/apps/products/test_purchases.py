@@ -22,8 +22,9 @@ class TestProductPurchaseCrud:
         )
         resp = manager_client.get(LIST_URL)
         assert resp.status_code == status.HTTP_200_OK
-        assert resp.data["count"] == 1
-        assert resp.data["results"][0]["id"] == str(purchase.pk)
+        assert resp.data["count"] == 2  # fixture purchase (qty=100) + this one
+        ids = [r["id"] for r in resp.data["results"]]
+        assert str(purchase.pk) in ids
 
     def test_list_purchases_filtered_by_product(self, manager_client, tenant):
         p1 = Product.objects.create(tenant=tenant, name="P1", sku="P1")

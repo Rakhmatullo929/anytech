@@ -76,8 +76,8 @@ class TestProductList:
         assert resp.status_code == status.HTTP_200_OK
         assert resp.data["count"] == 1
         assert resp.data["results"][0]["name"] == "Test Product"
-        assert resp.data["results"][0]["total_quantity"] == 20
-        assert resp.data["results"][0]["total_purchase_amount"] == "17000.00"
+        assert resp.data["results"][0]["total_quantity"] == 120  # 100 (fixture) + 10 + 10
+        assert resp.data["results"][0]["total_purchase_amount"] == "22000.00"  # 5000 + 9000 + 8000
 
     def test_list_unauthenticated(self, anon_client):
         resp = anon_client.get(LIST_URL)

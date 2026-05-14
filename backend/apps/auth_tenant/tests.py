@@ -261,6 +261,7 @@ class TestTenantUsersEndpoint:
         assert resp.status_code == status.HTTP_404_NOT_FOUND
 
     def test_users_create_admin_success(self, admin_client, tenant):
+        import uuid
         payload = {
             "first_name": "Created",
             "last_name": "Manager",
@@ -271,6 +272,8 @@ class TestTenantUsersEndpoint:
             "passport_series": "AB1231212",
             "gender": "male",
             "role": "manager",
+            "region_id": str(uuid.uuid4()),
+            "district_id": str(uuid.uuid4()),
             "password": "StrongPass123!",
             "password_confirm": "StrongPass123!",
         }

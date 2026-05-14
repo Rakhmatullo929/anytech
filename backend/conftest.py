@@ -178,15 +178,17 @@ def client_obj(tenant):
         tenant=tenant,
         name="Test Client",
         phone="+998901234567",
+        phones=["+998901234567"],
     )
 
 
 # ── Helpers ───────────────────────────────────────────────────────────
 
 
-def make_sale_payload(product, quantity=2, payment_type="cash", client_id=None):
+def make_sale_payload(product, created_by_id, quantity=2, payment_type="cash", client_id=None):
     payload = {
         "payment_type": payment_type,
+        "created_by_user_id": str(created_by_id),
         "items": [{"product": str(product.pk), "quantity": quantity, "price": "100.00"}],
     }
     if client_id:

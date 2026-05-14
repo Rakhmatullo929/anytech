@@ -61,15 +61,15 @@ class TestClientList:
         resp = manager_client.get(detail_url(client_obj.pk))
         assert resp.status_code == status.HTTP_200_OK
         assert resp.data["name"] == "Test Client"
-        assert "sales" in resp.data
-        assert "total_debt" in resp.data
+        assert "total_purchases_amount" in resp.data
+        assert "sales_count" in resp.data
 
 
 # ── Create ────────────────────────────────────────────────────────────
 
 
 class TestClientCreate:
-    PAYLOAD = {"name": "New Client", "phone": "+998900000001"}
+    PAYLOAD = {"name": "New Client", "phones": ["+998900000001"]}
 
     def test_admin_can_create(self, admin_client, tenant):
         resp = admin_client.post(LIST_URL, self.PAYLOAD, format="json")
@@ -87,14 +87,14 @@ class TestClientCreate:
     def test_duplicate_phone_rejected(self, admin_client, client_obj):
         resp = admin_client.post(
             LIST_URL,
-            {"name": "Dup", "phone": client_obj.phone},
+            {"name": "Dup", "phones": [client_obj.phone]},
             format="json",
         )
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_empty_phone_rejected(self, admin_client):
+    def test_empty_phones_rejected(self, admin_client):
         resp = admin_client.post(
-            LIST_URL, {"name": "Empty", "phone": "   "}, format="json"
+            LIST_URL, {"name": "Empty", "phones": []}, format="json"
         )
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -106,7 +106,7 @@ class TestClientUpdate:
     def test_admin_can_update(self, admin_client, client_obj):
         resp = admin_client.put(
             detail_url(client_obj.pk),
-            {"name": "Updated", "phone": "+998901111111"},
+            {"name": "Updated", "phones": ["+998900099999"]},
             format="json",
         )
         assert resp.status_code == status.HTTP_200_OK
@@ -115,7 +115,7 @@ class TestClientUpdate:
     def test_seller_cannot_update(self, seller_client, client_obj):
         resp = seller_client.put(
             detail_url(client_obj.pk),
-            {"name": "Hack", "phone": "+998900000000"},
+            {"name": "Hack", "phones": ["+998900000000"]},
             format="json",
         )
         assert resp.status_code == status.HTTP_403_FORBIDDEN
