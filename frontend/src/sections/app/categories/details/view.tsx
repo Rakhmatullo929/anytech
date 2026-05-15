@@ -60,7 +60,7 @@ export default function CategoryDetailsView() {
     pageSize: rowsPerPage,
     search: debouncedSearch || undefined,
     ordering,
-    categoryId: id,
+    categoryIds: [id],
   });
 
   const rows = useMemo(() => productsQuery.data?.results ?? [], [productsQuery.data?.results]);

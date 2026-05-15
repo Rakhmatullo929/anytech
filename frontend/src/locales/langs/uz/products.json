@@ -37,6 +37,12 @@
       "title": "Qoldiq"
     }
   },
+  "filters": {
+    "category": "Kategoriya",
+    "quantityRange": "Miqdor diapazoni",
+    "minQty": "Min.",
+    "maxQty": "Maks."
+  },
   "searchPlaceholder": "Nom yoki SKU boʻyicha qidiruv…",
   "bulkImport": {
     "button": "Excel import",

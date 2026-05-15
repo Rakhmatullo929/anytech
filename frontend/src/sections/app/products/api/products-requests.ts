@@ -25,7 +25,10 @@ export async function fetchProductsList(
       page: params.page,
       pageSize: params.pageSize,
       ...(params.search ? { search: params.search } : {}),
-      ...(params.categoryId ? { categoryId: params.categoryId } : {}),
+      // Comma-joined → humps converts key to category_ids on the wire
+      ...(params.categoryIds?.length ? { categoryIds: params.categoryIds.join(',') } : {}),
+      ...(params.minQuantity ? { minQuantity: params.minQuantity } : {}),
+      ...(params.maxQuantity ? { maxQuantity: params.maxQuantity } : {}),
       ...(params.inStock ? { inStock: true } : {}),
       ordering: params.ordering ?? '-created_at',
     },
@@ -174,6 +177,31 @@ export async function downloadProductExcelTemplate(): Promise<void> {
   const link = document.createElement('a');
   link.href = url;
   link.setAttribute('download', 'products_template.xlsx');
+  document.body.appendChild(link);
+  try {
+    link.click();
+  } finally {
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  }
+}
+
+export async function exportProductsExcel(params: Omit<FetchProductsListParams, 'page' | 'pageSize'>): Promise<void> {
+  const response = await apiClient.get(API_ENDPOINTS.products.exportExcel, {
+    responseType: 'blob',
+    params: {
+      ...(params.search ? { search: params.search } : {}),
+      ...(params.categoryIds?.length ? { categoryIds: params.categoryIds.join(',') } : {}),
+      ...(params.minQuantity ? { minQuantity: params.minQuantity } : {}),
+      ...(params.maxQuantity ? { maxQuantity: params.maxQuantity } : {}),
+      ordering: params.ordering ?? '-created_at',
+    },
+  });
+
+  const url = window.URL.createObjectURL(new Blob([response.data]));
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', 'products_export.xlsx');
   document.body.appendChild(link);
   try {
     link.click();

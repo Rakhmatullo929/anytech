@@ -12,6 +12,7 @@ import {
   createProduct,
   deleteProductPurchase,
   deleteProduct,
+  exportProductsExcel,
   fetchCategoriesList,
   fetchProductPurchasesList,
   fetchProductDetail,
@@ -38,7 +39,9 @@ type ProductsListKeyParams = {
   pageSize?: number;
   search?: string;
   ordering?: string;
-  categoryId?: string;
+  categoryIds?: string;
+  minQuantity?: string;
+  maxQuantity?: string;
 };
 
 function getProductsListKeyParams(queryKey: QueryKey): ProductsListKeyParams {
@@ -52,21 +55,33 @@ function getProductsListKeyParams(queryKey: QueryKey): ProductsListKeyParams {
     pageSize: typeof params.pageSize === 'number' ? params.pageSize : undefined,
     search: typeof params.search === 'string' ? params.search : undefined,
     ordering: typeof params.ordering === 'string' ? params.ordering : undefined,
-    categoryId: typeof params.categoryId === 'string' ? params.categoryId : undefined,
+    categoryIds: typeof params.categoryIds === 'string' ? params.categoryIds : undefined,
+    minQuantity: typeof params.minQuantity === 'string' ? params.minQuantity : undefined,
+    maxQuantity: typeof params.maxQuantity === 'string' ? params.maxQuantity : undefined,
   };
 }
 
 export function useProductsListQuery(params: FetchProductsListParams) {
-  const { page, pageSize, search, ordering, categoryId } = params;
+  const { page, pageSize, search, ordering, categoryIds, minQuantity, maxQuantity } = params;
+
+  const categoryIdsKey = categoryIds?.join(',') ?? '';
 
   const queryKey = useMemo(
     () =>
       [
         'products',
         'list',
-        { page, pageSize, search: search ?? '', ordering: ordering ?? '-created_at', categoryId: categoryId ?? '' },
+        {
+          page,
+          pageSize,
+          search: search ?? '',
+          ordering: ordering ?? '-created_at',
+          categoryIds: categoryIdsKey,
+          minQuantity: minQuantity ?? '',
+          maxQuantity: maxQuantity ?? '',
+        },
       ] as const,
-    [page, pageSize, search, ordering, categoryId]
+    [page, pageSize, search, ordering, categoryIdsKey, minQuantity, maxQuantity]
   );
 
   return useFetchList<ProductListItem>(queryKey, () => fetchProductsList(params), {
@@ -99,11 +114,16 @@ export function useCreateProductMutation() {
       cachedLists.forEach(([queryKey, cachedPage]) => {
         if (!cachedPage) return;
 
-        const { page = 1, pageSize = cachedPage.results.length, search = '', ordering = '-created_at', categoryId = '' } =
+        const { page = 1, pageSize = cachedPage.results.length, search = '', ordering = '-created_at', categoryIds = '', minQuantity = '', maxQuantity = '' } =
           getProductsListKeyParams(queryKey);
 
         const shouldInsertIntoCurrentPage =
-          page === 1 && ordering === '-created_at' && search.trim() === '' && categoryId.trim() === '';
+          page === 1 &&
+          ordering === '-created_at' &&
+          search.trim() === '' &&
+          !categoryIds &&
+          !minQuantity &&
+          !maxQuantity;
         if (!shouldInsertIntoCurrentPage) return;
 
         const nextResults = [createdProduct, ...cachedPage.results];
@@ -165,6 +185,10 @@ export function useBulkDeleteProductsMutation() {
       );
     },
   });
+}
+
+export function useExportProductsMutation() {
+  return useMutate<void, Omit<FetchProductsListParams, 'page' | 'pageSize'>>(exportProductsExcel);
 }
 
 export function useBulkCreateProductsMutation() {

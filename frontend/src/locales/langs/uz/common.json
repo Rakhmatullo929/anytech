@@ -24,10 +24,13 @@
     "apply": "Qoʻllash",
     "backToList": "Roʻyxatga",
     "cancel": "Bekor qilish",
-    "delete": "O‘chirish",
+    "delete": "O’chirish",
     "edit": "Tahrirlash",
+    "export": "Eksport",
+    "filters": "Filtrlar",
+    "reset": "Tozalash",
     "save": "Saqlash",
-    "view": "Ko‘rish"
+    "view": "Ko’rish"
   },
   "labels": {
     "guest": "Mehmon",
