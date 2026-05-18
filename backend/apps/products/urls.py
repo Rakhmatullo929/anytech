@@ -24,6 +24,11 @@ urlpatterns = [
         name="product-bulk-create-excel",
     ),
     path(
+        "export-excel/",
+        ProductViewSet.as_view({"get": "export_excel"}),
+        name="product-export-excel",
+    ),
+    path(
         "download-excel-template/",
         ProductViewSet.as_view({"get": "download_excel_template"}),
         name="product-download-excel-template",

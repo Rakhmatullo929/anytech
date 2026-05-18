@@ -61,7 +61,10 @@ export type FetchProductsListParams = {
   pageSize: number;
   search?: string;
   ordering?: string;
-  categoryId?: string;
+  /** Comma-joined category IDs sent as a single `category_ids` param */
+  categoryIds?: string[];
+  minQuantity?: string;
+  maxQuantity?: string;
   inStock?: boolean;
 };
 

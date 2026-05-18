@@ -31,7 +31,25 @@ export type FetchDebtsListParams = {
   pageSize: number;
   ordering?: string;
   status?: DebtStatus;
-  clientId?: string;
+  clientIds?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  deadlineFrom?: string;
+  deadlineTo?: string;
+  amountFrom?: string;
+  amountTo?: string;
+};
+
+export type ExportDebtsParams = {
+  ordering?: string;
+  status?: DebtStatus;
+  clientIds?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  deadlineFrom?: string;
+  deadlineTo?: string;
+  amountFrom?: string;
+  amountTo?: string;
 };
 
 export type PayDebtPayload = {

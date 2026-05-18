@@ -58,6 +58,7 @@ from .serializers import (
 class ProductViewSet(TenantQuerySetMixin, ModelViewSet):
     queryset = (
         Product.objects.all()
+        .select_related("category")
         .prefetch_related("images")
         .annotate(
             total_quantity=Coalesce(Sum("purchases__quantity"), Value(0)),
@@ -80,7 +81,15 @@ class ProductViewSet(TenantQuerySetMixin, ModelViewSet):
     http_method_names = ["get", "post", "put", "patch", "delete", "head", "options"]
 
     search_fields = ["name", "sku"]
-    ordering_fields = ["name", "created_at", "total_quantity"]
+    ordering_fields = [
+        "name",
+        "sku",
+        "created_at",
+        "total_quantity",
+        "total_purchase_amount",
+        "average_purchase_price",
+        "category__name",
+    ]
     ordering = ["-created_at"]
 
     def get_queryset(self):
@@ -88,16 +97,39 @@ class ProductViewSet(TenantQuerySetMixin, ModelViewSet):
         queryset = super().get_queryset().annotate(
             available_quantity=F("total_quantity")
         )
-        category_id = self.request.query_params.get("category_id")
-        if category_id:
-            queryset = queryset.filter(category_id=category_id)
+
+        # Multi-category filter — comma-separated IDs, e.g. ?category_ids=id1,id2
+        category_ids_raw = self.request.query_params.get("category_ids")
+        if category_ids_raw:
+            ids = [i.strip() for i in category_ids_raw.split(",") if i.strip()]
+            if ids:
+                queryset = queryset.filter(category_id__in=ids)
+        elif self.request.query_params.get("category_id"):
+            # backward-compat single-value param
+            queryset = queryset.filter(category_id=self.request.query_params["category_id"])
+
         in_stock = self.request.query_params.get("in_stock")
         if in_stock == "true":
             queryset = queryset.filter(total_quantity__gt=0)
+
+        # Quantity range filters
+        min_qty = self.request.query_params.get("min_quantity")
+        max_qty = self.request.query_params.get("max_quantity")
+        if min_qty is not None:
+            try:
+                queryset = queryset.filter(total_quantity__gte=int(min_qty))
+            except (ValueError, TypeError):
+                pass
+        if max_qty is not None:
+            try:
+                queryset = queryset.filter(total_quantity__lte=int(max_qty))
+            except (ValueError, TypeError):
+                pass
+
         return queryset
 
     def get_permissions(self):
-        if self.action in ("list", "search"):
+        if self.action in ("list", "search", "export_excel"):
             return [page_action_permission("products", "read")()]
         if self.action == "retrieve":
             return [page_action_permission("products", "detail")()]
@@ -115,6 +147,56 @@ class ProductViewSet(TenantQuerySetMixin, ModelViewSet):
     @action(detail=False, methods=["get"], url_path="search")
     def search(self, request):
         return self.list(request)
+
+    @action(detail=False, methods=["get"], url_path="export-excel")
+    def export_excel(self, request):
+        try:
+            from openpyxl import Workbook
+            from openpyxl.styles import Alignment, Font, PatternFill
+        except ImportError as exc:
+            raise ValidationError(
+                {"detail": _("Excel export requires openpyxl package on backend.")}
+            ) from exc
+
+        queryset = self.filter_queryset(self.get_queryset())
+
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Products"
+
+        headers = ["Name", "SKU", "Category", "Quantity", "Purchase Amount", "Avg. Price"]
+        header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+        header_font = Font(bold=True, color="FFFFFF")
+
+        for col_idx, header in enumerate(headers, start=1):
+            cell = ws.cell(row=1, column=col_idx, value=header)
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = Alignment(horizontal="center")
+
+        for product in queryset.iterator(chunk_size=500):
+            ws.append([
+                product.name,
+                product.sku or "",
+                product.category.name if product.category else "",
+                product.total_quantity,
+                float(product.total_purchase_amount),
+                float(product.average_purchase_price),
+            ])
+
+        for col in ws.columns:
+            ws.column_dimensions[col[0].column_letter].width = 22
+
+        buffer = BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+
+        response = HttpResponse(
+            buffer.read(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = 'attachment; filename="products_export.xlsx"'
+        return response
 
     @action(detail=False, methods=["post"], url_path="bulk-delete")
     def bulk_delete(self, request):

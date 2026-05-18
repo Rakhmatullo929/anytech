@@ -37,6 +37,12 @@
     }
   },
   "searchPlaceholder": "Ism yoki telefon boʻyicha qidiruv…",
+  "filters": {
+    "gender": "Jins",
+    "genderMale": "Erkak",
+    "genderFemale": "Ayol",
+    "group": "Guruh"
+  },
   "tabs": {
     "clients": "Mijozlar",
     "groups": "Guruhlar"

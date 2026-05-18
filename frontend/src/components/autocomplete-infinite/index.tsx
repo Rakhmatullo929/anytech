@@ -78,6 +78,7 @@ export type AutocompleteInfiniteProps<T extends ModelType> = {
   /** Debounce delay in ms. Defaults to 400. */
   debounceMs?: number;
   disabled?: boolean;
+  size?: 'small' | 'medium';
   sx?: SxProps<Theme>;
   noOptionsText?: string;
   loadingText?: string;
@@ -100,6 +101,7 @@ export default function AutocompleteInfinite<T extends ModelType>({
   placeholder,
   debounceMs = 400,
   disabled,
+  size,
   sx,
   noOptionsText,
   loadingText,
@@ -188,6 +190,7 @@ export default function AutocompleteInfinite<T extends ModelType>({
             {...params}
             label={label}
             placeholder={value.length === 0 ? placeholder : undefined}
+            size={size}
           />
         )}
       />

@@ -12,7 +12,15 @@
   "documentTitle": "Продажи",
   "filters": {
     "allOption": "Все",
-    "paymentLabel": "Тип оплаты"
+    "paymentLabel": "Тип оплаты",
+    "dateRange": "Период",
+    "dateFrom": "С",
+    "dateTo": "По",
+    "client": "Клиент",
+    "seller": "Продавец",
+    "amountRange": "Сумма",
+    "amountMin": "От",
+    "amountMax": "До"
   },
   "listHeading": "История продаж"
 }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type MouseEvent } from 'react';
+import { useCallback, useEffect, useMemo, useState, type MouseEvent } from 'react';
 // locales
 import { useLocales } from 'src/locales';
 // @mui
@@ -63,10 +63,12 @@ export default function CategoriesView() {
   const deleteMutation = useDeleteCategoryMutation();
   const bulkDeleteMutation = useBulkDeleteCategoriesMutation();
 
-  const tableHead = useMemo(
+  type HeadCell = { id: string; label: string; sortKey?: string };
+
+  const tableHead: HeadCell[] = useMemo(
     () => [
-      { id: 'name', label: tx('common.table.category') },
-      { id: 'created', label: tx('common.table.created') },
+      { id: 'name', label: tx('common.table.category'), sortKey: 'name' },
+      { id: 'created', label: tx('common.table.created'), sortKey: 'created_at' },
       { id: '', label: '' },
     ],
     [tx]
@@ -78,6 +80,7 @@ export default function CategoriesView() {
     search: searchValue,
     ordering,
     setSearch,
+    setOrdering,
     setValues: setQueryState,
     handlePageChange,
     handleRowsPerPageChange,
@@ -91,6 +94,26 @@ export default function CategoriesView() {
     defaultOrdering: '-created_at',
   });
   const debouncedSearch = useDebounce(searchValue.trim(), 400);
+
+  const { tableOrderBy, tableOrder } = useMemo(() => {
+    const isDesc = ordering.startsWith('-');
+    const field = isDesc ? ordering.slice(1) : ordering;
+    const col = tableHead.find((h) => h.sortKey === field);
+    return {
+      tableOrderBy: col?.id ?? '',
+      tableOrder: isDesc ? ('desc' as const) : ('asc' as const),
+    };
+  }, [ordering, tableHead]);
+
+  const handleSort = useCallback(
+    (columnId: string) => {
+      const col = tableHead.find((h) => h.id === columnId);
+      if (!col?.sortKey) return;
+      const isCurrentAsc = tableOrderBy === columnId && tableOrder === 'asc';
+      setOrdering(isCurrentAsc ? `-${col.sortKey}` : col.sortKey);
+    },
+    [tableHead, tableOrderBy, tableOrder, setOrdering]
+  );
 
   const table = useTable({
     defaultCurrentPage: Math.max(0, pageParam - 1),
@@ -309,6 +332,9 @@ export default function CategoriesView() {
             <Scrollbar>
               <Table size="small">
                 <TableHeadCustom
+                  order={tableOrder}
+                  orderBy={tableOrderBy}
+                  onSort={handleSort}
                   headLabel={tableHead}
                   rowCount={rows.length}
                   numSelected={selectedIds.length}

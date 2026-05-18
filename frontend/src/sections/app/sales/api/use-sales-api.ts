@@ -1,16 +1,30 @@
 import { useMemo } from 'react';
 
-import { useFetchList, useFetchOne } from 'src/hooks/api';
+import { useFetchList, useFetchOne, useMutate } from 'src/hooks/api';
 
-import { fetchSaleDetail, fetchSalesList } from './sales-requests';
-import type { FetchSalesListParams, SaleDetail, SaleListItem } from './types';
+import { exportSalesExcel, fetchSaleDetail, fetchSalesList } from './sales-requests';
+import type { ExportSalesParams, FetchSalesListParams, SaleDetail, SaleListItem } from './types';
 
 export function useSalesListQuery(params: FetchSalesListParams) {
-  const { page, pageSize, ordering, paymentType, clientId, createdBy } = params;
+  const { page, pageSize, ordering, paymentType, clientIds, sellerIds, dateFrom, dateTo, amountFrom, amountTo } = params;
 
   const queryKey = useMemo(
-    () => ['sales', 'list', { page, pageSize, ordering: ordering ?? '-created_at', paymentType: paymentType ?? '', clientId: clientId ?? '', createdBy: createdBy ?? '' }] as const,
-    [page, pageSize, ordering, paymentType, clientId, createdBy]
+    () => [
+      'sales',
+      'list',
+      {
+        page, pageSize,
+        ordering: ordering ?? '-created_at',
+        paymentType: paymentType ?? '',
+        clientIds: clientIds ?? '',
+        sellerIds: sellerIds ?? '',
+        dateFrom: dateFrom ?? '',
+        dateTo: dateTo ?? '',
+        amountFrom: amountFrom ?? '',
+        amountTo: amountTo ?? '',
+      },
+    ] as const,
+    [page, pageSize, ordering, paymentType, clientIds, sellerIds, dateFrom, dateTo, amountFrom, amountTo]
   );
 
   return useFetchList<SaleListItem>(queryKey, () => fetchSalesList(params), {
@@ -24,4 +38,8 @@ export function useSaleDetailQuery(id: string) {
   return useFetchOne<SaleDetail>(queryKey, () => fetchSaleDetail(id), {
     enabled: Boolean(id),
   });
+}
+
+export function useExportSalesMutation() {
+  return useMutate<void, ExportSalesParams>(exportSalesExcel);
 }

@@ -1,9 +1,13 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import type { AutocompleteInfiniteFetcher } from 'src/components/autocomplete-infinite';
+import AutocompleteInfinite from 'src/components/autocomplete-infinite';
 // locales
 import { useLocales } from 'src/locales';
 // @mui
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
+import MenuItem from '@mui/material/MenuItem';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import TableRow from '@mui/material/TableRow';
@@ -11,49 +15,114 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import Link from '@mui/material/Link';
 import LinearProgress from '@mui/material/LinearProgress';
-import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 // utils
 import { fCurrency } from 'src/utils/format-number';
 import { fDateTime } from 'src/utils/format-time';
-import {
-  intParam,
-  stringParam,
-  useSyncTableWithUrlListState,
-  useUrlQueryState,
-} from 'src/hooks/use-url-query-state';
+import { useSyncTableWithUrlListState } from 'src/hooks/use-url-query-state';
 import { useCheckPermission } from 'src/auth/hooks/use-check-permission';
 // routes
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
 // components
+import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+import { FilterDrawer, FilterFieldDateRange, FilterFieldRange } from 'src/components/filter-drawer';
 import {
   useTable,
   TableNoData,
   TableHeadCustom,
   TablePaginationCustom,
 } from 'src/components/table';
-import { useSalesListQuery, type SalePaymentType } from 'src/sections/app/sales/api';
+import { fetchClientsList } from 'src/sections/app/clients/api/clients-requests';
+import type { ClientListItem } from 'src/sections/app/clients/api/types';
+import { fetchTenantUsers } from 'src/sections/app/admin/users/api/users-requests';
+import type { TenantUserListItem } from 'src/sections/app/admin/users/api/types';
+import {
+  useSalesListQuery,
+  useExportSalesMutation,
+  useSalesUrlState,
+  type SalePaymentType,
+} from 'src/sections/app/sales/api';
 import { SalesListSkeleton } from 'src/sections/app/sales/skeleton';
 
 // ----------------------------------------------------------------------
 
+type HeadCell = { id: string; label: string; sortKey?: string };
+
+const CLIENTS_QUERY_KEY_BASE = ['sales-clients', 'infinite'] as const;
+const clientsInfiniteFetcher: AutocompleteInfiniteFetcher<ClientListItem> = ({ page, search }) =>
+  fetchClientsList({ page, pageSize: 20, search: search || undefined });
+
+const SELLERS_QUERY_KEY_BASE = ['sales-sellers', 'infinite'] as const;
+const sellersInfiniteFetcher: AutocompleteInfiniteFetcher<TenantUserListItem> = ({
+  page,
+  search,
+}) => fetchTenantUsers({ page, pageSize: 20, search: search || undefined });
+
 export default function SalesView() {
   const { tx } = useLocales();
   const { canDetailPage } = useCheckPermission();
-  const { values, setValues } = useUrlQueryState({
-    page: intParam(1),
-    page_size: intParam(15),
-    ordering: stringParam('-created_at'),
-    payment_type: stringParam(''),
-  });
-  const pageParam = values.page as number;
-  const rowsPerPage = values.page_size as number;
-  const ordering = values.ordering as string;
-  const paymentType = values.payment_type as '' | SalePaymentType;
+  const exportMutation = useExportSalesMutation();
 
+  const {
+    page: pageParam,
+    rowsPerPage,
+    ordering,
+    paymentType,
+    dateFrom,
+    dateTo,
+    clientIds,
+    sellerIds,
+    amountFrom,
+    amountTo,
+    activeFiltersCount,
+    setOrdering,
+    setFilters,
+    resetFilters,
+    handlePageChange,
+    handleRowsPerPageChange,
+  } = useSalesUrlState();
+
+  // ── Local state for autocomplete objects ──────────────────────────────────
+  const [selectedClients, setSelectedClients] = useState<ClientListItem[]>([]);
+  const [selectedSellers, setSelectedSellers] = useState<TenantUserListItem[]>([]);
+
+  // ── Sorting ──────────────────────────────────────────────────────────────
+  const tableHead: HeadCell[] = useMemo(
+    () => [
+      { id: 'id', label: tx('common.table.saleId') },
+      { id: 'client', label: tx('common.table.client'), sortKey: 'client__name' },
+      { id: 'created_by', label: tx('common.table.createdBy'), sortKey: 'created_by__first_name' },
+      { id: 'total', label: tx('common.table.total'), sortKey: 'total_amount' },
+      { id: 'pay', label: tx('common.table.pay') },
+      { id: 'date', label: tx('common.table.date'), sortKey: 'created_at' },
+    ],
+    [tx]
+  );
+
+  const { tableOrderBy, tableOrder } = useMemo(() => {
+    const isDesc = ordering.startsWith('-');
+    const field = isDesc ? ordering.slice(1) : ordering;
+    const col = tableHead.find((h) => h.sortKey === field);
+    return {
+      tableOrderBy: col?.id ?? '',
+      tableOrder: isDesc ? ('desc' as const) : ('asc' as const),
+    };
+  }, [ordering, tableHead]);
+
+  const handleSort = useCallback(
+    (columnId: string) => {
+      const col = tableHead.find((h) => h.id === columnId);
+      if (!col?.sortKey) return;
+      const isCurrentAsc = tableOrderBy === columnId && tableOrder === 'asc';
+      setOrdering(isCurrentAsc ? `-${col.sortKey}` : col.sortKey);
+    },
+    [tableHead, tableOrderBy, tableOrder, setOrdering]
+  );
+
+  // ── Table / data ─────────────────────────────────────────────────────────
   const table = useTable({
     defaultCurrentPage: Math.max(0, pageParam - 1),
     defaultRowsPerPage: rowsPerPage,
@@ -61,23 +130,20 @@ export default function SalesView() {
   const { setPage, setRowsPerPage } = table;
   const page = Math.max(0, pageParam - 1);
 
-  const tableHead = useMemo(
-    () => [
-      { id: 'id', label: tx('common.table.saleId') },
-      { id: 'client', label: tx('common.table.client') },
-      { id: 'created_by', label: tx('common.table.createdBy') },
-      { id: 'total', label: tx('common.table.total') },
-      { id: 'pay', label: tx('common.table.pay') },
-      { id: 'date', label: tx('common.table.date') },
-    ],
-    [tx]
-  );
+  const clientIdsStr = clientIds.join(',');
+  const sellerIdsStr = sellerIds.join(',');
 
   const { data, isPending, isFetching } = useSalesListQuery({
     page: page + 1,
     pageSize: rowsPerPage,
     ordering,
     paymentType: paymentType || undefined,
+    clientIds: clientIdsStr || undefined,
+    sellerIds: sellerIdsStr || undefined,
+    dateFrom: dateFrom || undefined,
+    dateTo: dateTo || undefined,
+    amountFrom: amountFrom || undefined,
+    amountTo: amountTo || undefined,
   });
   const rows = useMemo(() => data?.results ?? [], [data?.results]);
   const total = data?.count ?? 0;
@@ -93,6 +159,7 @@ export default function SalesView() {
     setTableRowsPerPage: setRowsPerPage,
   });
 
+  // ── Payment options ───────────────────────────────────────────────────────
   const payLabel = useMemo(
     () => ({
       cash: tx('common.payment.cash'),
@@ -102,29 +169,44 @@ export default function SalesView() {
     }),
     [tx]
   );
+
   const paymentOptions = useMemo(
     () => [
       { value: '', label: tx('sales.filters.allOption') },
       { value: 'cash', label: tx('common.payment.cash') },
       { value: 'card', label: tx('common.payment.card') },
+      { value: 'transfer', label: tx('common.payment.transfer') },
       { value: 'debt', label: tx('common.payment.debt') },
     ],
     [tx]
   );
 
-  const handlePaymentTypeChange = (nextPaymentType: '' | SalePaymentType) => {
-    setValues({ payment_type: nextPaymentType, page: 1 });
+  // ── Handlers ──────────────────────────────────────────────────────────────
+  const handleExport = async () => {
+    try {
+      await exportMutation.mutateAsync({
+        ordering,
+        paymentType: paymentType || undefined,
+        clientIds: clientIdsStr || undefined,
+        sellerIds: sellerIdsStr || undefined,
+        dateFrom: dateFrom || undefined,
+        dateTo: dateTo || undefined,
+        amountFrom: amountFrom || undefined,
+        amountTo: amountTo || undefined,
+      });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  const handlePageChange = (_event: unknown, newPage: number) => {
-    setValues({ page: newPage + 1 });
+  const handleReset = () => {
+    resetFilters();
+    setSelectedClients([]);
+    setSelectedSellers([]);
   };
 
-  const handleRowsPerPageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const nextRowsPerPage = parseInt(event.target.value, 10);
-    if (!Number.isInteger(nextRowsPerPage) || nextRowsPerPage <= 0) return;
-    setValues({ page_size: nextRowsPerPage, page: 1 });
-  };
+  const sellerLabel = (u: TenantUserListItem) =>
+    [u.firstName, u.lastName].filter(Boolean).join(' ');
 
   return (
     <>
@@ -145,30 +227,114 @@ export default function SalesView() {
           )}
 
           <Stack spacing={2} sx={{ p: 2 }}>
-            <TextField
-              select
-              size="small"
-              label={tx('sales.filters.paymentLabel')}
-              value={paymentType}
-              onChange={(event) => handlePaymentTypeChange(event.target.value as '' | SalePaymentType)}
-              sx={{ maxWidth: 260 }}
-            >
-              {paymentOptions.map((option) => (
-                <MenuItem key={option.value || 'all'} value={option.value}>
-                  {option.label}
-                </MenuItem>
-              ))}
-            </TextField>
+            {/* Toolbar */}
+            <Stack direction="row" spacing={1} alignItems="center">
+              <Box sx={{ flexGrow: 1 }} />
+
+              <FilterDrawer
+                filtersCount={activeFiltersCount}
+                title={tx('common.actions.filters')}
+                resetLabel={tx('common.actions.reset')}
+                onReset={handleReset}
+              >
+                <TextField
+                  select
+                  fullWidth
+                  size="small"
+                  label={tx('sales.filters.paymentLabel')}
+                  value={paymentType}
+                  onChange={(e) =>
+                    setFilters({ paymentType: e.target.value as '' | SalePaymentType })
+                  }
+                >
+                  {paymentOptions.map((opt) => (
+                    <MenuItem key={opt.value || 'all'} value={opt.value}>
+                      {opt.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+
+                <AutocompleteInfinite<ClientListItem>
+                  queryKeyBase={CLIENTS_QUERY_KEY_BASE}
+                  fetcher={clientsInfiniteFetcher}
+                  size="small"
+                  value={selectedClients}
+                  onChange={(clients) => {
+                    setSelectedClients(clients);
+                    setFilters({ clientIds: clients.map((c) => c.id).join(',') });
+                  }}
+                  getOptionLabel={(c) => c.name}
+                  label={tx('sales.filters.client')}
+                />
+
+                <AutocompleteInfinite<TenantUserListItem>
+                  queryKeyBase={SELLERS_QUERY_KEY_BASE}
+                  fetcher={sellersInfiniteFetcher}
+                  size="small"
+                  value={selectedSellers}
+                  onChange={(sellers) => {
+                    setSelectedSellers(sellers);
+                    setFilters({ sellerIds: sellers.map((s) => s.id).join(',') });
+                  }}
+                  getOptionLabel={sellerLabel}
+                  label={tx('sales.filters.seller')}
+                />
+
+                <FilterFieldDateRange
+                  label={tx('sales.filters.dateRange')}
+                  fromLabel={tx('sales.filters.dateFrom')}
+                  toLabel={tx('sales.filters.dateTo')}
+                  fromValue={dateFrom}
+                  toValue={dateTo}
+                  onFromChange={(v) => setFilters({ dateFrom: v })}
+                  onToChange={(v) => setFilters({ dateTo: v })}
+                />
+
+                <FilterFieldRange
+                  label={tx('sales.filters.amountRange')}
+                  minLabel={tx('sales.filters.amountMin')}
+                  maxLabel={tx('sales.filters.amountMax')}
+                  minValue={amountFrom}
+                  maxValue={amountTo}
+                  onMinChange={(v) => setFilters({ amountFrom: v })}
+                  onMaxChange={(v) => setFilters({ amountTo: v })}
+                />
+              </FilterDrawer>
+
+              <Button
+                variant="outlined"
+                startIcon={
+                  exportMutation.isPending ? (
+                    <Iconify icon="svg-spinners:ring-resize" />
+                  ) : (
+                    <Iconify icon="eva:download-fill" />
+                  )
+                }
+                onClick={handleExport}
+                disabled={exportMutation.isPending}
+              >
+                {tx('common.actions.export')}
+              </Button>
+            </Stack>
 
             <Scrollbar>
               <Table size="small">
-                <TableHeadCustom headLabel={tableHead} />
+                <TableHeadCustom
+                  headLabel={tableHead}
+                  order={tableOrder}
+                  orderBy={tableOrderBy}
+                  onSort={handleSort}
+                />
                 <TableBody>
                   {rows.map((row) => (
                     <TableRow key={row.id} hover>
                       <TableCell>
                         {canDetailSales ? (
-                          <Link component={RouterLink} href={paths.sales.details(row.id)} variant="subtitle2">
+                          <Link
+                            component={RouterLink}
+                            href={paths.sales.details(row.id)}
+                            variant="subtitle2"
+                          >
                             {row.id}
                           </Link>
                         ) : (

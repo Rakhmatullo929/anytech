@@ -37,6 +37,12 @@
     }
   },
   "searchPlaceholder": "Поиск по имени или телефону…",
+  "filters": {
+    "gender": "Пол",
+    "genderMale": "Мужской",
+    "genderFemale": "Женский",
+    "group": "Группа"
+  },
   "tabs": {
     "clients": "Клиенты",
     "groups": "Группы"

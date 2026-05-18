@@ -25,6 +25,15 @@ export type FetchClientsListParams = {
   search?: string;
   ordering?: string;
   groupId?: string;
+  groupIds?: string[];
+  gender?: string;
+};
+
+export type ExportClientsParams = {
+  search?: string;
+  ordering?: string;
+  groupIds?: string[];
+  gender?: string;
 };
 
 export type CreateClientPayload = {

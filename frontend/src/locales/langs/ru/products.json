@@ -37,6 +37,12 @@
       "title": "Остаток"
     }
   },
+  "filters": {
+    "category": "Категория",
+    "quantityRange": "Диапазон количества",
+    "minQty": "Мин.",
+    "maxQty": "Макс."
+  },
   "searchPlaceholder": "Поиск по названию или SKU…",
   "bulkImport": {
     "button": "Импорт Excel",
