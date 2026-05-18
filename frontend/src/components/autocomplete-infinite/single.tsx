@@ -76,6 +76,7 @@ export type AutocompleteInfiniteSingleProps<T extends ModelType> = {
   debounceMs?: number;
   disabled?: boolean;
   required?: boolean;
+  size?: 'small' | 'medium';
   sx?: SxProps<Theme>;
   noOptionsText?: string;
   loadingText?: string;
@@ -99,6 +100,7 @@ export default function AutocompleteInfiniteSingle<T extends ModelType>({
   debounceMs = 400,
   disabled,
   required,
+  size,
   sx,
   noOptionsText,
   loadingText,
@@ -171,6 +173,7 @@ export default function AutocompleteInfiniteSingle<T extends ModelType>({
             label={label}
             required={required}
             placeholder={value ? undefined : placeholder}
+            size={size}
           />
         )}
       />

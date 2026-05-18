@@ -50,7 +50,7 @@ export default function PurchasesTabPanel({ clientId }: Props) {
     [tx]
   );
 
-  const { data, isPending } = useSalesListQuery({ page, pageSize: rowsPerPage, clientId });
+  const { data, isPending } = useSalesListQuery({ page, pageSize: rowsPerPage, clientIds: clientId });
 
   const rows = data?.results ?? [];
   const total = data?.count ?? 0;

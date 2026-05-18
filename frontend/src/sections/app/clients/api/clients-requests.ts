@@ -7,6 +7,7 @@ import type {
   ClientDetail,
   ClientListItem,
   CreateClientPayload,
+  ExportClientsParams,
   FetchClientsListParams,
   UpdateClientPayload,
 } from './types';
@@ -22,9 +23,31 @@ export async function fetchClientsList(
       pageSize: params.pageSize,
       ...(params.search ? { search: params.search } : {}),
       ...(params.groupId ? { groupId: params.groupId } : {}),
+      ...(params.groupIds?.length ? { groupIds: params.groupIds.join(',') } : {}),
+      ...(params.gender ? { gender: params.gender } : {}),
       ordering: params.ordering ?? '-created_at',
     },
   });
+}
+
+export async function exportClientsExcel(params: ExportClientsParams): Promise<void> {
+  const response = await request<Blob>({
+    method: 'GET',
+    url: API_ENDPOINTS.clients.exportExcel,
+    responseType: 'blob',
+    params: {
+      ...(params.search ? { search: params.search } : {}),
+      ...(params.groupIds?.length ? { groupIds: params.groupIds.join(',') } : {}),
+      ...(params.gender ? { gender: params.gender } : {}),
+      ordering: params.ordering ?? '-created_at',
+    },
+  });
+  const url = window.URL.createObjectURL(response as unknown as Blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'clients_export.xlsx';
+  link.click();
+  window.URL.revokeObjectURL(url);
 }
 
 export async function fetchClientDetail(id: string): Promise<ClientDetail> {

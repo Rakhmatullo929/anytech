@@ -51,10 +51,12 @@ export const API_ENDPOINTS = {
     search: `${API_V1}/clients/search/`,
     bulkDelete: `${API_V1}/clients/bulk-delete/`,
     bulkCreateExcel: `${API_V1}/clients/bulk-create-excel/`,
+    exportExcel: `${API_V1}/clients/export-excel/`,
     detail: (id: string) => `${API_V1}/clients/${id}/`,
   },
   sales: {
     list: `${API_V1}/sales/`,
+    exportExcel: `${API_V1}/sales/export-excel/`,
     detail: (id: string) => `${API_V1}/sales/${id}/`,
   },
   debts: {

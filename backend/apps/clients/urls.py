@@ -41,6 +41,11 @@ urlpatterns = [
         name="client-search",
     ),
     path(
+        "export-excel/",
+        ClientViewSet.as_view({"get": "export_excel"}),
+        name="client-export-excel",
+    ),
+    path(
         "bulk-delete/",
         ClientViewSet.as_view({"post": "bulk_delete"}),
         name="client-bulk-delete",

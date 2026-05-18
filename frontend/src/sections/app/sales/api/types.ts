@@ -28,6 +28,21 @@ export type FetchSalesListParams = {
   pageSize: number;
   ordering?: string;
   paymentType?: SalePaymentType;
-  clientId?: string;
-  createdBy?: string;
+  clientIds?: string;
+  sellerIds?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  amountFrom?: string;
+  amountTo?: string;
+};
+
+export type ExportSalesParams = {
+  ordering?: string;
+  paymentType?: SalePaymentType;
+  clientIds?: string;
+  sellerIds?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  amountFrom?: string;
+  amountTo?: string;
 };
