@@ -15,6 +15,18 @@
     "statusLine": "Статус:",
     "totalLine": "Всего:"
   },
+  "filters": {
+    "client": "Клиент",
+    "dateRange": "Период создания",
+    "dateFrom": "С",
+    "dateTo": "По",
+    "deadlineRange": "Срок оплаты",
+    "deadlineFrom": "С",
+    "deadlineTo": "По",
+    "amountRange": "Сумма",
+    "amountMin": "От",
+    "amountMax": "До"
+  },
   "list": {
     "deadline": "Срок",
     "daysLeft": "{{count}} дн. осталось",

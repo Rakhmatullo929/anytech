@@ -1,7 +1,13 @@
 import type { Pagination } from 'src/hooks/api';
 import { request, API_ENDPOINTS } from 'src/utils/axios';
 
-import type { DebtDetail, DebtListItem, FetchDebtsListParams, PayDebtPayload } from './types';
+import type {
+  DebtDetail,
+  DebtListItem,
+  ExportDebtsParams,
+  FetchDebtsListParams,
+  PayDebtPayload,
+} from './types';
 
 export async function fetchDebtsList(params: FetchDebtsListParams): Promise<Pagination<DebtListItem>> {
   return request<Pagination<DebtListItem>>({
@@ -12,9 +18,40 @@ export async function fetchDebtsList(params: FetchDebtsListParams): Promise<Pagi
       pageSize: params.pageSize,
       ordering: params.ordering ?? '-created_at',
       ...(params.status ? { status: params.status } : {}),
-      ...(params.clientId ? { client: params.clientId } : {}),
+      ...(params.clientIds ? { client_ids: params.clientIds } : {}),
+      ...(params.dateFrom ? { date_from: params.dateFrom } : {}),
+      ...(params.dateTo ? { date_to: params.dateTo } : {}),
+      ...(params.deadlineFrom ? { deadline_from: params.deadlineFrom } : {}),
+      ...(params.deadlineTo ? { deadline_to: params.deadlineTo } : {}),
+      ...(params.amountFrom ? { amount_from: params.amountFrom } : {}),
+      ...(params.amountTo ? { amount_to: params.amountTo } : {}),
     },
   });
+}
+
+export async function exportDebtsExcel(params: ExportDebtsParams): Promise<void> {
+  const response = await request<Blob>({
+    method: 'GET',
+    url: API_ENDPOINTS.debts.exportExcel,
+    responseType: 'blob',
+    params: {
+      ordering: params.ordering ?? '-created_at',
+      ...(params.status ? { status: params.status } : {}),
+      ...(params.clientIds ? { client_ids: params.clientIds } : {}),
+      ...(params.dateFrom ? { date_from: params.dateFrom } : {}),
+      ...(params.dateTo ? { date_to: params.dateTo } : {}),
+      ...(params.deadlineFrom ? { deadline_from: params.deadlineFrom } : {}),
+      ...(params.deadlineTo ? { deadline_to: params.deadlineTo } : {}),
+      ...(params.amountFrom ? { amount_from: params.amountFrom } : {}),
+      ...(params.amountTo ? { amount_to: params.amountTo } : {}),
+    },
+  });
+  const url = window.URL.createObjectURL(response as unknown as Blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'debts_export.xlsx';
+  link.click();
+  window.URL.revokeObjectURL(url);
 }
 
 export async function fetchDebtDetail(id: string): Promise<DebtDetail> {

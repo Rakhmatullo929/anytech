@@ -3,15 +3,49 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { useFetchList, useFetchOne, useMutate } from 'src/hooks/api';
 
-import { fetchDebtDetail, fetchDebtsList, payDebt } from './debts-requests';
-import type { DebtDetail, DebtListItem, FetchDebtsListParams, PayDebtPayload } from './types';
+import { exportDebtsExcel, fetchDebtDetail, fetchDebtsList, payDebt } from './debts-requests';
+import type {
+  DebtDetail,
+  DebtListItem,
+  ExportDebtsParams,
+  FetchDebtsListParams,
+  PayDebtPayload,
+} from './types';
 
 export function useDebtsListQuery(params: FetchDebtsListParams) {
-  const { page, pageSize, ordering, status, clientId } = params;
+  const {
+    page,
+    pageSize,
+    ordering,
+    status,
+    clientIds,
+    dateFrom,
+    dateTo,
+    deadlineFrom,
+    deadlineTo,
+    amountFrom,
+    amountTo,
+  } = params;
 
   const queryKey = useMemo(
-    () => ['debts', 'list', { page, pageSize, ordering: ordering ?? '-created_at', status: status ?? '', clientId: clientId ?? '' }] as const,
-    [page, pageSize, ordering, status, clientId]
+    () => [
+      'debts',
+      'list',
+      {
+        page,
+        pageSize,
+        ordering: ordering ?? '-created_at',
+        status: status ?? '',
+        clientIds: clientIds ?? '',
+        dateFrom: dateFrom ?? '',
+        dateTo: dateTo ?? '',
+        deadlineFrom: deadlineFrom ?? '',
+        deadlineTo: deadlineTo ?? '',
+        amountFrom: amountFrom ?? '',
+        amountTo: amountTo ?? '',
+      },
+    ] as const,
+    [page, pageSize, ordering, status, clientIds, dateFrom, dateTo, deadlineFrom, deadlineTo, amountFrom, amountTo]
   );
 
   return useFetchList<DebtListItem>(queryKey, () => fetchDebtsList(params), {
@@ -32,4 +66,8 @@ export function usePayDebtMutation(id: string) {
       queryClient.invalidateQueries({ queryKey: ['debts', 'list'] });
     },
   });
+}
+
+export function useExportDebtsMutation() {
+  return useMutate<void, ExportDebtsParams>(exportDebtsExcel);
 }

@@ -61,6 +61,7 @@ export const API_ENDPOINTS = {
   },
   debts: {
     list: `${API_V1}/debts/`,
+    exportExcel: `${API_V1}/debts/export-excel/`,
     detail: (id: string) => `${API_V1}/debts/${id}/`,
     pay: (id: string) => `${API_V1}/debts/${id}/pay/`,
   },

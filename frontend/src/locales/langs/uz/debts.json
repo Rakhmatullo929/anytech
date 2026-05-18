@@ -15,6 +15,18 @@
     "statusLine": "Holat:",
     "totalLine": "Jami:"
   },
+  "filters": {
+    "client": "Mijoz",
+    "dateRange": "Yaratilgan davr",
+    "dateFrom": "Dan",
+    "dateTo": "Gacha",
+    "deadlineRange": "Toʻlov muddati",
+    "deadlineFrom": "Dan",
+    "deadlineTo": "Gacha",
+    "amountRange": "Summa",
+    "amountMin": "Dan",
+    "amountMax": "Gacha"
+  },
   "list": {
     "deadline": "Muddat",
     "daysLeft": "{{count}} kun qoldi",

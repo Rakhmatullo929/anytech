@@ -56,7 +56,7 @@ export default function DebtsTabPanel({ clientId }: Props) {
     [tx]
   );
 
-  const { data, isPending } = useDebtsListQuery({ page, pageSize: rowsPerPage, clientId });
+  const { data, isPending } = useDebtsListQuery({ page, pageSize: rowsPerPage, clientIds: clientId });
 
   const rows = data?.results ?? [];
   const total = data?.count ?? 0;
