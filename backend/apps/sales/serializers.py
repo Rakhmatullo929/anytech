@@ -39,7 +39,7 @@ class SaleCreateSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         tenant = self.context["request"].user.tenant
         register = CashRegister.objects.filter(tenant=tenant).first()
-        if register is None or register.status == CashRegister.Status.CLOSED:
+        if register is not None and register.status == CashRegister.Status.CLOSED:
             raise serializers.ValidationError(
                 {"detail": _("Cash register is closed. Open the register to create sales.")}
             )

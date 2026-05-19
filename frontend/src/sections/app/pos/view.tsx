@@ -50,8 +50,9 @@ export default function PosView() {
   const { enqueueSnackbar } = useSnackbar();
   const { user: authUser } = useAuthContext();
 
-  const { data: cashRegister, isPending: cashRegisterPending } = useCashRegisterQuery();
-  const isRegisterClosed = !cashRegisterPending && (!cashRegister || cashRegister.status === 'closed');
+  const { data: cashRegister, isPending: cashRegisterPending, isError: cashRegisterError } = useCashRegisterQuery();
+  // Only block if we have confirmed data showing CLOSED. Never block on loading or error state.
+  const isRegisterClosed = !cashRegisterPending && !cashRegisterError && cashRegister?.status === 'closed';
 
   const [client, setClient] = useState<ClientListItem | null>(null);
   const [createdBy, setCreatedBy] = useState<TenantUserListItem | null>(() => {

@@ -59,6 +59,7 @@ DEFAULT_ROLE_PERMISSIONS = {
     "seller": [
         permission_key("pos", "read"),
         permission_key("pos", "write"),
+        permission_key("sales", "write"),  # sellers create sales via POS
         permission_key("cash_register", "read"),
     ],
 }

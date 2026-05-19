@@ -2,6 +2,7 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
@@ -10,11 +11,15 @@ from auth_tenant.permissions import page_action_permission
 from .models import CashRegister
 from .serializers import CashRegisterSerializer
 
+_CLOSED_DEFAULT = {"id": None, "status": "closed", "opened_at": None, "closed_at": None,
+                   "opened_by": None, "opened_by_name": None, "closed_by": None, "closed_by_name": None}
+
 
 class CashRegisterViewSet(ViewSet):
     def get_permissions(self):
         if self.action == "status":
-            return [page_action_permission("cash_register", "read")()]
+            # All authenticated users can read the status (sellers, managers, admins)
+            return [IsAuthenticated()]
         return [page_action_permission("cash_register", "write")()]
 
     def _get_or_create_register(self, tenant):
@@ -25,7 +30,12 @@ class CashRegisterViewSet(ViewSet):
         return register
 
     def status(self, request):
-        register = self._get_or_create_register(request.user.tenant)
+        # Do NOT auto-create — just read. If no record exists the register is implicitly open
+        # (backward compatible: tenants that never used this feature can still sell).
+        try:
+            register = CashRegister.objects.get(tenant=request.user.tenant)
+        except CashRegister.DoesNotExist:
+            return Response(_CLOSED_DEFAULT | {"status": "open"})
         return Response(CashRegisterSerializer(register).data)
 
     def open_register(self, request):
