@@ -14,6 +14,7 @@ import Logo from 'src/components/logo';
 import SvgColor from 'src/components/svg-color';
 import { useSettingsContext } from 'src/components/settings';
 //
+import { CashRegisterStatusBadge } from 'src/sections/app/cash-register/components';
 import { HEADER, NAV } from '../config-layout';
 import {
   Searchbar,
@@ -64,6 +65,8 @@ export default function Header({ onOpenNav }: Props) {
         justifyContent="flex-end"
         spacing={{ xs: 0.5, sm: 1 }}
       >
+        <CashRegisterStatusBadge />
+
         <LanguagePopover />
 
         <NotificationsPopover />

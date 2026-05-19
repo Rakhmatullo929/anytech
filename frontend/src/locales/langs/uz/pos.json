@@ -1,4 +1,18 @@
 {
+  "cashRegister": {
+    "statusOpen": "Kassa ochiq",
+    "statusClosed": "Kassa yopiq",
+    "openButton": "Kassani ochish",
+    "closeButton": "Kassani yopish",
+    "blockedTitle": "Kassa yopiq",
+    "blockedMessage": "Savdo qilish uchun kassani ochish kerak.",
+    "confirmOpenTitle": "Kassani ochishni tasdiqlang",
+    "confirmCloseTitle": "Kassani yopishni tasdiqlang",
+    "confirmOpenDescription": "Kassani haqiqatan ham ochmoqchimisiz?",
+    "confirmCloseDescription": "Kassani haqiqatan ham yopmoqchimisiz?",
+    "openSuccess": "Kassa muvaffaqiyatli ochildi",
+    "closeSuccess": "Kassa muvaffaqiyatli yopildi"
+  },
   "cart": "Savatcha",
   "client": "Mijoz",
   "completeSale": "Savdoni yakunlash",

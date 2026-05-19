@@ -10,6 +10,7 @@ PERMISSION_ACTIONS_BY_PAGE = {
     "sales": ("read", "detail", "write"),
     "debts": ("read", "detail", "write"),
     "reports": ("read",),
+    "cash_register": ("read", "write"),
 }
 
 
@@ -58,5 +59,7 @@ DEFAULT_ROLE_PERMISSIONS = {
     "seller": [
         permission_key("pos", "read"),
         permission_key("pos", "write"),
+        permission_key("sales", "write"),  # sellers create sales via POS
+        permission_key("cash_register", "read"),
     ],
 }
