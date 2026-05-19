@@ -1,65 +1,187 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import type { AutocompleteInfiniteFetcher } from 'src/components/autocomplete-infinite';
+import AutocompleteInfinite from 'src/components/autocomplete-infinite';
 // locales
 import { useLocales } from 'src/locales';
 // @mui
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
+import Chip from '@mui/material/Chip';
+import Link from '@mui/material/Link';
+import LinearProgress from '@mui/material/LinearProgress';
+import MenuItem from '@mui/material/MenuItem';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
-import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
-import Link from '@mui/material/Link';
+import TableRow from '@mui/material/TableRow';
 import TextField from '@mui/material/TextField';
-import MenuItem from '@mui/material/MenuItem';
-import LinearProgress from '@mui/material/LinearProgress';
+import Typography from '@mui/material/Typography';
 // utils
 import { fCurrency } from 'src/utils/format-number';
-import { intParam, stringParam, useSyncTableWithUrlListState, useUrlQueryState } from 'src/hooks/use-url-query-state';
+import { fDate } from 'src/utils/format-time';
+import { useSyncTableWithUrlListState } from 'src/hooks/use-url-query-state';
 import { useCheckPermission } from 'src/auth/hooks/use-check-permission';
 // routes
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
 // components
+import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+import { FilterDrawer, FilterFieldDateRange, FilterFieldRange } from 'src/components/filter-drawer';
 import {
   useTable,
   TableNoData,
   TableHeadCustom,
   TablePaginationCustom,
 } from 'src/components/table';
-import { useDebtsListQuery, type DebtStatus } from 'src/sections/app/depts/api';
+import { fetchClientsList } from 'src/sections/app/clients/api/clients-requests';
+import type { ClientListItem } from 'src/sections/app/clients/api/types';
+import {
+  useDebtsListQuery,
+  useExportDebtsMutation,
+  useDebtsUrlState,
+  type DebtStatus,
+  type DebtListItem,
+} from 'src/sections/app/depts/api';
 import { DebtsListSkeleton } from 'src/sections/app/depts/skeleton';
+
+// ----------------------------------------------------------------------
+
+type HeadCell = { id: string; label: string; sortKey?: string };
+
+const CLIENTS_QUERY_KEY_BASE = ['debts-clients', 'infinite'] as const;
+const clientsInfiniteFetcher: AutocompleteInfiniteFetcher<ClientListItem> = ({ page, search }) =>
+  fetchClientsList({ page, pageSize: 20, search: search || undefined });
+
+// ----------------------------------------------------------------------
+
+function getDeadlineInfo(deadline: string | null): { diff: number } | null {
+  if (!deadline) return null;
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const due = new Date(deadline);
+  due.setHours(0, 0, 0, 0);
+  return { diff: Math.round((due.getTime() - now.getTime()) / 86400000) };
+}
+
+function DeadlineCell({
+  row,
+  tx,
+}: {
+  row: DebtListItem;
+  tx: (k: string, o?: Record<string, string | number>) => string;
+}) {
+  if (!row.deadline) return <TableCell>—</TableCell>;
+  const info = getDeadlineInfo(row.deadline);
+  if (!info) return <TableCell>—</TableCell>;
+  const { diff } = info;
+
+  if (row.status === 'closed') {
+    return (
+      <TableCell>
+        <Typography variant="body2" color="text.secondary">
+          {fDate(row.deadline)}
+        </Typography>
+      </TableCell>
+    );
+  }
+  if (diff > 0) {
+    return (
+      <TableCell>
+        <Stack spacing={0.5}>
+          <Typography variant="caption" color="text.secondary">{fDate(row.deadline)}</Typography>
+          <Chip size="small" label={tx('debts.list.daysLeft', { count: diff })} color="success" variant="soft" />
+        </Stack>
+      </TableCell>
+    );
+  }
+  if (diff === 0) {
+    return (
+      <TableCell>
+        <Stack spacing={0.5}>
+          <Typography variant="caption" color="text.secondary">{fDate(row.deadline)}</Typography>
+          <Chip size="small" label={tx('debts.detail.dueToday')} color="warning" variant="soft" />
+        </Stack>
+      </TableCell>
+    );
+  }
+  return (
+    <TableCell>
+      <Stack spacing={0.5}>
+        <Typography variant="caption" color="text.secondary">{fDate(row.deadline)}</Typography>
+        <Chip size="small" label={tx('debts.list.daysOverdue', { count: Math.abs(diff) })} color="error" variant="soft" />
+      </Stack>
+    </TableCell>
+  );
+}
 
 // ----------------------------------------------------------------------
 
 export default function DebtsView() {
   const { tx } = useLocales();
   const { canDetailPage } = useCheckPermission();
+  const exportMutation = useExportDebtsMutation();
 
-  const tableHead = useMemo(
+  const {
+    page: pageParam,
+    rowsPerPage,
+    ordering,
+    status,
+    clientIds,
+    dateFrom,
+    dateTo,
+    deadlineFrom,
+    deadlineTo,
+    amountFrom,
+    amountTo,
+    activeFiltersCount,
+    setOrdering,
+    setFilters,
+    resetFilters,
+    handlePageChange,
+    handleRowsPerPageChange,
+  } = useDebtsUrlState();
+
+  // ── Local state for autocomplete objects ──────────────────────────────────
+  const [selectedClients, setSelectedClients] = useState<ClientListItem[]>([]);
+
+  // ── Sorting ──────────────────────────────────────────────────────────────
+  const tableHead: HeadCell[] = useMemo(
     () => [
-      { id: 'client', label: tx('common.table.client') },
-      { id: 'total', label: tx('common.table.total') },
-      { id: 'paid', label: tx('common.table.paid') },
-      { id: 'rem', label: tx('common.table.rem') },
-      { id: 'status', label: tx('common.table.status') },
+      { id: 'client', label: tx('common.table.client'), sortKey: 'client__name' },
+      { id: 'total', label: tx('common.table.total'), sortKey: 'total_amount' },
+      { id: 'paid', label: tx('common.table.paid'), sortKey: 'paid_amount' },
+      { id: 'rem', label: tx('common.table.rem'), sortKey: 'remaining_amount' },
+      { id: 'deadline', label: tx('debts.list.deadline'), sortKey: 'deadline' },
+      { id: 'status', label: tx('common.table.status'), sortKey: 'status' },
     ],
     [tx]
   );
 
-  const { values, setValues } = useUrlQueryState({
-    page: intParam(1),
-    page_size: intParam(15),
-    ordering: stringParam('-created_at'),
-    status: stringParam(''),
-  });
-  const pageParam = values.page as number;
-  const rowsPerPage = values.page_size as number;
-  const ordering = values.ordering as string;
-  const status = values.status as '' | DebtStatus;
+  const { tableOrderBy, tableOrder } = useMemo(() => {
+    const isDesc = ordering.startsWith('-');
+    const field = isDesc ? ordering.slice(1) : ordering;
+    const col = tableHead.find((h) => h.sortKey === field);
+    return {
+      tableOrderBy: col?.id ?? '',
+      tableOrder: isDesc ? ('desc' as const) : ('asc' as const),
+    };
+  }, [ordering, tableHead]);
 
+  const handleSort = useCallback(
+    (columnId: string) => {
+      const col = tableHead.find((h) => h.id === columnId);
+      if (!col?.sortKey) return;
+      const isCurrentAsc = tableOrderBy === columnId && tableOrder === 'asc';
+      setOrdering(isCurrentAsc ? `-${col.sortKey}` : col.sortKey);
+    },
+    [tableHead, tableOrderBy, tableOrder, setOrdering]
+  );
+
+  // ── Table / data ─────────────────────────────────────────────────────────
   const table = useTable({
     defaultCurrentPage: Math.max(0, pageParam - 1),
     defaultRowsPerPage: rowsPerPage,
@@ -67,11 +189,20 @@ export default function DebtsView() {
   const { setPage, setRowsPerPage } = table;
   const page = Math.max(0, pageParam - 1);
 
+  const clientIdsStr = clientIds.join(',');
+
   const { data, isPending, isFetching } = useDebtsListQuery({
     page: page + 1,
     pageSize: rowsPerPage,
     ordering,
     status: status || undefined,
+    clientIds: clientIdsStr || undefined,
+    dateFrom: dateFrom || undefined,
+    dateTo: dateTo || undefined,
+    deadlineFrom: deadlineFrom || undefined,
+    deadlineTo: deadlineTo || undefined,
+    amountFrom: amountFrom || undefined,
+    amountTo: amountTo || undefined,
   });
   const rows = useMemo(() => data?.results ?? [], [data?.results]);
   const total = data?.count ?? 0;
@@ -87,18 +218,36 @@ export default function DebtsView() {
     setTableRowsPerPage: setRowsPerPage,
   });
 
-  const handleStatusChange = (nextStatus: '' | DebtStatus) => {
-    setValues({ status: nextStatus, page: 1 });
+  const statusOptions = useMemo(
+    () => [
+      { value: '', label: tx('common.status.filterAll') },
+      { value: 'active', label: tx('common.status.filterActive') },
+      { value: 'closed', label: tx('common.status.filterClosed') },
+    ],
+    [tx]
+  );
+
+  const handleExport = async () => {
+    try {
+      await exportMutation.mutateAsync({
+        ordering,
+        status: status || undefined,
+        clientIds: clientIdsStr || undefined,
+        dateFrom: dateFrom || undefined,
+        dateTo: dateTo || undefined,
+        deadlineFrom: deadlineFrom || undefined,
+        deadlineTo: deadlineTo || undefined,
+        amountFrom: amountFrom || undefined,
+        amountTo: amountTo || undefined,
+      });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  const handlePageChange = (_event: unknown, newPage: number) => {
-    setValues({ page: newPage + 1 });
-  };
-
-  const handleRowsPerPageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const nextRowsPerPage = parseInt(event.target.value, 10);
-    if (!Number.isInteger(nextRowsPerPage) || nextRowsPerPage <= 0) return;
-    setValues({ page_size: nextRowsPerPage, page: 1 });
+  const handleReset = () => {
+    resetFilters();
+    setSelectedClients([]);
   };
 
   return (
@@ -120,44 +269,137 @@ export default function DebtsView() {
           )}
 
           <Stack spacing={2} sx={{ p: 2 }}>
-            <TextField
-              select
-              size="small"
-              label={tx('common.status.filterLabel')}
-              value={status}
-              onChange={(event) => handleStatusChange(event.target.value as '' | DebtStatus)}
-              sx={{ maxWidth: 220 }}
-            >
-              <MenuItem value="">{tx('common.status.filterAll')}</MenuItem>
-              <MenuItem value="active">{tx('common.status.filterActive')}</MenuItem>
-              <MenuItem value="closed">{tx('common.status.filterClosed')}</MenuItem>
-            </TextField>
+            {/* Toolbar */}
+            <Stack direction="row" spacing={1} alignItems="center">
+              <Box sx={{ flexGrow: 1 }} />
+
+              <FilterDrawer
+                filtersCount={activeFiltersCount}
+                title={tx('common.actions.filters')}
+                resetLabel={tx('common.actions.reset')}
+                onReset={handleReset}
+              >
+                <TextField
+                  select
+                  fullWidth
+                  size="small"
+                  label={tx('common.status.filterLabel')}
+                  value={status}
+                  onChange={(e) => setFilters({ status: e.target.value as '' | DebtStatus })}
+                >
+                  {statusOptions.map((opt) => (
+                    <MenuItem key={opt.value || 'all'} value={opt.value}>
+                      {opt.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+
+                <AutocompleteInfinite<ClientListItem>
+                  queryKeyBase={CLIENTS_QUERY_KEY_BASE}
+                  fetcher={clientsInfiniteFetcher}
+                  size="small"
+                  value={selectedClients}
+                  onChange={(clients) => {
+                    setSelectedClients(clients);
+                    setFilters({ clientIds: clients.map((c) => c.id).join(',') });
+                  }}
+                  getOptionLabel={(c) => c.name}
+                  label={tx('debts.filters.client')}
+                />
+
+                <FilterFieldDateRange
+                  label={tx('debts.filters.dateRange')}
+                  fromLabel={tx('debts.filters.dateFrom')}
+                  toLabel={tx('debts.filters.dateTo')}
+                  fromValue={dateFrom}
+                  toValue={dateTo}
+                  onFromChange={(v) => setFilters({ dateFrom: v })}
+                  onToChange={(v) => setFilters({ dateTo: v })}
+                />
+
+                <FilterFieldDateRange
+                  label={tx('debts.filters.deadlineRange')}
+                  fromLabel={tx('debts.filters.deadlineFrom')}
+                  toLabel={tx('debts.filters.deadlineTo')}
+                  fromValue={deadlineFrom}
+                  toValue={deadlineTo}
+                  onFromChange={(v) => setFilters({ deadlineFrom: v })}
+                  onToChange={(v) => setFilters({ deadlineTo: v })}
+                />
+
+                <FilterFieldRange
+                  label={tx('debts.filters.amountRange')}
+                  minLabel={tx('debts.filters.amountMin')}
+                  maxLabel={tx('debts.filters.amountMax')}
+                  minValue={amountFrom}
+                  maxValue={amountTo}
+                  onMinChange={(v) => setFilters({ amountFrom: v })}
+                  onMaxChange={(v) => setFilters({ amountTo: v })}
+                />
+              </FilterDrawer>
+
+              <Button
+                variant="outlined"
+                startIcon={
+                  exportMutation.isPending ? (
+                    <Iconify icon="svg-spinners:ring-resize" />
+                  ) : (
+                    <Iconify icon="eva:download-fill" />
+                  )
+                }
+                onClick={handleExport}
+                disabled={exportMutation.isPending}
+              >
+                {tx('common.actions.export')}
+              </Button>
+            </Stack>
 
             <Scrollbar>
               <Table size="small">
-                <TableHeadCustom headLabel={tableHead} />
+                <TableHeadCustom
+                  headLabel={tableHead}
+                  order={tableOrder}
+                  orderBy={tableOrderBy}
+                  onSort={handleSort}
+                />
                 <TableBody>
-                  {rows.map((row) => (
-                    <TableRow key={row.id} hover>
-                      <TableCell>
-                        {canDetailDebts ? (
-                          <Link component={RouterLink} href={paths.debts.details(row.id)} variant="subtitle2">
-                            {row.clientName}
-                          </Link>
-                        ) : (
-                          row.clientName
-                        )}
-                      </TableCell>
-                      <TableCell>{fCurrency(row.totalAmount)}</TableCell>
-                      <TableCell>{fCurrency(row.paidAmount)}</TableCell>
-                      <TableCell>{fCurrency(row.remaining)}</TableCell>
-                      <TableCell>
-                        {row.status === 'active'
-                          ? tx('common.status.rowActive')
-                          : tx('common.status.rowClosed')}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {rows.map((row) => {
+                    const isOverdue =
+                      row.status === 'active' &&
+                      row.deadline != null &&
+                      (getDeadlineInfo(row.deadline)?.diff ?? 1) < 0;
+
+                    return (
+                      <TableRow
+                        key={row.id}
+                        hover
+                        sx={isOverdue ? { bgcolor: 'error.lighter' } : undefined}
+                      >
+                        <TableCell>
+                          {canDetailDebts ? (
+                            <Link
+                              component={RouterLink}
+                              href={paths.debts.details(row.id)}
+                              variant="subtitle2"
+                            >
+                              {row.clientName}
+                            </Link>
+                          ) : (
+                            row.clientName
+                          )}
+                        </TableCell>
+                        <TableCell>{fCurrency(row.totalAmount)}</TableCell>
+                        <TableCell>{fCurrency(row.paidAmount)}</TableCell>
+                        <TableCell>{fCurrency(row.remaining)}</TableCell>
+                        <DeadlineCell row={row} tx={tx} />
+                        <TableCell>
+                          {row.status === 'active'
+                            ? tx('common.status.rowActive')
+                            : tx('common.status.rowClosed')}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                   <TableNoData notFound={!rows.length} title={tx('common.table.noData')} />
                 </TableBody>
               </Table>

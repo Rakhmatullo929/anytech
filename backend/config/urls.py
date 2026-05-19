@@ -13,9 +13,12 @@ urlpatterns = [
     path("api/v1/auth/", include("auth_tenant.urls")),
     path("api/locations/", include("auth_tenant.location_urls")),
     path("api/v1/products/", include("products.urls")),
+    path("api/v1/product-purchases/", include("products.product_purchase_urls")),
+    path("api/v1/categories/", include("products.category_urls")),
     path("api/v1/clients/", include("clients.urls")),
     path("api/v1/sales/", include("sales.urls")),
     path("api/v1/debts/", include("debts.urls")),
+    path("api/v1/reports/", include("reports.urls")),
     # OpenAPI schema & docs
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),

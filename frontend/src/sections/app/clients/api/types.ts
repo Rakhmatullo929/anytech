@@ -1,6 +1,3 @@
-/** Client row from `GET /api/v1/clients/` (camelCase after axios transform). */
-export type ClientCommunicationLanguage = '' | 'uz' | 'ru' | 'en';
-
 export type ClientListItem = {
   id: string;
   tenant: string;
@@ -8,14 +5,18 @@ export type ClientListItem = {
   lastName: string;
   middleName: string;
   birthDate: string | null;
-  communicationLanguage: ClientCommunicationLanguage;
   gender: string;
   maritalStatus: string;
   phone: string;
   phones: string[];
   addresses: ClientAddress[];
   socialNetworks: ClientSocialNetworks;
+  groups: string[];
   createdAt: string;
+  lastPurchaseAt: string | null;
+  firstPurchaseAt: string | null;
+  totalPurchasesAmount: string;
+  salesCount: number;
 };
 
 export type FetchClientsListParams = {
@@ -23,6 +24,16 @@ export type FetchClientsListParams = {
   pageSize: number;
   search?: string;
   ordering?: string;
+  groupId?: string;
+  groupIds?: string[];
+  gender?: string;
+};
+
+export type ExportClientsParams = {
+  search?: string;
+  ordering?: string;
+  groupIds?: string[];
+  gender?: string;
 };
 
 export type CreateClientPayload = {
@@ -30,12 +41,12 @@ export type CreateClientPayload = {
   lastName?: string;
   middleName?: string;
   birthDate?: string | null;
-  communicationLanguage?: ClientCommunicationLanguage;
   gender?: string;
   maritalStatus?: string;
   phones: string[];
   addresses?: ClientAddress[];
   socialNetworks?: ClientSocialNetworks;
+  groups?: string[];
 };
 
 export type UpdateClientPayload = {
@@ -44,12 +55,12 @@ export type UpdateClientPayload = {
   lastName?: string;
   middleName?: string;
   birthDate?: string | null;
-  communicationLanguage?: ClientCommunicationLanguage;
   gender?: string;
   maritalStatus?: string;
   phones: string[];
   addresses?: ClientAddress[];
   socialNetworks?: ClientSocialNetworks;
+  groups?: string[];
 };
 
 export type ClientAddress = {
@@ -72,31 +83,4 @@ export type BulkCreateClientsResult = {
   results: ClientListItem[];
 };
 
-export type ClientSaleItem = {
-  id: string;
-  productName: string;
-  quantity: number;
-  price: string;
-};
-
-export type ClientSaleDebt = {
-  totalAmount: string;
-  paidAmount: string;
-  remaining: string;
-  status: string;
-};
-
-export type ClientSale = {
-  id: string;
-  totalAmount: string;
-  paymentType: 'cash' | 'card' | 'debt';
-  createdAt: string;
-  items: ClientSaleItem[];
-  debt: ClientSaleDebt | null;
-};
-
-/** Client detail from `GET /api/v1/clients/{id}/` (camelCase after axios transform). */
-export type ClientDetail = ClientListItem & {
-  sales: ClientSale[];
-  totalDebt: string;
-};
+export type ClientDetail = ClientListItem;

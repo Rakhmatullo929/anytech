@@ -2,15 +2,20 @@
   "addButton": "Добавить товар",
   "createButton": "Создать товар",
   "detail": {
-    "notFound": "Товар не найден"
+    "notFound": "Товар не найден",
+    "imagesCount": "Изображений: {{count}}",
+    "noImages": "Нет изображений",
+    "averagePrice": "Сред. цена"
+  },
+  "tabs": {
+    "info": "Инфо",
+    "table": "Закупки"
   },
   "detailDocumentTitle": "Товар",
   "documentTitle": "Товары",
   "dialogs": {
     "create": {
-      "initialStock": "Начальный остаток",
-      "purchasePrice": "Закупочная цена",
-      "salePrice": "Цена продажи",
+      "image": "Изображение",
       "title": "Новый товар"
     },
     "edit": {
@@ -32,14 +37,32 @@
       "title": "Остаток"
     }
   },
+  "filters": {
+    "category": "Категория",
+    "quantityRange": "Диапазон количества",
+    "minQty": "Мин.",
+    "maxQty": "Макс."
+  },
   "searchPlaceholder": "Поиск по названию или SKU…",
+  "bulkImport": {
+    "button": "Импорт Excel",
+    "title": "Массовый импорт товаров",
+    "stepTemplate": "Шаг 1. Скачайте шаблон Excel",
+    "downloadTemplate": "Скачать шаблон",
+    "stepUpload": "Шаг 2. Загрузите заполненный файл",
+    "chooseFile": "Выбрать файл",
+    "importButton": "Импортировать",
+    "successSummary": "Импортировано товаров: {{count}}",
+    "errorsSummary": "Строк с ошибками: {{count}}",
+    "rowLabel": "Строка {{row}}:",
+    "nothingImported": "Ни одного товара не импортировано.",
+    "toastSuccess": "Импортировано товаров: {{count}}"
+  },
   "toasts": {
     "bulkDeleted": "Удалено товаров: {{count}}",
     "created": "Товар успешно создан",
     "deleted": "Товар удалён",
-    "invalidPrices": "Проверьте цены: значения должны быть числами >= 0",
-    "invalidStock": "Проверьте остаток: значение должно быть числом >= 0",
-    "requiredFields": "Название, закупка и продажа обязательны",
+    "requiredFields": "Название товара обязательно",
     "updated": "Товар обновлён"
   }
 }

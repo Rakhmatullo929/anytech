@@ -17,6 +17,7 @@ import {
   bulkCreateClientsFromExcel,
   createClient,
   deleteClient,
+  exportClientsExcel,
   fetchClientDetail,
   fetchClientsList,
   updateClient,
@@ -25,6 +26,7 @@ import type {
   ClientDetail,
   ClientListItem,
   CreateClientPayload,
+  ExportClientsParams,
   FetchClientsListParams,
   BulkCreateClientsResult,
   UpdateClientPayload,
@@ -35,6 +37,9 @@ type ClientsListKeyParams = {
   pageSize?: number;
   search?: string;
   ordering?: string;
+  groupId?: string;
+  groupIds?: string;
+  gender?: string;
 };
 
 function getClientsListKeyParams(queryKey: QueryKey): ClientsListKeyParams {
@@ -48,15 +53,30 @@ function getClientsListKeyParams(queryKey: QueryKey): ClientsListKeyParams {
     pageSize: typeof params.pageSize === 'number' ? params.pageSize : undefined,
     search: typeof params.search === 'string' ? params.search : undefined,
     ordering: typeof params.ordering === 'string' ? params.ordering : undefined,
+    groupId: typeof params.groupId === 'string' ? params.groupId : undefined,
+    groupIds: typeof params.groupIds === 'string' ? params.groupIds : undefined,
+    gender: typeof params.gender === 'string' ? params.gender : undefined,
   };
 }
 
 export function useClientsListQuery(params: FetchClientsListParams) {
-  const { page, pageSize, search, ordering } = params;
+  const { page, pageSize, search, ordering, groupId, groupIds, gender } = params;
 
   const queryKey = useMemo(
-    () => ['clients', 'list', { page, pageSize, search: search ?? '', ordering: ordering ?? '-created_at' }] as const,
-    [page, pageSize, search, ordering]
+    () =>
+      [
+        'clients',
+        'list',
+        {
+          page, pageSize,
+          search: search ?? '',
+          ordering: ordering ?? '-created_at',
+          groupId: groupId ?? '',
+          groupIds: groupIds?.join(',') ?? '',
+          gender: gender ?? '',
+        },
+      ] as const,
+    [page, pageSize, search, ordering, groupId, groupIds, gender]
   );
 
   return useFetchList<ClientListItem>(queryKey, () => fetchClientsList(params), {
@@ -86,11 +106,12 @@ export function useCreateClientMutation() {
       cachedLists.forEach(([queryKey, cachedPage]) => {
         if (!cachedPage) return;
 
-        const { page = 1, pageSize = cachedPage.results.length, search = '', ordering = '-created_at' } =
+        const { page = 1, pageSize = cachedPage.results.length, search = '', ordering = '-created_at', groupId = '', groupIds = '', gender = '' } =
           getClientsListKeyParams(queryKey);
 
-        // New entity should only appear immediately on the first page of default ordering without active search.
-        const shouldInsertIntoCurrentPage = page === 1 && ordering === '-created_at' && search.trim() === '';
+        const shouldInsertIntoCurrentPage =
+          page === 1 && ordering === '-created_at' && search.trim() === '' &&
+          groupId.trim() === '' && groupIds.trim() === '' && gender.trim() === '';
         if (!shouldInsertIntoCurrentPage) return;
 
         const nextResults = [createdClient, ...cachedPage.results];
@@ -159,10 +180,12 @@ export function useBulkCreateClientsMutation() {
       cachedLists.forEach(([queryKey, cachedPage]) => {
         if (!cachedPage) return;
 
-        const { page = 1, pageSize = cachedPage.results.length, search = '', ordering = '-created_at' } =
+        const { page = 1, pageSize = cachedPage.results.length, search = '', ordering = '-created_at', groupId = '', groupIds = '', gender = '' } =
           getClientsListKeyParams(queryKey);
 
-        const shouldInsertIntoCurrentPage = page === 1 && ordering === '-created_at' && search.trim() === '';
+        const shouldInsertIntoCurrentPage =
+          page === 1 && ordering === '-created_at' && search.trim() === '' &&
+          groupId.trim() === '' && groupIds.trim() === '' && gender.trim() === '';
         if (!shouldInsertIntoCurrentPage) return;
 
         const nextResults = [...createdClients, ...cachedPage.results];
@@ -195,4 +218,8 @@ export function useUpdateClientMutation() {
       );
     },
   });
+}
+
+export function useExportClientsMutation() {
+  return useMutate<void, ExportClientsParams>(exportClientsExcel);
 }

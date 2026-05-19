@@ -1,8 +1,35 @@
 from django.urls import path
 
-from .views import ClientViewSet
+from .views import ClientViewSet, GroupViewSet
 
 urlpatterns = [
+    path(
+        "groups/",
+        GroupViewSet.as_view({"get": "list", "post": "create"}),
+        name="group-list",
+    ),
+    path(
+        "groups/bulk-delete/",
+        GroupViewSet.as_view({"post": "bulk_delete"}),
+        name="group-bulk-delete",
+    ),
+    path(
+        "groups/<uuid:pk>/add-clients/",
+        GroupViewSet.as_view({"post": "add_clients"}),
+        name="group-add-clients",
+    ),
+    path(
+        "groups/<uuid:pk>/remove-clients/",
+        GroupViewSet.as_view({"post": "remove_clients"}),
+        name="group-remove-clients",
+    ),
+    path(
+        "groups/<uuid:pk>/",
+        GroupViewSet.as_view(
+            {"get": "retrieve", "put": "update", "patch": "partial_update", "delete": "destroy"}
+        ),
+        name="group-detail",
+    ),
     path(
         "",
         ClientViewSet.as_view({"get": "list", "post": "create"}),
@@ -12,6 +39,11 @@ urlpatterns = [
         "search/",
         ClientViewSet.as_view({"get": "search"}),
         name="client-search",
+    ),
+    path(
+        "export-excel/",
+        ClientViewSet.as_view({"get": "export_excel"}),
+        name="client-export-excel",
     ),
     path(
         "bulk-delete/",

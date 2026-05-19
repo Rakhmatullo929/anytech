@@ -47,11 +47,12 @@ export default function SaleDetailsView() {
     () => ({
       cash: tx('common.payment.cash'),
       card: tx('common.payment.card'),
+      transfer: tx('common.payment.transfer'),
       debt: tx('common.payment.debt'),
     }),
     [tx]
   );
-  const itemCount = sale?.items?.length ?? 0;
+  const itemCount = sale?.items?.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
 
   if (isPending) {
     return (
@@ -92,6 +93,9 @@ export default function SaleDetailsView() {
             <Stack spacing={1} sx={{ flexGrow: 1 }}>
               <Typography variant="body2" color="text.secondary">
                 {tx('sales.detail.clientLine')} <strong>{sale.clientName || '-'}</strong>
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {tx('sales.detail.createdByLine')} <strong>{sale.createdByName || '-'}</strong>
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 {tx('sales.detail.dateLine')} {fDateTime(sale.createdAt)}

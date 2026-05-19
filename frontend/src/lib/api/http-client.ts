@@ -50,6 +50,9 @@ function camelizeResponseData(data: unknown): unknown {
   if (data == null || typeof data !== 'object' || Array.isArray(data)) {
     return data;
   }
+  if (typeof Blob !== 'undefined' && data instanceof Blob) {
+    return data;
+  }
   return humps.camelizeKeys(data as Record<string, unknown>);
 }
 

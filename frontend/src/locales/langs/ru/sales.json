@@ -5,13 +5,22 @@
     "headingDetail": "Продажа {{id}}",
     "linesTitle": "Состав",
     "notFound": "Продажа не найдена",
-    "payLine": "Оплата:"
+    "payLine": "Оплата:",
+    "createdByLine": "Продавец:"
   },
   "detailDocumentTitle": "Продажа",
   "documentTitle": "Продажи",
   "filters": {
     "allOption": "Все",
-    "paymentLabel": "Тип оплаты"
+    "paymentLabel": "Тип оплаты",
+    "dateRange": "Период",
+    "dateFrom": "С",
+    "dateTo": "По",
+    "client": "Клиент",
+    "seller": "Продавец",
+    "amountRange": "Сумма",
+    "amountMin": "От",
+    "amountMax": "До"
   },
   "listHeading": "История продаж"
 }

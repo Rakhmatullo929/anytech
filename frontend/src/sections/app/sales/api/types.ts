@@ -1,9 +1,11 @@
-export type SalePaymentType = 'cash' | 'card' | 'debt';
+export type SalePaymentType = 'cash' | 'card' | 'transfer' | 'debt';
 
 export type SaleListItem = {
   id: string;
   client: string | null;
   clientName: string | null;
+  createdById: string | null;
+  createdByName: string | null;
   totalAmount: string;
   paymentType: SalePaymentType;
   createdAt: string;
@@ -26,4 +28,21 @@ export type FetchSalesListParams = {
   pageSize: number;
   ordering?: string;
   paymentType?: SalePaymentType;
+  clientIds?: string;
+  sellerIds?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  amountFrom?: string;
+  amountTo?: string;
+};
+
+export type ExportSalesParams = {
+  ordering?: string;
+  paymentType?: SalePaymentType;
+  clientIds?: string;
+  sellerIds?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  amountFrom?: string;
+  amountTo?: string;
 };

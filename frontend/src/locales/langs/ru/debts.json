@@ -2,6 +2,11 @@
   "detail": {
     "addPayment": "Добавить платёж",
     "clientLine": "Клиент:",
+    "createdLine": "Дата создания:",
+    "deadlineLine": "Срок:",
+    "daysLeft": "{{count}} дн. осталось",
+    "daysOverdue": "{{count}} дн. просрочено",
+    "dueToday": "Срок сегодня",
     "headingDetail": "Долг · {{name}}",
     "notFound": "Долг не найден",
     "paidLine": "Оплачено:",
@@ -10,11 +15,29 @@
     "statusLine": "Статус:",
     "totalLine": "Всего:"
   },
+  "filters": {
+    "client": "Клиент",
+    "dateRange": "Период создания",
+    "dateFrom": "С",
+    "dateTo": "По",
+    "deadlineRange": "Срок оплаты",
+    "deadlineFrom": "С",
+    "deadlineTo": "По",
+    "amountRange": "Сумма",
+    "amountMin": "От",
+    "amountMax": "До"
+  },
+  "list": {
+    "deadline": "Срок",
+    "daysLeft": "{{count}} дн. осталось",
+    "daysOverdue": "{{count}} дн. просрочено"
+  },
   "detailDocumentTitle": "Долг",
   "documentTitle": "Долги",
   "paymentDialog": {
     "maxAmount": "Максимум:",
-    "payButton": "Оплатить",
+    "payButton": "Частично",
+    "payFullButton": "Полностью погасить",
     "title": "Платёж"
   }
 }

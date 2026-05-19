@@ -1,0 +1,35 @@
+{
+  "addButton": "Kategoriya qoʻshish",
+  "detailDocumentTitle": "Kategoriya",
+  "detail": {
+    "notFound": "Kategoriya topilmadi",
+    "productsTitle": "Kategoriya mahsulotlari",
+    "productsHint": "Ushbu kategoriyaga tegishli mahsulotlar ro‘yxati.",
+    "productsCount": "Mahsulotlar: {{count}}"
+  },
+  "tabs": {
+    "info": "Maʼlumot",
+    "products": "Mahsulotlar"
+  },
+  "searchPlaceholder": "Kategoriya nomi bo‘yicha qidiruv…",
+  "dialogs": {
+    "create": {
+      "title": "Yangi kategoriya"
+    },
+    "edit": {
+      "title": "Kategoriyani tahrirlash"
+    },
+    "delete": {
+      "title": "Kategoriyani o‘chirish",
+      "description": "Kategoriyani o‘chirishni tasdiqlaysizmi?",
+      "bulkTitle": "Kategoriyalarni ommaviy o‘chirish",
+      "bulkDescription": "Tanlangan kategoriyalarni o‘chirishni tasdiqlaysizmi? Soni: {{count}}"
+    }
+  },
+  "toasts": {
+    "created": "Kategoriya muvaffaqiyatli yaratildi",
+    "updated": "Kategoriya yangilandi",
+    "deleted": "Kategoriya o‘chirildi",
+    "bulkDeleted": "O‘chirilgan kategoriyalar soni: {{count}}"
+  }
+}

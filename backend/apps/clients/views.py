@@ -1,3 +1,6 @@
+from decimal import Decimal
+from io import BytesIO
+
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -5,17 +8,23 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from django.db import transaction
+from django.db.models import Count, DecimalField, Max, Min, Sum, Value
+from django.db.models.functions import Coalesce
+from django.http import HttpResponse
 from django.utils.translation import gettext as _
 
 from auth_tenant.mixins import TenantQuerySetMixin
 from auth_tenant.permissions import page_action_permission
 
-from .models import Client
+from .models import Client, Group
 from .serializers import (
     ClientBulkDeleteSerializer,
     ClientBulkCreateExcelSerializer,
-    ClientDetailSerializer,
     ClientSerializer,
+    GroupAddClientsSerializer,
+    GroupBulkDeleteSerializer,
+    GroupDetailSerializer,
+    GroupListSerializer,
 )
 
 
@@ -25,30 +34,101 @@ class ClientViewSet(TenantQuerySetMixin, ModelViewSet):
     http_method_names = ["get", "post", "put", "patch", "delete", "head", "options"]
 
     search_fields = ["name", "last_name", "middle_name", "phone"]
-    ordering_fields = ["name", "created_at"]
+    ordering_fields = ["name", "created_at", "last_purchase_at", "total_purchases_amount"]
     ordering = ["-created_at"]
 
     def get_permissions(self):
-        if self.action in ("list", "search"):
+        if self.action in ("list", "search", "export_excel"):
             return [page_action_permission("clients", "read")()]
         if self.action == "retrieve":
             return [page_action_permission("clients", "detail")()]
         return [page_action_permission("clients", "write")()]
 
     def get_serializer_class(self):
-        if self.action == "retrieve":
-            return ClientDetailSerializer
         return ClientSerializer
 
     def get_queryset(self):
         qs = super().get_queryset()
-        if self.action == "retrieve":
-            qs = qs.prefetch_related(
-                "sales__items__product",
-                "sales__debt",
-                "debts",
+        group_id = self.request.query_params.get("group_id")
+        if group_id:
+            qs = qs.filter(groups__id=group_id)
+
+        group_ids_raw = self.request.query_params.get("group_ids")
+        if group_ids_raw:
+            ids = [i.strip() for i in group_ids_raw.split(",") if i.strip()]
+            if ids:
+                qs = qs.filter(groups__id__in=ids).distinct()
+
+        gender = self.request.query_params.get("gender")
+        if gender:
+            qs = qs.filter(gender=gender)
+
+        if self.action in ("list", "retrieve", "search", "export_excel"):
+            qs = qs.annotate(
+                last_purchase_at=Max("sales__created_at"),
+                first_purchase_at=Min("sales__created_at"),
+                total_purchases_amount=Coalesce(
+                    Sum("sales__total_amount"),
+                    Value(Decimal("0.00")),
+                    output_field=DecimalField(max_digits=14, decimal_places=2),
+                ),
+                sales_count=Count("sales", distinct=True),
             )
+
+        if self.action == "retrieve":
+            qs = qs.prefetch_related("groups")
         return qs
+
+    @action(detail=False, methods=["get"], url_path="export-excel")
+    def export_excel(self, request):
+        try:
+            from openpyxl import Workbook
+            from openpyxl.styles import Alignment, Font, PatternFill
+        except ImportError as exc:
+            raise ValidationError(
+                {"detail": _("Excel export requires openpyxl package on backend.")}
+            ) from exc
+
+        queryset = self.filter_queryset(self.get_queryset())
+
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Clients"
+
+        headers = ["Name", "Phone", "Gender", "Last Purchase", "Total Purchases", "Created"]
+        header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+        header_font = Font(bold=True, color="FFFFFF")
+
+        for col_idx, header in enumerate(headers, start=1):
+            cell = ws.cell(row=1, column=col_idx, value=header)
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = Alignment(horizontal="center")
+
+        for client in queryset.iterator(chunk_size=500):
+            last_purchase = client.last_purchase_at
+            ws.append([
+                client.name,
+                client.phone,
+                client.gender or "",
+                last_purchase.strftime("%Y-%m-%d") if last_purchase else "",
+                float(client.total_purchases_amount),
+                client.created_at.strftime("%Y-%m-%d"),
+            ])
+
+        for col in ws.columns:
+            ws.column_dimensions[col[0].column_letter].width = 22
+
+        buffer = BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+
+        response = HttpResponse(
+            buffer.read(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = 'attachment; filename="clients_export.xlsx"'
+        return response
 
     @action(detail=False, methods=["get"], url_path="search")
     def search(self, request):
@@ -147,3 +227,59 @@ class ClientViewSet(TenantQuerySetMixin, ModelViewSet):
 
         response_data = ClientSerializer(created_clients, many=True, context={"request": request}).data
         return Response({"created": len(response_data), "results": response_data}, status=status.HTTP_201_CREATED)
+
+
+class GroupViewSet(TenantQuerySetMixin, ModelViewSet):
+    queryset = Group.objects.all()
+    serializer_class = GroupListSerializer
+    http_method_names = ["get", "post", "put", "patch", "delete", "head", "options"]
+
+    search_fields = ["name"]
+    ordering_fields = ["name", "created_at", "clients_count"]
+    ordering = ["-created_at"]
+
+    def get_permissions(self):
+        if self.action == "retrieve":
+            return [page_action_permission("groups", "detail")()]
+        if self.action in ("list", "search"):
+            return [page_action_permission("groups", "read")()]
+        return [page_action_permission("groups", "write")()]
+
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return GroupDetailSerializer
+        return GroupListSerializer
+
+    def get_queryset(self):
+        return super().get_queryset().annotate(clients_count=Count("clients", distinct=True))
+
+    @action(detail=False, methods=["post"], url_path="bulk-delete")
+    def bulk_delete(self, request):
+        serializer = GroupBulkDeleteSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        ids = serializer.validated_data["ids"]
+        deleted_count, _details = self.get_queryset().filter(id__in=ids).delete()
+        return Response({"deleted": deleted_count}, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["post"], url_path="add-clients")
+    def add_clients(self, request, pk=None):
+        group = self.get_object()
+        serializer = GroupAddClientsSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        ids = serializer.validated_data["ids"]
+        clients = Client.objects.filter(tenant=request.user.tenant, id__in=ids)
+        group.clients.add(*clients)
+        return Response(status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["post"], url_path="remove-clients")
+    def remove_clients(self, request, pk=None):
+        group = self.get_object()
+        serializer = GroupAddClientsSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        ids = serializer.validated_data["ids"]
+        clients = Client.objects.filter(tenant=request.user.tenant, id__in=ids)
+        group.clients.remove(*clients)
+        return Response(status=status.HTTP_200_OK)

@@ -21,8 +21,10 @@
       "overview": "Обзор",
       "contacts": "Контакты",
       "addresses": "Адреса",
-      "purchases": "Покупки"
-    }
+      "purchases": "Покупки",
+      "debts": "Долги"
+    },
+    "totalPurchasesAmount": "Итого покупок"
   },
   "detailDocumentTitle": "Клиент",
   "documentTitle": "Клиенты",
@@ -35,6 +37,67 @@
     }
   },
   "searchPlaceholder": "Поиск по имени или телефону…",
+  "filters": {
+    "gender": "Пол",
+    "genderMale": "Мужской",
+    "genderFemale": "Женский",
+    "group": "Группа"
+  },
+  "tabs": {
+    "clients": "Клиенты",
+    "groups": "Группы"
+  },
+  "groups": {
+    "addButton": "Добавить группу",
+    "clientsCount": "Клиентов: {{count}}",
+    "clientsListTitle": "Клиенты в группе",
+    "clientsListHint": "Список клиентов, привязанных к этой группе",
+    "detailDocumentTitle": "Группа клиентов",
+    "detailTitle": "Детали группы",
+    "emptyDescription": "Описание не заполнено",
+    "documentTitle": "Группы клиентов",
+    "notFound": "Группа не найдена",
+    "searchPlaceholder": "Поиск по названию группы…",
+    "fields": {
+      "name": "Название группы",
+      "description": "Описание"
+    },
+    "validation": {
+      "nameRequired": "Название группы обязательно"
+    },
+    "dialogs": {
+      "createTitle": "Новая группа",
+      "editTitle": "Редактировать группу",
+      "deleteTitle": "Удаление группы",
+      "deleteDescription": "Вы точно хотите удалить группу?",
+      "bulkDeleteTitle": "Массовое удаление групп",
+      "bulkDeleteDescription": "Вы точно хотите удалить выбранные группы? Количество: {{count}}"
+    },
+    "toasts": {
+      "created": "Группа успешно создана",
+      "updated": "Группа обновлена",
+      "deleted": "Группа удалена",
+      "bulkDeleted": "Удалено групп: {{count}}"
+    },
+    "addClientsButton": "Добавить клиентов",
+    "addClientsDialog": {
+      "title": "Добавить клиентов в группу",
+      "searchLabel": "Выберите клиентов",
+      "searchPlaceholder": "Поиск по имени или телефону…",
+      "submitButton": "Добавить",
+      "successToast": "Клиентов добавлено в группу: {{count}}"
+    },
+    "removeClientsButton": "Удалить из группы",
+    "removeClientsDialog": {
+      "title": "Удалить из группы",
+      "description": "Удалить выбранных клиентов из группы? Количество: {{count}}",
+      "successToast": "Удалено из группы: {{count}} клиентов"
+    },
+    "table": {
+      "name": "Название группы",
+      "clientsCount": "Количество клиентов"
+    }
+  },
   "form": {
     "createTitle": "Новый клиент",
     "editTitle": "Редактировать клиента",
@@ -51,7 +114,8 @@
       "lastName": "Фамилия",
       "middleName": "Отчество",
       "birthDate": "Дата рождения",
-      "communicationLanguage": "Язык общения",
+      "groups": "Группы",
+      "groupsPlaceholder": "Выберите группы",
       "phoneCountry": "Страна",
       "gender": "Пол",
       "maritalStatus": "Семейное положение",
@@ -72,11 +136,6 @@
     "marital": {
       "married": "В браке",
       "single": "Не в браке"
-    },
-    "languages": {
-      "uz": "Узбекский",
-      "ru": "Русский",
-      "en": "English"
     }
   },
   "toasts": {

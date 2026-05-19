@@ -1,13 +1,13 @@
-from django.db.models import F, Sum
 from django.utils.translation import gettext as _
 from rest_framework import serializers
 import re
 
-from debts.models import Debt
-from sales.models import Sale
-from sales.serializers import SaleItemReadSerializer
+from .models import Client, Group
 
-from .models import Client
+
+def _get_annotated(obj, attr, default=None):
+    """Return annotated attribute from a queryset instance, or *default* if absent."""
+    return getattr(obj, attr, default)
 
 
 class ClientSerializer(serializers.ModelSerializer):
@@ -29,11 +29,6 @@ class ClientSerializer(serializers.ModelSerializer):
     def supported_phone_examples(cls):
         return ", ".join(example for _pattern, example in cls.PHONE_PATTERNS)
 
-    communication_language = serializers.ChoiceField(
-        choices=Client.CommunicationLanguage.choices,
-        required=False,
-        allow_blank=True,
-    )
     phones = serializers.ListField(
         child=serializers.CharField(allow_blank=True, trim_whitespace=True),
         allow_empty=False,
@@ -45,6 +40,11 @@ class ClientSerializer(serializers.ModelSerializer):
     )
     social_networks = serializers.DictField(
         child=serializers.CharField(allow_blank=True, required=False),
+        required=False,
+    )
+    groups = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Group.objects.all(),
         required=False,
     )
 
@@ -99,15 +99,59 @@ class ClientSerializer(serializers.ModelSerializer):
                 _("Phone must match one of: %(examples)s.")
                 % {"examples": self.supported_phone_examples()}
             )
-        tenant = self.context["request"].user.tenant
-        qs = Client.objects.filter(tenant=tenant, phone=value)
-        if self.instance:
-            qs = qs.exclude(pk=self.instance.pk)
-        if qs.exists():
+        return value
+
+    def validate_groups(self, value):
+        request = self.context.get("request")
+        if not request or not hasattr(request.user, "tenant"):
+            return value
+
+        tenant_id = request.user.tenant_id
+        invalid = [group.id for group in value if group.tenant_id != tenant_id]
+        if invalid:
             raise serializers.ValidationError(
-                _("Client with this phone number already exists.")
+                _("Some groups do not belong to your tenant: %(ids)s.")
+                % {"ids": ", ".join(str(group_id) for group_id in invalid)}
             )
         return value
+
+    def create(self, validated_data):
+        groups = validated_data.pop("groups", [])
+        client = super().create(validated_data)
+        if groups:
+            client.groups.set(groups)
+        return client
+
+    def update(self, instance, validated_data):
+        groups = validated_data.pop("groups", None)
+        client = super().update(instance, validated_data)
+        if groups is not None:
+            client.groups.set(groups)
+        return client
+
+    last_purchase_at = serializers.SerializerMethodField()
+    first_purchase_at = serializers.SerializerMethodField()
+    total_purchases_amount = serializers.SerializerMethodField()
+    sales_count = serializers.SerializerMethodField()
+
+    def get_last_purchase_at(self, obj):
+        val = _get_annotated(obj, 'last_purchase_at')
+        if val is None:
+            return None
+        return val.isoformat() if hasattr(val, 'isoformat') else str(val)
+
+    def get_first_purchase_at(self, obj):
+        val = _get_annotated(obj, 'first_purchase_at')
+        if val is None:
+            return None
+        return val.isoformat() if hasattr(val, 'isoformat') else str(val)
+
+    def get_total_purchases_amount(self, obj):
+        val = _get_annotated(obj, 'total_purchases_amount')
+        return str(val) if val is not None else '0.00'
+
+    def get_sales_count(self, obj):
+        return _get_annotated(obj, 'sales_count', 0)
 
     class Meta:
         model = Client
@@ -118,55 +162,28 @@ class ClientSerializer(serializers.ModelSerializer):
             "last_name",
             "middle_name",
             "birth_date",
-            "communication_language",
             "gender",
             "marital_status",
             "phone",
             "phones",
             "addresses",
             "social_networks",
+            "groups",
             "created_at",
+            "last_purchase_at",
+            "first_purchase_at",
+            "total_purchases_amount",
+            "sales_count",
         )
-        read_only_fields = ("id", "tenant", "created_at")
+        read_only_fields = (
+            "id", "tenant", "created_at",
+            "last_purchase_at", "first_purchase_at",
+            "total_purchases_amount", "sales_count",
+        )
         extra_kwargs = {
             "phone": {"required": False},
         }
 
-
-# ── Inline serializers for client detail (purchase history) ──────────
-
-
-class DebtInlineSerializer(serializers.ModelSerializer):
-    remaining = serializers.DecimalField(
-        max_digits=14, decimal_places=2, read_only=True
-    )
-
-    class Meta:
-        model = Debt
-        fields = ("total_amount", "paid_amount", "remaining", "status")
-
-
-class SaleInlineSerializer(serializers.ModelSerializer):
-    items = SaleItemReadSerializer(many=True, read_only=True)
-    debt = DebtInlineSerializer(read_only=True, allow_null=True, default=None)
-
-    class Meta:
-        model = Sale
-        fields = ("id", "total_amount", "payment_type", "created_at", "items", "debt")
-
-
-class ClientDetailSerializer(ClientSerializer):
-    sales = SaleInlineSerializer(many=True, read_only=True)
-    total_debt = serializers.SerializerMethodField()
-
-    def get_total_debt(self, obj):
-        result = obj.debts.filter(status=Debt.Status.ACTIVE).aggregate(
-            total=Sum(F("total_amount") - F("paid_amount"))
-        )
-        return result["total"] or 0
-
-    class Meta(ClientSerializer.Meta):
-        fields = ClientSerializer.Meta.fields + ("sales", "total_debt")
 
 
 class ClientBulkDeleteSerializer(serializers.Serializer):
@@ -178,3 +195,63 @@ class ClientBulkDeleteSerializer(serializers.Serializer):
 
 class ClientBulkCreateExcelSerializer(serializers.Serializer):
     file = serializers.FileField()
+
+
+class GroupBulkDeleteSerializer(serializers.Serializer):
+    ids = serializers.ListField(
+        child=serializers.UUIDField(),
+        allow_empty=False,
+    )
+
+
+class GroupAddClientsSerializer(serializers.Serializer):
+    ids = serializers.ListField(
+        child=serializers.UUIDField(),
+        allow_empty=False,
+    )
+
+
+class GroupListSerializer(serializers.ModelSerializer):
+    clients_count = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Group
+        fields = ("id", "tenant", "name", "description", "clients_count", "created_at")
+        read_only_fields = ("id", "tenant", "clients_count", "created_at")
+
+    def validate_name(self, value):
+        value = value.strip()
+        if not value:
+            raise serializers.ValidationError(_("Name is required."))
+        return value
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        request = self.context.get("request")
+        tenant = getattr(request.user, "tenant", None) if request else None
+        if not tenant:
+            return attrs
+
+        name = attrs.get("name")
+        if not name and self.instance is not None:
+            name = self.instance.name
+        if not name:
+            return attrs
+
+        qs = Group.objects.filter(tenant=tenant, name=name)
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError(
+                {"name": _("Group with this name already exists.")}
+            )
+        return attrs
+
+
+class GroupDetailSerializer(serializers.ModelSerializer):
+    clients_count = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Group
+        fields = ("id", "tenant", "name", "description", "clients_count", "created_at")
+        read_only_fields = fields

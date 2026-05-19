@@ -22,6 +22,7 @@ class Debt(models.Model):
     total_amount = models.DecimalField(max_digits=14, decimal_places=2)
     paid_amount = models.DecimalField(max_digits=14, decimal_places=2, default=0)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.ACTIVE)
+    deadline = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -37,9 +38,19 @@ class Debt(models.Model):
 
 
 class Payment(models.Model):
+    class PaymentMethod(models.TextChoices):
+        CASH = "cash", _("Cash")
+        CARD = "card", _("Card")
+        TRANSFER = "transfer", _("Transfer")
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     debt = models.ForeignKey(Debt, on_delete=models.CASCADE, related_name="payments")
     amount = models.DecimalField(max_digits=14, decimal_places=2)
+    payment_method = models.CharField(
+        max_length=10,
+        choices=PaymentMethod.choices,
+        default=PaymentMethod.CASH,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

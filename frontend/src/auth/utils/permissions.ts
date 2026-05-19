@@ -4,9 +4,12 @@ export type PermissionPage =
   | 'users'
   | 'pos'
   | 'products'
+  | 'categories'
   | 'clients'
+  | 'groups'
   | 'sales'
-  | 'debts';
+  | 'debts'
+  | 'reports';
 
 export type PermissionAction = 'read' | 'detail' | 'write';
 

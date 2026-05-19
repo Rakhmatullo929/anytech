@@ -12,8 +12,12 @@ import { LoadingScreen } from 'src/components/loading-screen';
 const PosPage = lazy(() => import('../../pages/pos'));
 const ProfilePage = lazy(() => import('../../pages/profile'));
 const ProductsPage = lazy(() => import('../../pages/products'));
+const CategoriesPage = lazy(() => import('../../pages/categories'));
+const CategoryDetailsPage = lazy(() => import('../../sections/app/categories/details/view'));
 const ProductDetailsPage = lazy(() => import('../../pages/product-details'));
 const ClientsListPage = lazy(() => import('../../pages/clients'));
+const ClientsGroupsPage = lazy(() => import('../../pages/clients-groups'));
+const ClientsGroupsDetailsPage = lazy(() => import('../../pages/clients-groups-details'));
 const ClientCreatePage = lazy(() => import('../../pages/client-create'));
 const ClientEditPage = lazy(() => import('../../pages/client-edit'));
 const ClientDetailsPage = lazy(() => import('../../pages/client-details'));
@@ -26,9 +30,24 @@ const AdminUserDetailsPage = lazy(() => import('../../pages/admin-users-details'
 const AdminUserCreatePage = lazy(() => import('../../pages/admin-users-create'));
 const AdminUserEditPage = lazy(() => import('../../pages/admin-user-edit'));
 const AdminRolesPage = lazy(() => import('../../pages/admin-roles'));
+const ReportCustomersPage = lazy(() => import('../../pages/report-customers'));
+const ReportSalesPage = lazy(() => import('../../pages/report-sales'));
+const ReportEmployeesPage = lazy(() => import('../../pages/report-employees'));
+const ReportDebtsPage = lazy(() => import('../../pages/report-debts'));
 
 function withPermission(
-  page: 'admin' | 'roles' | 'users' | 'pos' | 'products' | 'clients' | 'sales' | 'debts',
+  page:
+    | 'admin'
+    | 'roles'
+    | 'users'
+    | 'pos'
+    | 'products'
+    | 'categories'
+    | 'clients'
+    | 'groups'
+    | 'sales'
+    | 'debts'
+    | 'reports',
   action: 'read' | 'detail' | 'write',
   element: ReactElement
 ) {
@@ -67,6 +86,19 @@ export const dashboardRoutes = [
         ],
       },
       {
+        path: 'categories',
+        children: [
+          {
+            index: true,
+            element: withPermission('categories', 'read', <CategoriesPage />),
+          },
+          {
+            path: ':id',
+            element: withPermission('categories', 'detail', <CategoryDetailsPage />),
+          },
+        ],
+      },
+      {
         path: 'clients',
         children: [
           {
@@ -84,6 +116,19 @@ export const dashboardRoutes = [
           {
             path: ':id',
             element: withPermission('clients', 'detail', <ClientDetailsPage />),
+          },
+        ],
+      },
+      {
+        path: 'groups',
+        children: [
+          {
+            index: true,
+            element: withPermission('groups', 'read', <ClientsGroupsPage />),
+          },
+          {
+            path: ':id',
+            element: withPermission('groups', 'detail', <ClientsGroupsDetailsPage />),
           },
         ],
       },
@@ -111,6 +156,15 @@ export const dashboardRoutes = [
             path: ':id',
             element: withPermission('debts', 'detail', <DebtDetailsPage />),
           },
+        ],
+      },
+      {
+        path: 'reports',
+        children: [
+          { path: 'customers', element: withPermission('reports', 'read', <ReportCustomersPage />) },
+          { path: 'sales', element: withPermission('reports', 'read', <ReportSalesPage />) },
+          { path: 'employees', element: withPermission('reports', 'read', <ReportEmployeesPage />) },
+          { path: 'debts', element: withPermission('reports', 'read', <ReportDebtsPage />) },
         ],
       },
       {

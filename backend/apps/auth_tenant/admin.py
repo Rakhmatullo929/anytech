@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
 
-from .models import District, Region, Tenant, User
+from .models import District, Region, RolePermission, Tenant, TenantRole, User
 
 
 @admin.register(Tenant)
@@ -45,3 +45,17 @@ class DistrictAdmin(admin.ModelAdmin):
     list_display = ("name_uz", "name_ru", "code", "region")
     search_fields = ("name_uz", "name_ru", "code")
     list_filter = ("region",)
+
+
+@admin.register(TenantRole)
+class TenantRoleAdmin(admin.ModelAdmin):
+    list_display = ("tenant", "code", "name", "is_system", "created_at")
+    search_fields = ("tenant__name", "code", "name")
+    list_filter = ("is_system", "tenant")
+
+
+@admin.register(RolePermission)
+class RolePermissionAdmin(admin.ModelAdmin):
+    list_display = ("tenant", "role", "permission", "created_at")
+    search_fields = ("tenant__name", "role", "permission")
+    list_filter = ("tenant", "role")

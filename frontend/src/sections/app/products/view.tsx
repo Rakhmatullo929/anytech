@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type MouseEvent } from 'react';
+import { useCallback, useEffect, useMemo, useState, type MouseEvent } from 'react';
 // locales
 import { useLocales } from 'src/locales';
 // @mui
@@ -10,19 +10,24 @@ import Table from '@mui/material/Table';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
+import Avatar from '@mui/material/Avatar';
 import TextField from '@mui/material/TextField';
 import LinearProgress from '@mui/material/LinearProgress';
 import IconButton from '@mui/material/IconButton';
 import MenuItem from '@mui/material/MenuItem';
 import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
-import Typography from '@mui/material/Typography';
+import ListItemText from '@mui/material/ListItemText';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
 // utils
-import { fCurrency } from 'src/utils/format-number';
 import { useDebounce } from 'src/hooks/use-debounce';
-import { useUrlListState, useSyncTableWithUrlListState } from 'src/hooks/use-url-query-state';
+import { useSyncTableWithUrlListState } from 'src/hooks/use-url-query-state';
 import { useCheckPermission } from 'src/auth/hooks/use-check-permission';
 import Can from 'src/auth/components/can';
+import { fCurrency, fNumber } from 'src/utils/format-number';
 // routes
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
@@ -40,18 +45,38 @@ import {
   TableSelectedAction,
   TablePaginationCustom,
 } from 'src/components/table';
+import { FilterDrawer, FilterFieldMultiSelect, FilterFieldRange } from 'src/components/filter-drawer';
 import {
+  fetchProductDetail,
+  useCategoriesListQuery,
+  useBulkCreateProductsMutation,
   useBulkDeleteProductsMutation,
   useCreateProductMutation,
+  useCreateProductPurchaseMutation,
   useDeleteProductMutation,
+  useExportProductsMutation,
   useProductsListQuery,
   useUpdateProductMutation,
+  useProductsUrlState,
+  type BulkCreateProductsResult,
+  type ProductImageFormValue,
   type ProductListItem,
 } from 'src/sections/app/products/api';
-import { ProductUpsertDialog } from 'src/sections/app/products/components';
+import { ProductBulkImportDialog, ProductUpsertDialog } from 'src/sections/app/products/components';
 import { ProductsListSkeleton } from 'src/sections/app/products/skeleton';
 
 // ----------------------------------------------------------------------
+
+type HeadCell = {
+  id: string;
+  label: string;
+  sortKey?: string;
+};
+
+type EditingProductState = {
+  product: ProductListItem;
+  existingImages: ProductImageFormValue[];
+};
 
 export default function ProductsView() {
   const { tx } = useLocales();
@@ -59,42 +84,71 @@ export default function ProductsView() {
   const { enqueueSnackbar } = useSnackbar();
   const actionsPopover = usePopover();
   const createMutation = useCreateProductMutation();
+  const createPurchaseMutation = useCreateProductPurchaseMutation();
   const updateMutation = useUpdateProductMutation();
   const deleteMutation = useDeleteProductMutation();
   const bulkDeleteMutation = useBulkDeleteProductsMutation();
+  const bulkImportMutation = useBulkCreateProductsMutation();
+  const exportMutation = useExportProductsMutation();
+  const { data: categoriesData } = useCategoriesListQuery();
+  const categories = useMemo(() => categoriesData?.results ?? [], [categoriesData?.results]);
 
-  const tableHead = useMemo(
-    () => [
-      { id: 'name', label: tx('common.table.name') },
-      { id: 'sku', label: tx('common.table.sku') },
-      { id: 'stock', label: tx('common.table.stock') },
-      { id: 'purchase', label: tx('common.table.purchase') },
-      { id: 'sale', label: tx('common.table.salePrice') },
-      { id: '', label: '' },
-    ],
-    [tx]
-  );
-
+  // ── URL state ──────────────────────────────────────────────────────────
   const {
     page: pageParam,
     rowsPerPage,
     search: searchValue,
     ordering,
+    categoryIds,
+    minQuantity,
+    maxQuantity,
+    activeFiltersCount,
     setSearch,
-    setValues: setQueryState,
+    setOrdering,
+    setFilters,
+    resetFilters,
     handlePageChange,
     handleRowsPerPageChange,
-  } = useUrlListState({
-    pageKey: 'page',
-    pageSizeKey: 'page_size',
-    searchKey: 'search',
-    orderingKey: 'ordering',
-    defaultPage: 1,
-    defaultPageSize: 15,
-    defaultOrdering: '-created_at',
-  });
-  const debouncedSearch = useDebounce(searchValue.trim(), 400);
+  } = useProductsUrlState();
 
+  const debouncedSearch = useDebounce(searchValue.trim(), 400);
+  const debouncedMinQty = useDebounce(minQuantity, 400);
+  const debouncedMaxQty = useDebounce(maxQuantity, 400);
+
+  // ── Sorting ────────────────────────────────────────────────────────────
+  const tableHead: HeadCell[] = useMemo(
+    () => [
+      { id: 'name', label: tx('common.table.name'), sortKey: 'name' },
+      { id: 'sku', label: tx('common.table.sku'), sortKey: 'sku' },
+      { id: 'category', label: tx('common.table.category'), sortKey: 'category__name' },
+      { id: 'totalQuantity', label: tx('common.table.qty'), sortKey: 'total_quantity' },
+      { id: 'totalPurchaseAmount', label: tx('common.table.purchase'), sortKey: 'total_purchase_amount' },
+      { id: '', label: '' },
+    ],
+    [tx]
+  );
+
+  const { tableOrderBy, tableOrder } = useMemo(() => {
+    const isDesc = ordering.startsWith('-');
+    const field = isDesc ? ordering.slice(1) : ordering;
+    const col = tableHead.find((h) => h.sortKey === field);
+    return {
+      tableOrderBy: col?.id ?? '',
+      tableOrder: isDesc ? ('desc' as const) : ('asc' as const),
+    };
+  }, [ordering, tableHead]);
+
+  const handleSort = useCallback(
+    (columnId: string) => {
+      const col = tableHead.find((h) => h.id === columnId);
+      if (!col?.sortKey) return;
+      const isCurrentAsc = tableOrderBy === columnId && tableOrder === 'asc';
+      setOrdering(isCurrentAsc ? `-${col.sortKey}` : col.sortKey);
+    },
+    [tableHead, tableOrderBy, tableOrder, setOrdering]
+  );
+
+  // ── Table (selection) ──────────────────────────────────────────────────
   const table = useTable({
     defaultCurrentPage: Math.max(0, pageParam - 1),
     defaultRowsPerPage: rowsPerPage,
@@ -102,21 +156,33 @@ export default function ProductsView() {
   const { setPage, setRowsPerPage } = table;
   const page = Math.max(0, pageParam - 1);
 
+  // ── Data ───────────────────────────────────────────────────────────────
   const { data, isPending, isFetching } = useProductsListQuery({
     page: page + 1,
     pageSize: rowsPerPage,
     search: debouncedSearch || undefined,
     ordering,
+    categoryIds: categoryIds.length ? categoryIds : undefined,
+    minQuantity: debouncedMinQty || undefined,
+    maxQuantity: debouncedMaxQty || undefined,
   });
   const rows = useMemo(() => data?.results ?? [], [data?.results]);
   const total = data?.count ?? 0;
   const showInitialLoader = isPending && !data;
+
+  // ── Dialog states ──────────────────────────────────────────────────────
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [upsertOpen, setUpsertOpen] = useState(false);
   const [upsertMode, setUpsertMode] = useState<'create' | 'edit'>('create');
-  const [editingProduct, setEditingProduct] = useState<ProductListItem | null>(null);
+  const [editingProduct, setEditingProduct] = useState<EditingProductState | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [purchaseOpen, setPurchaseOpen] = useState(false);
+  const [purchaseProduct, setPurchaseProduct] = useState<ProductListItem | null>(null);
+  const [purchaseQuantity, setPurchaseQuantity] = useState('1');
+  const [purchaseUnitPrice, setPurchaseUnitPrice] = useState('');
+  const [bulkImportOpen, setBulkImportOpen] = useState(false);
+  const [bulkImportResult, setBulkImportResult] = useState<BulkCreateProductsResult | null>(null);
   const { selected: selectedIds, setSelected } = table;
 
   useEffect(() => {
@@ -136,55 +202,70 @@ export default function ProductsView() {
     setTableRowsPerPage: setRowsPerPage,
   });
 
+  // ── Action handlers ────────────────────────────────────────────────────
   const closeActions = (clearSelected = true) => {
     actionsPopover.onClose();
-    if (clearSelected) {
-      setSelectedProductId(null);
-    }
+    if (clearSelected) setSelectedProductId(null);
   };
-
-  const handleCloseActions = () => closeActions();
 
   const openActions = (event: MouseEvent<HTMLElement>, productId: string) => {
     setSelectedProductId(productId);
     actionsPopover.onOpen(event);
   };
 
-  const handleEdit = () => {
+  const handleEdit = async () => {
     if (!selectedProductId) return;
     const product = rows.find((row) => row.id === selectedProductId);
-    if (!product) {
-      closeActions();
-      return;
+    if (!product) { closeActions(); return; }
+    try {
+      const detail = await fetchProductDetail(product.id);
+      setUpsertMode('edit');
+      const existingImages: ProductImageFormValue[] = detail.images.map((item) => ({
+        id: item.id,
+        preview: item.image,
+        name: item.image.split('/').pop() || 'image',
+        size: 0,
+        type: 'image/*',
+      }));
+      setEditingProduct({ product, existingImages });
+      setUpsertOpen(true);
+      closeActions(false);
+    } catch (error) {
+      console.error(error);
     }
-    setEditingProduct(product);
-    setUpsertMode('edit');
-    setUpsertOpen(true);
-    closeActions(false);
   };
 
-  const handleAskDelete = () => {
-    closeActions(false);
-    setDeleteOpen(true);
-  };
-
-  const handleCloseDelete = () => {
-    setDeleteOpen(false);
-    setSelectedProductId(null);
-  };
-
-  const handleOpenBulkDelete = () => {
-    setBulkDeleteOpen(true);
-  };
-
-  const handleCloseBulkDelete = () => {
-    setBulkDeleteOpen(false);
-  };
+  const handleAskDelete = () => { closeActions(false); setDeleteOpen(true); };
+  const handleCloseDelete = () => { setDeleteOpen(false); setSelectedProductId(null); };
+  const handleOpenBulkDelete = () => setBulkDeleteOpen(true);
+  const handleCloseBulkDelete = () => setBulkDeleteOpen(false);
 
   const handleOpenCreate = () => {
     setUpsertMode('create');
     setEditingProduct(null);
     setUpsertOpen(true);
+  };
+
+  const handleOpenPurchaseCreate = (product: ProductListItem) => {
+    setPurchaseProduct(product);
+    setPurchaseQuantity('1');
+    setPurchaseUnitPrice('');
+    setPurchaseOpen(true);
+  };
+
+  const handleCreatePurchase = async () => {
+    if (!purchaseProduct) return;
+    const quantity = Number(purchaseQuantity);
+    const unitPrice = purchaseUnitPrice.trim();
+    if (!quantity || quantity <= 0 || !unitPrice) return;
+    try {
+      await createPurchaseMutation.mutateAsync({ product: purchaseProduct.id, quantity, unitPrice });
+      enqueueSnackbar(tx('products.toasts.created'), { variant: 'success' });
+      setPurchaseOpen(false);
+      setPurchaseProduct(null);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleCloseUpsert = () => {
@@ -209,16 +290,39 @@ export default function ProductsView() {
     if (!selectedIds.length) return;
     try {
       await bulkDeleteMutation.mutateAsync(selectedIds);
-      enqueueSnackbar(tx('products.toasts.bulkDeleted', { count: selectedIds.length }), {
-        variant: 'success',
-      });
-      table.onUpdatePageDeleteRows({
-        totalRows: total,
-        totalRowsInPage: rows.length,
-        totalRowsFiltered: total,
-      });
+      enqueueSnackbar(tx('products.toasts.bulkDeleted', { count: selectedIds.length }), { variant: 'success' });
+      table.onUpdatePageDeleteRows({ totalRows: total, totalRowsInPage: rows.length, totalRowsFiltered: total });
       table.setSelected([]);
       handleCloseBulkDelete();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleOpenBulkImport = () => { setBulkImportResult(null); setBulkImportOpen(true); };
+  const handleCloseBulkImport = () => { setBulkImportOpen(false); setBulkImportResult(null); };
+
+  const handleBulkImport = async (file: File) => {
+    try {
+      const result = await bulkImportMutation.mutateAsync(file);
+      setBulkImportResult(result);
+      if (result.created > 0) {
+        enqueueSnackbar(tx('products.bulkImport.toastSuccess', { count: result.created }), { variant: 'success' });
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleExport = async () => {
+    try {
+      await exportMutation.mutateAsync({
+        search: debouncedSearch || undefined,
+        ordering,
+        categoryIds: categoryIds.length ? categoryIds : undefined,
+        minQuantity: debouncedMinQty || undefined,
+        maxQuantity: debouncedMaxQty || undefined,
+      });
     } catch (error) {
       console.error(error);
     }
@@ -227,72 +331,56 @@ export default function ProductsView() {
   const handleSubmitUpsert = async (values: {
     name: string;
     sku: string;
-    purchasePrice: string;
-    salePrice: string;
-    stock: string;
+    category: string;
+    images: ProductImageFormValue[];
   }) => {
     const normalizedName = values.name.trim();
-    const normalizedPurchase = values.purchasePrice.trim();
-    const normalizedSale = values.salePrice.trim();
     const normalizedSku = values.sku.trim();
-    const parsedStock = Number(values.stock);
-
-    if (!normalizedName || !normalizedPurchase || !normalizedSale) {
+    if (!normalizedName) {
       enqueueSnackbar(tx('products.toasts.requiredFields'), { variant: 'warning' });
       return;
     }
-
-    if (
-      Number.isNaN(Number(normalizedPurchase)) ||
-      Number.isNaN(Number(normalizedSale)) ||
-      Number(normalizedPurchase) < 0 ||
-      Number(normalizedSale) < 0
-    ) {
-      enqueueSnackbar(tx('products.toasts.invalidPrices'), { variant: 'warning' });
-      return;
-    }
-
-    if (upsertMode === 'create' && (Number.isNaN(parsedStock) || parsedStock < 0)) {
-      enqueueSnackbar(tx('products.toasts.invalidStock'), { variant: 'warning' });
-      return;
-    }
-
     try {
       if (upsertMode === 'create') {
         await createMutation.mutateAsync({
           name: normalizedName,
           sku: normalizedSku || undefined,
-          purchasePrice: normalizedPurchase,
-          salePrice: normalizedSale,
-          stock: parsedStock,
+          category: values.category || undefined,
+          images: values.images.filter((item): item is File => item instanceof File),
         });
         enqueueSnackbar(tx('products.toasts.created'), { variant: 'success' });
       } else if (editingProduct) {
+        const keepImageIds = values.images
+          .filter((item): item is Extract<ProductImageFormValue, { id: string }> =>
+            typeof item === 'object' && item !== null && 'id' in item
+          )
+          .map((item) => item.id);
         await updateMutation.mutateAsync({
-          id: editingProduct.id,
+          id: editingProduct.product.id,
           name: normalizedName,
           sku: normalizedSku || undefined,
-          purchasePrice: normalizedPurchase,
-          salePrice: normalizedSale,
+          category: values.category || undefined,
+          images: values.images.filter((item): item is File => item instanceof File),
+          keepImageIds,
         });
         enqueueSnackbar(tx('products.toasts.updated'), { variant: 'success' });
       }
       handleCloseUpsert();
       setPage(0);
-      setQueryState({ page: 1, search: '' });
     } catch (error) {
       console.error(error);
     }
   };
 
+  // ── Derived flags ──────────────────────────────────────────────────────
   const upsertLoading = createMutation.isPending || updateMutation.isPending;
+  const purchaseLoading = createPurchaseMutation.isPending;
   const deletingCurrent =
-    deleteMutation.isPending &&
-    selectedProductId !== null &&
-    deleteMutation.variables === selectedProductId;
+    deleteMutation.isPending && selectedProductId !== null && deleteMutation.variables === selectedProductId;
   const deletingBulk = bulkDeleteMutation.isPending;
   const canWriteProducts = canWritePage('products');
 
+  // ── Render ─────────────────────────────────────────────────────────────
   return (
     <>
       <CustomBreadcrumbs
@@ -300,9 +388,22 @@ export default function ProductsView() {
         links={[{ name: tx('common.navigation.products'), href: paths.products.root }]}
         action={
           <Can page="products" action="write">
-            <Button variant="contained" startIcon={<Iconify icon="mingcute:add-line" />} onClick={handleOpenCreate}>
-              {tx('products.addButton')}
-            </Button>
+            <Stack direction="row" spacing={1}>
+              <Button
+                variant="outlined"
+                startIcon={<Iconify icon="eva:cloud-upload-fill" />}
+                onClick={handleOpenBulkImport}
+              >
+                {tx('products.bulkImport.button')}
+              </Button>
+              <Button
+                variant="contained"
+                startIcon={<Iconify icon="mingcute:add-line" />}
+                onClick={handleOpenCreate}
+              >
+                {tx('products.addButton')}
+              </Button>
+            </Stack>
           </Can>
         }
         sx={{ mb: { xs: 3, md: 5 } }}
@@ -331,17 +432,64 @@ export default function ProductsView() {
                 }
               />
             </Can>
-            <TextField
-              size="small"
-              placeholder={tx('products.searchPlaceholder')}
-              value={searchValue}
-              onChange={(e) => setSearch(e.target.value)}
-              sx={{ maxWidth: 360 }}
-            />
+
+            {/* Toolbar: search (left) + filters + export (right) */}
+            <Stack direction="row" spacing={1} alignItems="center">
+              <TextField
+                size="small"
+                placeholder={tx('products.searchPlaceholder')}
+                value={searchValue}
+                onChange={(e) => setSearch(e.target.value)}
+                sx={{ width: 280 }}
+              />
+
+              <Box sx={{ flexGrow: 1 }} />
+
+              <FilterDrawer
+                filtersCount={activeFiltersCount}
+                title={tx('common.actions.filters')}
+                resetLabel={tx('common.actions.reset')}
+                onReset={resetFilters}
+              >
+                <FilterFieldMultiSelect
+                  label={tx('products.filters.category')}
+                  options={categories.map((c) => ({ value: c.id, label: c.name }))}
+                  value={categoryIds}
+                  onChange={(ids) => setFilters({ categories: ids.join(',') })}
+                />
+                <FilterFieldRange
+                  label={tx('products.filters.quantityRange')}
+                  minLabel={tx('products.filters.minQty')}
+                  maxLabel={tx('products.filters.maxQty')}
+                  minValue={minQuantity}
+                  maxValue={maxQuantity}
+                  onMinChange={(v) => setFilters({ minQuantity: v })}
+                  onMaxChange={(v) => setFilters({ maxQuantity: v })}
+                />
+              </FilterDrawer>
+
+              <Button
+                variant="outlined"
+                startIcon={
+                  exportMutation.isPending ? (
+                    <Iconify icon="svg-spinners:ring-resize" />
+                  ) : (
+                    <Iconify icon="eva:download-fill" />
+                  )
+                }
+                onClick={handleExport}
+                disabled={exportMutation.isPending}
+              >
+                {tx('common.actions.export')}
+              </Button>
+            </Stack>
 
             <Scrollbar>
               <Table size="small">
                 <TableHeadCustom
+                  order={tableOrder}
+                  orderBy={tableOrderBy}
+                  onSort={handleSort}
                   headLabel={tableHead}
                   rowCount={rows.length}
                   numSelected={selectedIds.length}
@@ -358,25 +506,48 @@ export default function ProductsView() {
                         />
                       </TableCell>
                       <TableCell>
-                        <Can
-                          page="products"
-                          action="detail"
-                          fallback={<Typography variant="subtitle2">{row.name}</Typography>}
-                        >
-                          <Link component={RouterLink} href={paths.products.details(row.id)} variant="subtitle2">
-                            {row.name}
-                          </Link>
-                        </Can>
+                        <Stack direction="row" spacing={1.5} alignItems="center">
+                          <Avatar src={row.image ?? undefined} alt={row.name}>
+                            {row.name.charAt(0).toUpperCase()}
+                          </Avatar>
+                          <Can
+                            page="products"
+                            action="detail"
+                            fallback={
+                              <ListItemText
+                                primary={row.name}
+                                primaryTypographyProps={{ variant: 'subtitle2' }}
+                              />
+                            }
+                          >
+                            <ListItemText
+                              primary={
+                                <Link
+                                  component={RouterLink}
+                                  href={paths.products.details(row.id)}
+                                  variant="subtitle2"
+                                >
+                                  {row.name}
+                                </Link>
+                              }
+                            />
+                          </Can>
+                        </Stack>
                       </TableCell>
                       <TableCell>{row.sku || '-'}</TableCell>
-                      <TableCell>{row.stock}</TableCell>
-                      <TableCell>{fCurrency(row.purchasePrice)}</TableCell>
-                      <TableCell>{fCurrency(row.salePrice)}</TableCell>
+                      <TableCell>{row.category?.name || '-'}</TableCell>
+                      <TableCell>{fNumber(row.totalQuantity)}</TableCell>
+                      <TableCell>{fCurrency(row.totalPurchaseAmount)}</TableCell>
                       <TableCell align="right">
                         {canWriteProducts ? (
-                          <IconButton color="default" onClick={(event) => openActions(event, row.id)}>
-                            <Iconify icon="eva:more-vertical-fill" />
-                          </IconButton>
+                          <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+                            <IconButton color="primary" onClick={() => handleOpenPurchaseCreate(row)}>
+                              <Iconify icon="mingcute:add-line" />
+                            </IconButton>
+                            <IconButton color="default" onClick={(event) => openActions(event, row.id)}>
+                              <Iconify icon="eva:more-vertical-fill" />
+                            </IconButton>
+                          </Stack>
                         ) : null}
                       </TableCell>
                     </TableRow>
@@ -399,7 +570,7 @@ export default function ProductsView() {
         </Card>
       )}
 
-      <CustomPopover open={actionsPopover.open} onClose={handleCloseActions} sx={{ width: 180, p: 1 }}>
+      <CustomPopover open={actionsPopover.open} onClose={() => closeActions()} sx={{ width: 180, p: 1 }}>
         <Can page="products" action="write">
           <MenuItem onClick={handleEdit}>
             <Iconify icon="solar:pen-bold" />
@@ -422,17 +593,50 @@ export default function ProductsView() {
           initialValues={
             upsertMode === 'edit' && editingProduct
               ? {
-                  name: editingProduct.name,
-                  sku: editingProduct.sku ?? '',
-                  purchasePrice: editingProduct.purchasePrice,
-                  salePrice: editingProduct.salePrice,
-                  stock: String(editingProduct.stock),
+                  name: editingProduct.product.name,
+                  sku: editingProduct.product.sku ?? '',
+                  category: editingProduct.product.category?.id ?? '',
+                  images: editingProduct.existingImages,
                 }
               : undefined
           }
+          categories={categories.map((item) => ({ id: item.id, name: item.name }))}
           onClose={handleCloseUpsert}
           onSubmit={handleSubmitUpsert}
         />
+      </Can>
+
+      <Can page="products" action="write">
+        <Dialog open={purchaseOpen} onClose={() => setPurchaseOpen(false)} fullWidth maxWidth="xs">
+          <DialogTitle>{tx('common.table.purchase')}</DialogTitle>
+          <DialogContent sx={{ pt: 3 }}>
+            <Stack spacing={2}>
+              <TextField
+                label={tx('common.table.product')}
+                value={purchaseProduct?.name ?? ''}
+                disabled
+                InputLabelProps={{ shrink: true }}
+              />
+              <TextField
+                label={tx('common.table.qty')}
+                type="number"
+                value={purchaseQuantity}
+                onChange={(e) => setPurchaseQuantity(e.target.value)}
+              />
+              <TextField
+                label={tx('common.table.price')}
+                value={purchaseUnitPrice}
+                onChange={(e) => setPurchaseUnitPrice(e.target.value)}
+              />
+            </Stack>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setPurchaseOpen(false)}>{tx('common.actions.cancel')}</Button>
+            <Button variant="contained" onClick={handleCreatePurchase} disabled={purchaseLoading}>
+              {tx('common.actions.save')}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Can>
 
       <Can page="products" action="write">
@@ -462,6 +666,16 @@ export default function ProductsView() {
               {tx('common.actions.delete')}
             </Button>
           }
+        />
+      </Can>
+
+      <Can page="products" action="write">
+        <ProductBulkImportDialog
+          open={bulkImportOpen}
+          loading={bulkImportMutation.isPending}
+          result={bulkImportResult}
+          onClose={handleCloseBulkImport}
+          onImport={handleBulkImport}
         />
       </Can>
     </>

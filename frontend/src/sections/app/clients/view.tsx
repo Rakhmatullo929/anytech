@@ -1,4 +1,6 @@
-import { useMemo, useRef, useState, useEffect, type MouseEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
+import type { AutocompleteInfiniteFetcher } from 'src/components/autocomplete-infinite';
+import AutocompleteInfinite from 'src/components/autocomplete-infinite';
 // locales
 import { useLocales } from 'src/locales';
 // @mui
@@ -18,13 +20,14 @@ import Checkbox from '@mui/material/Checkbox';
 import LinearProgress from '@mui/material/LinearProgress';
 import Typography from '@mui/material/Typography';
 // utils
-import { fDateTime } from 'src/utils/format-time';
+import { fCurrency } from 'src/utils/format-number';
+import { fDate, fDateTime } from 'src/utils/format-time';
 // routes
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hook';
 import { RouterLink } from 'src/routes/components';
 import { useDebounce } from 'src/hooks/use-debounce';
-import { useUrlListState, useSyncTableWithUrlListState } from 'src/hooks/use-url-query-state';
+import { useSyncTableWithUrlListState } from 'src/hooks/use-url-query-state';
 import { useCheckPermission } from 'src/auth/hooks/use-check-permission';
 import Can from 'src/auth/components/can';
 // components
@@ -41,16 +44,29 @@ import {
   TableSelectedAction,
   TablePaginationCustom,
 } from 'src/components/table';
+import { FilterDrawer, FilterFieldMultiSelect } from 'src/components/filter-drawer';
+import { fetchGroupsList } from 'src/sections/app/clients/groups/api/groups-requests';
+import type { GroupListItem } from 'src/sections/app/clients/groups/api/types';
 
 import {
   useClientsListQuery,
   useBulkDeleteClientsMutation,
   useBulkCreateClientsMutation,
   useDeleteClientMutation,
+  useExportClientsMutation,
 } from 'src/sections/app/clients/api/use-clients-api';
+import { useClientsUrlState } from 'src/sections/app/clients/api/use-clients-url-state';
 import { ClientsListSkeleton } from 'src/sections/app/clients/skeleton';
+import ClientsTabs from 'src/sections/app/clients/components/clients-tabs';
 
 // ----------------------------------------------------------------------
+
+type HeadCell = { id: string; label: string; sortKey?: string };
+
+const GROUPS_QUERY_KEY_BASE = ['clients-groups', 'infinite'] as const;
+
+const groupsInfiniteFetcher: AutocompleteInfiniteFetcher<GroupListItem> = ({ page, search }) =>
+  fetchGroupsList({ page, pageSize: 20, search: search || undefined });
 
 export default function ClientsView() {
   const { tx } = useLocales();
@@ -61,36 +77,74 @@ export default function ClientsView() {
   const deleteMutation = useDeleteClientMutation();
   const bulkDeleteMutation = useBulkDeleteClientsMutation();
   const bulkCreateMutation = useBulkCreateClientsMutation();
+  const exportMutation = useExportClientsMutation();
   const excelInputRef = useRef<HTMLInputElement | null>(null);
 
-  const tableHead = useMemo(
-    () => [
-      { id: 'name', label: tx('common.table.client') },
-      { id: 'phone', label: tx('common.table.phone') },
-      { id: 'created', label: tx('common.table.created') },
-      { id: '', label: '' },
-    ],
-    [tx]
-  );
-
+  // ── URL state ──────────────────────────────────────────────────────────
   const {
     page: pageParam,
     rowsPerPage,
     search: searchValue,
     ordering,
+    gender,
+    groupIds,
+    activeFiltersCount,
     setSearch,
+    setOrdering,
+    setFilters,
+    resetFilters,
     handlePageChange,
     handleRowsPerPageChange,
-  } = useUrlListState({
-    pageKey: 'page',
-    pageSizeKey: 'page_size',
-    searchKey: 'search',
-    orderingKey: 'ordering',
-    defaultPage: 1,
-    defaultPageSize: 15,
-    defaultOrdering: '-created_at',
-  });
+    setValues,
+  } = useClientsUrlState();
+
   const debouncedSearch = useDebounce(searchValue.trim(), 400);
+
+  // ── Sorting ────────────────────────────────────────────────────────────
+  const tableHead: HeadCell[] = useMemo(
+    () => [
+      { id: 'name', label: tx('common.table.client'), sortKey: 'name' },
+      { id: 'phone', label: tx('common.table.phone') },
+      { id: 'last_purchase', label: tx('clients.detail.lastPurchase'), sortKey: 'last_purchase_at' },
+      { id: 'total_purchases', label: tx('clients.detail.totalPurchasesAmount'), sortKey: 'total_purchases_amount' },
+      { id: 'created', label: tx('common.table.created'), sortKey: 'created_at' },
+      { id: '', label: '' },
+    ],
+    [tx]
+  );
+
+  const { tableOrderBy, tableOrder } = useMemo(() => {
+    const isDesc = ordering.startsWith('-');
+    const field = isDesc ? ordering.slice(1) : ordering;
+    const col = tableHead.find((h) => h.sortKey === field);
+    return {
+      tableOrderBy: col?.id ?? '',
+      tableOrder: isDesc ? ('desc' as const) : ('asc' as const),
+    };
+  }, [ordering, tableHead]);
+
+  const handleSort = useCallback(
+    (columnId: string) => {
+      const col = tableHead.find((h) => h.id === columnId);
+      if (!col?.sortKey) return;
+      const isCurrentAsc = tableOrderBy === columnId && tableOrder === 'asc';
+      setOrdering(isCurrentAsc ? `-${col.sortKey}` : col.sortKey);
+    },
+    [tableHead, tableOrderBy, tableOrder, setOrdering]
+  );
+
+  // ── Filter options ─────────────────────────────────────────────────────
+  const [selectedGroups, setSelectedGroups] = useState<GroupListItem[]>([]);
+
+  const genderOptions = useMemo(
+    () => [
+      { value: 'male', label: tx('clients.filters.genderMale') },
+      { value: 'female', label: tx('clients.filters.genderFemale') },
+    ],
+    [tx]
+  );
+
+  // ── Table ──────────────────────────────────────────────────────────────
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
@@ -107,6 +161,8 @@ export default function ClientsView() {
     pageSize: rowsPerPage,
     search: debouncedSearch || undefined,
     ordering,
+    groupIds: groupIds.length ? groupIds : undefined,
+    gender: gender || undefined,
   });
 
   const rows = useMemo(() => data?.results ?? [], [data?.results]);
@@ -131,13 +187,11 @@ export default function ClientsView() {
     setTableRowsPerPage: setRowsPerPage,
   });
 
+  // ── Action handlers ────────────────────────────────────────────────────
   const closeActions = (clearSelected = true) => {
     actionsPopover.onClose();
-    if (clearSelected) {
-      setSelectedClientId(null);
-    }
+    if (clearSelected) setSelectedClientId(null);
   };
-  const handleCloseActions = () => closeActions();
 
   const openActions = (event: MouseEvent<HTMLElement>, clientId: string) => {
     setSelectedClientId(clientId);
@@ -166,13 +220,8 @@ export default function ClientsView() {
     setSelectedClientId(null);
   };
 
-  const handleOpenBulkDelete = () => {
-    setBulkDeleteOpen(true);
-  };
-
-  const handleCloseBulkDelete = () => {
-    setBulkDeleteOpen(false);
-  };
+  const handleOpenBulkDelete = () => setBulkDeleteOpen(true);
+  const handleCloseBulkDelete = () => setBulkDeleteOpen(false);
 
   const handleDelete = async () => {
     if (!selectedClientId) return;
@@ -190,14 +239,8 @@ export default function ClientsView() {
     if (!selectedIds.length) return;
     try {
       await bulkDeleteMutation.mutateAsync(selectedIds);
-      enqueueSnackbar(tx('clients.toasts.bulkDeleted', { count: selectedIds.length }), {
-        variant: 'success',
-      });
-      table.onUpdatePageDeleteRows({
-        totalRows: total,
-        totalRowsInPage: rows.length,
-        totalRowsFiltered: total,
-      });
+      enqueueSnackbar(tx('clients.toasts.bulkDeleted', { count: selectedIds.length }), { variant: 'success' });
+      table.onUpdatePageDeleteRows({ totalRows: total, totalRowsInPage: rows.length, totalRowsFiltered: total });
       table.setSelected([]);
       handleCloseBulkDelete();
     } catch (error) {
@@ -205,37 +248,41 @@ export default function ClientsView() {
     }
   };
 
-  const handleOpenCreate = () => {
-    router.push(paths.clients.create);
-  };
+  const handleOpenCreate = () => router.push(paths.clients.create);
 
-  const handleOpenExcelPicker = () => {
-    excelInputRef.current?.click();
-  };
+  const handleOpenExcelPicker = () => excelInputRef.current?.click();
 
   const handleExcelFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = '';
     if (!file) return;
-
     try {
       const result = await bulkCreateMutation.mutateAsync(file);
-      enqueueSnackbar(tx('clients.toasts.bulkCreated', { count: result.created }), {
-        variant: 'success',
+      enqueueSnackbar(tx('clients.toasts.bulkCreated', { count: result.created }), { variant: 'success' });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleExport = async () => {
+    try {
+      await exportMutation.mutateAsync({
+        search: debouncedSearch || undefined,
+        ordering,
+        groupIds: groupIds.length ? groupIds : undefined,
+        gender: gender || undefined,
       });
     } catch (error) {
       console.error(error);
     }
   };
 
-
   const deletingCurrent =
-    deleteMutation.isPending &&
-    selectedClientId !== null &&
-    deleteMutation.variables === selectedClientId;
+    deleteMutation.isPending && selectedClientId !== null && deleteMutation.variables === selectedClientId;
   const deletingBulk = bulkDeleteMutation.isPending;
   const canWriteClients = canWritePage('clients');
   const canDetailClients = canDetailPage('clients');
+
   return (
     <>
       <CustomBreadcrumbs
@@ -267,6 +314,7 @@ export default function ClientsView() {
         onChange={handleExcelFileChange}
         style={{ display: 'none' }}
       />
+      <ClientsTabs value="clients" />
 
       {showInitialLoader ? (
         <ClientsListSkeleton headLabel={tableHead} />
@@ -291,17 +339,71 @@ export default function ClientsView() {
                 }
               />
             </Can>
-            <TextField
-              size="small"
-              placeholder={tx('clients.searchPlaceholder')}
-              value={searchValue}
-              onChange={(e) => setSearch(e.target.value)}
-              sx={{ maxWidth: 360 }}
-            />
+
+            {/* Toolbar: search (left) + filters + export (right) */}
+            <Stack direction="row" spacing={1} alignItems="center">
+              <TextField
+                size="small"
+                placeholder={tx('clients.searchPlaceholder')}
+                value={searchValue}
+                onChange={(e) => setSearch(e.target.value)}
+                sx={{ width: 280 }}
+              />
+
+              <Box sx={{ flexGrow: 1 }} />
+
+              <FilterDrawer
+                filtersCount={activeFiltersCount}
+                title={tx('common.actions.filters')}
+                resetLabel={tx('common.actions.reset')}
+                onReset={() => {
+                  resetFilters();
+                  setSelectedGroups([]);
+                }}
+              >
+                <FilterFieldMultiSelect
+                  label={tx('clients.filters.gender')}
+                  options={genderOptions}
+                  value={gender ? [gender] : []}
+                  onChange={(vals) => setFilters({ gender: vals[vals.length - 1] ?? '' })}
+                />
+                <AutocompleteInfinite<GroupListItem>
+                  queryKeyBase={GROUPS_QUERY_KEY_BASE}
+                  fetcher={groupsInfiniteFetcher}
+                  pageSize={20}
+                  size="small"
+                  value={selectedGroups}
+                  onChange={(groups) => {
+                    setSelectedGroups(groups);
+                    setFilters({ groupIds: groups.map((g) => g.id).join(',') });
+                  }}
+                  getOptionLabel={(g) => g.name}
+                  label={tx('clients.filters.group')}
+                />
+              </FilterDrawer>
+
+              <Button
+                variant="outlined"
+                startIcon={
+                  exportMutation.isPending ? (
+                    <Iconify icon="svg-spinners:ring-resize" />
+                  ) : (
+                    <Iconify icon="eva:download-fill" />
+                  )
+                }
+                onClick={handleExport}
+                disabled={exportMutation.isPending}
+              >
+                {tx('common.actions.export')}
+              </Button>
+            </Stack>
 
             <Scrollbar>
               <Table size="small">
                 <TableHeadCustom
+                  order={tableOrder}
+                  orderBy={tableOrderBy}
+                  onSort={handleSort}
                   headLabel={tableHead}
                   rowCount={rows.length}
                   numSelected={selectedIds.length}
@@ -329,6 +431,8 @@ export default function ClientsView() {
                         </Can>
                       </TableCell>
                       <TableCell>{row.phone}</TableCell>
+                      <TableCell>{row.lastPurchaseAt ? fDate(row.lastPurchaseAt) : '—'}</TableCell>
+                      <TableCell>{fCurrency(row.totalPurchasesAmount)}</TableCell>
                       <TableCell>{fDateTime(row.createdAt)}</TableCell>
                       <TableCell align="right">
                         {canDetailClients || canWriteClients ? (
@@ -356,7 +460,7 @@ export default function ClientsView() {
         </Card>
       )}
 
-      <CustomPopover open={actionsPopover.open} onClose={handleCloseActions} sx={{ width: 180, p: 1 }}>
+      <CustomPopover open={actionsPopover.open} onClose={() => closeActions()} sx={{ width: 180, p: 1 }}>
         <Can page="clients" action="detail">
           <MenuItem onClick={handleView}>
             <Iconify icon="solar:eye-bold" />

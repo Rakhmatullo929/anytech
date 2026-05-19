@@ -58,18 +58,13 @@ class UserManager(BaseUserManager):
         return user
 
     def create_superuser(self, phone, password=None, **extra_fields):
-        extra_fields.setdefault("role", User.Role.ADMIN)
+        extra_fields.setdefault("role", "admin")
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
         return self.create_user(phone, password, **extra_fields)
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    class Role(models.TextChoices):
-        ADMIN = "admin", _("Admin")
-        MANAGER = "manager", _("Manager")
-        SELLER = "seller", _("Seller")
-
     class Gender(models.TextChoices):
         MALE = "male", _("Male")
         FEMALE = "female", _("Female")
@@ -88,7 +83,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True, null=True, blank=True)
     passport_series = models.CharField(max_length=9, null=True, blank=True)
     gender = models.CharField(max_length=10, choices=Gender.choices, null=True, blank=True)
-    role = models.CharField(max_length=20, choices=Role.choices, default=Role.SELLER)
+    role = models.CharField(max_length=64, default="seller")
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -108,7 +103,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 class RolePermission(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, related_name="role_permissions")
-    role = models.CharField(max_length=20, choices=User.Role.choices)
+    role = models.CharField(max_length=64)
     permission = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -118,3 +113,20 @@ class RolePermission(models.Model):
 
     def __str__(self):
         return f"{self.tenant_id}:{self.role}:{self.permission}"
+
+
+class TenantRole(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, related_name="roles")
+    code = models.SlugField(max_length=64)
+    name = models.CharField(max_length=255)
+    is_system = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "tenant_roles"
+        unique_together = ("tenant", "code")
+        ordering = ("created_at",)
+
+    def __str__(self):
+        return f"{self.tenant_id}:{self.code}"

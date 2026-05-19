@@ -4,22 +4,33 @@
   },
   "navigation": {
     "clients": "Mijozlar",
+    "groups": "Guruhlar",
+    "catalog": "Katalog",
+    "categories": "Kategoriyalar",
     "debts": "Qarzlar",
     "group": "Doʻkon",
     "pos": "POS",
     "products": "Mahsulotlar",
     "sales": "Savdolar",
     "admin": "Admin",
-    "users": "Foydalanuvchilar"
+    "users": "Foydalanuvchilar",
+    "reports": "Hisobotlar",
+    "reportCustomers": "Mijozlar",
+    "reportSales": "Savdo va mahsulotlar",
+    "reportEmployees": "Xodimlar",
+    "reportDebts": "Qarzlar"
   },
   "actions": {
     "apply": "Qoʻllash",
     "backToList": "Roʻyxatga",
     "cancel": "Bekor qilish",
-    "delete": "O‘chirish",
+    "delete": "O’chirish",
     "edit": "Tahrirlash",
+    "export": "Eksport",
+    "filters": "Filtrlar",
+    "reset": "Tozalash",
     "save": "Saqlash",
-    "view": "Ko‘rish"
+    "view": "Ko’rish"
   },
   "labels": {
     "guest": "Mehmon",
@@ -29,6 +40,7 @@
     "card": "Karta",
     "cash": "Naqd",
     "debt": "Qarzga",
+    "transfer": "O'tkazma",
     "method": "Toʻlov"
   },
   "status": {
@@ -42,10 +54,12 @@
   "table": {
     "allOption": "Barchasi",
     "amount": "Summa",
+    "category": "Kategoriya",
     "client": "Mijoz",
     "created": "Yaratilgan",
     "date": "Sana",
     "email": "Email",
+    "image": "Rasm",
     "name": "Nomi",
     "noData": "Ma'lumot topilmadi",
     "paid": "Toʻlangan",
@@ -61,12 +75,15 @@
     "salePrice": "Sotuv",
     "sku": "SKU",
     "status": "Holat",
+    "updated": "Yangilangan",
     "stock": "Qoldiq",
     "total": "Summa",
     "password": "Parol",
-    "passportSeries": "Pasport seriyasi"
+    "passportSeries": "Pasport seriyasi",
+    "createdBy": "Sotuvchi"
   },
   "validation": {
+    "categoryNameRequired": "Kategoriya nomi majburiy",
     "clientNameRequired": "Mijoz ismi majburiy",
     "emailInvalid": "Email noto‘g‘ri formatda",
     "numberInvalid": "Toʻgʻri son kiriting",

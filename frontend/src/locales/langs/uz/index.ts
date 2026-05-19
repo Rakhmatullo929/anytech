@@ -1,5 +1,6 @@
 import common from './common.json';
 import clients from './clients.json';
+import categories from './categories.json';
 import debts from './debts.json';
 import pos from './pos.json';
 import products from './products.json';
@@ -8,10 +9,12 @@ import admin from './admin.json';
 import profile from './profile.json';
 import errors from './errors.json';
 import users from './users.json';
+import reports from './reports.json';
 
 const translation = {
   common,
   clients,
+  categories,
   debts,
   pos,
   products,
@@ -20,6 +23,7 @@ const translation = {
   profile,
   errors,
   users,
+  reports,
 };
 
 export default translation;

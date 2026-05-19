@@ -2,9 +2,21 @@
   "cart": "Корзина",
   "client": "Клиент",
   "completeSale": "Завершить продажу",
+  "debtDeadlineDays": "Срок (в днях)",
+  "debtDeadlineDaysUnit": "дн.",
   "documentTitle": "POS",
   "emptyCart": "Добавьте товар из списка слева.",
   "productsHeading": "Товары",
+  "saleSuccess": "Продажа успешно завершена",
+  "selectClient": "Выберите клиента",
   "searchPlaceholder": "Поиск по названию или SKU…",
-  "stockShort": "остаток"
+  "stockShort": "остаток",
+  "createdBy": "Продавец",
+  "selectCreatedBy": "Выберите продавца",
+  "validation": {
+    "qtyMin": "Минимум 1",
+    "qtyExceedsStock": "В наличии: {{max}}",
+    "priceMin": "Минимум 0",
+    "priceInvalid": "Введите корректную цену"
+  }
 }

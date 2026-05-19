@@ -4,7 +4,6 @@ Shared pytest fixtures for the AnyTech ERP/POS test suite.
 Provides: tenants, users (admin/manager/seller), authenticated API clients,
 products, clients, and helper factories.
 """
-from decimal import Decimal
 
 import pytest
 from django.core.management import call_command
@@ -12,7 +11,7 @@ from rest_framework.test import APIClient
 
 from auth_tenant.models import Tenant, User
 from clients.models import Client
-from products.models import Product
+from products.models import Category, Product, ProductPurchase
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -60,7 +59,7 @@ def admin_user(tenant):
         first_name="Admin",
         last_name="User",
         tenant=tenant,
-        role=User.Role.ADMIN,
+        role="admin",
     )
 
 
@@ -73,7 +72,7 @@ def manager_user(tenant):
         first_name="Manager",
         last_name="User",
         tenant=tenant,
-        role=User.Role.MANAGER,
+        role="manager",
     )
 
 
@@ -86,7 +85,7 @@ def seller_user(tenant):
         first_name="Seller",
         last_name="User",
         tenant=tenant,
-        role=User.Role.SELLER,
+        role="seller",
     )
 
 
@@ -100,7 +99,7 @@ def other_tenant_user(other_tenant):
         first_name="Other",
         last_name="User",
         tenant=other_tenant,
-        role=User.Role.ADMIN,
+        role="admin",
     )
 
 
@@ -145,24 +144,30 @@ def anon_client():
 
 @pytest.fixture
 def product(tenant):
-    return Product.objects.create(
+    p = Product.objects.create(
         tenant=tenant,
         name="Test Product",
         sku="TP-001",
-        purchase_price=Decimal("50.00"),
-        sale_price=Decimal("100.00"),
-        stock=20,
     )
+    ProductPurchase.objects.create(product=p, quantity=100, unit_price="50.00")
+    return p
 
 
 @pytest.fixture
 def product_no_sku(tenant):
-    return Product.objects.create(
+    p = Product.objects.create(
         tenant=tenant,
         name="No SKU Product",
-        purchase_price=Decimal("30.00"),
-        sale_price=Decimal("60.00"),
-        stock=10,
+    )
+    ProductPurchase.objects.create(product=p, quantity=100, unit_price="50.00")
+    return p
+
+
+@pytest.fixture
+def category(tenant):
+    return Category.objects.create(
+        tenant=tenant,
+        name="Default Category",
     )
 
 
@@ -173,16 +178,18 @@ def client_obj(tenant):
         tenant=tenant,
         name="Test Client",
         phone="+998901234567",
+        phones=["+998901234567"],
     )
 
 
 # ── Helpers ───────────────────────────────────────────────────────────
 
 
-def make_sale_payload(product, quantity=2, payment_type="cash", client_id=None):
+def make_sale_payload(product, created_by_id, quantity=2, payment_type="cash", client_id=None):
     payload = {
         "payment_type": payment_type,
-        "items": [{"product": str(product.pk), "quantity": quantity}],
+        "created_by_user_id": str(created_by_id),
+        "items": [{"product": str(product.pk), "quantity": quantity, "price": "100.00"}],
     }
     if client_id:
         payload["client"] = str(client_id)

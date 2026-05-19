@@ -35,6 +35,7 @@ import {
   useTenantUserDetailQuery,
   useUpdateTenantUserMutation,
 } from '../api';
+import { useTenantRolesQuery } from '../../roles/api';
 import { UserDetailsSkeleton } from '../skeleton';
 import { getUserUpsertSchema } from '../components/utils/user-upsert-schema';
 
@@ -54,7 +55,7 @@ type UserFormValues = {
   passportSeriesPrefix: string;
   passportSeriesNumber: string;
   gender: 'male' | 'female' | '';
-  role: 'admin' | 'manager' | 'seller';
+  role: string;
   password: string;
   passwordConfirm: string;
 };
@@ -83,6 +84,7 @@ export default function UserFormView({ mode }: Props) {
   const updateMutation = useUpdateTenantUserMutation();
   const detailQuery = useTenantUserDetailQuery(id);
   const regionsQuery = useRegionsQuery();
+  const rolesQuery = useTenantRolesQuery();
   const passwordVisible = useBoolean();
   const passwordConfirmVisible = useBoolean();
 
@@ -391,9 +393,11 @@ export default function UserFormView({ mode }: Props) {
             <Stack spacing={2}>
               <Typography variant="subtitle1">{tx('users.table.role')}</Typography>
               <RHFTextField name="role" label={`${tx('users.table.role')} *`} select>
-                <MenuItem value="admin">{tx('users.roles.admin')}</MenuItem>
-                <MenuItem value="manager">{tx('users.roles.manager')}</MenuItem>
-                <MenuItem value="seller">{tx('users.roles.seller')}</MenuItem>
+                {(rolesQuery.data?.results || []).map((role) => (
+                  <MenuItem key={role.value} value={role.value}>
+                    {role.label}
+                  </MenuItem>
+                ))}
               </RHFTextField>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
                 <Box sx={{ width: { xs: 1, sm: '50%' } }}>

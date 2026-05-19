@@ -9,8 +9,14 @@ export const paths = {
     root: '/products',
     details: (id: string) => `/products/${id}`,
   },
+  categories: {
+    root: '/categories',
+    details: (id: string) => `/categories/${id}`,
+  },
   clients: {
     root: '/clients',
+    groups: '/groups',
+    groupsDetails: (id: string) => `/groups/${id}`,
     create: '/clients/new',
     edit: (id: string) => `/clients/${id}/edit`,
     details: (id: string) => `/clients/${id}`,
@@ -34,14 +40,22 @@ export const paths = {
     roles: '/admin/roles',
   },
 
+  reports: {
+    root: '/reports/sales',
+    customers: '/reports/customers',
+    sales: '/reports/sales',
+    employees: '/reports/employees',
+    debts: '/reports/debts',
+  },
+
   components: '/components',
   maintenance: '/maintenance',
   page403: '/403',
   page404: '/404',
   page500: '/500',
 
-  docs: 'https://docs.minimals.cc',
-  changelog: 'https://docs.minimals.cc/changelog',
+  docs: '#',
+  changelog: '#',
 
   auth: {
     jwt: {

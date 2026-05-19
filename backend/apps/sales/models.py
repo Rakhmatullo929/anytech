@@ -8,6 +8,7 @@ class Sale(models.Model):
     class PaymentType(models.TextChoices):
         CASH = "cash", _("Cash")
         CARD = "card", _("Card")
+        TRANSFER = "transfer", _("Transfer")
         DEBT = "debt", _("Debt")
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -17,12 +18,20 @@ class Sale(models.Model):
     client = models.ForeignKey(
         "clients.Client", on_delete=models.SET_NULL, null=True, blank=True, related_name="sales"
     )
+    created_by = models.ForeignKey(
+        "auth_tenant.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="created_sales"
+    )
     total_amount = models.DecimalField(max_digits=14, decimal_places=2)
     payment_type = models.CharField(max_length=10, choices=PaymentType.choices)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = "sales"
+        indexes = [
+            models.Index(fields=["tenant", "-created_at"], name="sales_tenant_created_idx"),
+            models.Index(fields=["tenant", "payment_type"], name="sales_tenant_payment_idx"),
+            models.Index(fields=["client"], name="sales_client_idx"),
+        ]
 
     def __str__(self):
         return f"Sale {self.id}"
@@ -36,6 +45,7 @@ class SaleItem(models.Model):
     )
     quantity = models.PositiveIntegerField()
     price = models.DecimalField(max_digits=12, decimal_places=2)
+    cost = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
 
     class Meta:
         db_table = "sale_items"

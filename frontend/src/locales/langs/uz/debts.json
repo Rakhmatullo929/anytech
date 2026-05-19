@@ -2,6 +2,11 @@
   "detail": {
     "addPayment": "Toʻlov qoʻshish",
     "clientLine": "Mijoz:",
+    "createdLine": "Yaratilgan sana:",
+    "deadlineLine": "Muddat:",
+    "daysLeft": "{{count}} kun qoldi",
+    "daysOverdue": "{{count}} kun kechikdi",
+    "dueToday": "Muddat bugun",
     "headingDetail": "Qarz · {{name}}",
     "notFound": "Qarz topilmadi",
     "paidLine": "Toʻlangan:",
@@ -10,11 +15,29 @@
     "statusLine": "Holat:",
     "totalLine": "Jami:"
   },
+  "filters": {
+    "client": "Mijoz",
+    "dateRange": "Yaratilgan davr",
+    "dateFrom": "Dan",
+    "dateTo": "Gacha",
+    "deadlineRange": "Toʻlov muddati",
+    "deadlineFrom": "Dan",
+    "deadlineTo": "Gacha",
+    "amountRange": "Summa",
+    "amountMin": "Dan",
+    "amountMax": "Gacha"
+  },
+  "list": {
+    "deadline": "Muddat",
+    "daysLeft": "{{count}} kun qoldi",
+    "daysOverdue": "{{count}} kun kechikdi"
+  },
   "detailDocumentTitle": "Qarz",
   "documentTitle": "Qarzlar",
   "paymentDialog": {
     "maxAmount": "Maksimum:",
-    "payButton": "Toʻlash",
+    "payButton": "Qisman",
+    "payFullButton": "To'liq to'lash",
     "title": "Toʻlov"
   }
 }

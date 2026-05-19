@@ -16,15 +16,34 @@
     "toasts": {
       "saved": "Rol ruxsatlari yangilandi"
     },
+    "dialogs": {
+      "create": {
+        "title": "Rol qo'shish",
+        "submit": "Rol yaratish",
+        "fields": {
+          "name": "Rol nomi"
+        }
+      },
+      "edit": {
+        "title": "Rolni tahrirlash"
+      },
+      "delete": {
+        "title": "Rolni o'chirish",
+        "description": "\"{{role}}\" rolini haqiqatan ham o'chirmoqchimisiz?"
+      }
+    },
     "pages": {
       "admin": "Admin",
       "roles": "Rollar",
       "users": "Foydalanuvchilar",
       "pos": "POS",
       "products": "Mahsulotlar",
+      "categories": "Kategoriyalar",
       "clients": "Mijozlar",
+      "groups": "Guruhlar",
       "sales": "Savdolar",
-      "debts": "Qarzlar"
+      "debts": "Qarzlar",
+      "reports": "Hisobotlar"
     },
     "items": {
       "admin": "Tizim va sozlamalarni to'liq boshqarish huquqi",

@@ -19,13 +19,23 @@ urlpatterns = [
         name="product-bulk-delete",
     ),
     path(
+        "bulk-create-excel/",
+        ProductViewSet.as_view({"post": "bulk_create_excel"}),
+        name="product-bulk-create-excel",
+    ),
+    path(
+        "export-excel/",
+        ProductViewSet.as_view({"get": "export_excel"}),
+        name="product-export-excel",
+    ),
+    path(
+        "download-excel-template/",
+        ProductViewSet.as_view({"get": "download_excel_template"}),
+        name="product-download-excel-template",
+    ),
+    path(
         "<uuid:pk>/",
         ProductViewSet.as_view({"get": "retrieve", "put": "update", "delete": "destroy"}),
         name="product-detail",
-    ),
-    path(
-        "<uuid:pk>/stock/",
-        ProductViewSet.as_view({"patch": "adjust_stock"}),
-        name="product-stock",
     ),
 ]

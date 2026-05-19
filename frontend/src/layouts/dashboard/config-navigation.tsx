@@ -21,6 +21,7 @@ const ICONS = {
   user: icon('ic_user'),
   order: icon('ic_order'),
   invoice: icon('ic_invoice'),
+  analytics: icon('ic_analytics'),
 };
 
 // ----------------------------------------------------------------------
@@ -34,14 +35,16 @@ export function useNavData() {
   const canReadAdmin = canReadPage(permissions, 'admin');
   const canReadPos = canReadPage(permissions, 'pos');
   const canReadProducts = canReadPage(permissions, 'products');
+  const canReadCategories = canReadPage(permissions, 'categories');
   const canReadClients = canReadPage(permissions, 'clients');
+  const canReadGroups = canReadPage(permissions, 'groups');
   const canReadSales = canReadPage(permissions, 'sales');
   const canReadDebts = canReadPage(permissions, 'debts');
+  const canReadReports = canReadPage(permissions, 'reports');
 
   const data = useMemo(
     () => [
       {
-        subheader: tx('common.navigation.group'),
         items: [
           ...(canReadAdmin
             ? [
@@ -64,8 +67,31 @@ export function useNavData() {
           ...(canReadProducts
             ? [
                 {
-                  title: tx('common.navigation.products'),
+                  title: tx('common.navigation.catalog'),
                   path: paths.products.root,
+                  icon: ICONS.product,
+                  children: [
+                    {
+                      title: tx('common.navigation.products'),
+                      path: paths.products.root,
+                    },
+                    ...(canReadCategories
+                      ? [
+                          {
+                            title: tx('common.navigation.categories'),
+                            path: paths.categories.root,
+                          },
+                        ]
+                      : []),
+                  ],
+                },
+              ]
+            : []),
+          ...(!canReadProducts && canReadCategories
+            ? [
+                {
+                  title: tx('common.navigation.categories'),
+                  path: paths.categories.root,
                   icon: ICONS.product,
                 },
               ]
@@ -76,6 +102,20 @@ export function useNavData() {
                   title: tx('common.navigation.clients'),
                   path: paths.clients.root,
                   icon: ICONS.user,
+                  children: [
+                    ...(canReadGroups
+                      ? [
+                          {
+                            title: tx('common.navigation.groups'),
+                            path: paths.clients.groups,
+                          },
+                        ]
+                      : []),
+                    {
+                      title: tx('common.navigation.clients'),
+                      path: paths.clients.root,
+                    },
+                  ],
                 },
               ]
             : []),
@@ -97,10 +137,25 @@ export function useNavData() {
                 },
               ]
             : []),
+          ...(canReadReports
+            ? [
+                {
+                  title: tx('common.navigation.reports'),
+                  path: paths.reports.root,
+                  icon: ICONS.analytics,
+                  children: [
+                    { title: tx('common.navigation.reportCustomers'), path: paths.reports.customers },
+                    { title: tx('common.navigation.reportSales'), path: paths.reports.sales },
+                    { title: tx('common.navigation.reportEmployees'), path: paths.reports.employees },
+                    { title: tx('common.navigation.reportDebts'), path: paths.reports.debts },
+                  ],
+                },
+              ]
+            : []),
         ],
       },
     ],
-    [canReadAdmin, canReadClients, canReadDebts, canReadPos, canReadProducts, canReadSales, tx]
+    [canReadAdmin, canReadCategories, canReadClients, canReadDebts, canReadGroups, canReadPos, canReadProducts, canReadReports, canReadSales, tx]
   );
 
   return data;

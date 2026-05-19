@@ -4,8 +4,16 @@
     "pk": "d1000000-0000-0000-0000-000000000001",
     "fields": {
       "tenant": "a1000000-0000-0000-0000-000000000001",
-      "name": "Иванов Алексей",
+      "name": "Алексей",
+      "last_name": "Иванов",
+      "middle_name": "Петрович",
+      "birth_date": "1990-05-15",
+      "gender": "male",
+      "marital_status": "married",
       "phone": "+998901234567",
+      "phones": ["+998901234567"],
+      "addresses": [],
+      "social_networks": {},
       "created_at": "2025-02-01T10:00:00Z"
     }
   },
@@ -14,8 +22,16 @@
     "pk": "d1000000-0000-0000-0000-000000000002",
     "fields": {
       "tenant": "a1000000-0000-0000-0000-000000000001",
-      "name": "Петрова Мария",
+      "name": "Мария",
+      "last_name": "Петрова",
+      "middle_name": "Ивановна",
+      "birth_date": "1995-08-22",
+      "gender": "female",
+      "marital_status": "single",
       "phone": "+998937654321",
+      "phones": ["+998937654321"],
+      "addresses": [],
+      "social_networks": {},
       "created_at": "2025-02-05T14:30:00Z"
     }
   },
@@ -24,8 +40,16 @@
     "pk": "d1000000-0000-0000-0000-000000000003",
     "fields": {
       "tenant": "a1000000-0000-0000-0000-000000000001",
-      "name": "Сидоров Дмитрий",
+      "name": "Дмитрий",
+      "last_name": "Сидоров",
+      "middle_name": "",
+      "birth_date": null,
+      "gender": "male",
+      "marital_status": "",
       "phone": "+998911112233",
+      "phones": ["+998911112233"],
+      "addresses": [],
+      "social_networks": {},
       "created_at": "2025-02-10T09:15:00Z"
     }
   },
@@ -34,8 +58,16 @@
     "pk": "d1000000-0000-0000-0000-000000000004",
     "fields": {
       "tenant": "a1000000-0000-0000-0000-000000000002",
-      "name": "Каримов Бахтиёр",
+      "name": "Бахтиёр",
+      "last_name": "Каримов",
+      "middle_name": "Алишерович",
+      "birth_date": "1988-03-10",
+      "gender": "male",
+      "marital_status": "married",
       "phone": "+998944445566",
+      "phones": ["+998944445566"],
+      "addresses": [],
+      "social_networks": {},
       "created_at": "2025-02-03T11:00:00Z"
     }
   },
@@ -44,8 +76,16 @@
     "pk": "d1000000-0000-0000-0000-000000000005",
     "fields": {
       "tenant": "a1000000-0000-0000-0000-000000000002",
-      "name": "Рахимова Нигора",
+      "name": "Нигора",
+      "last_name": "Рахимова",
+      "middle_name": "",
+      "birth_date": "1993-11-30",
+      "gender": "female",
+      "marital_status": "single",
       "phone": "+998977778899",
+      "phones": ["+998977778899"],
+      "addresses": [],
+      "social_networks": {},
       "created_at": "2025-02-08T16:45:00Z"
     }
   }

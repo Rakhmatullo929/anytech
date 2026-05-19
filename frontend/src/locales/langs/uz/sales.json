@@ -5,13 +5,22 @@
     "headingDetail": "Savdo {{id}}",
     "linesTitle": "Tarkib",
     "notFound": "Savdo topilmadi",
-    "payLine": "Toʻlov:"
+    "payLine": "Toʻlov:",
+    "createdByLine": "Sotuvchi:"
   },
   "detailDocumentTitle": "Savdo",
   "documentTitle": "Savdolar",
   "filters": {
     "allOption": "Barchasi",
-    "paymentLabel": "Toʻlov turi"
+    "paymentLabel": "Toʻlov turi",
+    "dateRange": "Davr",
+    "dateFrom": "Dan",
+    "dateTo": "Gacha",
+    "client": "Mijoz",
+    "seller": "Sotuvchi",
+    "amountRange": "Summa",
+    "amountMin": "Dan",
+    "amountMax": "Gacha"
   },
   "listHeading": "Savdolar tarixi"
 }

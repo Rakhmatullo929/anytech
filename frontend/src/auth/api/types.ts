@@ -1,5 +1,5 @@
 /** Matches `auth_tenant.User.Role` after `humps.camelizeKeys`. */
-export type UserRole = 'admin' | 'manager' | 'seller';
+export type UserRole = string;
 
 /** Matches DRF `UserSerializer` response (camelCase). */
 export type TenantUser = {

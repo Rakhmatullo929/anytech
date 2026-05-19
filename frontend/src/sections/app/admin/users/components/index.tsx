@@ -2,19 +2,19 @@ import Label from 'src/components/label';
 import AdminTabs from './admin-tabs/index';
 
 type Props = {
-  role: 'admin' | 'manager' | 'seller';
+  role: string;
   label: string;
 };
 
-const ROLE_COLOR: Record<Props['role'], 'error' | 'warning' | 'info'> = {
-  admin: 'error',
-  manager: 'warning',
-  seller: 'info',
-};
+function getRoleColor(role: string): 'error' | 'warning' | 'info' {
+  if (role === 'admin') return 'error';
+  if (role === 'manager') return 'warning';
+  return 'info';
+}
 
 export function UserRoleLabel({ role, label }: Props) {
   return (
-    <Label variant="soft" color={ROLE_COLOR[role]}>
+    <Label variant="soft" color={getRoleColor(role)}>
       {label}
     </Label>
   );
