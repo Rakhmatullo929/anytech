@@ -9,7 +9,8 @@ export type PermissionPage =
   | 'groups'
   | 'sales'
   | 'debts'
-  | 'reports';
+  | 'reports'
+  | 'cash_register';
 
 export type PermissionAction = 'read' | 'detail' | 'write';
 

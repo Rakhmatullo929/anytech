@@ -43,7 +43,8 @@
       "groups": "Guruhlar",
       "sales": "Savdolar",
       "debts": "Qarzlar",
-      "reports": "Hisobotlar"
+      "reports": "Hisobotlar",
+      "cash_register": "Kassa"
     },
     "items": {
       "admin": "Tizim va sozlamalarni to'liq boshqarish huquqi",

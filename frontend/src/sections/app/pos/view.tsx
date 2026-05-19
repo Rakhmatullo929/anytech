@@ -1,6 +1,8 @@
 import { useCallback, useMemo, useState } from 'react';
 
+import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import { useSnackbar } from 'src/components/snackbar';
@@ -11,6 +13,8 @@ import { useDebounce } from 'src/hooks/use-debounce';
 import { useLocales } from 'src/locales';
 import { paths } from 'src/routes/paths';
 
+import { useCashRegisterQuery } from '../cash-register/api/use-cash-register-api';
+import { CashRegisterControls, CashRegisterStatusBadge } from '../cash-register/components';
 import type { ClientListItem } from '../clients/api/types';
 import { fetchProductsList } from '../products/api/products-requests';
 import type { ProductListItem } from '../products/api/types';
@@ -45,6 +49,9 @@ export default function PosView() {
   const { tx } = useLocales();
   const { enqueueSnackbar } = useSnackbar();
   const { user: authUser } = useAuthContext();
+
+  const { data: cashRegister, isPending: cashRegisterPending } = useCashRegisterQuery();
+  const isRegisterClosed = !cashRegisterPending && (!cashRegister || cashRegister.status === 'closed');
 
   const [client, setClient] = useState<ClientListItem | null>(null);
   const [createdBy, setCreatedBy] = useState<TenantUserListItem | null>(() => {
@@ -106,7 +113,7 @@ export default function PosView() {
 
   const createSaleMutation = useCreateSaleMutation();
 
-  const canComplete = cart.length > 0 && client !== null && createdBy !== null;
+  const canComplete = cart.length > 0 && client !== null && createdBy !== null && !isRegisterClosed;
 
   const completeSale = useCallback(async () => {
     if (!client) return;
@@ -142,8 +149,25 @@ export default function PosView() {
       <CustomBreadcrumbs
         heading={tx('common.navigation.pos')}
         links={[{ name: tx('common.navigation.pos'), href: paths.pos }]}
+        action={
+          <Stack direction="row" spacing={1.5} alignItems="center">
+            <CashRegisterStatusBadge />
+            <CashRegisterControls />
+          </Stack>
+        }
         sx={{ mb: { xs: 3, md: 5 } }}
       />
+
+      {isRegisterClosed && (
+        <Alert
+          severity="error"
+          sx={{ mb: 3 }}
+          action={<CashRegisterControls />}
+        >
+          <Typography variant="subtitle2">{tx('pos.cashRegister.blockedTitle')}</Typography>
+          <Typography variant="body2">{tx('pos.cashRegister.blockedMessage')}</Typography>
+        </Alert>
+      )}
 
       {showInitialSkeleton ? (
         <PosViewSkeleton />

@@ -5,6 +5,7 @@ from django.db import transaction
 from django.utils.translation import gettext as _
 from rest_framework import serializers
 
+from cash_register.models import CashRegister
 from debts.models import Debt
 from products.models import Product, ProductPurchase
 
@@ -36,6 +37,13 @@ class SaleCreateSerializer(serializers.ModelSerializer):
         read_only_fields = ("id", "tenant", "total_amount", "created_at")
 
     def validate(self, attrs):
+        tenant = self.context["request"].user.tenant
+        register = CashRegister.objects.filter(tenant=tenant).first()
+        if register is None or register.status == CashRegister.Status.CLOSED:
+            raise serializers.ValidationError(
+                {"detail": _("Cash register is closed. Open the register to create sales.")}
+            )
+
         if not attrs.get("items"):
             raise serializers.ValidationError({"items": _("At least one item is required.")})
 
