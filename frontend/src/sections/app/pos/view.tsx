@@ -60,7 +60,7 @@ export default function PosView() {
     return tenantUserToListItem(authUser as TenantUser);
   });
   const [paymentType, setPaymentType] = useState<SalePaymentType>('cash');
-  const [debtDeadlineDays, setDebtDeadlineDays] = useState<number | ''>('');
+  const [debtDeadlineDays, setDebtDeadlineDays] = useState<number | ''>(15);
   const [search, setSearch] = useState('');
 
   const debouncedSearch = useDebounce(search, 400);
@@ -114,7 +114,12 @@ export default function PosView() {
 
   const createSaleMutation = useCreateSaleMutation();
 
-  const canComplete = cart.length > 0 && client !== null && createdBy !== null && !isRegisterClosed;
+  const canComplete =
+    cart.length > 0 &&
+    client !== null &&
+    createdBy !== null &&
+    !isRegisterClosed &&
+    (paymentType !== 'debt' || debtDeadlineDays !== '');
 
   const completeSale = useCallback(async () => {
     if (!client) return;
@@ -134,7 +139,7 @@ export default function PosView() {
       clear();
       setClient(null);
       setPaymentType('cash');
-      setDebtDeadlineDays('');
+      setDebtDeadlineDays(15);
       if (authUser && 'id' in authUser) {
         setCreatedBy(tenantUserToListItem(authUser as TenantUser));
       }
