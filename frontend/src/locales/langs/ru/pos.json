@@ -27,6 +27,10 @@
   "stockShort": "остаток",
   "createdBy": "Продавец",
   "selectCreatedBy": "Выберите продавца",
+  "todaySales": {
+    "heading": "Сегодняшние продажи",
+    "empty": "Сегодня пока нет продаж"
+  },
   "validation": {
     "qtyMin": "Минимум 1",
     "qtyExceedsStock": "В наличии: {{max}}",
