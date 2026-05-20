@@ -22,7 +22,7 @@ import type { TenantUserListItem } from '../admin/users/api/types';
 
 import { useCreateSaleMutation } from './api/use-pos-api';
 import type { SalePaymentType } from './api/types';
-import { PosCart, PosProductList } from './components';
+import { PosCart, PosProductList, PosTodaySales } from './components';
 import { PosViewSkeleton } from './skeleton';
 import { usePosCart } from './hooks/use-pos-cart';
 
@@ -60,7 +60,7 @@ export default function PosView() {
     return tenantUserToListItem(authUser as TenantUser);
   });
   const [paymentType, setPaymentType] = useState<SalePaymentType>('cash');
-  const [debtDeadlineDays, setDebtDeadlineDays] = useState<number | ''>('');
+  const [debtDeadlineDays, setDebtDeadlineDays] = useState<number | ''>(15);
   const [search, setSearch] = useState('');
 
   const debouncedSearch = useDebounce(search, 400);
@@ -70,7 +70,7 @@ export default function PosView() {
   // ── Product infinite list ──────────────────────────────────────────
 
   const productsQueryKey = useMemo(
-    () => ['pos', 'products', debouncedSearch],
+    () => ['products', 'pos', debouncedSearch],
     [debouncedSearch]
   );
 
@@ -114,7 +114,12 @@ export default function PosView() {
 
   const createSaleMutation = useCreateSaleMutation();
 
-  const canComplete = cart.length > 0 && client !== null && createdBy !== null && !isRegisterClosed;
+  const canComplete =
+    cart.length > 0 &&
+    client !== null &&
+    createdBy !== null &&
+    !isRegisterClosed &&
+    (paymentType !== 'debt' || debtDeadlineDays !== '');
 
   const completeSale = useCallback(async () => {
     if (!client) return;
@@ -134,7 +139,7 @@ export default function PosView() {
       clear();
       setClient(null);
       setPaymentType('cash');
-      setDebtDeadlineDays('');
+      setDebtDeadlineDays(15);
       if (authUser && 'id' in authUser) {
         setCreatedBy(tenantUserToListItem(authUser as TenantUser));
       }
@@ -173,36 +178,40 @@ export default function PosView() {
       {showInitialSkeleton ? (
         <PosViewSkeleton />
       ) : (
-        <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} alignItems="flex-start">
-          <PosProductList
-            products={products}
-            search={search}
-            onSearchChange={setSearch}
-            onAddProduct={addProduct}
-            isFetching={productsFetching && !!productsData}
-            isFetchingNextPage={isFetchingNextPage}
-            hasNextPage={Boolean(hasNextPage)}
-            observerRef={observer.ref}
-          />
+        <Stack spacing={3}>
+          <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} alignItems="flex-start">
+            <PosProductList
+              products={products}
+              search={search}
+              onSearchChange={setSearch}
+              onAddProduct={addProduct}
+              isFetching={productsFetching && !!productsData}
+              isFetchingNextPage={isFetchingNextPage}
+              hasNextPage={Boolean(hasNextPage)}
+              observerRef={observer.ref}
+            />
 
-          <PosCart
-            cart={cart}
-            onSetQty={setQty}
-            onSetPrice={setPrice}
-            onRemove={removeLine}
-            client={client}
-            onClientChange={setClient}
-            createdBy={createdBy}
-            onCreatedByChange={setCreatedBy}
-            paymentType={paymentType}
-            onPaymentTypeChange={setPaymentType}
-            debtDeadlineDays={debtDeadlineDays}
-            onDebtDeadlineDaysChange={setDebtDeadlineDays}
-            subtotal={subtotal}
-            canComplete={canComplete}
-            isCreating={createSaleMutation.isPending}
-            onComplete={completeSale}
-          />
+            <PosCart
+              cart={cart}
+              onSetQty={setQty}
+              onSetPrice={setPrice}
+              onRemove={removeLine}
+              client={client}
+              onClientChange={setClient}
+              createdBy={createdBy}
+              onCreatedByChange={setCreatedBy}
+              paymentType={paymentType}
+              onPaymentTypeChange={setPaymentType}
+              debtDeadlineDays={debtDeadlineDays}
+              onDebtDeadlineDaysChange={setDebtDeadlineDays}
+              subtotal={subtotal}
+              canComplete={canComplete}
+              isCreating={createSaleMutation.isPending}
+              onComplete={completeSale}
+            />
+          </Stack>
+
+          <PosTodaySales />
         </Stack>
       )}
     </>

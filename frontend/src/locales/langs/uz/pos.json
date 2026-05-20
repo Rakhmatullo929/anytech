@@ -27,6 +27,10 @@
   "stockShort": "qoldiq",
   "createdBy": "Sotuvchi",
   "selectCreatedBy": "Sotuvchini tanlang",
+  "todaySales": {
+    "heading": "Bugungi savdolar",
+    "empty": "Bugun hali savdo yo'q"
+  },
   "validation": {
     "qtyMin": "Kamida 1",
     "qtyExceedsStock": "Mavjud: {{max}}",
