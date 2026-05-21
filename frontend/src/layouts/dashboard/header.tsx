@@ -21,8 +21,6 @@ import {
   AccountPopover,
   SettingsButton,
   LanguagePopover,
-  ContactsPopover,
-  NotificationsPopover,
 } from '../_common';
 
 // ----------------------------------------------------------------------
@@ -68,10 +66,6 @@ export default function Header({ onOpenNav }: Props) {
         <CashRegisterStatusBadge />
 
         <LanguagePopover />
-
-        <NotificationsPopover />
-
-        <ContactsPopover />
 
         <SettingsButton />
 
