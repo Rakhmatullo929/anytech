@@ -7,8 +7,6 @@ import { authRoutes } from './auth';
 import { dashboardRoutes } from './dashboard';
 import { componentsRoutes } from './components';
 
-// App route table (root → JWT login).
-
 // ----------------------------------------------------------------------
 
 export default function Router() {

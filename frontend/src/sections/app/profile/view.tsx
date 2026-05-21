@@ -1,113 +1,177 @@
-import Avatar from '@mui/material/Avatar';
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import Chip from '@mui/material/Chip';
-import Stack from '@mui/material/Stack';
-import Divider from '@mui/material/Divider';
-import Typography from '@mui/material/Typography';
+import { useMemo } from 'react';
 
-import { useLocales } from 'src/locales';
-import { useAppUserProfile } from 'src/hooks/use-app-user-profile';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
-import { fDateTime } from 'src/utils/format-time';
+import EmptyContent from 'src/components/empty-content';
+import ProfileCover from 'src/components/profile-cover';
+import { useLocales } from 'src/locales';
+import { paths } from 'src/routes/paths';
+import { fDate, fDateTime } from 'src/utils/format-time';
+import { stringParam, useUrlQueryState } from 'src/hooks/use-url-query-state';
+
+import { UserDetailsSkeleton } from '../admin/users/skeleton';
+import {
+  AccessTabPanel,
+  ContactsTabPanel,
+  DetailsTabs,
+  OverviewTabPanel,
+  type UserDetailsTabValue,
+} from '../admin/users/details/components';
+import { useMyProfileQuery } from './api';
+
+// ----------------------------------------------------------------------
 
 export default function ProfileView() {
   const { tx } = useLocales();
-  const { user } = useAppUserProfile();
-  const { role } = user;
+  const { data: user, isPending, isError } = useMyProfileQuery();
+  const { values, setValues } = useUrlQueryState({ tab: stringParam('overview') });
 
-  const displayName = user.displayName || '-';
-  const email = user.email || '-';
-  const phone = user.phoneNumber || '-';
-  const gender = user.gender ? tx(`users.genders.${user.gender}`) : '-';
-  const passportSeries = user.passportSeries || '-';
-  const createdAt = user.createdAt ? fDateTime(user.createdAt) : '';
-  const roleLabel = (() => {
+  const fullName = useMemo(
+    () => [user?.firstName, user?.lastName, user?.middleName].filter(Boolean).join(' '),
+    [user?.firstName, user?.lastName, user?.middleName]
+  );
+
+  const notSetLabel = tx('clients.detail.notSet');
+
+  const activeTab = ((): UserDetailsTabValue => {
+    const raw = values.tab;
+    if (raw === 'overview' || raw === 'contacts' || raw === 'access') return raw;
+    return 'overview';
+  })();
+
+  const tabLabels: Record<UserDetailsTabValue, string> = {
+    overview: tx('users.detail.tabs.overview'),
+    contacts: tx('users.detail.tabs.contacts'),
+    access: tx('users.detail.tabs.access'),
+  };
+
+  const getRoleLabel = (role: string) => {
     const key = `users.roles.${role}`;
     const translated = tx(key);
     return translated === key ? role : translated;
-  })();
+  };
 
-  const avatarInitial = displayName.trim().charAt(0).toUpperCase() || 'U';
+  if (isPending) {
+    return (
+      <Box>
+        <UserDetailsSkeleton />
+      </Box>
+    );
+  }
+
+  if (isError || !user) {
+    return <EmptyContent filled title={tx('users.detail.notFound')} />;
+  }
 
   return (
     <>
       <CustomBreadcrumbs
         heading={tx('profile.heading')}
-        links={[{ name: tx('profile.heading'), href: '/profile' }]}
-        sx={{ mb: { xs: 3, md: 5 } }}
+        links={[{ name: tx('profile.heading'), href: paths.profile }]}
+        sx={{ mb: { xs: 3, md: 4 } }}
       />
 
-      <Stack spacing={3}>
-        <Card
-          sx={{
-            p: 3,
-            background: (theme) =>
-              `linear-gradient(135deg, ${theme.palette.primary.lighter} 0%, ${theme.palette.background.paper} 65%)`,
-          }}
-        >
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2.5} alignItems={{ xs: 'flex-start', sm: 'center' }}>
-            <Avatar sx={{ width: 64, height: 64, bgcolor: 'primary.main', fontWeight: 700, fontSize: 28 }}>
-              {avatarInitial}
-            </Avatar>
-            <Box sx={{ flexGrow: 1 }}>
-              <Typography variant="h4">{displayName}</Typography>
-              <Typography variant="body2" color="text.secondary">
-                {email}
-              </Typography>
-            </Box>
-            <Chip color="primary" variant="soft" label={roleLabel} />
-          </Stack>
-        </Card>
+      <Stack spacing={2}>
+        <ProfileCover
+          title={fullName || user.phone || notSetLabel}
+          subtitle={user.phone || ''}
+          emptyLabel={notSetLabel}
+          editLabel={tx('common.actions.edit')}
+          chips={[
+            {
+              key: 'role',
+              title: tx('users.table.role'),
+              icon: 'solar:shield-user-bold',
+              label: getRoleLabel(user.role),
+            },
+            {
+              key: 'gender',
+              title: tx('common.table.gender'),
+              icon: user.gender === 'female' ? 'mdi:gender-female' : 'mdi:gender-male',
+              label: user.gender ? tx(`users.genders.${user.gender}`) : notSetLabel,
+            },
+            {
+              key: 'region',
+              title: tx('users.form.region'),
+              icon: 'solar:map-point-bold',
+              label: user.region?.name || notSetLabel,
+            },
+            {
+              key: 'district',
+              title: tx('clients.form.fields.city'),
+              icon: 'solar:city-bold',
+              label: user.district?.name || notSetLabel,
+            },
+          ]}
+        />
 
-        <Card sx={{ p: 3 }}>
-          <Typography variant="subtitle1">{tx('profile.personalInfo')}</Typography>
-          <Divider sx={{ my: 2 }} />
+        <DetailsTabs
+          value={activeTab}
+          onChange={(nextTab) => setValues({ tab: nextTab })}
+          labels={tabLabels}
+        />
 
-          <Box
-            sx={{
-              display: 'grid',
-              gap: 2,
-              gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
-            }}
-          >
-            <Stack spacing={0.5}>
-              <Typography variant="caption" color="text.secondary">
-                {tx('common.table.phone')}
-              </Typography>
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                {phone}
-              </Typography>
-            </Stack>
+        {activeTab === 'overview' && (
+          <OverviewTabPanel
+            title={tx('users.detail.sections.personal')}
+            emptyLabel={notSetLabel}
+            stats={[
+              { label: tx('users.table.role'), value: getRoleLabel(user.role) },
+              { label: tx('common.table.created'), value: fDateTime(user.createdAt) },
+              { label: tx('common.table.phone'), value: user.phone || notSetLabel },
+            ]}
+            infoItems={[
+              { label: tx('clients.form.fields.name'), value: user.firstName || '' },
+              { label: tx('clients.form.fields.lastName'), value: user.lastName || '' },
+              { label: tx('clients.form.fields.middleName'), value: user.middleName || '' },
+              {
+                label: tx('clients.form.fields.birthDate'),
+                value: user.birthDate ? fDate(user.birthDate) : '',
+              },
+              {
+                label: tx('common.table.gender'),
+                value: user.gender ? tx(`users.genders.${user.gender}`) : '',
+              },
+              { label: tx('users.form.region'), value: user.region?.name || '' },
+              { label: tx('clients.form.fields.city'), value: user.district?.name || '' },
+            ]}
+          />
+        )}
 
-            <Stack spacing={0.5}>
-              <Typography variant="caption" color="text.secondary">
-                {tx('common.table.gender')}
-              </Typography>
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                {gender}
-              </Typography>
-            </Stack>
+        {activeTab === 'contacts' && (
+          <ContactsTabPanel
+            phoneTitle={tx('users.detail.sections.contacts')}
+            emptyLabel={notSetLabel}
+            contactItems={[
+              {
+                key: 'phone',
+                icon: 'solar:phone-bold',
+                label: tx('common.table.phone'),
+                value: user.phone || '',
+              },
+              {
+                key: 'email',
+                icon: 'solar:letter-bold',
+                label: tx('common.table.email'),
+                value: user.email || '',
+              },
+            ]}
+          />
+        )}
 
-            <Stack spacing={0.5}>
-              <Typography variant="caption" color="text.secondary">
-                {tx('common.table.passportSeries')}
-              </Typography>
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                {passportSeries}
-              </Typography>
-            </Stack>
-
-            <Stack spacing={0.5}>
-              <Typography variant="caption" color="text.secondary">
-                {tx('common.table.created')}
-              </Typography>
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                {createdAt || '-'}
-              </Typography>
-            </Stack>
-          </Box>
-        </Card>
+        {activeTab === 'access' && (
+          <AccessTabPanel
+            title={tx('users.detail.sections.access')}
+            emptyLabel={notSetLabel}
+            items={[
+              { label: tx('users.table.role'), value: getRoleLabel(user.role) },
+              { label: tx('common.table.passportSeries'), value: user.passportSeries || '' },
+              { label: tx('common.table.created'), value: fDateTime(user.createdAt) },
+            ]}
+          />
+        )}
       </Stack>
     </>
   );
