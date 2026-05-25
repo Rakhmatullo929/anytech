@@ -581,6 +581,73 @@ class TestTenantUsersEndpoint:
         assert set(admin_row["permissions"]) == set(ADMIN_REQUIRED_PERMISSIONS)
 
 
+class TestPermissionsCache:
+    """Cross-request caching of resolved (tenant, role) permissions."""
+
+    @pytest.fixture(autouse=True)
+    def _clear_cache(self):
+        from django.core.cache import cache
+
+        cache.clear()
+        yield
+        cache.clear()
+
+    def test_second_call_hits_cache(self, manager_user, django_assert_num_queries):
+        from auth_tenant.permissions import get_user_permissions
+
+        # Cold: DB is queried once.
+        with django_assert_num_queries(1):
+            first = get_user_permissions(manager_user)
+
+        # Fresh User instance (no per-request cache attr) — must hit Layer 2
+        # (process/Redis cache) with zero queries.
+        refreshed = User.objects.get(pk=manager_user.pk)
+        with django_assert_num_queries(0):
+            second = get_user_permissions(refreshed)
+
+        assert first == second
+
+    def test_update_invalidates_cache(self, admin_client, manager_user):
+        from auth_tenant.permissions import get_user_permissions
+
+        get_user_permissions(manager_user)  # warm cache
+
+        resp = admin_client.patch(
+            ROLE_PERMISSIONS_URL("manager"),
+            {"permissions": ["products:read", "products:write"]},
+            format="json",
+        )
+        assert resp.status_code == status.HTTP_200_OK
+
+        # Fresh instance — Layer 2 must reflect the update.
+        refreshed = User.objects.get(pk=manager_user.pk)
+        new_perms = get_user_permissions(refreshed)
+        assert new_perms == {"products:read", "products:write"}
+
+    def test_signal_invalidates_on_direct_save(self, tenant):
+        """RolePermission.save() outside the serializer (admin UI, scripts)
+        must drop the cache via the post_save signal."""
+        from auth_tenant.permissions import get_user_permissions
+        from auth_tenant.models import RolePermission
+
+        user = User.objects.create_user(
+            phone="+998901119001",
+            password="StrongPass123!",
+            tenant=tenant,
+            role="custom_role",
+        )
+        first = get_user_permissions(user)
+
+        RolePermission.objects.create(
+            tenant=tenant, role="custom_role", permission="reports:read"
+        )
+
+        refreshed = User.objects.get(pk=user.pk)
+        second = get_user_permissions(refreshed)
+        assert second == {"reports:read"}
+        assert second != first
+
+
 class TestImpersonateEndpoint:
     def test_impersonate_admin_success(self, admin_client, manager_user):
         resp = admin_client.post(
