@@ -13,9 +13,9 @@ import pytest
 from django.urls import reverse
 from rest_framework import status
 
-from clients.models import Client
-from debts.models import Debt
-from sales.models import Sale
+from apps.clients.models import Client
+from apps.debts.models import Debt
+from apps.sales.models import Sale
 
 from conftest import make_sale_payload
 

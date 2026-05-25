@@ -11,8 +11,8 @@ import pytest
 from django.urls import reverse
 from rest_framework import status
 
-from debts.models import Debt
-from sales.models import Sale, SaleItem
+from apps.debts.models import Debt
+from apps.sales.models import Sale, SaleItem
 
 pytestmark = pytest.mark.django_db
 
@@ -267,7 +267,7 @@ class TestSaleTenantIsolation:
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_cannot_use_other_tenant_client(self, other_tenant_client, client_obj, other_tenant, other_tenant_user):
-        from products.models import Product
+        from apps.products.models import Product
 
         other_product = Product.objects.create(
             tenant=other_tenant,

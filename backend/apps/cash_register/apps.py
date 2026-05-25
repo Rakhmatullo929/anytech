@@ -2,4 +2,5 @@ from django.apps import AppConfig
 
 
 class CashRegisterConfig(AppConfig):
-    name = 'cash_register'
+    name = "apps.cash_register"
+    label = "cash_register"

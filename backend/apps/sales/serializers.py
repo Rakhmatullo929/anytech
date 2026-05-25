@@ -5,9 +5,9 @@ from django.db import transaction
 from django.utils.translation import gettext as _
 from rest_framework import serializers
 
-from cash_register.models import CashRegister
-from debts.models import Debt
-from products.models import Product, ProductPurchase
+from apps.cash_register.models import CashRegister
+from apps.debts.models import Debt
+from apps.products.models import Product, ProductPurchase
 
 from .models import Sale, SaleItem
 
@@ -109,7 +109,7 @@ class SaleCreateSerializer(serializers.ModelSerializer):
         debt_deadline_days = validated_data.pop("debt_deadline_days", None)
         created_by_user_id = validated_data.pop("created_by_user_id")
         tenant = validated_data["tenant"]
-        from auth_tenant.models import User as TenantUser
+        from apps.auth_tenant.models import User as TenantUser
         try:
             validated_data["created_by"] = TenantUser.objects.get(pk=created_by_user_id, tenant=tenant)
         except TenantUser.DoesNotExist:
