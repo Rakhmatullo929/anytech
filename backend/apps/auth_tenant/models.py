@@ -2,6 +2,7 @@ import uuid
 
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
+from django.db.models import Q, UniqueConstraint
 from django.utils.translation import gettext_lazy as _
 
 
@@ -79,8 +80,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     birth_date = models.DateField(null=True, blank=True)
     region = models.ForeignKey(Region, on_delete=models.SET_NULL, null=True, blank=True, related_name="users")
     district = models.ForeignKey(District, on_delete=models.SET_NULL, null=True, blank=True, related_name="users")
-    phone = models.CharField(max_length=20, unique=True, null=True, blank=True)
-    email = models.EmailField(unique=True, null=True, blank=True)
+    # Multi-tenant: a phone/email can be reused across tenants (e.g. an
+    # accountant working for two organizations). Uniqueness is enforced
+    # per-tenant via Meta.constraints below; the standalone db_index keeps
+    # the login lookup fast now that the implicit unique index is gone.
+    phone = models.CharField(max_length=20, null=True, blank=True, db_index=True)
+    email = models.EmailField(null=True, blank=True)
     passport_series = models.CharField(max_length=9, null=True, blank=True)
     gender = models.CharField(max_length=10, choices=Gender.choices, null=True, blank=True)
     role = models.CharField(max_length=64, default="seller")
@@ -95,6 +100,18 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     class Meta:
         db_table = "users"
+        constraints = [
+            UniqueConstraint(
+                fields=["tenant", "phone"],
+                condition=Q(phone__isnull=False),
+                name="unique_user_phone_per_tenant",
+            ),
+            UniqueConstraint(
+                fields=["tenant", "email"],
+                condition=Q(email__isnull=False),
+                name="unique_user_email_per_tenant",
+            ),
+        ]
 
     def __str__(self):
         return self.phone or self.email or str(self.id)
