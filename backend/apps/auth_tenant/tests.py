@@ -63,6 +63,60 @@ class TestUserModel:
         assert str(admin_user) == admin_user.phone
 
 
+# ── TenantQuerySetMixin tests ────────────────────────────────────────
+
+
+class TestTenantQuerySetMixin:
+    """The mixin must refuse a payload tenant that doesn't match the caller's
+    instead of silently overriding it."""
+
+    def _build(self, request_user):
+        from types import SimpleNamespace
+        from auth_tenant.mixins import TenantQuerySetMixin
+
+        # Bare mixin instance with just the request attribute it touches.
+        view = TenantQuerySetMixin()
+        view.request = SimpleNamespace(user=request_user)
+        return view
+
+    def _serializer(self, validated_data):
+        from types import SimpleNamespace
+
+        calls = []
+
+        def save(**kwargs):
+            calls.append(kwargs)
+
+        return SimpleNamespace(validated_data=validated_data, save=save), calls
+
+    def test_payload_with_matching_tenant_allowed(self, admin_user):
+        view = self._build(admin_user)
+        serializer, calls = self._serializer({"tenant": admin_user.tenant})
+        view.perform_update(serializer)
+        view.perform_create(serializer)
+        assert len(calls) == 2
+        assert all(c == {"tenant": admin_user.tenant} for c in calls)
+
+    def test_payload_with_other_tenant_raises_403(self, admin_user, other_tenant):
+        from rest_framework.exceptions import PermissionDenied
+
+        view = self._build(admin_user)
+        serializer, calls = self._serializer({"tenant": other_tenant})
+        with pytest.raises(PermissionDenied):
+            view.perform_update(serializer)
+        with pytest.raises(PermissionDenied):
+            view.perform_create(serializer)
+        assert calls == []  # never reached serializer.save
+
+    def test_empty_validated_data_uses_request_tenant(self, admin_user):
+        """The common case: serializer marks tenant read-only, so validated_data
+        has no tenant key. Mixin injects the caller's tenant on save."""
+        view = self._build(admin_user)
+        serializer, calls = self._serializer({"name": "anything"})
+        view.perform_create(serializer)
+        assert calls == [{"tenant": admin_user.tenant}]
+
+
 # ── Registration tests ────────────────────────────────────────────────
 
 
