@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import password_validation
 from django.db import transaction
 from django.utils.text import slugify
@@ -8,6 +9,10 @@ from .models import District, Region, RolePermission, Tenant, TenantRole, User
 from .permission_catalog import ADMIN_REQUIRED_PERMISSIONS, ALL_PERMISSIONS
 from .roles import ensure_tenant_roles
 from .phone import get_phone_rule, is_phone_valid, normalize_phone
+
+# Imported from settings so DRF length checks stay in lockstep with
+# AUTH_PASSWORD_VALIDATORS' MinimumLengthValidator (single source of truth).
+PASSWORD_MIN_LENGTH = settings.MIN_PASSWORD_LENGTH
 
 
 def normalize_passport_series(value):
@@ -98,8 +103,8 @@ class RegisterSerializer(serializers.Serializer):
     first_name = serializers.CharField(max_length=255)
     phone = serializers.CharField(max_length=20)
     email = serializers.EmailField(required=False, allow_blank=True, allow_null=True)
-    password = serializers.CharField(write_only=True, min_length=6)
-    password_confirm = serializers.CharField(write_only=True, min_length=6)
+    password = serializers.CharField(write_only=True, min_length=PASSWORD_MIN_LENGTH)
+    password_confirm = serializers.CharField(write_only=True, min_length=PASSWORD_MIN_LENGTH)
 
     def validate_phone(self, value):
         # Registration always creates a fresh tenant, so phone/email uniqueness
@@ -172,8 +177,8 @@ class TenantUserCreateSerializer(serializers.Serializer):
     role = serializers.CharField(max_length=64)
     region_id = serializers.UUIDField(required=True, allow_null=False)
     district_id = serializers.UUIDField(required=True, allow_null=False)
-    password = serializers.CharField(write_only=True, min_length=6)
-    password_confirm = serializers.CharField(write_only=True, min_length=6)
+    password = serializers.CharField(write_only=True, min_length=PASSWORD_MIN_LENGTH)
+    password_confirm = serializers.CharField(write_only=True, min_length=PASSWORD_MIN_LENGTH)
 
     def validate_phone(self, value):
         request = self.context["request"]
@@ -259,9 +264,9 @@ class TenantUserUpdateSerializer(serializers.Serializer):
     role = serializers.CharField(max_length=64)
     region_id = serializers.UUIDField(required=True, allow_null=False)
     district_id = serializers.UUIDField(required=True, allow_null=False)
-    password = serializers.CharField(write_only=True, min_length=6, required=False, allow_blank=True)
+    password = serializers.CharField(write_only=True, min_length=PASSWORD_MIN_LENGTH, required=False, allow_blank=True)
     password_confirm = serializers.CharField(
-        write_only=True, min_length=6, required=False, allow_blank=True
+        write_only=True, min_length=PASSWORD_MIN_LENGTH, required=False, allow_blank=True
     )
 
     def validate_phone(self, value):
