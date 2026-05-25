@@ -159,7 +159,7 @@ apiClient.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    const status = error.response.status;
+    const { status } = error.response;
     const originalRequest = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean;
     };
