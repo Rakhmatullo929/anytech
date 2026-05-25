@@ -200,7 +200,7 @@ class SaleListSerializer(serializers.ModelSerializer):
         u = obj.created_by
         if not u:
             return None
-        return ' '.join(filter(None, [u.first_name, getattr(u, 'last_name', '') or ''])) or None
+        return " ".join(filter(None, [u.first_name, u.last_name])) or None
 
     class Meta:
         model = Sale
