@@ -7,11 +7,11 @@ from rest_framework.views import APIView
 from django.db.models import Avg, Count, DecimalField, ExpressionWrapper, F, Sum
 from django.db.models.functions import Coalesce, TruncDate, TruncMonth
 
-from auth_tenant.permissions import page_action_permission
-from clients.models import Client
+from apps.auth_tenant.permissions import page_action_permission
+from apps.clients.models import Client
 from config.pagination import StandardResultsSetPagination
-from debts.models import Debt, Payment
-from sales.models import Sale, SaleItem
+from apps.debts.models import Debt, Payment
+from apps.sales.models import Sale, SaleItem
 
 
 def _parse_date(value, default: date) -> date:

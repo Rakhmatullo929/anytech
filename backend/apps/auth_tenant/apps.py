@@ -2,7 +2,8 @@ from django.apps import AppConfig
 
 
 class AuthTenantConfig(AppConfig):
-    name = "auth_tenant"
+    name = "apps.auth_tenant"
+    label = "auth_tenant"
 
     def ready(self):
         # Side effect: registers post_save/post_delete receivers that invalidate

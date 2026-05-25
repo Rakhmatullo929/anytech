@@ -8,9 +8,9 @@ import pytest
 from django.urls import reverse
 from rest_framework import status
 
-from auth_tenant.models import Tenant, User
-from auth_tenant.permission_catalog import ADMIN_REQUIRED_PERMISSIONS
-from auth_tenant.permissions import IsAdmin, IsManagerOrAbove, IsSellerOrAbove
+from apps.auth_tenant.models import Tenant, User
+from apps.auth_tenant.permission_catalog import ADMIN_REQUIRED_PERMISSIONS
+from apps.auth_tenant.permissions import IsAdmin, IsManagerOrAbove, IsSellerOrAbove
 
 pytestmark = pytest.mark.django_db
 
@@ -72,7 +72,7 @@ class TestTenantQuerySetMixin:
 
     def _build(self, request_user):
         from types import SimpleNamespace
-        from auth_tenant.mixins import TenantQuerySetMixin
+        from apps.auth_tenant.mixins import TenantQuerySetMixin
 
         # Bare mixin instance with just the request attribute it touches.
         view = TenantQuerySetMixin()
@@ -647,7 +647,7 @@ class TestPermissionsCache:
         cache.clear()
 
     def test_second_call_hits_cache(self, manager_user, django_assert_num_queries):
-        from auth_tenant.permissions import get_user_permissions
+        from apps.auth_tenant.permissions import get_user_permissions
 
         # Cold: DB is queried once.
         with django_assert_num_queries(1):
@@ -662,7 +662,7 @@ class TestPermissionsCache:
         assert first == second
 
     def test_update_invalidates_cache(self, admin_client, manager_user):
-        from auth_tenant.permissions import get_user_permissions
+        from apps.auth_tenant.permissions import get_user_permissions
 
         get_user_permissions(manager_user)  # warm cache
 
@@ -681,8 +681,8 @@ class TestPermissionsCache:
     def test_signal_invalidates_on_direct_save(self, tenant):
         """RolePermission.save() outside the serializer (admin UI, scripts)
         must drop the cache via the post_save signal."""
-        from auth_tenant.permissions import get_user_permissions
-        from auth_tenant.models import RolePermission
+        from apps.auth_tenant.permissions import get_user_permissions
+        from apps.auth_tenant.models import RolePermission
 
         user = User.objects.create_user(
             phone="+998901119001",

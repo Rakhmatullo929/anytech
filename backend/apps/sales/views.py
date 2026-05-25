@@ -7,8 +7,8 @@ from rest_framework.viewsets import ModelViewSet
 from django.http import HttpResponse
 from django.utils.translation import gettext as _
 
-from auth_tenant.mixins import TenantQuerySetMixin
-from auth_tenant.permissions import page_action_permission
+from apps.auth_tenant.mixins import TenantQuerySetMixin
+from apps.auth_tenant.permissions import page_action_permission
 
 from .models import Sale
 from .serializers import SaleCreateSerializer, SaleDetailSerializer, SaleListSerializer

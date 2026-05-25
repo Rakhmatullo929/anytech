@@ -8,7 +8,7 @@ import pytest
 from django.urls import reverse
 from rest_framework import status
 
-from products.models import Product, ProductPurchase
+from apps.products.models import Product, ProductPurchase
 
 pytestmark = pytest.mark.django_db
 
@@ -190,7 +190,7 @@ class TestProductSearch:
 
 class TestProductFiltering:
     def test_filter_by_category(self, manager_client, tenant):
-        from products.models import Category
+        from apps.products.models import Category
 
         c1 = Category.objects.create(tenant=tenant, name="Phones")
         c2 = Category.objects.create(tenant=tenant, name="Laptops")
