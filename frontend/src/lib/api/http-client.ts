@@ -185,7 +185,7 @@ apiClient.interceptors.response.use(
       const newAccess = await refreshPromise;
       originalRequest.headers = originalRequest.headers ?? {};
       (originalRequest.headers as Record<string, string>).Authorization = `Bearer ${newAccess}`;
-      return apiClient.request(originalRequest);
+      return await apiClient.request(originalRequest);
     } catch (refreshError) {
       clearSessionAndRedirect();
       return Promise.reject(refreshError);
