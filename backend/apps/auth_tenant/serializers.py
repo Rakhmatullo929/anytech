@@ -395,14 +395,21 @@ class TenantRolePermissionsUpdateSerializer(serializers.Serializer):
         request = self.context["request"]
         role = self.context["role"]
         permissions = self.validated_data["permissions"]
+        tenant = request.user.tenant
 
-        RolePermission.objects.filter(tenant=request.user.tenant, role=role).delete()
+        # QuerySet.delete() and bulk_create() bypass post_save/post_delete signals,
+        # so the signal-based invalidation in signals.py would NOT fire here.
+        # Invalidate explicitly to keep the cache coherent.
+        RolePermission.objects.filter(tenant=tenant, role=role).delete()
         RolePermission.objects.bulk_create(
             [
-                RolePermission(tenant=request.user.tenant, role=role, permission=permission)
+                RolePermission(tenant=tenant, role=role, permission=permission)
                 for permission in permissions
             ]
         )
+        from .permissions import invalidate_role_permissions_cache
+
+        invalidate_role_permissions_cache(tenant.id, role)
         return permissions
 
 
