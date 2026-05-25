@@ -10,8 +10,8 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from auth_tenant.mixins import TenantQuerySetMixin
-from auth_tenant.permissions import page_action_permission
+from apps.auth_tenant.mixins import TenantQuerySetMixin
+from apps.auth_tenant.permissions import page_action_permission
 
 from .models import Debt, Payment
 from .serializers import DebtDetailSerializer, DebtListSerializer, PaymentCreateSerializer

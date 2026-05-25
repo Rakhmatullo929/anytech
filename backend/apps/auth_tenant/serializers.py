@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import password_validation
 from django.db import transaction
 from django.utils.text import slugify
@@ -8,6 +9,10 @@ from .models import District, Region, RolePermission, Tenant, TenantRole, User
 from .permission_catalog import ADMIN_REQUIRED_PERMISSIONS, ALL_PERMISSIONS
 from .roles import ensure_tenant_roles
 from .phone import get_phone_rule, is_phone_valid, normalize_phone
+
+# Imported from settings so DRF length checks stay in lockstep with
+# AUTH_PASSWORD_VALIDATORS' MinimumLengthValidator (single source of truth).
+PASSWORD_MIN_LENGTH = settings.MIN_PASSWORD_LENGTH
 
 
 def normalize_passport_series(value):
@@ -98,27 +103,24 @@ class RegisterSerializer(serializers.Serializer):
     first_name = serializers.CharField(max_length=255)
     phone = serializers.CharField(max_length=20)
     email = serializers.EmailField(required=False, allow_blank=True, allow_null=True)
-    password = serializers.CharField(write_only=True, min_length=6)
-    password_confirm = serializers.CharField(write_only=True, min_length=6)
+    password = serializers.CharField(write_only=True, min_length=PASSWORD_MIN_LENGTH)
+    password_confirm = serializers.CharField(write_only=True, min_length=PASSWORD_MIN_LENGTH)
 
     def validate_phone(self, value):
+        # Registration always creates a fresh tenant, so phone/email uniqueness
+        # is enforced per-tenant by the DB constraints — no global check needed.
         phone = normalize_phone(value)
         rule = get_phone_rule()
         if not is_phone_valid(phone):
             raise serializers.ValidationError(
                 _("Phone must match %(example)s format.") % {"example": rule.example}
             )
-        if User.objects.filter(phone=phone).exists():
-            raise serializers.ValidationError(_("A user with this phone already exists."))
         return phone
 
     def validate_email(self, value):
         if value in ("", None):
             return None
-        normalized = value.lower()
-        if User.objects.filter(email__iexact=normalized).exists():
-            raise serializers.ValidationError(_("A user with this email already exists."))
-        return normalized
+        return value.lower()
 
     def validate(self, attrs):
         if attrs["password"] != attrs["password_confirm"]:
@@ -175,25 +177,31 @@ class TenantUserCreateSerializer(serializers.Serializer):
     role = serializers.CharField(max_length=64)
     region_id = serializers.UUIDField(required=True, allow_null=False)
     district_id = serializers.UUIDField(required=True, allow_null=False)
-    password = serializers.CharField(write_only=True, min_length=6)
-    password_confirm = serializers.CharField(write_only=True, min_length=6)
+    password = serializers.CharField(write_only=True, min_length=PASSWORD_MIN_LENGTH)
+    password_confirm = serializers.CharField(write_only=True, min_length=PASSWORD_MIN_LENGTH)
 
     def validate_phone(self, value):
+        request = self.context["request"]
         phone = normalize_phone(value)
         rule = get_phone_rule()
         if not is_phone_valid(phone):
             raise serializers.ValidationError(
                 _("Phone must match %(example)s format.") % {"example": rule.example}
             )
-        if User.objects.filter(phone=phone).exists():
+        # Per-tenant uniqueness only — a phone may legitimately belong to users
+        # in other tenants (multi-tenant identity).
+        if User.objects.filter(tenant_id=request.user.tenant_id, phone=phone).exists():
             raise serializers.ValidationError(_("A user with this phone already exists."))
         return phone
 
     def validate_email(self, value):
         if value in ("", None):
             return None
+        request = self.context["request"]
         normalized = value.lower()
-        if User.objects.filter(email__iexact=normalized).exists():
+        if User.objects.filter(
+            tenant_id=request.user.tenant_id, email__iexact=normalized
+        ).exists():
             raise serializers.ValidationError(_("A user with this email already exists."))
         return normalized
 
@@ -256,9 +264,9 @@ class TenantUserUpdateSerializer(serializers.Serializer):
     role = serializers.CharField(max_length=64)
     region_id = serializers.UUIDField(required=True, allow_null=False)
     district_id = serializers.UUIDField(required=True, allow_null=False)
-    password = serializers.CharField(write_only=True, min_length=6, required=False, allow_blank=True)
+    password = serializers.CharField(write_only=True, min_length=PASSWORD_MIN_LENGTH, required=False, allow_blank=True)
     password_confirm = serializers.CharField(
-        write_only=True, min_length=6, required=False, allow_blank=True
+        write_only=True, min_length=PASSWORD_MIN_LENGTH, required=False, allow_blank=True
     )
 
     def validate_phone(self, value):
@@ -269,7 +277,10 @@ class TenantUserUpdateSerializer(serializers.Serializer):
                 _("Phone must match %(example)s format.") % {"example": rule.example}
             )
 
-        qs = User.objects.filter(phone=phone)
+        # Per-tenant uniqueness, scoped to the user-being-edited's tenant (which
+        # by RBAC is always the requesting admin's tenant).
+        tenant_id = self.instance.tenant_id if self.instance else self.context["request"].user.tenant_id
+        qs = User.objects.filter(tenant_id=tenant_id, phone=phone)
         if self.instance:
             qs = qs.exclude(pk=self.instance.pk)
         if qs.exists():
@@ -280,7 +291,8 @@ class TenantUserUpdateSerializer(serializers.Serializer):
         if value in ("", None):
             return None
         normalized = value.lower()
-        qs = User.objects.filter(email__iexact=normalized)
+        tenant_id = self.instance.tenant_id if self.instance else self.context["request"].user.tenant_id
+        qs = User.objects.filter(tenant_id=tenant_id, email__iexact=normalized)
         if self.instance:
             qs = qs.exclude(pk=self.instance.pk)
         if qs.exists():
@@ -388,14 +400,21 @@ class TenantRolePermissionsUpdateSerializer(serializers.Serializer):
         request = self.context["request"]
         role = self.context["role"]
         permissions = self.validated_data["permissions"]
+        tenant = request.user.tenant
 
-        RolePermission.objects.filter(tenant=request.user.tenant, role=role).delete()
+        # QuerySet.delete() and bulk_create() bypass post_save/post_delete signals,
+        # so the signal-based invalidation in signals.py would NOT fire here.
+        # Invalidate explicitly to keep the cache coherent.
+        RolePermission.objects.filter(tenant=tenant, role=role).delete()
         RolePermission.objects.bulk_create(
             [
-                RolePermission(tenant=request.user.tenant, role=role, permission=permission)
+                RolePermission(tenant=tenant, role=role, permission=permission)
                 for permission in permissions
             ]
         )
+        from .permissions import invalidate_role_permissions_cache
+
+        invalidate_role_permissions_cache(tenant.id, role)
         return permissions
 
 

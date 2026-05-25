@@ -95,7 +95,6 @@ export default function ClientsView() {
     resetFilters,
     handlePageChange,
     handleRowsPerPageChange,
-    setValues,
   } = useClientsUrlState();
 
   const debouncedSearch = useDebounce(searchValue.trim(), 400);

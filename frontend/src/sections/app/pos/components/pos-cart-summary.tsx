@@ -152,6 +152,7 @@ export default function PosCartSummary({
       {paymentType === 'debt' && (
         <TextField
           fullWidth
+          required
           size="small"
           label={tx('pos.debtDeadlineDays')}
           type="number"

@@ -1,5 +1,4 @@
 import os
-import sys
 from datetime import timedelta
 from pathlib import Path
 
@@ -7,9 +6,11 @@ import environ
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-APPS_DIR = BASE_DIR / "apps"
-if str(APPS_DIR) not in sys.path:
-    sys.path.insert(0, str(APPS_DIR))
+# Canonical imports only. `apps/__init__.py` makes `apps` a package, so use
+# `from apps.auth_tenant.models import User` everywhere. The previous
+# sys.path.insert hack allowed `from auth_tenant.models import User` to also
+# resolve, which broke mypy/pyright (two import paths for the same module
+# defeats static analysis) and caused inconsistent AppConfig labels.
 
 env = environ.Env(
     DEBUG=(bool, False),
@@ -39,6 +40,7 @@ DJANGO_APPS = [
 
 THIRD_PARTY_APPS = [
     "rest_framework",
+    "rest_framework_simplejwt.token_blacklist",
     "django_filters",
     "corsheaders",
     "django_celery_beat",
@@ -46,12 +48,13 @@ THIRD_PARTY_APPS = [
 ]
 
 LOCAL_APPS = [
-    "auth_tenant",
-    "products",
-    "clients",
-    "sales",
-    "debts",
-    "reports",
+    "apps.auth_tenant",
+    "apps.products",
+    "apps.clients",
+    "apps.sales",
+    "apps.debts",
+    "apps.reports",
+    "apps.cash_register",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -104,9 +107,18 @@ DATABASES["default"]["ATOMIC_REQUESTS"] = True
 # Password validation
 # ---------------------------------------------------------------------------
 
+# Single source of truth for password length policy. Used both by Django's
+# MinimumLengthValidator (covers createsuperuser, Django admin, set_password)
+# and by DRF serializer `min_length=` (gives per-field error attribution to
+# `password` instead of non_field_errors on the API).
+MIN_PASSWORD_LENGTH = 10
+
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", "OPTIONS": {"min_length": 6}},
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {"min_length": MIN_PASSWORD_LENGTH},
+    },
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
@@ -215,6 +227,12 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "auth_tenant.User"
 
+# auth.E003 requires USERNAME_FIELD to be globally unique. We enforce phone
+# uniqueness per-tenant via a partial UniqueConstraint on User and disambiguate
+# multi-tenant logins in CustomTokenObtainPairSerializer — silencing this check
+# is the intentional consequence of that design choice.
+SILENCED_SYSTEM_CHECKS = ["auth.E003"]
+
 # ---------------------------------------------------------------------------
 # Password Hashers (Argon2 preferred)
 # ---------------------------------------------------------------------------
@@ -231,8 +249,11 @@ PASSWORD_HASHERS = [
 # ---------------------------------------------------------------------------
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=env.int("JWT_ACCESS_TOKEN_LIFETIME_MINUTES", default=15)),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=env.int("JWT_REFRESH_TOKEN_LIFETIME_DAYS", default=7)),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "UPDATE_LAST_LOGIN": True,
     "AUTH_HEADER_TYPES": ("Bearer",),
     "TOKEN_OBTAIN_SERIALIZER": "auth_tenant.tokens.CustomTokenObtainPairSerializer",
 }

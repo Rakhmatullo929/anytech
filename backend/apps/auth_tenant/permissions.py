@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 from .models import RolePermission
@@ -5,14 +6,43 @@ from .permission_catalog import DEFAULT_ROLE_PERMISSIONS, permission_key
 
 _PERMISSIONS_CACHE_ATTR = "_cached_permissions"
 
+# Process-level cache key namespace. Resolved permissions for a (tenant, role)
+# rarely change but are read on every authenticated request — caching them in
+# Redis (production) / LocMem (dev/test) eliminates a per-request SELECT from
+# role_permissions. Invalidation: post_save/post_delete signal on RolePermission
+# (see signals.py) plus an explicit cache.delete in the update serializer.
+_PERMS_CACHE_PREFIX = "auth:perms:v1"
+_PERMS_CACHE_TTL = 60 * 60  # 1 hour — signal-driven invalidation makes this a safety net.
+
+
+def role_permissions_cache_key(tenant_id, role: str) -> str:
+    """Key for the resolved-permissions cache. tenant_id may be None for
+    superusers / orphan users; encode as "_" so the key remains valid."""
+    tid = tenant_id if tenant_id is not None else "_"
+    return f"{_PERMS_CACHE_PREFIX}:{tid}:{role}"
+
+
+def invalidate_role_permissions_cache(tenant_id, role: str) -> None:
+    cache.delete(role_permissions_cache_key(tenant_id, role))
+
 
 def get_user_permissions(user):
     if not user.is_authenticated:
         return set()
 
+    # Layer 1: per-request cache on the user instance — avoids even a cache.get
+    # round-trip when multiple permission classes evaluate within one request.
     cached = getattr(user, _PERMISSIONS_CACHE_ATTR, None)
     if cached is not None:
         return cached
+
+    # Layer 2: process/Redis cache, shared across requests and workers.
+    cache_key = role_permissions_cache_key(user.tenant_id, user.role)
+    cached_perms = cache.get(cache_key)
+    if cached_perms is not None:
+        resolved_permissions = set(cached_perms)
+        setattr(user, _PERMISSIONS_CACHE_ATTR, resolved_permissions)
+        return resolved_permissions
 
     custom_permissions = set(
         RolePermission.objects.filter(
@@ -21,6 +51,9 @@ def get_user_permissions(user):
         ).values_list("permission", flat=True)
     )
     resolved_permissions = custom_permissions or set(DEFAULT_ROLE_PERMISSIONS.get(user.role, []))
+    # Store as a sorted tuple so the serialized payload is deterministic across
+    # workers — useful for debugging and avoids spurious cache churn.
+    cache.set(cache_key, tuple(sorted(resolved_permissions)), _PERMS_CACHE_TTL)
     setattr(user, _PERMISSIONS_CACHE_ATTR, resolved_permissions)
     return resolved_permissions
 

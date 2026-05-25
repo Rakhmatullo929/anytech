@@ -8,9 +8,9 @@ import pytest
 from django.urls import reverse
 from rest_framework import status
 
-from auth_tenant.models import Tenant, User
-from auth_tenant.permission_catalog import ADMIN_REQUIRED_PERMISSIONS
-from auth_tenant.permissions import IsAdmin, IsManagerOrAbove, IsSellerOrAbove
+from apps.auth_tenant.models import Tenant, User
+from apps.auth_tenant.permission_catalog import ADMIN_REQUIRED_PERMISSIONS
+from apps.auth_tenant.permissions import IsAdmin, IsManagerOrAbove, IsSellerOrAbove
 
 pytestmark = pytest.mark.django_db
 
@@ -63,6 +63,60 @@ class TestUserModel:
         assert str(admin_user) == admin_user.phone
 
 
+# ── TenantQuerySetMixin tests ────────────────────────────────────────
+
+
+class TestTenantQuerySetMixin:
+    """The mixin must refuse a payload tenant that doesn't match the caller's
+    instead of silently overriding it."""
+
+    def _build(self, request_user):
+        from types import SimpleNamespace
+        from apps.auth_tenant.mixins import TenantQuerySetMixin
+
+        # Bare mixin instance with just the request attribute it touches.
+        view = TenantQuerySetMixin()
+        view.request = SimpleNamespace(user=request_user)
+        return view
+
+    def _serializer(self, validated_data):
+        from types import SimpleNamespace
+
+        calls = []
+
+        def save(**kwargs):
+            calls.append(kwargs)
+
+        return SimpleNamespace(validated_data=validated_data, save=save), calls
+
+    def test_payload_with_matching_tenant_allowed(self, admin_user):
+        view = self._build(admin_user)
+        serializer, calls = self._serializer({"tenant": admin_user.tenant})
+        view.perform_update(serializer)
+        view.perform_create(serializer)
+        assert len(calls) == 2
+        assert all(c == {"tenant": admin_user.tenant} for c in calls)
+
+    def test_payload_with_other_tenant_raises_403(self, admin_user, other_tenant):
+        from rest_framework.exceptions import PermissionDenied
+
+        view = self._build(admin_user)
+        serializer, calls = self._serializer({"tenant": other_tenant})
+        with pytest.raises(PermissionDenied):
+            view.perform_update(serializer)
+        with pytest.raises(PermissionDenied):
+            view.perform_create(serializer)
+        assert calls == []  # never reached serializer.save
+
+    def test_empty_validated_data_uses_request_tenant(self, admin_user):
+        """The common case: serializer marks tenant read-only, so validated_data
+        has no tenant key. Mixin injects the caller's tenant on save."""
+        view = self._build(admin_user)
+        serializer, calls = self._serializer({"name": "anything"})
+        view.perform_create(serializer)
+        assert calls == [{"tenant": admin_user.tenant}]
+
+
 # ── Registration tests ────────────────────────────────────────────────
 
 
@@ -90,9 +144,14 @@ class TestRegistration:
         assert Tenant.objects.filter(name="New Company").exists()
         assert User.objects.filter(email="john@example.com").exists()
 
-    def test_register_duplicate_phone(self, anon_client, admin_user):
+    def test_register_with_phone_already_in_another_tenant_creates_new_tenant(
+        self, anon_client, admin_user
+    ):
+        """Multi-tenant identity: the same phone may register a NEW tenant even
+        if the phone already belongs to a user in some other tenant.
+        Uniqueness is enforced per-tenant (see User.Meta.constraints)."""
         data = {
-            "tenant_name": "Dup Co",
+            "tenant_name": "Second Org",
             "first_name": "Dup",
             "phone": admin_user.phone,
             "email": "dup@test.com",
@@ -100,7 +159,10 @@ class TestRegistration:
             "password_confirm": "StrongPass123!",
         }
         resp = anon_client.post(REGISTER_URL, data, format="json")
-        assert resp.status_code == status.HTTP_400_BAD_REQUEST
+        assert resp.status_code == status.HTTP_201_CREATED
+        new_user = User.objects.get(email="dup@test.com")
+        assert new_user.phone == admin_user.phone
+        assert new_user.tenant_id != admin_user.tenant_id
 
     def test_register_password_mismatch(self, anon_client):
         data = {
@@ -168,6 +230,123 @@ class TestLogin:
         assert resp.status_code == status.HTTP_401_UNAUTHORIZED
 
 
+# ── Multi-tenant identity tests ──────────────────────────────────────
+
+
+SHARED_PHONE = "+998901112000"
+
+
+class TestPerTenantUniqueness:
+    """Phone/email uniqueness is scoped to tenant, not global."""
+
+    def test_same_phone_allowed_across_tenants(self, tenant, other_tenant):
+        a = User.objects.create_user(
+            phone=SHARED_PHONE, password="PassA12345!", tenant=tenant, role="admin"
+        )
+        b = User.objects.create_user(
+            phone=SHARED_PHONE, password="PassB12345!", tenant=other_tenant, role="admin"
+        )
+        assert a.tenant_id != b.tenant_id
+        assert a.phone == b.phone
+
+    def test_same_phone_rejected_within_tenant(self, tenant):
+        User.objects.create_user(
+            phone=SHARED_PHONE, password="PassA12345!", tenant=tenant, role="admin"
+        )
+        from django.db.utils import IntegrityError
+
+        with pytest.raises(IntegrityError):
+            User.objects.create_user(
+                phone=SHARED_PHONE, password="PassB12345!", tenant=tenant, role="seller"
+            )
+
+
+class TestMultiTenantLogin:
+    """Phone+password login disambiguation across tenants."""
+
+    @pytest.fixture
+    def multi_tenant_users(self, tenant, other_tenant):
+        # Same phone, *different* passwords across tenants → password decides.
+        u1 = User.objects.create_user(
+            phone=SHARED_PHONE,
+            password="PasswordTenantA!",
+            tenant=tenant,
+            role="admin",
+        )
+        u2 = User.objects.create_user(
+            phone=SHARED_PHONE,
+            password="PasswordTenantB!",
+            tenant=other_tenant,
+            role="admin",
+        )
+        return u1, u2
+
+    def test_login_picks_user_by_password(self, anon_client, multi_tenant_users):
+        u1, u2 = multi_tenant_users
+        resp = anon_client.post(
+            LOGIN_URL,
+            {"phone": SHARED_PHONE, "password": "PasswordTenantB!"},
+            format="json",
+        )
+        assert resp.status_code == status.HTTP_200_OK
+        assert resp.data["user"]["tenant_id"] == str(u2.tenant_id)
+
+    def test_login_ambiguous_returns_tenants_list(self, anon_client, tenant, other_tenant):
+        # Same phone *and* same password in two tenants → server can't pick.
+        User.objects.create_user(
+            phone=SHARED_PHONE, password="SamePass12345!", tenant=tenant, role="admin"
+        )
+        User.objects.create_user(
+            phone=SHARED_PHONE, password="SamePass12345!", tenant=other_tenant, role="admin"
+        )
+
+        resp = anon_client.post(
+            LOGIN_URL,
+            {"phone": SHARED_PHONE, "password": "SamePass12345!"},
+            format="json",
+        )
+        assert resp.status_code == 409
+        assert resp.data["code"] == "multi_tenant"
+        assert len(resp.data["tenants"]) == 2
+        tenant_ids = {t["id"] for t in resp.data["tenants"]}
+        assert tenant_ids == {str(tenant.id), str(other_tenant.id)}
+
+    def test_login_with_tenant_id_resolves_ambiguity(
+        self, anon_client, tenant, other_tenant
+    ):
+        User.objects.create_user(
+            phone=SHARED_PHONE, password="SamePass12345!", tenant=tenant, role="admin"
+        )
+        User.objects.create_user(
+            phone=SHARED_PHONE, password="SamePass12345!", tenant=other_tenant, role="admin"
+        )
+
+        resp = anon_client.post(
+            LOGIN_URL,
+            {
+                "phone": SHARED_PHONE,
+                "password": "SamePass12345!",
+                "tenant_id": str(other_tenant.id),
+            },
+            format="json",
+        )
+        assert resp.status_code == status.HTTP_200_OK
+        assert resp.data["user"]["tenant_id"] == str(other_tenant.id)
+
+    def test_login_with_wrong_tenant_id_rejected(self, anon_client, multi_tenant_users, other_tenant):
+        # tenant_id narrows the search; if no user in that tenant matches → 401.
+        resp = anon_client.post(
+            LOGIN_URL,
+            {
+                "phone": SHARED_PHONE,
+                "password": "PasswordTenantA!",  # tenant A's password
+                "tenant_id": str(other_tenant.id),  # but tenant B
+            },
+            format="json",
+        )
+        assert resp.status_code == status.HTTP_401_UNAUTHORIZED
+
+
 # ── Token refresh tests ──────────────────────────────────────────────
 
 
@@ -193,6 +372,64 @@ class TestTokenRefresh:
         resp = anon_client.post(
             REFRESH_URL, {"refresh": "invalid-token"}, format="json"
         )
+        assert resp.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_rotated_refresh_blacklists_old(self, anon_client, admin_user):
+        login_resp = anon_client.post(
+            LOGIN_URL,
+            {"phone": admin_user.phone, "password": "StrongPass123!"},
+            format="json",
+        )
+        first_refresh = login_resp.data["refresh"]
+
+        rotated = anon_client.post(
+            REFRESH_URL, {"refresh": first_refresh}, format="json"
+        )
+        assert rotated.status_code == status.HTTP_200_OK
+        assert "refresh" in rotated.data
+        assert rotated.data["refresh"] != first_refresh
+
+        # Replaying the old refresh must fail — it's blacklisted.
+        replay = anon_client.post(
+            REFRESH_URL, {"refresh": first_refresh}, format="json"
+        )
+        assert replay.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+# ── Logout tests ─────────────────────────────────────────────────────
+
+
+LOGOUT_URL = reverse("auth-logout")
+
+
+class TestLogout:
+    def test_logout_blacklists_refresh(self, anon_client, admin_client, admin_user):
+        login_resp = anon_client.post(
+            LOGIN_URL,
+            {"phone": admin_user.phone, "password": "StrongPass123!"},
+            format="json",
+        )
+        refresh_token = login_resp.data["refresh"]
+
+        resp = admin_client.post(LOGOUT_URL, {"refresh": refresh_token}, format="json")
+        assert resp.status_code == status.HTTP_205_RESET_CONTENT
+
+        # Blacklisted refresh can no longer be used.
+        replay = anon_client.post(
+            REFRESH_URL, {"refresh": refresh_token}, format="json"
+        )
+        assert replay.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_logout_requires_refresh(self, admin_client):
+        resp = admin_client.post(LOGOUT_URL, {}, format="json")
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_logout_invalid_refresh(self, admin_client):
+        resp = admin_client.post(LOGOUT_URL, {"refresh": "garbage"}, format="json")
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_logout_unauthenticated(self, anon_client):
+        resp = anon_client.post(LOGOUT_URL, {"refresh": "any"}, format="json")
         assert resp.status_code == status.HTTP_401_UNAUTHORIZED
 
 
@@ -396,6 +633,73 @@ class TestTenantUsersEndpoint:
         assert roles_resp.status_code == status.HTTP_200_OK
         admin_row = next(row for row in roles_resp.data["results"] if row["value"] == "admin")
         assert set(admin_row["permissions"]) == set(ADMIN_REQUIRED_PERMISSIONS)
+
+
+class TestPermissionsCache:
+    """Cross-request caching of resolved (tenant, role) permissions."""
+
+    @pytest.fixture(autouse=True)
+    def _clear_cache(self):
+        from django.core.cache import cache
+
+        cache.clear()
+        yield
+        cache.clear()
+
+    def test_second_call_hits_cache(self, manager_user, django_assert_num_queries):
+        from apps.auth_tenant.permissions import get_user_permissions
+
+        # Cold: DB is queried once.
+        with django_assert_num_queries(1):
+            first = get_user_permissions(manager_user)
+
+        # Fresh User instance (no per-request cache attr) — must hit Layer 2
+        # (process/Redis cache) with zero queries.
+        refreshed = User.objects.get(pk=manager_user.pk)
+        with django_assert_num_queries(0):
+            second = get_user_permissions(refreshed)
+
+        assert first == second
+
+    def test_update_invalidates_cache(self, admin_client, manager_user):
+        from apps.auth_tenant.permissions import get_user_permissions
+
+        get_user_permissions(manager_user)  # warm cache
+
+        resp = admin_client.patch(
+            ROLE_PERMISSIONS_URL("manager"),
+            {"permissions": ["products:read", "products:write"]},
+            format="json",
+        )
+        assert resp.status_code == status.HTTP_200_OK
+
+        # Fresh instance — Layer 2 must reflect the update.
+        refreshed = User.objects.get(pk=manager_user.pk)
+        new_perms = get_user_permissions(refreshed)
+        assert new_perms == {"products:read", "products:write"}
+
+    def test_signal_invalidates_on_direct_save(self, tenant):
+        """RolePermission.save() outside the serializer (admin UI, scripts)
+        must drop the cache via the post_save signal."""
+        from apps.auth_tenant.permissions import get_user_permissions
+        from apps.auth_tenant.models import RolePermission
+
+        user = User.objects.create_user(
+            phone="+998901119001",
+            password="StrongPass123!",
+            tenant=tenant,
+            role="custom_role",
+        )
+        first = get_user_permissions(user)
+
+        RolePermission.objects.create(
+            tenant=tenant, role="custom_role", permission="reports:read"
+        )
+
+        refreshed = User.objects.get(pk=user.pk)
+        second = get_user_permissions(refreshed)
+        assert second == {"reports:read"}
+        assert second != first
 
 
 class TestImpersonateEndpoint:

@@ -1,13 +1,9 @@
 // @mui
 import { useTheme } from '@mui/material/styles';
-import Link from '@mui/material/Link';
-import Stack from '@mui/material/Stack';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 // theme
 import { bgBlur } from 'src/theme/css';
-// routes
-import { paths } from 'src/routes/paths';
 // hooks
 import { useOffSetTop } from 'src/hooks/use-off-set-top';
 // components
@@ -49,19 +45,7 @@ export default function HeaderSimple() {
       >
         <Logo />
 
-        <Stack direction="row" alignItems="center" spacing={1}>
-          <SettingsButton />
-
-          <Link
-            href={paths.docs}
-            target="_blank"
-            rel="noopener"
-            color="inherit"
-            sx={{ typography: 'subtitle2' }}
-          >
-            Need help?
-          </Link>
-        </Stack>
+        <SettingsButton />
       </Toolbar>
 
       {offsetTop && <HeaderShadow />}

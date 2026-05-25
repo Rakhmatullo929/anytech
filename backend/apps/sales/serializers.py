@@ -5,8 +5,9 @@ from django.db import transaction
 from django.utils.translation import gettext as _
 from rest_framework import serializers
 
-from debts.models import Debt
-from products.models import Product, ProductPurchase
+from apps.cash_register.models import CashRegister
+from apps.debts.models import Debt
+from apps.products.models import Product, ProductPurchase
 
 from .models import Sale, SaleItem
 
@@ -36,6 +37,13 @@ class SaleCreateSerializer(serializers.ModelSerializer):
         read_only_fields = ("id", "tenant", "total_amount", "created_at")
 
     def validate(self, attrs):
+        tenant = self.context["request"].user.tenant
+        register = CashRegister.objects.filter(tenant=tenant).first()
+        if register is not None and register.status == CashRegister.Status.CLOSED:
+            raise serializers.ValidationError(
+                {"detail": _("Cash register is closed. Open the register to create sales.")}
+            )
+
         if not attrs.get("items"):
             raise serializers.ValidationError({"items": _("At least one item is required.")})
 
@@ -101,7 +109,7 @@ class SaleCreateSerializer(serializers.ModelSerializer):
         debt_deadline_days = validated_data.pop("debt_deadline_days", None)
         created_by_user_id = validated_data.pop("created_by_user_id")
         tenant = validated_data["tenant"]
-        from auth_tenant.models import User as TenantUser
+        from apps.auth_tenant.models import User as TenantUser
         try:
             validated_data["created_by"] = TenantUser.objects.get(pk=created_by_user_id, tenant=tenant)
         except TenantUser.DoesNotExist:
@@ -192,7 +200,7 @@ class SaleListSerializer(serializers.ModelSerializer):
         u = obj.created_by
         if not u:
             return None
-        return ' '.join(filter(None, [u.first_name, getattr(u, 'last_name', '') or ''])) or None
+        return " ".join(filter(None, [u.first_name, u.last_name])) or None
 
     class Meta:
         model = Sale

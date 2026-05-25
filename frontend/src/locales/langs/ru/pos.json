@@ -1,4 +1,18 @@
 {
+  "cashRegister": {
+    "statusOpen": "Касса открыта",
+    "statusClosed": "Касса закрыта",
+    "openButton": "Открыть кассу",
+    "closeButton": "Закрыть кассу",
+    "blockedTitle": "Касса закрыта",
+    "blockedMessage": "Для совершения продаж необходимо открыть кассу.",
+    "confirmOpenTitle": "Открыть кассу?",
+    "confirmCloseTitle": "Закрыть кассу?",
+    "confirmOpenDescription": "Вы уверены, что хотите открыть кассу?",
+    "confirmCloseDescription": "Вы уверены, что хотите закрыть кассу?",
+    "openSuccess": "Касса успешно открыта",
+    "closeSuccess": "Касса успешно закрыта"
+  },
   "cart": "Корзина",
   "client": "Клиент",
   "completeSale": "Завершить продажу",
@@ -13,6 +27,10 @@
   "stockShort": "остаток",
   "createdBy": "Продавец",
   "selectCreatedBy": "Выберите продавца",
+  "todaySales": {
+    "heading": "Сегодняшние продажи",
+    "empty": "Сегодня пока нет продаж"
+  },
   "validation": {
     "qtyMin": "Минимум 1",
     "qtyExceedsStock": "В наличии: {{max}}",
