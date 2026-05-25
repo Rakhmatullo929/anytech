@@ -195,6 +195,64 @@ class TestTokenRefresh:
         )
         assert resp.status_code == status.HTTP_401_UNAUTHORIZED
 
+    def test_rotated_refresh_blacklists_old(self, anon_client, admin_user):
+        login_resp = anon_client.post(
+            LOGIN_URL,
+            {"phone": admin_user.phone, "password": "StrongPass123!"},
+            format="json",
+        )
+        first_refresh = login_resp.data["refresh"]
+
+        rotated = anon_client.post(
+            REFRESH_URL, {"refresh": first_refresh}, format="json"
+        )
+        assert rotated.status_code == status.HTTP_200_OK
+        assert "refresh" in rotated.data
+        assert rotated.data["refresh"] != first_refresh
+
+        # Replaying the old refresh must fail — it's blacklisted.
+        replay = anon_client.post(
+            REFRESH_URL, {"refresh": first_refresh}, format="json"
+        )
+        assert replay.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+# ── Logout tests ─────────────────────────────────────────────────────
+
+
+LOGOUT_URL = reverse("auth-logout")
+
+
+class TestLogout:
+    def test_logout_blacklists_refresh(self, anon_client, admin_client, admin_user):
+        login_resp = anon_client.post(
+            LOGIN_URL,
+            {"phone": admin_user.phone, "password": "StrongPass123!"},
+            format="json",
+        )
+        refresh_token = login_resp.data["refresh"]
+
+        resp = admin_client.post(LOGOUT_URL, {"refresh": refresh_token}, format="json")
+        assert resp.status_code == status.HTTP_205_RESET_CONTENT
+
+        # Blacklisted refresh can no longer be used.
+        replay = anon_client.post(
+            REFRESH_URL, {"refresh": refresh_token}, format="json"
+        )
+        assert replay.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_logout_requires_refresh(self, admin_client):
+        resp = admin_client.post(LOGOUT_URL, {}, format="json")
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_logout_invalid_refresh(self, admin_client):
+        resp = admin_client.post(LOGOUT_URL, {"refresh": "garbage"}, format="json")
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_logout_unauthenticated(self, anon_client):
+        resp = anon_client.post(LOGOUT_URL, {"refresh": "any"}, format="json")
+        assert resp.status_code == status.HTTP_401_UNAUTHORIZED
+
 
 # ── /me endpoint tests ───────────────────────────────────────────────
 

@@ -1,4 +1,5 @@
 import axios, {
+  AxiosError,
   AxiosRequestTransformer,
   AxiosResponseTransformer,
   InternalAxiosRequestConfig,
@@ -7,6 +8,14 @@ import axios, {
 import humps from 'humps';
 
 import { HOST_API } from 'src/config-global';
+import { paths } from 'src/routes/paths';
+import {
+  ACCESS_TOKEN_KEY,
+  AUTH_USER_KEY,
+  REFRESH_TOKEN_KEY,
+} from 'src/auth/api/storage-keys';
+
+import { API_ENDPOINTS } from './endpoints';
 
 // ----------------------------------------------------------------------
 
@@ -90,7 +99,7 @@ apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   }
 
   if (!next.skipAuth && typeof window !== 'undefined') {
-    const token = sessionStorage.getItem('accessToken');
+    const token = sessionStorage.getItem(ACCESS_TOKEN_KEY);
     if (token) {
       next.headers = next.headers ?? {};
       (next.headers as Record<string, string>).Authorization = `Bearer ${token}`;
@@ -100,12 +109,86 @@ apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   return next;
 });
 
+// ── Transparent refresh on 401 ──────────────────────────────────────────
+//
+// Access tokens are short-lived (minutes). When one expires mid-session the
+// API returns 401; we exchange the refresh token for a new pair and replay
+// the original request once. Concurrent 401s share a single in-flight refresh
+// so we don't fire N parallel refresh calls.
+
+const REFRESH_URL = API_ENDPOINTS.auth.refresh;
+
+let refreshPromise: Promise<string> | null = null;
+
+function clearSessionAndRedirect() {
+  if (typeof window === 'undefined') return;
+  sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+  sessionStorage.removeItem(REFRESH_TOKEN_KEY);
+  sessionStorage.removeItem(AUTH_USER_KEY);
+  if (window.location.pathname !== paths.auth.jwt.login) {
+    window.location.href = paths.auth.jwt.login;
+  }
+}
+
+async function refreshAccessToken(): Promise<string> {
+  const refresh = sessionStorage.getItem(REFRESH_TOKEN_KEY);
+  if (!refresh) {
+    throw new Error('no_refresh_token');
+  }
+  // Bare axios call: bypasses our request/response interceptors so a failed
+  // refresh can't loop back into another refresh attempt.
+  const response = await axios.post<{ access: string; refresh?: string }>(
+    `${root}${REFRESH_URL}`,
+    { refresh },
+    { headers: { 'Content-Type': 'application/json' } }
+  );
+  const newAccess = response.data.access;
+  const newRefresh = response.data.refresh;
+  sessionStorage.setItem(ACCESS_TOKEN_KEY, newAccess);
+  if (newRefresh) {
+    // ROTATE_REFRESH_TOKENS=True on the backend → store the rotated refresh.
+    sessionStorage.setItem(REFRESH_TOKEN_KEY, newRefresh);
+  }
+  return newAccess;
+}
+
 apiClient.interceptors.response.use(
   (response) => response,
-  (error: unknown) => {
-    if (axios.isAxiosError(error)) {
+  async (error: AxiosError) => {
+    if (!axios.isAxiosError(error) || !error.response || !error.config) {
       return Promise.reject(error);
     }
-    return Promise.reject(error);
+
+    const status = error.response.status;
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+    };
+
+    const isAuthEndpoint =
+      typeof originalRequest.url === 'string' &&
+      (originalRequest.url.includes(REFRESH_URL) ||
+        originalRequest.url.includes(API_ENDPOINTS.auth.login) ||
+        originalRequest.url.includes(API_ENDPOINTS.auth.logout));
+
+    if (status !== 401 || originalRequest._retry || originalRequest.skipAuth || isAuthEndpoint) {
+      return Promise.reject(error);
+    }
+
+    originalRequest._retry = true;
+
+    try {
+      if (!refreshPromise) {
+        refreshPromise = refreshAccessToken().finally(() => {
+          refreshPromise = null;
+        });
+      }
+      const newAccess = await refreshPromise;
+      originalRequest.headers = originalRequest.headers ?? {};
+      (originalRequest.headers as Record<string, string>).Authorization = `Bearer ${newAccess}`;
+      return apiClient.request(originalRequest);
+    } catch (refreshError) {
+      clearSessionAndRedirect();
+      return Promise.reject(refreshError);
+    }
   }
 );

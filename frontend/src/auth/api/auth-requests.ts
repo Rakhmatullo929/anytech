@@ -25,6 +25,14 @@ export async function fetchRegister(data: RegisterRequest): Promise<TokenPairRes
   );
 }
 
+export async function fetchLogout(refresh: string): Promise<void> {
+  await request<void>({
+    method: 'POST',
+    url: AUTH_URLS.logout,
+    data: { refresh },
+  });
+}
+
 export async function fetchCurrentUser(): Promise<{ user: TenantUser }> {
   return request<{ user: TenantUser }>({
     method: 'GET',

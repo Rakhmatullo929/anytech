@@ -4,6 +4,8 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
+from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import District, Region, TenantRole, User
 from .permission_catalog import ALL_PERMISSIONS, DEFAULT_ROLE_PERMISSIONS
@@ -27,6 +29,32 @@ from .tokens import CustomTokenObtainPairSerializer
 class AuthRateThrottle(AnonRateThrottle):
     """Strict rate limit for authentication endpoints (login, register)."""
     scope = "auth"
+
+
+class LogoutView(generics.GenericAPIView):
+    """Blacklist the supplied refresh token so it cannot be reused.
+
+    Access tokens stay valid until their (short) TTL expires — this is the
+    standard Simple JWT trade-off; tighten ACCESS_TOKEN_LIFETIME to shrink it.
+    """
+
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, *args, **kwargs):
+        refresh = (request.data or {}).get("refresh")
+        if not refresh:
+            return Response(
+                {"detail": _("Refresh token is required.")},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            RefreshToken(refresh).blacklist()
+        except TokenError:
+            return Response(
+                {"detail": _("Token is invalid or expired.")},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(status=status.HTTP_205_RESET_CONTENT)
 
 
 class RegisterView(generics.CreateAPIView):

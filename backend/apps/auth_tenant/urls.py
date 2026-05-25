@@ -3,6 +3,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from .tokens import CustomTokenObtainPairSerializer
 from .views import (
+    LogoutView,
     MeView,
     RegisterView,
     RegionDistrictListView,
@@ -24,6 +25,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 urlpatterns = [
     path("register/", RegisterView.as_view(), name="auth-register"),
     path("login/", CustomTokenObtainPairView.as_view(), name="auth-login"),
+    path("logout/", LogoutView.as_view(), name="auth-logout"),
     path("token/refresh/", TokenRefreshView.as_view(), name="auth-token-refresh"),
     path("me/", MeView.as_view(), name="auth-me"),
     path("users/", TenantUsersListView.as_view(), name="auth-users"),
