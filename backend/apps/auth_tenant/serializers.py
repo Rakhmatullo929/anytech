@@ -102,23 +102,20 @@ class RegisterSerializer(serializers.Serializer):
     password_confirm = serializers.CharField(write_only=True, min_length=6)
 
     def validate_phone(self, value):
+        # Registration always creates a fresh tenant, so phone/email uniqueness
+        # is enforced per-tenant by the DB constraints — no global check needed.
         phone = normalize_phone(value)
         rule = get_phone_rule()
         if not is_phone_valid(phone):
             raise serializers.ValidationError(
                 _("Phone must match %(example)s format.") % {"example": rule.example}
             )
-        if User.objects.filter(phone=phone).exists():
-            raise serializers.ValidationError(_("A user with this phone already exists."))
         return phone
 
     def validate_email(self, value):
         if value in ("", None):
             return None
-        normalized = value.lower()
-        if User.objects.filter(email__iexact=normalized).exists():
-            raise serializers.ValidationError(_("A user with this email already exists."))
-        return normalized
+        return value.lower()
 
     def validate(self, attrs):
         if attrs["password"] != attrs["password_confirm"]:
@@ -179,21 +176,27 @@ class TenantUserCreateSerializer(serializers.Serializer):
     password_confirm = serializers.CharField(write_only=True, min_length=6)
 
     def validate_phone(self, value):
+        request = self.context["request"]
         phone = normalize_phone(value)
         rule = get_phone_rule()
         if not is_phone_valid(phone):
             raise serializers.ValidationError(
                 _("Phone must match %(example)s format.") % {"example": rule.example}
             )
-        if User.objects.filter(phone=phone).exists():
+        # Per-tenant uniqueness only — a phone may legitimately belong to users
+        # in other tenants (multi-tenant identity).
+        if User.objects.filter(tenant_id=request.user.tenant_id, phone=phone).exists():
             raise serializers.ValidationError(_("A user with this phone already exists."))
         return phone
 
     def validate_email(self, value):
         if value in ("", None):
             return None
+        request = self.context["request"]
         normalized = value.lower()
-        if User.objects.filter(email__iexact=normalized).exists():
+        if User.objects.filter(
+            tenant_id=request.user.tenant_id, email__iexact=normalized
+        ).exists():
             raise serializers.ValidationError(_("A user with this email already exists."))
         return normalized
 
@@ -269,7 +272,10 @@ class TenantUserUpdateSerializer(serializers.Serializer):
                 _("Phone must match %(example)s format.") % {"example": rule.example}
             )
 
-        qs = User.objects.filter(phone=phone)
+        # Per-tenant uniqueness, scoped to the user-being-edited's tenant (which
+        # by RBAC is always the requesting admin's tenant).
+        tenant_id = self.instance.tenant_id if self.instance else self.context["request"].user.tenant_id
+        qs = User.objects.filter(tenant_id=tenant_id, phone=phone)
         if self.instance:
             qs = qs.exclude(pk=self.instance.pk)
         if qs.exists():
@@ -280,7 +286,8 @@ class TenantUserUpdateSerializer(serializers.Serializer):
         if value in ("", None):
             return None
         normalized = value.lower()
-        qs = User.objects.filter(email__iexact=normalized)
+        tenant_id = self.instance.tenant_id if self.instance else self.context["request"].user.tenant_id
+        qs = User.objects.filter(tenant_id=tenant_id, email__iexact=normalized)
         if self.instance:
             qs = qs.exclude(pk=self.instance.pk)
         if qs.exists():
