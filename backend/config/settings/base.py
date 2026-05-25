@@ -217,6 +217,12 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "auth_tenant.User"
 
+# auth.E003 requires USERNAME_FIELD to be globally unique. We enforce phone
+# uniqueness per-tenant via a partial UniqueConstraint on User and disambiguate
+# multi-tenant logins in CustomTokenObtainPairSerializer — silencing this check
+# is the intentional consequence of that design choice.
+SILENCED_SYSTEM_CHECKS = ["auth.E003"]
+
 # ---------------------------------------------------------------------------
 # Password Hashers (Argon2 preferred)
 # ---------------------------------------------------------------------------
