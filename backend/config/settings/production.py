@@ -68,3 +68,30 @@ LOGGING = {
         },
     },
 }
+
+# ---------------------------------------------------------------------------
+# Sentry — only initialized when SENTRY_DSN is set, so the same prod settings
+# work in environments without an error-tracking backend (CI smoke checks,
+# self-hosted deployments without Sentry). The sentry-sdk[django] extra
+# auto-installs DjangoIntegration; we add it explicitly for visibility.
+# ---------------------------------------------------------------------------
+
+SENTRY_DSN = env("SENTRY_DSN", default="")
+
+if SENTRY_DSN:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()],
+        environment=env("SENTRY_ENVIRONMENT", default="production"),
+        release=env("SENTRY_RELEASE", default=None),
+        # Defaults are conservative: errors yes, performance/profiling opt-in.
+        # Bump traces_sample_rate gradually once event budget is understood.
+        traces_sample_rate=env.float("SENTRY_TRACES_SAMPLE_RATE", default=0.0),
+        profiles_sample_rate=env.float("SENTRY_PROFILES_SAMPLE_RATE", default=0.0),
+        # Phones/emails live in our User model — keep PII out of error payloads
+        # unless the operator explicitly opts in.
+        send_default_pii=env.bool("SENTRY_SEND_DEFAULT_PII", default=False),
+    )
