@@ -1,7 +1,16 @@
 import { useEffect, useReducer, useCallback, useMemo } from 'react';
 
-import { fetchCurrentUser, fetchLogin, fetchRegister } from 'src/auth/api/auth-requests';
-import { AUTH_USER_KEY, REFRESH_TOKEN_KEY } from 'src/auth/api/storage-keys';
+import {
+  fetchCurrentUser,
+  fetchLogin,
+  fetchLogout,
+  fetchRegister,
+} from 'src/auth/api/auth-requests';
+import {
+  ACCESS_TOKEN_KEY,
+  AUTH_USER_KEY,
+  REFRESH_TOKEN_KEY,
+} from 'src/auth/api/storage-keys';
 import type { LoginRequest, RegisterRequest, TokenPairResponse } from 'src/auth/api/types';
 
 import { AuthContext } from './auth-context';
@@ -70,7 +79,7 @@ const reducer = (state: AuthStateType, action: ActionsType) => {
 
 // ----------------------------------------------------------------------
 
-const STORAGE_KEY = 'accessToken';
+const STORAGE_KEY = ACCESS_TOKEN_KEY;
 
 type Props = {
   children: React.ReactNode;
@@ -92,56 +101,42 @@ export function AuthProvider({ children }: Props) {
   const initialize = useCallback(async () => {
     try {
       const accessToken = sessionStorage.getItem(STORAGE_KEY);
+      const refreshToken = sessionStorage.getItem(REFRESH_TOKEN_KEY);
 
-      if (accessToken && isValidToken(accessToken)) {
+      // Access valid → use it. Access expired but refresh present → still try
+      // /me; the response interceptor refreshes transparently on 401 so a
+      // returning user (access TTL 15min, refresh TTL 7d) stays signed in
+      // across page reloads.
+      const hasUsableSession =
+        (accessToken && isValidToken(accessToken)) || Boolean(refreshToken);
+
+      if (!hasUsableSession) {
+        dispatch({ type: Types.INITIAL, payload: { user: null } });
+        return;
+      }
+
+      if (accessToken) {
         setSession(accessToken);
+      }
 
-        if (isJwtAuthMock()) {
-          const raw = sessionStorage.getItem(AUTH_USER_KEY);
-          const user = raw ? JSON.parse(raw) : null;
-          dispatch({
-            type: Types.INITIAL,
-            payload: {
-              user,
-            },
-          });
-          return;
-        }
+      if (isJwtAuthMock()) {
+        const raw = sessionStorage.getItem(AUTH_USER_KEY);
+        const user = raw ? JSON.parse(raw) : null;
+        dispatch({ type: Types.INITIAL, payload: { user } });
+        return;
+      }
 
-        try {
-          const { user } = await fetchCurrentUser();
-          dispatch({
-            type: Types.INITIAL,
-            payload: {
-              user,
-            },
-          });
-        } catch {
-          const raw = sessionStorage.getItem(AUTH_USER_KEY);
-          const user = raw ? JSON.parse(raw) : null;
-          dispatch({
-            type: Types.INITIAL,
-            payload: {
-              user,
-            },
-          });
-        }
-      } else {
-        dispatch({
-          type: Types.INITIAL,
-          payload: {
-            user: null,
-          },
-        });
+      try {
+        const { user } = await fetchCurrentUser();
+        dispatch({ type: Types.INITIAL, payload: { user } });
+      } catch {
+        // /me failed even after refresh (refresh expired / blacklisted) —
+        // the interceptor already cleared storage and triggered a redirect.
+        dispatch({ type: Types.INITIAL, payload: { user: null } });
       }
     } catch (error) {
       console.error(error);
-      dispatch({
-        type: Types.INITIAL,
-        payload: {
-          user: null,
-        },
-      });
+      dispatch({ type: Types.INITIAL, payload: { user: null } });
     }
   }, []);
 
@@ -188,6 +183,17 @@ export function AuthProvider({ children }: Props) {
   );
 
   const logout = useCallback(async () => {
+    const refresh = sessionStorage.getItem(REFRESH_TOKEN_KEY);
+    if (refresh) {
+      // Server-side blacklist so the refresh token can't be replayed if it leaks.
+      // Best-effort: a failed call (network, already-blacklisted) must not block
+      // clearing the local session.
+      try {
+        await fetchLogout(refresh);
+      } catch {
+        /* ignore — local session will be cleared regardless */
+      }
+    }
     sessionStorage.removeItem(REFRESH_TOKEN_KEY);
     sessionStorage.removeItem(AUTH_USER_KEY);
     setSession(null);
