@@ -106,9 +106,18 @@ DATABASES["default"]["ATOMIC_REQUESTS"] = True
 # Password validation
 # ---------------------------------------------------------------------------
 
+# Single source of truth for password length policy. Used both by Django's
+# MinimumLengthValidator (covers createsuperuser, Django admin, set_password)
+# and by DRF serializer `min_length=` (gives per-field error attribution to
+# `password` instead of non_field_errors on the API).
+MIN_PASSWORD_LENGTH = 10
+
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", "OPTIONS": {"min_length": 6}},
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {"min_length": MIN_PASSWORD_LENGTH},
+    },
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
