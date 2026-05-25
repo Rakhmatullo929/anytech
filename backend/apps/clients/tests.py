@@ -8,7 +8,7 @@ import pytest
 from django.urls import reverse
 from rest_framework import status
 
-from clients.models import Client
+from apps.clients.models import Client
 
 pytestmark = pytest.mark.django_db
 

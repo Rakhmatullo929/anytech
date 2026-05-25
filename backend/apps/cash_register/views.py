@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
-from auth_tenant.permissions import page_action_permission
+from apps.auth_tenant.permissions import page_action_permission
 
 from .models import CashRegister
 from .serializers import CashRegisterSerializer

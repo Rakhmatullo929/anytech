@@ -12,7 +12,7 @@ from django.urls import reverse
 from rest_framework import status
 
 from conftest import make_sale_payload
-from debts.models import Debt, Payment
+from apps.debts.models import Debt, Payment
 
 pytestmark = pytest.mark.django_db
 

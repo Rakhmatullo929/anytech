@@ -1,5 +1,4 @@
 import os
-import sys
 from datetime import timedelta
 from pathlib import Path
 
@@ -7,9 +6,11 @@ import environ
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-APPS_DIR = BASE_DIR / "apps"
-if str(APPS_DIR) not in sys.path:
-    sys.path.insert(0, str(APPS_DIR))
+# Canonical imports only. `apps/__init__.py` makes `apps` a package, so use
+# `from apps.auth_tenant.models import User` everywhere. The previous
+# sys.path.insert hack allowed `from auth_tenant.models import User` to also
+# resolve, which broke mypy/pyright (two import paths for the same module
+# defeats static analysis) and caused inconsistent AppConfig labels.
 
 env = environ.Env(
     DEBUG=(bool, False),
@@ -47,13 +48,13 @@ THIRD_PARTY_APPS = [
 ]
 
 LOCAL_APPS = [
-    "auth_tenant",
-    "products",
-    "clients",
-    "sales",
-    "debts",
-    "reports",
-    "cash_register",
+    "apps.auth_tenant",
+    "apps.products",
+    "apps.clients",
+    "apps.sales",
+    "apps.debts",
+    "apps.reports",
+    "apps.cash_register",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
