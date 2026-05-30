@@ -14,6 +14,7 @@ export default function CssBaseline(theme: Theme) {
           padding: 0,
           width: '100%',
           height: '100%',
+          overflowX: 'hidden',
           WebkitOverflowScrolling: 'touch',
         },
         body: {
@@ -21,6 +22,7 @@ export default function CssBaseline(theme: Theme) {
           padding: 0,
           width: '100%',
           height: '100%',
+          overflowX: 'hidden',
         },
         '#root, #__next': {
           width: '100%',

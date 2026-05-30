@@ -1,7 +1,12 @@
 import { useCallback, useMemo, useState } from 'react';
 
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
 import Typography from '@mui/material/Typography';
 
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
@@ -11,6 +16,7 @@ import type { TenantUser } from 'src/auth/api/types';
 import { useInfiniteFetch, type InfinitePageFetcher } from 'src/hooks/api';
 import { useDebounce } from 'src/hooks/use-debounce';
 import { useLocales } from 'src/locales';
+import { useRouter, useSearchParams } from 'src/routes/hook';
 import { paths } from 'src/routes/paths';
 
 import { useCashRegisterQuery } from '../cash-register/api/use-cash-register-api';
@@ -23,8 +29,12 @@ import type { TenantUserListItem } from '../admin/users/api/types';
 import { useCreateSaleMutation } from './api/use-pos-api';
 import type { SalePaymentType } from './api/types';
 import { PosCart, PosProductList, PosTodaySales } from './components';
+import PosCartDrawer from './components/pos-cart-drawer';
+import PosMobileCartFab from './components/pos-mobile-cart-fab';
 import { PosViewSkeleton } from './skeleton';
 import { usePosCart } from './hooks/use-pos-cart';
+
+// ----------------------------------------------------------------------
 
 function tenantUserToListItem(u: TenantUser): TenantUserListItem {
   return {
@@ -49,9 +59,10 @@ export default function PosView() {
   const { tx } = useLocales();
   const { enqueueSnackbar } = useSnackbar();
   const { user: authUser } = useAuthContext();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const { data: cashRegister, isPending: cashRegisterPending, isError: cashRegisterError } = useCashRegisterQuery();
-  // Only block if we have confirmed data showing CLOSED. Never block on loading or error state.
   const isRegisterClosed = !cashRegisterPending && !cashRegisterError && cashRegister?.status === 'closed';
 
   const [client, setClient] = useState<ClientListItem | null>(null);
@@ -62,6 +73,18 @@ export default function PosView() {
   const [paymentType, setPaymentType] = useState<SalePaymentType>('cash');
   const [debtDeadlineDays, setDebtDeadlineDays] = useState<number | ''>(15);
   const [search, setSearch] = useState('');
+
+  // Mobile cart drawer state
+  const [cartOpen, setCartOpen] = useState(false);
+
+  // Tab state persisted in the URL: ?tab=pos | ?tab=sales
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const currentTab = searchParams.get('tab') === 'sales' ? 'sales' : 'pos';
+
+  const handleTabChange = (_: React.SyntheticEvent, value: string) => {
+    router.replace(`${paths.pos}?tab=${value}`);
+  };
 
   const debouncedSearch = useDebounce(search, 400);
 
@@ -80,9 +103,6 @@ export default function PosView() {
         page: pageParam,
         pageSize: 20,
         search: debouncedSearch || undefined,
-        // Without search: only in-stock products, sorted alphabetically.
-        // With search: all products (so cashier can see out-of-stock too),
-        // in-stock first via -total_quantity ordering.
         ordering: debouncedSearch ? '-total_quantity,name' : 'name',
         inStock: !debouncedSearch,
       }),
@@ -140,6 +160,7 @@ export default function PosView() {
       setClient(null);
       setPaymentType('cash');
       setDebtDeadlineDays(15);
+      setCartOpen(false); // close the mobile drawer after a successful sale
       if (authUser && 'id' in authUser) {
         setCreatedBy(tenantUserToListItem(authUser as TenantUser));
       }
@@ -147,6 +168,27 @@ export default function PosView() {
       // useMutate global handler shows the error snackbar
     }
   }, [cart, client, createdBy, paymentType, debtDeadlineDays, createSaleMutation, enqueueSnackbar, tx, clear, authUser]);
+
+  // ── Shared cart props ──────────────────────────────────────────────
+
+  const cartProps = {
+    cart,
+    onSetQty: setQty,
+    onSetPrice: setPrice,
+    onRemove: removeLine,
+    client,
+    onClientChange: setClient,
+    createdBy,
+    onCreatedByChange: setCreatedBy,
+    paymentType,
+    onPaymentTypeChange: setPaymentType,
+    debtDeadlineDays,
+    onDebtDeadlineDaysChange: setDebtDeadlineDays,
+    subtotal,
+    canComplete,
+    isCreating: createSaleMutation.isPending,
+    onComplete: completeSale,
+  };
 
   // ── Render ─────────────────────────────────────────────────────────
 
@@ -165,54 +207,78 @@ export default function PosView() {
       />
 
       {isRegisterClosed && (
-        <Alert
-          severity="error"
-          sx={{ mb: 3 }}
-          action={<CashRegisterControls />}
-        >
+        <Alert severity="error" sx={{ mb: 3 }} action={<CashRegisterControls />}>
           <Typography variant="subtitle2">{tx('pos.cashRegister.blockedTitle')}</Typography>
           <Typography variant="body2">{tx('pos.cashRegister.blockedMessage')}</Typography>
         </Alert>
       )}
 
-      {showInitialSkeleton ? (
-        <PosViewSkeleton />
-      ) : (
-        <Stack spacing={3}>
-          <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} alignItems="flex-start">
-            <PosProductList
-              products={products}
-              search={search}
-              onSearchChange={setSearch}
-              onAddProduct={addProduct}
-              isFetching={productsFetching && !!productsData}
-              isFetchingNextPage={isFetchingNextPage}
-              hasNextPage={Boolean(hasNextPage)}
-              observerRef={observer.ref}
-            />
+      {/* ── Tabs ── */}
+      <Box
+        sx={{
+          mx: { xs: -2, md: 0 },
+          mb: 3,
+          borderBottom: 1,
+          borderColor: 'divider',
+        }}
+      >
+        <Tabs
+          value={currentTab}
+          onChange={handleTabChange}
+          sx={{ px: { xs: 2, md: 0 } }}
+        >
+          <Tab value="pos" label={tx('pos.tabs.pos')} />
+          <Tab value="sales" label={tx('pos.tabs.sales')} />
+        </Tabs>
+      </Box>
 
-            <PosCart
-              cart={cart}
-              onSetQty={setQty}
-              onSetPrice={setPrice}
-              onRemove={removeLine}
-              client={client}
-              onClientChange={setClient}
-              createdBy={createdBy}
-              onCreatedByChange={setCreatedBy}
-              paymentType={paymentType}
-              onPaymentTypeChange={setPaymentType}
-              debtDeadlineDays={debtDeadlineDays}
-              onDebtDeadlineDaysChange={setDebtDeadlineDays}
-              subtotal={subtotal}
-              canComplete={canComplete}
-              isCreating={createSaleMutation.isPending}
-              onComplete={completeSale}
-            />
-          </Stack>
+      {/* ── Tab: POS ── */}
+      {currentTab === 'pos' && (
+        <>
+          {showInitialSkeleton ? (
+            <PosViewSkeleton />
+          ) : (
+            <Box sx={{ mx: { xs: -2, md: 0 } }}>
+              <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} alignItems={{ xs: 'stretch', md: 'flex-start' }}>
+                <PosProductList
+                  products={products}
+                  search={search}
+                  onSearchChange={setSearch}
+                  onAddProduct={addProduct}
+                  isFetching={productsFetching && !!productsData}
+                  isFetchingNextPage={isFetchingNextPage}
+                  hasNextPage={Boolean(hasNextPage)}
+                  observerRef={observer.ref}
+                />
+                {!isMobile && <PosCart {...cartProps} />}
+              </Stack>
+            </Box>
+          )}
 
+          {/* FAB + drawer only on the POS tab */}
+          {isMobile && (
+            <>
+              <PosMobileCartFab
+                itemCount={cart.length}
+                subtotal={subtotal}
+                onClick={() => setCartOpen(true)}
+              />
+              <PosCartDrawer
+                open={cartOpen}
+                onClose={() => setCartOpen(false)}
+                onOpen={() => setCartOpen(true)}
+                {...cartProps}
+              />
+            </>
+          )}
+        </>
+      )}
+
+      {/* ── Tab: Today's sales ── */}
+      {currentTab === 'sales' && (
+        <Box sx={{ mx: { xs: -2, md: 0 } }}>
           <PosTodaySales />
-        </Stack>
+        </Box>
       )}
     </>
   );
