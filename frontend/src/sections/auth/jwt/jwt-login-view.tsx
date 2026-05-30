@@ -3,14 +3,16 @@ import { useCallback, useEffect, useState } from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import LoadingButton from '@mui/lab/LoadingButton';
-import Link from '@mui/material/Link';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import Stack from '@mui/material/Stack';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import InputAdornment from '@mui/material/InputAdornment';
 import { useSearchParams } from 'src/routes/hook';
+import { REMEMBER_ME_KEY } from 'src/auth/api/storage-keys';
 // config
 import { PATH_AFTER_LOGIN } from 'src/config-global';
 // hooks
@@ -31,7 +33,11 @@ type FormValuesProps = {
 };
 
 export default function JwtLoginView() {
-  const loginMutation = useLoginMutation();
+  const [rememberMe, setRememberMe] = useState(
+    () => localStorage.getItem(REMEMBER_ME_KEY) === 'true'
+  );
+
+  const loginMutation = useLoginMutation(rememberMe);
   const { tx } = useLocales();
 
   const [errorMsg, setErrorMsg] = useState('');
@@ -147,9 +153,24 @@ export default function JwtLoginView() {
         }}
       />
 
-      <Link variant="body2" color="inherit" underline="always" sx={{ alignSelf: 'flex-end' }}>
-        Forgot password?
-      </Link>
+      <FormControlLabel
+        control={
+          <Checkbox
+            size="small"
+            checked={rememberMe}
+            onChange={(e) => {
+              const val = e.target.checked;
+              setRememberMe(val);
+              localStorage.setItem(REMEMBER_ME_KEY, String(val));
+            }}
+          />
+        }
+        label={
+          <Typography variant="body2" color="text.secondary">
+            {tx('common.auth.rememberMe')}
+          </Typography>
+        }
+      />
 
       <LoadingButton
         fullWidth

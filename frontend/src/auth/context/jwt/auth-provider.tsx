@@ -9,7 +9,10 @@ import {
 import {
   ACCESS_TOKEN_KEY,
   AUTH_USER_KEY,
+  REMEMBER_ME_KEY,
   REFRESH_TOKEN_KEY,
+  getRememberMe,
+  getStoredToken,
 } from 'src/auth/api/storage-keys';
 import type { LoginRequest, RegisterRequest, TokenPairResponse } from 'src/auth/api/types';
 
@@ -88,20 +91,28 @@ type Props = {
 export function AuthProvider({ children }: Props) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const syncSessionFromApiResponse = useCallback((payload: TokenPairResponse) => {
-    sessionStorage.setItem(REFRESH_TOKEN_KEY, payload.refresh);
-    sessionStorage.setItem(AUTH_USER_KEY, JSON.stringify(payload.user));
-    setSession(payload.access);
-    dispatch({
-      type: Types.LOGIN,
-      payload: { user: payload.user },
-    });
-  }, []);
+  const syncSessionFromApiResponse = useCallback(
+    (payload: TokenPairResponse, rememberMe?: boolean) => {
+      const persist = rememberMe ?? getRememberMe();
+      if (rememberMe !== undefined) {
+        localStorage.setItem(REMEMBER_ME_KEY, String(persist));
+      }
+      const storage = persist ? localStorage : sessionStorage;
+      storage.setItem(REFRESH_TOKEN_KEY, payload.refresh);
+      storage.setItem(AUTH_USER_KEY, JSON.stringify(payload.user));
+      setSession(payload.access, persist);
+      dispatch({
+        type: Types.LOGIN,
+        payload: { user: payload.user },
+      });
+    },
+    []
+  );
 
   const initialize = useCallback(async () => {
     try {
-      const accessToken = sessionStorage.getItem(STORAGE_KEY);
-      const refreshToken = sessionStorage.getItem(REFRESH_TOKEN_KEY);
+      const accessToken = getStoredToken(STORAGE_KEY);
+      const refreshToken = getStoredToken(REFRESH_TOKEN_KEY);
 
       // Access valid → use it. Access expired but refresh present → still try
       // /me; the response interceptor refreshes transparently on 401 so a
@@ -120,7 +131,7 @@ export function AuthProvider({ children }: Props) {
       }
 
       if (isJwtAuthMock()) {
-        const raw = sessionStorage.getItem(AUTH_USER_KEY);
+        const raw = getStoredToken(AUTH_USER_KEY);
         const user = raw ? JSON.parse(raw) : null;
         dispatch({ type: Types.INITIAL, payload: { user } });
         return;
@@ -183,7 +194,7 @@ export function AuthProvider({ children }: Props) {
   );
 
   const logout = useCallback(async () => {
-    const refresh = sessionStorage.getItem(REFRESH_TOKEN_KEY);
+    const refresh = getStoredToken(REFRESH_TOKEN_KEY);
     if (refresh) {
       // Server-side blacklist so the refresh token can't be replayed if it leaks.
       // Best-effort: a failed call (network, already-blacklisted) must not block
@@ -194,9 +205,7 @@ export function AuthProvider({ children }: Props) {
         /* ignore — local session will be cleared regardless */
       }
     }
-    sessionStorage.removeItem(REFRESH_TOKEN_KEY);
-    sessionStorage.removeItem(AUTH_USER_KEY);
-    setSession(null);
+    setSession(null); // clears all auth keys from both localStorage and sessionStorage
     dispatch({
       type: Types.LOGOUT,
     });
