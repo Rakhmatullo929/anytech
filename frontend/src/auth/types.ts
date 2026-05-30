@@ -28,7 +28,7 @@ export type JWTContextType = {
   authenticated: boolean;
   unauthenticated: boolean;
   /** Apply Django `{ access, refresh, user }` and sync React state + storage. */
-  syncSessionFromApiResponse: (payload: TokenPairResponse) => void;
+  syncSessionFromApiResponse: (payload: TokenPairResponse, rememberMe?: boolean) => void;
   login: (credentials: LoginRequest) => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
   logout: () => Promise<void>;

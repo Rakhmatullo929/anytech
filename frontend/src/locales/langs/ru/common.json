@@ -107,6 +107,9 @@
     "salePriceRequired": "Цена продажи обязательна",
     "stockRequired": "Начальный остаток обязателен"
   },
+  "auth": {
+    "rememberMe": "Запомнить меня"
+  },
   "dictionary": {
     "account": "аккаунт",
     "analytics": "аналитика",
