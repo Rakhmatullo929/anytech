@@ -107,6 +107,9 @@
     "salePriceRequired": "Sotuv narxi majburiy",
     "stockRequired": "Boshlangʻich qoldiq majburiy"
   },
+  "auth": {
+    "rememberMe": "Meni eslab qol"
+  },
   "dictionary": {
     "account": "akkaunt",
     "analytics": "analitika",

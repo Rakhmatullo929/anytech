@@ -11,8 +11,10 @@ import { HOST_API } from 'src/config-global';
 import { paths } from 'src/routes/paths';
 import {
   ACCESS_TOKEN_KEY,
-  AUTH_USER_KEY,
   REFRESH_TOKEN_KEY,
+  clearAllAuthStorage,
+  getRememberMe,
+  getStoredToken,
 } from 'src/auth/api/storage-keys';
 
 import { API_ENDPOINTS } from './endpoints';
@@ -67,7 +69,7 @@ function camelizeResponseData(data: unknown): unknown {
 
 /**
  * Axios instance for this app: `HOST_API` origin, snake_case ↔ camelCase for JSON bodies
- * and plain object query params, JWT from `sessionStorage` unless `skipAuth` is set.
+ * and plain object query params, JWT from storage (localStorage or sessionStorage) unless `skipAuth` is set.
  */
 export const apiClient = axios.create({
   baseURL: root || undefined,
@@ -99,7 +101,7 @@ apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   }
 
   if (!next.skipAuth && typeof window !== 'undefined') {
-    const token = sessionStorage.getItem(ACCESS_TOKEN_KEY);
+    const token = getStoredToken(ACCESS_TOKEN_KEY);
     if (token) {
       next.headers = next.headers ?? {};
       (next.headers as Record<string, string>).Authorization = `Bearer ${token}`;
@@ -122,16 +124,14 @@ let refreshPromise: Promise<string> | null = null;
 
 function clearSessionAndRedirect() {
   if (typeof window === 'undefined') return;
-  sessionStorage.removeItem(ACCESS_TOKEN_KEY);
-  sessionStorage.removeItem(REFRESH_TOKEN_KEY);
-  sessionStorage.removeItem(AUTH_USER_KEY);
+  clearAllAuthStorage();
   if (window.location.pathname !== paths.auth.jwt.login) {
     window.location.href = paths.auth.jwt.login;
   }
 }
 
 async function refreshAccessToken(): Promise<string> {
-  const refresh = sessionStorage.getItem(REFRESH_TOKEN_KEY);
+  const refresh = getStoredToken(REFRESH_TOKEN_KEY);
   if (!refresh) {
     throw new Error('no_refresh_token');
   }
@@ -144,10 +144,11 @@ async function refreshAccessToken(): Promise<string> {
   );
   const newAccess = response.data.access;
   const newRefresh = response.data.refresh;
-  sessionStorage.setItem(ACCESS_TOKEN_KEY, newAccess);
+  const storage = getRememberMe() ? localStorage : sessionStorage;
+  storage.setItem(ACCESS_TOKEN_KEY, newAccess);
   if (newRefresh) {
     // ROTATE_REFRESH_TOKENS=True on the backend → store the rotated refresh.
-    sessionStorage.setItem(REFRESH_TOKEN_KEY, newRefresh);
+    storage.setItem(REFRESH_TOKEN_KEY, newRefresh);
   }
   return newAccess;
 }

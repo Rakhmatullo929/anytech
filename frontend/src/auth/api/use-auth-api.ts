@@ -9,7 +9,7 @@ import type { LoginRequest, RegisterRequest, TokenPairResponse } from './types';
 
 // ----------------------------------------------------------------------
 
-export function useLoginMutation() {
+export function useLoginMutation(rememberMe: boolean) {
   const { syncSessionFromApiResponse } = useAuthContext();
   const queryClient = useQueryClient();
 
@@ -25,7 +25,7 @@ export function useLoginMutation() {
     {
       skipGlobalErrorNotification: true,
       onSuccess: (payload) => {
-        syncSessionFromApiResponse(payload);
+        syncSessionFromApiResponse(payload, rememberMe);
         queryClient.invalidateQueries();
       },
     }
@@ -55,17 +55,13 @@ export function useRegisterMutation() {
   );
 }
 
-/**
- * Client-only logout: clears tokens, user cache, and React Query (no blacklist call).
- */
 export function useLogoutMutation() {
   const { logout } = useAuthContext();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async () => undefined,
+    mutationFn: logout,
     onSuccess: () => {
-      logout();
       queryClient.clear();
     },
   });

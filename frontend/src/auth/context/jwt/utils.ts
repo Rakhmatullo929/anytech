@@ -1,4 +1,8 @@
-import { ACCESS_TOKEN_KEY, AUTH_USER_KEY, REFRESH_TOKEN_KEY } from 'src/auth/api/storage-keys';
+import {
+  ACCESS_TOKEN_KEY,
+  clearAllAuthStorage,
+  getRememberMe,
+} from 'src/auth/api/storage-keys';
 
 // ----------------------------------------------------------------------
 
@@ -40,13 +44,16 @@ export const isValidToken = (accessToken: string) => {
  * axios response interceptor (refresh on 401), not by a setTimeout — short
  * access TTLs (minutes) made the old "schedule an alert at exp" approach
  * both noisy and unreliable across tab sleep/wake.
+ *
+ * When `rememberMe` is omitted the current stored preference is used so
+ * callers that don't know about the flag (e.g. initialize on page load) stay
+ * consistent with whatever the user chose at login time.
  */
-export const setSession = (accessToken: string | null) => {
+export const setSession = (accessToken: string | null, rememberMe?: boolean) => {
   if (accessToken) {
-    sessionStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+    const storage = (rememberMe ?? getRememberMe()) ? localStorage : sessionStorage;
+    storage.setItem(ACCESS_TOKEN_KEY, accessToken);
   } else {
-    sessionStorage.removeItem(ACCESS_TOKEN_KEY);
-    sessionStorage.removeItem(REFRESH_TOKEN_KEY);
-    sessionStorage.removeItem(AUTH_USER_KEY);
+    clearAllAuthStorage();
   }
 };
