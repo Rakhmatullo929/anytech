@@ -12,6 +12,8 @@ import type { ProductListItem } from 'src/sections/app/products/api/types';
 
 import PosProductListItem from './pos-product-list-item';
 
+// ----------------------------------------------------------------------
+
 type Props = {
   products: ProductListItem[];
   search: string;
@@ -22,6 +24,8 @@ type Props = {
   hasNextPage: boolean;
   observerRef: (el: HTMLElement | null) => void;
 };
+
+// ----------------------------------------------------------------------
 
 export default function PosProductList({
   products,
@@ -36,30 +40,61 @@ export default function PosProductList({
   const { tx } = useLocales();
 
   return (
-    <Card sx={{ flex: 1, p: 2 }}>
+    <Card
+      sx={{
+        flex: 1,
+        p: 2,
+        // Flat, full-bleed appearance on mobile/tablet — the parent Box in
+        // view.tsx already extends the card edge-to-edge using mx:-2.
+        borderRadius: { xs: 0, md: 2 },
+        '@media (max-width: 899px)': { boxShadow: 'none' },
+        // overflow:visible lets position:sticky work on mobile
+        // (Card/Paper default overflow:hidden breaks it).
+        overflow: { xs: 'visible', md: 'hidden' },
+      }}
+    >
       <Typography variant="h6" sx={{ mb: 2 }}>
         {tx('pos.productsHeading')}
       </Typography>
 
-      <TextField
-        fullWidth
-        size="small"
-        placeholder={tx('pos.searchPlaceholder')}
-        value={search}
-        onChange={(e) => onSearchChange(e.target.value)}
-        InputProps={{
-          startAdornment: (
-            <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled', mr: 1 }} />
-          ),
+      {/*
+       * Sticky search — sticks to the top of the viewport while the page
+       * scrolls. Card has overflow:visible on mobile so sticky works.
+       * No negative margins: Card already has equal p:2 on both sides, so
+       * the paper background naturally covers the full width when sticky.
+       */}
+      <Box
+        sx={{
+          position: { xs: 'sticky', md: 'static' },
+          top: 0,
+          zIndex: { xs: 10, md: 'auto' },
+          bgcolor: 'background.paper',
+          pb: { xs: 1, md: 0 },
+          pt: { xs: 0.5, md: 0 },
         }}
-        sx={{ mb: 2 }}
-      />
+      >
+        <TextField
+          fullWidth
+          size="small"
+          placeholder={tx('pos.searchPlaceholder')}
+          value={search}
+          onChange={(e) => onSearchChange(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled', mr: 1 }} />
+            ),
+          }}
+          sx={{ mb: { xs: 1, md: 2 } }}
+        />
 
-      {isFetching && (
-        <LinearProgress sx={{ mb: 1, borderRadius: 1 }} color="inherit" />
-      )}
+        {isFetching && (
+          <LinearProgress sx={{ borderRadius: 1 }} color="inherit" />
+        )}
+      </Box>
 
-      <Stack spacing={0.5}>
+      {/* Product list — extra bottom padding on mobile so the FAB doesn't
+          cover the last item */}
+      <Stack spacing={0.5} sx={{ pb: { xs: 10, md: 0 } }}>
         {products.map((product) => (
           <PosProductListItem key={product.id} product={product} onAdd={onAddProduct} />
         ))}
