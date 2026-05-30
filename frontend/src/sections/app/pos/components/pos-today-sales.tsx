@@ -95,7 +95,7 @@ export default function PosTodaySales() {
   );
 
   return (
-    <Card>
+    <Card sx={{ borderRadius: { xs: 0, md: 2 }, '@media (max-width: 899px)': { boxShadow: 'none' } }}>
       {isFetching && data ? (
         <LinearProgress sx={{ borderRadius: 1 }} color="inherit" />
       ) : (

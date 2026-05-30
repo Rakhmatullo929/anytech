@@ -1,6 +1,9 @@
 import { useCallback, useMemo, useState } from 'react';
 
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
@@ -23,8 +26,12 @@ import type { TenantUserListItem } from '../admin/users/api/types';
 import { useCreateSaleMutation } from './api/use-pos-api';
 import type { SalePaymentType } from './api/types';
 import { PosCart, PosProductList, PosTodaySales } from './components';
+import PosCartDrawer from './components/pos-cart-drawer';
+import PosMobileCartFab from './components/pos-mobile-cart-fab';
 import { PosViewSkeleton } from './skeleton';
 import { usePosCart } from './hooks/use-pos-cart';
+
+// ----------------------------------------------------------------------
 
 function tenantUserToListItem(u: TenantUser): TenantUserListItem {
   return {
@@ -49,9 +56,10 @@ export default function PosView() {
   const { tx } = useLocales();
   const { enqueueSnackbar } = useSnackbar();
   const { user: authUser } = useAuthContext();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const { data: cashRegister, isPending: cashRegisterPending, isError: cashRegisterError } = useCashRegisterQuery();
-  // Only block if we have confirmed data showing CLOSED. Never block on loading or error state.
   const isRegisterClosed = !cashRegisterPending && !cashRegisterError && cashRegister?.status === 'closed';
 
   const [client, setClient] = useState<ClientListItem | null>(null);
@@ -62,6 +70,9 @@ export default function PosView() {
   const [paymentType, setPaymentType] = useState<SalePaymentType>('cash');
   const [debtDeadlineDays, setDebtDeadlineDays] = useState<number | ''>(15);
   const [search, setSearch] = useState('');
+
+  // Mobile cart drawer state
+  const [cartOpen, setCartOpen] = useState(false);
 
   const debouncedSearch = useDebounce(search, 400);
 
@@ -80,9 +91,6 @@ export default function PosView() {
         page: pageParam,
         pageSize: 20,
         search: debouncedSearch || undefined,
-        // Without search: only in-stock products, sorted alphabetically.
-        // With search: all products (so cashier can see out-of-stock too),
-        // in-stock first via -total_quantity ordering.
         ordering: debouncedSearch ? '-total_quantity,name' : 'name',
         inStock: !debouncedSearch,
       }),
@@ -140,6 +148,7 @@ export default function PosView() {
       setClient(null);
       setPaymentType('cash');
       setDebtDeadlineDays(15);
+      setCartOpen(false); // close the mobile drawer after a successful sale
       if (authUser && 'id' in authUser) {
         setCreatedBy(tenantUserToListItem(authUser as TenantUser));
       }
@@ -147,6 +156,27 @@ export default function PosView() {
       // useMutate global handler shows the error snackbar
     }
   }, [cart, client, createdBy, paymentType, debtDeadlineDays, createSaleMutation, enqueueSnackbar, tx, clear, authUser]);
+
+  // ── Shared cart props ──────────────────────────────────────────────
+
+  const cartProps = {
+    cart,
+    onSetQty: setQty,
+    onSetPrice: setPrice,
+    onRemove: removeLine,
+    client,
+    onClientChange: setClient,
+    createdBy,
+    onCreatedByChange: setCreatedBy,
+    paymentType,
+    onPaymentTypeChange: setPaymentType,
+    debtDeadlineDays,
+    onDebtDeadlineDaysChange: setDebtDeadlineDays,
+    subtotal,
+    canComplete,
+    isCreating: createSaleMutation.isPending,
+    onComplete: completeSale,
+  };
 
   // ── Render ─────────────────────────────────────────────────────────
 
@@ -179,40 +209,52 @@ export default function PosView() {
         <PosViewSkeleton />
       ) : (
         <Stack spacing={3}>
-          <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} alignItems="flex-start">
-            <PosProductList
-              products={products}
-              search={search}
-              onSearchChange={setSearch}
-              onAddProduct={addProduct}
-              isFetching={productsFetching && !!productsData}
-              isFetchingNextPage={isFetchingNextPage}
-              hasNextPage={Boolean(hasNextPage)}
-              observerRef={observer.ref}
-            />
+          {/*
+           * On mobile/tablet (< md = 900 px) the cards bleed to the
+           * full screen width by cancelling the layout's px:2 (16 px)
+           * padding. html/body already have overflow-x:hidden so the
+           * negative margin does NOT create a horizontal scrollbar.
+           */}
+          <Box sx={{ mx: { xs: -2, md: 0 } }}>
+            <Stack direction={{ xs: 'column', md: 'row' }} spacing={0} alignItems="flex-start">
+              <PosProductList
+                products={products}
+                search={search}
+                onSearchChange={setSearch}
+                onAddProduct={addProduct}
+                isFetching={productsFetching && !!productsData}
+                isFetchingNextPage={isFetchingNextPage}
+                hasNextPage={Boolean(hasNextPage)}
+                observerRef={observer.ref}
+              />
 
-            <PosCart
-              cart={cart}
-              onSetQty={setQty}
-              onSetPrice={setPrice}
-              onRemove={removeLine}
-              client={client}
-              onClientChange={setClient}
-              createdBy={createdBy}
-              onCreatedByChange={setCreatedBy}
-              paymentType={paymentType}
-              onPaymentTypeChange={setPaymentType}
-              debtDeadlineDays={debtDeadlineDays}
-              onDebtDeadlineDaysChange={setDebtDeadlineDays}
-              subtotal={subtotal}
-              canComplete={canComplete}
-              isCreating={createSaleMutation.isPending}
-              onComplete={completeSale}
-            />
-          </Stack>
+              {/* Desktop: sticky sidebar cart */}
+              {!isMobile && <PosCart {...cartProps} />}
+            </Stack>
+          </Box>
 
-          <PosTodaySales />
+          <Box sx={{ mx: { xs: -2, md: 0 } }}>
+            <PosTodaySales />
+          </Box>
         </Stack>
+      )}
+
+      {/* Mobile: floating cart button + bottom-sheet drawer */}
+      {isMobile && (
+        <>
+          <PosMobileCartFab
+            itemCount={cart.length}
+            subtotal={subtotal}
+            onClick={() => setCartOpen(true)}
+          />
+
+          <PosCartDrawer
+            open={cartOpen}
+            onClose={() => setCartOpen(false)}
+            onOpen={() => setCartOpen(true)}
+            {...cartProps}
+          />
+        </>
       )}
     </>
   );
