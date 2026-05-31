@@ -36,6 +36,41 @@ class DebtDetailSerializer(DebtListSerializer):
         fields = DebtListSerializer.Meta.fields + ("updated_at", "payments")
 
 
+class DebtPaymentListSerializer(serializers.ModelSerializer):
+    debt_id = serializers.UUIDField(read_only=True)
+    customer_id = serializers.SerializerMethodField()
+    customer_name = serializers.SerializerMethodField()
+    cashier_id = serializers.UUIDField(read_only=True, allow_null=True)
+    cashier_name = serializers.SerializerMethodField()
+
+    def get_customer_id(self, obj):
+        return str(obj.debt.client_id) if obj.debt.client_id else None
+
+    def get_customer_name(self, obj):
+        client = obj.debt.client
+        return client.name if client else None
+
+    def get_cashier_name(self, obj):
+        u = obj.cashier
+        if not u:
+            return None
+        return " ".join(filter(None, [u.first_name, u.last_name])) or None
+
+    class Meta:
+        model = Payment
+        fields = (
+            "id",
+            "debt_id",
+            "customer_id",
+            "customer_name",
+            "amount",
+            "payment_method",
+            "created_at",
+            "cashier_id",
+            "cashier_name",
+        )
+
+
 # ── Write serializer (input for pay action) ───────────────────────────
 
 
