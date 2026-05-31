@@ -14,7 +14,12 @@ from apps.auth_tenant.mixins import TenantQuerySetMixin
 from apps.auth_tenant.permissions import page_action_permission
 
 from .models import Debt, Payment
-from .serializers import DebtDetailSerializer, DebtListSerializer, PaymentCreateSerializer
+from .serializers import (
+    DebtDetailSerializer,
+    DebtListSerializer,
+    DebtPaymentListSerializer,
+    PaymentCreateSerializer,
+)
 
 
 class DebtViewSet(TenantQuerySetMixin, ListModelMixin, RetrieveModelMixin, GenericViewSet):
@@ -173,7 +178,12 @@ class DebtViewSet(TenantQuerySetMixin, ListModelMixin, RetrieveModelMixin, Gener
             payment_method = serializer.validated_data.get(
                 "payment_method", Payment.PaymentMethod.CASH
             )
-            Payment.objects.create(debt=debt, amount=amount, payment_method=payment_method)
+            Payment.objects.create(
+                debt=debt,
+                amount=amount,
+                payment_method=payment_method,
+                cashier=request.user,
+            )
 
             debt.paid_amount += amount
             if debt.paid_amount >= debt.total_amount:
@@ -189,3 +199,101 @@ class DebtViewSet(TenantQuerySetMixin, ListModelMixin, RetrieveModelMixin, Gener
         return Response(
             DebtDetailSerializer(debt, context=self.get_serializer_context()).data
         )
+
+
+class DebtPaymentViewSet(ListModelMixin, GenericViewSet):
+    queryset = Payment.objects.select_related("debt__client", "cashier").all()
+    serializer_class = DebtPaymentListSerializer
+    ordering_fields = ["created_at", "amount"]
+    ordering = ["-created_at"]
+
+    def get_permissions(self):
+        return [page_action_permission("debts", "read")()]
+
+    def get_queryset(self):
+        user = self.request.user
+        if not user.is_authenticated or not user.tenant_id:
+            return Payment.objects.none()
+
+        qs = super().get_queryset().filter(debt__tenant_id=user.tenant_id)
+
+        customer_id = self.request.query_params.get("customer_id")
+        if customer_id:
+            qs = qs.filter(debt__client_id=customer_id)
+
+        payment_method = self.request.query_params.get("payment_method")
+        if payment_method in {m[0] for m in Payment.PaymentMethod.choices}:
+            qs = qs.filter(payment_method=payment_method)
+
+        cashier_ids_raw = self.request.query_params.get("cashier_ids")
+        if cashier_ids_raw:
+            ids = [i.strip() for i in cashier_ids_raw.split(",") if i.strip()]
+            if ids:
+                qs = qs.filter(cashier_id__in=ids)
+
+        date_from = self.request.query_params.get("date_from")
+        if date_from:
+            qs = qs.filter(created_at__date__gte=date_from)
+
+        date_to = self.request.query_params.get("date_to")
+        if date_to:
+            qs = qs.filter(created_at__date__lte=date_to)
+
+        return qs
+
+    @action(detail=False, methods=["get"], url_path="export-excel")
+    def export_excel(self, request):
+        try:
+            from openpyxl import Workbook
+            from openpyxl.styles import Alignment, Font, PatternFill
+        except ImportError as exc:
+            raise ValidationError(
+                {"detail": _("Excel export requires openpyxl package on backend.")}
+            ) from exc
+
+        queryset = self.filter_queryset(self.get_queryset())
+
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Debt Payments"
+
+        headers = ["ID", "Client", "Amount", "Payment Method", "Cashier", "Date"]
+        header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+        header_font = Font(bold=True, color="FFFFFF")
+
+        for col_idx, header in enumerate(headers, start=1):
+            cell = ws.cell(row=1, column=col_idx, value=header)
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = Alignment(horizontal="center")
+
+        for payment in queryset.iterator(chunk_size=500):
+            client = payment.debt.client
+            cashier = payment.cashier
+            cashier_name = (
+                " ".join(filter(None, [cashier.first_name, cashier.last_name]))
+                if cashier
+                else ""
+            )
+            ws.append([
+                str(payment.id),
+                client.name if client else "",
+                float(payment.amount),
+                payment.get_payment_method_display(),
+                cashier_name,
+                payment.created_at.strftime("%Y-%m-%d %H:%M"),
+            ])
+
+        for col in ws.columns:
+            ws.column_dimensions[col[0].column_letter].width = 22
+
+        buffer = BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+
+        response = HttpResponse(
+            buffer.read(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = 'attachment; filename="debt_payments_export.xlsx"'
+        return response

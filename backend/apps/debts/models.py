@@ -45,6 +45,13 @@ class Payment(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     debt = models.ForeignKey(Debt, on_delete=models.CASCADE, related_name="payments")
+    cashier = models.ForeignKey(
+        "auth_tenant.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="accepted_payments",
+    )
     amount = models.DecimalField(max_digits=14, decimal_places=2)
     payment_method = models.CharField(
         max_length=10,

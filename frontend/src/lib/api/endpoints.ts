@@ -66,6 +66,10 @@ export const API_ENDPOINTS = {
     detail: (id: string) => `${API_V1}/debts/${id}/`,
     pay: (id: string) => `${API_V1}/debts/${id}/pay/`,
   },
+  debtPayments: {
+    list: `${API_V1}/debts/payments/`,
+    exportExcel: `${API_V1}/debts/payments/export-excel/`,
+  },
   cashRegister: {
     status: `${API_V1}/cash-register/`,
     open: `${API_V1}/cash-register/open/`,

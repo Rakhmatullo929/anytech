@@ -12,10 +12,12 @@ import Link from '@mui/material/Link';
 import LinearProgress from '@mui/material/LinearProgress';
 import MenuItem from '@mui/material/MenuItem';
 import Stack from '@mui/material/Stack';
+import Tab from '@mui/material/Tab';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
+import Tabs from '@mui/material/Tabs';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 // utils
@@ -26,6 +28,7 @@ import { useCheckPermission } from 'src/auth/hooks/use-check-permission';
 // routes
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
+import { useRouter, useSearchParams } from 'src/routes/hook';
 // components
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
@@ -47,6 +50,7 @@ import {
   type DebtListItem,
 } from 'src/sections/app/depts/api';
 import { DebtsListSkeleton } from 'src/sections/app/depts/skeleton';
+import PaymentHistoryView from './payment-history-view';
 
 // ----------------------------------------------------------------------
 
@@ -120,7 +124,7 @@ function DeadlineCell({
 
 // ----------------------------------------------------------------------
 
-export default function DebtsView() {
+function DebtsListTab() {
   const { tx } = useLocales();
   const { canDetailPage } = useCheckPermission();
   const exportMutation = useExportDebtsMutation();
@@ -145,10 +149,8 @@ export default function DebtsView() {
     handleRowsPerPageChange,
   } = useDebtsUrlState();
 
-  // ── Local state for autocomplete objects ──────────────────────────────────
   const [selectedClients, setSelectedClients] = useState<ClientListItem[]>([]);
 
-  // ── Sorting ──────────────────────────────────────────────────────────────
   const tableHead: HeadCell[] = useMemo(
     () => [
       { id: 'client', label: tx('common.table.client'), sortKey: 'client__name' },
@@ -181,7 +183,6 @@ export default function DebtsView() {
     [tableHead, tableOrderBy, tableOrder, setOrdering]
   );
 
-  // ── Table / data ─────────────────────────────────────────────────────────
   const table = useTable({
     defaultCurrentPage: Math.max(0, pageParam - 1),
     defaultRowsPerPage: rowsPerPage,
@@ -250,6 +251,180 @@ export default function DebtsView() {
     setSelectedClients([]);
   };
 
+  if (showInitialLoader) {
+    return <DebtsListSkeleton headLabel={tableHead} />;
+  }
+
+  return (
+    <Card>
+      {isFetching && data ? (
+        <LinearProgress sx={{ borderRadius: 1 }} color="inherit" />
+      ) : (
+        <Box sx={{ height: 4 }} />
+      )}
+
+      <Stack spacing={2} sx={{ p: 2 }}>
+        {/* Toolbar */}
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Box sx={{ flexGrow: 1 }} />
+
+          <FilterDrawer
+            filtersCount={activeFiltersCount}
+            title={tx('common.actions.filters')}
+            resetLabel={tx('common.actions.reset')}
+            onReset={handleReset}
+          >
+            <TextField
+              select
+              fullWidth
+              size="small"
+              label={tx('common.status.filterLabel')}
+              value={status}
+              onChange={(e) => setFilters({ status: e.target.value as '' | DebtStatus })}
+            >
+              {statusOptions.map((opt) => (
+                <MenuItem key={opt.value || 'all'} value={opt.value}>
+                  {opt.label}
+                </MenuItem>
+              ))}
+            </TextField>
+
+            <AutocompleteInfinite<ClientListItem>
+              queryKeyBase={CLIENTS_QUERY_KEY_BASE}
+              fetcher={clientsInfiniteFetcher}
+              size="small"
+              value={selectedClients}
+              onChange={(clients) => {
+                setSelectedClients(clients);
+                setFilters({ clientIds: clients.map((c) => c.id).join(',') });
+              }}
+              getOptionLabel={(c) => c.name}
+              label={tx('debts.filters.client')}
+            />
+
+            <FilterFieldDateRange
+              label={tx('debts.filters.dateRange')}
+              fromLabel={tx('debts.filters.dateFrom')}
+              toLabel={tx('debts.filters.dateTo')}
+              fromValue={dateFrom}
+              toValue={dateTo}
+              onFromChange={(v) => setFilters({ dateFrom: v })}
+              onToChange={(v) => setFilters({ dateTo: v })}
+            />
+
+            <FilterFieldDateRange
+              label={tx('debts.filters.deadlineRange')}
+              fromLabel={tx('debts.filters.deadlineFrom')}
+              toLabel={tx('debts.filters.deadlineTo')}
+              fromValue={deadlineFrom}
+              toValue={deadlineTo}
+              onFromChange={(v) => setFilters({ deadlineFrom: v })}
+              onToChange={(v) => setFilters({ deadlineTo: v })}
+            />
+
+            <FilterFieldRange
+              label={tx('debts.filters.amountRange')}
+              minLabel={tx('debts.filters.amountMin')}
+              maxLabel={tx('debts.filters.amountMax')}
+              minValue={amountFrom}
+              maxValue={amountTo}
+              onMinChange={(v) => setFilters({ amountFrom: v })}
+              onMaxChange={(v) => setFilters({ amountTo: v })}
+            />
+          </FilterDrawer>
+
+          <Button
+            variant="outlined"
+            startIcon={
+              exportMutation.isPending ? (
+                <Iconify icon="svg-spinners:ring-resize" />
+              ) : (
+                <Iconify icon="eva:download-fill" />
+              )
+            }
+            onClick={handleExport}
+            disabled={exportMutation.isPending}
+          >
+            {tx('common.actions.export')}
+          </Button>
+        </Stack>
+
+        <Scrollbar>
+          <Table size="small">
+            <TableHeadCustom
+              headLabel={tableHead}
+              order={tableOrder}
+              orderBy={tableOrderBy}
+              onSort={handleSort}
+            />
+            <TableBody>
+              {rows.map((row) => {
+                const isOverdue =
+                  row.status === 'active' &&
+                  row.deadline != null &&
+                  (getDeadlineInfo(row.deadline)?.diff ?? 1) < 0;
+
+                return (
+                  <TableRow
+                    key={row.id}
+                    hover
+                    sx={isOverdue ? { bgcolor: 'error.lighter' } : undefined}
+                  >
+                    <TableCell>
+                      {canDetailDebts ? (
+                        <Link
+                          component={RouterLink}
+                          href={paths.debts.details(row.id)}
+                          variant="subtitle2"
+                        >
+                          {row.clientName}
+                        </Link>
+                      ) : (
+                        row.clientName
+                      )}
+                    </TableCell>
+                    <TableCell>{fCurrency(row.totalAmount)}</TableCell>
+                    <TableCell>{fCurrency(row.paidAmount)}</TableCell>
+                    <TableCell>{fCurrency(row.remaining)}</TableCell>
+                    <DeadlineCell row={row} tx={tx} />
+                    <TableCell>
+                      {row.status === 'active'
+                        ? tx('common.status.rowActive')
+                        : tx('common.status.rowClosed')}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+              <TableNoData notFound={!rows.length} title={tx('common.table.noData')} />
+            </TableBody>
+          </Table>
+        </Scrollbar>
+
+        <TablePaginationCustom
+          count={total}
+          page={page}
+          rowsPerPage={rowsPerPage}
+          rowsPerPageOptions={[5, 10, 15, 25]}
+          onPageChange={handlePageChange}
+          onRowsPerPageChange={handleRowsPerPageChange}
+        />
+      </Stack>
+    </Card>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+export default function DebtsView() {
+  const { tx } = useLocales();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const currentTab = searchParams.get('tab') === 'payments' ? 'payments' : 'debts';
+
+  const handleTabChange = (_: React.SyntheticEvent, value: string) => {
+    router.replace(`${paths.debts.root}?tab=${value}`);
+  };
+
   return (
     <>
       <CustomBreadcrumbs
@@ -258,164 +433,17 @@ export default function DebtsView() {
         sx={{ mb: { xs: 3, md: 5 } }}
       />
 
-      {showInitialLoader ? (
-        <DebtsListSkeleton headLabel={tableHead} />
-      ) : (
-        <Card>
-          {isFetching && data ? (
-            <LinearProgress sx={{ borderRadius: 1 }} color="inherit" />
-          ) : (
-            <Box sx={{ height: 4 }} />
-          )}
+      <Tabs
+        value={currentTab}
+        onChange={handleTabChange}
+        sx={{ mb: 3 }}
+      >
+        <Tab value="debts" label={tx('debts.tabs.debts')} />
+        <Tab value="payments" label={tx('debts.tabs.paymentHistory')} />
+      </Tabs>
 
-          <Stack spacing={2} sx={{ p: 2 }}>
-            {/* Toolbar */}
-            <Stack direction="row" spacing={1} alignItems="center">
-              <Box sx={{ flexGrow: 1 }} />
-
-              <FilterDrawer
-                filtersCount={activeFiltersCount}
-                title={tx('common.actions.filters')}
-                resetLabel={tx('common.actions.reset')}
-                onReset={handleReset}
-              >
-                <TextField
-                  select
-                  fullWidth
-                  size="small"
-                  label={tx('common.status.filterLabel')}
-                  value={status}
-                  onChange={(e) => setFilters({ status: e.target.value as '' | DebtStatus })}
-                >
-                  {statusOptions.map((opt) => (
-                    <MenuItem key={opt.value || 'all'} value={opt.value}>
-                      {opt.label}
-                    </MenuItem>
-                  ))}
-                </TextField>
-
-                <AutocompleteInfinite<ClientListItem>
-                  queryKeyBase={CLIENTS_QUERY_KEY_BASE}
-                  fetcher={clientsInfiniteFetcher}
-                  size="small"
-                  value={selectedClients}
-                  onChange={(clients) => {
-                    setSelectedClients(clients);
-                    setFilters({ clientIds: clients.map((c) => c.id).join(',') });
-                  }}
-                  getOptionLabel={(c) => c.name}
-                  label={tx('debts.filters.client')}
-                />
-
-                <FilterFieldDateRange
-                  label={tx('debts.filters.dateRange')}
-                  fromLabel={tx('debts.filters.dateFrom')}
-                  toLabel={tx('debts.filters.dateTo')}
-                  fromValue={dateFrom}
-                  toValue={dateTo}
-                  onFromChange={(v) => setFilters({ dateFrom: v })}
-                  onToChange={(v) => setFilters({ dateTo: v })}
-                />
-
-                <FilterFieldDateRange
-                  label={tx('debts.filters.deadlineRange')}
-                  fromLabel={tx('debts.filters.deadlineFrom')}
-                  toLabel={tx('debts.filters.deadlineTo')}
-                  fromValue={deadlineFrom}
-                  toValue={deadlineTo}
-                  onFromChange={(v) => setFilters({ deadlineFrom: v })}
-                  onToChange={(v) => setFilters({ deadlineTo: v })}
-                />
-
-                <FilterFieldRange
-                  label={tx('debts.filters.amountRange')}
-                  minLabel={tx('debts.filters.amountMin')}
-                  maxLabel={tx('debts.filters.amountMax')}
-                  minValue={amountFrom}
-                  maxValue={amountTo}
-                  onMinChange={(v) => setFilters({ amountFrom: v })}
-                  onMaxChange={(v) => setFilters({ amountTo: v })}
-                />
-              </FilterDrawer>
-
-              <Button
-                variant="outlined"
-                startIcon={
-                  exportMutation.isPending ? (
-                    <Iconify icon="svg-spinners:ring-resize" />
-                  ) : (
-                    <Iconify icon="eva:download-fill" />
-                  )
-                }
-                onClick={handleExport}
-                disabled={exportMutation.isPending}
-              >
-                {tx('common.actions.export')}
-              </Button>
-            </Stack>
-
-            <Scrollbar>
-              <Table size="small">
-                <TableHeadCustom
-                  headLabel={tableHead}
-                  order={tableOrder}
-                  orderBy={tableOrderBy}
-                  onSort={handleSort}
-                />
-                <TableBody>
-                  {rows.map((row) => {
-                    const isOverdue =
-                      row.status === 'active' &&
-                      row.deadline != null &&
-                      (getDeadlineInfo(row.deadline)?.diff ?? 1) < 0;
-
-                    return (
-                      <TableRow
-                        key={row.id}
-                        hover
-                        sx={isOverdue ? { bgcolor: 'error.lighter' } : undefined}
-                      >
-                        <TableCell>
-                          {canDetailDebts ? (
-                            <Link
-                              component={RouterLink}
-                              href={paths.debts.details(row.id)}
-                              variant="subtitle2"
-                            >
-                              {row.clientName}
-                            </Link>
-                          ) : (
-                            row.clientName
-                          )}
-                        </TableCell>
-                        <TableCell>{fCurrency(row.totalAmount)}</TableCell>
-                        <TableCell>{fCurrency(row.paidAmount)}</TableCell>
-                        <TableCell>{fCurrency(row.remaining)}</TableCell>
-                        <DeadlineCell row={row} tx={tx} />
-                        <TableCell>
-                          {row.status === 'active'
-                            ? tx('common.status.rowActive')
-                            : tx('common.status.rowClosed')}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                  <TableNoData notFound={!rows.length} title={tx('common.table.noData')} />
-                </TableBody>
-              </Table>
-            </Scrollbar>
-
-            <TablePaginationCustom
-              count={total}
-              page={page}
-              rowsPerPage={rowsPerPage}
-              rowsPerPageOptions={[5, 10, 15, 25]}
-              onPageChange={handlePageChange}
-              onRowsPerPageChange={handleRowsPerPageChange}
-            />
-          </Stack>
-        </Card>
-      )}
+      {currentTab === 'debts' && <DebtsListTab />}
+      {currentTab === 'payments' && <PaymentHistoryView />}
     </>
   );
 }

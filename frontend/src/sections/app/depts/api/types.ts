@@ -56,3 +56,28 @@ export type PayDebtPayload = {
   amount: string;
   paymentMethod: DebtPaymentMethod;
 };
+
+export type DebtPaymentHistoryItem = {
+  id: string;
+  debtId: string;
+  customerId: string | null;
+  customerName: string | null;
+  amount: string;
+  paymentMethod: DebtPaymentMethod;
+  createdAt: string;
+  cashierId: string | null;
+  cashierName: string | null;
+};
+
+export type FetchDebtPaymentsParams = {
+  page: number;
+  pageSize: number;
+  ordering?: string;
+  customerId?: string;
+  paymentMethod?: DebtPaymentMethod | '';
+  cashierIds?: string;
+  dateFrom?: string;
+  dateTo?: string;
+};
+
+export type ExportDebtPaymentsParams = Omit<FetchDebtPaymentsParams, 'page' | 'pageSize'>;
