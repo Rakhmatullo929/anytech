@@ -32,6 +32,24 @@
     "daysLeft": "{{count}} дн. осталось",
     "daysOverdue": "{{count}} дн. просрочено"
   },
+  "tabs": {
+    "debts": "Долги",
+    "paymentHistory": "История погашений"
+  },
+  "payments": {
+    "columnCustomer": "Клиент",
+    "columnAmount": "Сумма",
+    "columnPaymentMethod": "Способ оплаты",
+    "columnCashier": "Кто принял",
+    "columnDate": "Дата",
+    "filterCustomer": "Клиент",
+    "filterPaymentMethod": "Способ оплаты",
+    "filterCashier": "Кассир",
+    "filterDateRange": "Диапазон дат",
+    "methodCash": "Наличные",
+    "methodCard": "Карта",
+    "methodTransfer": "Перевод"
+  },
   "detailDocumentTitle": "Долг",
   "documentTitle": "Долги",
   "paymentDialog": {

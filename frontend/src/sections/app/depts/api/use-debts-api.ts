@@ -3,11 +3,21 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { useFetchList, useFetchOne, useMutate } from 'src/hooks/api';
 
-import { exportDebtsExcel, fetchDebtDetail, fetchDebtsList, payDebt } from './debts-requests';
+import {
+  exportDebtPaymentsExcel,
+  exportDebtsExcel,
+  fetchDebtDetail,
+  fetchDebtPaymentsList,
+  fetchDebtsList,
+  payDebt,
+} from './debts-requests';
 import type {
   DebtDetail,
   DebtListItem,
+  DebtPaymentHistoryItem,
+  ExportDebtPaymentsParams,
   ExportDebtsParams,
+  FetchDebtPaymentsParams,
   FetchDebtsListParams,
   PayDebtPayload,
 } from './types';
@@ -70,4 +80,36 @@ export function usePayDebtMutation(id: string) {
 
 export function useExportDebtsMutation() {
   return useMutate<void, ExportDebtsParams>(exportDebtsExcel);
+}
+
+export function useDebtPaymentsListQuery(params: FetchDebtPaymentsParams) {
+  const { page, pageSize, ordering, customerId, paymentMethod, cashierIds, dateFrom, dateTo } =
+    params;
+
+  const queryKey = useMemo(
+    () =>
+      [
+        'debt-payments',
+        'list',
+        {
+          page,
+          pageSize,
+          ordering: ordering ?? '-created_at',
+          customerId: customerId ?? '',
+          paymentMethod: paymentMethod ?? '',
+          cashierIds: cashierIds ?? '',
+          dateFrom: dateFrom ?? '',
+          dateTo: dateTo ?? '',
+        },
+      ] as const,
+    [page, pageSize, ordering, customerId, paymentMethod, cashierIds, dateFrom, dateTo]
+  );
+
+  return useFetchList<DebtPaymentHistoryItem>(queryKey, () => fetchDebtPaymentsList(params), {
+    placeholderData: (previousData) => previousData,
+  });
+}
+
+export function useExportDebtPaymentsMutation() {
+  return useMutate<void, ExportDebtPaymentsParams>(exportDebtPaymentsExcel);
 }

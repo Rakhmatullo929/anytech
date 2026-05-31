@@ -4,7 +4,10 @@ import { request, API_ENDPOINTS } from 'src/utils/axios';
 import type {
   DebtDetail,
   DebtListItem,
+  DebtPaymentHistoryItem,
+  ExportDebtPaymentsParams,
   ExportDebtsParams,
+  FetchDebtPaymentsParams,
   FetchDebtsListParams,
   PayDebtPayload,
 } from './types';
@@ -67,4 +70,45 @@ export async function payDebt(id: string, payload: PayDebtPayload): Promise<Debt
     url: API_ENDPOINTS.debts.pay(id),
     data: payload,
   });
+}
+
+export async function fetchDebtPaymentsList(
+  params: FetchDebtPaymentsParams
+): Promise<Pagination<DebtPaymentHistoryItem>> {
+  return request<Pagination<DebtPaymentHistoryItem>>({
+    method: 'GET',
+    url: API_ENDPOINTS.debtPayments.list,
+    params: {
+      page: params.page,
+      pageSize: params.pageSize,
+      ordering: params.ordering ?? '-created_at',
+      ...(params.customerId ? { customer_id: params.customerId } : {}),
+      ...(params.paymentMethod ? { payment_method: params.paymentMethod } : {}),
+      ...(params.cashierIds ? { cashier_ids: params.cashierIds } : {}),
+      ...(params.dateFrom ? { date_from: params.dateFrom } : {}),
+      ...(params.dateTo ? { date_to: params.dateTo } : {}),
+    },
+  });
+}
+
+export async function exportDebtPaymentsExcel(params: ExportDebtPaymentsParams): Promise<void> {
+  const response = await request<Blob>({
+    method: 'GET',
+    url: API_ENDPOINTS.debtPayments.exportExcel,
+    responseType: 'blob',
+    params: {
+      ordering: params.ordering ?? '-created_at',
+      ...(params.customerId ? { customer_id: params.customerId } : {}),
+      ...(params.paymentMethod ? { payment_method: params.paymentMethod } : {}),
+      ...(params.cashierIds ? { cashier_ids: params.cashierIds } : {}),
+      ...(params.dateFrom ? { date_from: params.dateFrom } : {}),
+      ...(params.dateTo ? { date_to: params.dateTo } : {}),
+    },
+  });
+  const url = window.URL.createObjectURL(response as unknown as Blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'debt_payments_export.xlsx';
+  link.click();
+  window.URL.revokeObjectURL(url);
 }

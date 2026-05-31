@@ -32,6 +32,24 @@
     "daysLeft": "{{count}} kun qoldi",
     "daysOverdue": "{{count}} kun kechikdi"
   },
+  "tabs": {
+    "debts": "Qarzlar",
+    "paymentHistory": "To'lovlar tarixi"
+  },
+  "payments": {
+    "columnCustomer": "Mijoz",
+    "columnAmount": "Summa",
+    "columnPaymentMethod": "To'lov usuli",
+    "columnCashier": "Kim qabul qildi",
+    "columnDate": "Sana",
+    "filterCustomer": "Mijoz",
+    "filterPaymentMethod": "To'lov usuli",
+    "filterCashier": "Kassir",
+    "filterDateRange": "Sana oralig'i",
+    "methodCash": "Naqd",
+    "methodCard": "Karta",
+    "methodTransfer": "O'tkazma"
+  },
   "detailDocumentTitle": "Qarz",
   "documentTitle": "Qarzlar",
   "paymentDialog": {
