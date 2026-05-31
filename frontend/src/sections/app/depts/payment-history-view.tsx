@@ -27,6 +27,7 @@ import {
 } from 'src/components/table';
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
+import { PaymentHistorySkeleton } from 'src/sections/app/depts/skeleton';
 import { fetchClientsList } from 'src/sections/app/clients/api/clients-requests';
 import type { ClientListItem } from 'src/sections/app/clients/api/types';
 import { fetchTenantUsers } from 'src/sections/app/admin/users/api/users-requests';
@@ -82,7 +83,7 @@ export default function PaymentHistoryView() {
   const [selectedClients, setSelectedClients] = useState<ClientListItem[]>([]);
   const [selectedCashiers, setSelectedCashiers] = useState<TenantUserListItem[]>([]);
 
-  // ── Sorting ────────────────────────────────────────────────────────────
+  // ── Table head (needed before the skeleton guard) ──────────────────────
   const tableHead: HeadCell[] = useMemo(
     () => [
       { id: 'customer', label: tx('debts.payments.columnCustomer') },
@@ -183,12 +184,7 @@ export default function PaymentHistoryView() {
   };
 
   if (showInitialLoader) {
-    return (
-      <Card>
-        <LinearProgress sx={{ borderRadius: 1 }} color="inherit" />
-        <Box sx={{ height: 300 }} />
-      </Card>
-    );
+    return <PaymentHistorySkeleton headLabel={tableHead} />;
   }
 
   return (
