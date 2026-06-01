@@ -340,61 +340,67 @@ export default function ClientsView() {
             </Can>
 
             {/* Toolbar: search (left) + filters + export (right) */}
-            <Stack direction="row" spacing={1} alignItems="center">
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={1}
+              alignItems={{ xs: 'stretch', sm: 'center' }}
+            >
               <TextField
                 size="small"
                 placeholder={tx('clients.searchPlaceholder')}
                 value={searchValue}
                 onChange={(e) => setSearch(e.target.value)}
-                sx={{ width: 280 }}
+                sx={{ width: { sm: 280 }, flexShrink: 0 }}
               />
 
-              <Box sx={{ flexGrow: 1 }} />
+              <Box sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }} />
 
-              <FilterDrawer
-                filtersCount={activeFiltersCount}
-                title={tx('common.actions.filters')}
-                resetLabel={tx('common.actions.reset')}
-                onReset={() => {
-                  resetFilters();
-                  setSelectedGroups([]);
-                }}
-              >
-                <FilterFieldMultiSelect
-                  label={tx('clients.filters.gender')}
-                  options={genderOptions}
-                  value={gender ? [gender] : []}
-                  onChange={(vals) => setFilters({ gender: vals[vals.length - 1] ?? '' })}
-                />
-                <AutocompleteInfinite<GroupListItem>
-                  queryKeyBase={GROUPS_QUERY_KEY_BASE}
-                  fetcher={groupsInfiniteFetcher}
-                  pageSize={20}
-                  size="small"
-                  value={selectedGroups}
-                  onChange={(groups) => {
-                    setSelectedGroups(groups);
-                    setFilters({ groupIds: groups.map((g) => g.id).join(',') });
+              <Stack direction="row" spacing={1} justifyContent={{ xs: 'flex-end', sm: 'flex-start' }}>
+                <FilterDrawer
+                  filtersCount={activeFiltersCount}
+                  title={tx('common.actions.filters')}
+                  resetLabel={tx('common.actions.reset')}
+                  onReset={() => {
+                    resetFilters();
+                    setSelectedGroups([]);
                   }}
-                  getOptionLabel={(g) => g.name}
-                  label={tx('clients.filters.group')}
-                />
-              </FilterDrawer>
+                >
+                  <FilterFieldMultiSelect
+                    label={tx('clients.filters.gender')}
+                    options={genderOptions}
+                    value={gender ? [gender] : []}
+                    onChange={(vals) => setFilters({ gender: vals[vals.length - 1] ?? '' })}
+                  />
+                  <AutocompleteInfinite<GroupListItem>
+                    queryKeyBase={GROUPS_QUERY_KEY_BASE}
+                    fetcher={groupsInfiniteFetcher}
+                    pageSize={20}
+                    size="small"
+                    value={selectedGroups}
+                    onChange={(groups) => {
+                      setSelectedGroups(groups);
+                      setFilters({ groupIds: groups.map((g) => g.id).join(',') });
+                    }}
+                    getOptionLabel={(g) => g.name}
+                    label={tx('clients.filters.group')}
+                  />
+                </FilterDrawer>
 
-              <Button
-                variant="outlined"
-                startIcon={
-                  exportMutation.isPending ? (
-                    <Iconify icon="svg-spinners:ring-resize" />
-                  ) : (
-                    <Iconify icon="eva:download-fill" />
-                  )
-                }
-                onClick={handleExport}
-                disabled={exportMutation.isPending}
-              >
-                {tx('common.actions.export')}
-              </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={
+                    exportMutation.isPending ? (
+                      <Iconify icon="svg-spinners:ring-resize" />
+                    ) : (
+                      <Iconify icon="eva:download-fill" />
+                    )
+                  }
+                  onClick={handleExport}
+                  disabled={exportMutation.isPending}
+                >
+                  {tx('common.actions.export')}
+                </Button>
+              </Stack>
             </Stack>
 
             <Scrollbar>

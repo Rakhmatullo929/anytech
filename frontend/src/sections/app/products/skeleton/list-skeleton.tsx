@@ -15,7 +15,7 @@ export default function ProductsListSkeleton({ headLabel }: Props) {
   return (
     <Card>
       <Stack spacing={2} sx={{ p: 2 }}>
-        <Skeleton variant="rounded" width={360} height={40} />
+        <Skeleton variant="rounded" sx={{ width: '100%', maxWidth: 360 }} height={40} />
 
         <Scrollbar>
           <Table size="small">
