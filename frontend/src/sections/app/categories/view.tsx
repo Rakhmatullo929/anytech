@@ -63,12 +63,12 @@ export default function CategoriesView() {
   const deleteMutation = useDeleteCategoryMutation();
   const bulkDeleteMutation = useBulkDeleteCategoriesMutation();
 
-  type HeadCell = { id: string; label: string; sortKey?: string };
+  type HeadCell = { id: string; label: string; sortKey?: string; sx?: object };
 
   const tableHead: HeadCell[] = useMemo(
     () => [
       { id: 'name', label: tx('common.table.category'), sortKey: 'name' },
-      { id: 'created', label: tx('common.table.created'), sortKey: 'created_at' },
+      { id: 'created', label: tx('common.table.created'), sortKey: 'created_at', sx: { display: { xs: 'none', sm: 'table-cell' } } },
       { id: '', label: '' },
     ],
     [tx]
@@ -361,7 +361,7 @@ export default function CategoriesView() {
                           </Link>
                         </Can>
                       </TableCell>
-                      <TableCell>{fDateTime(row.createdAt)}</TableCell>
+                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{fDateTime(row.createdAt)}</TableCell>
                       <TableCell align="right">
                         {canWriteCategories || canDetailCategories ? (
                           <IconButton color="default" onClick={(event) => openActions(event, row.id)}>

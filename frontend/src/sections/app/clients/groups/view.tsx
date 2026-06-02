@@ -59,13 +59,13 @@ export default function ClientGroupsView() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
 
-  type HeadCell = { id: string; label: string; sortKey?: string };
+  type HeadCell = { id: string; label: string; sortKey?: string; sx?: object };
 
   const tableHead: HeadCell[] = useMemo(
     () => [
       { id: 'name', label: tx('clients.groups.table.name'), sortKey: 'name' },
       { id: 'clientsCount', label: tx('clients.groups.table.clientsCount'), sortKey: 'clients_count' },
-      { id: 'createdAt', label: tx('common.table.created'), sortKey: 'created_at' },
+      { id: 'createdAt', label: tx('common.table.created'), sortKey: 'created_at', sx: { display: { xs: 'none', sm: 'table-cell' } } },
       { id: '', label: '' },
     ],
     [tx]
@@ -321,7 +321,7 @@ export default function ClientGroupsView() {
                         </Can>
                       </TableCell>
                       <TableCell>{row.clientsCount}</TableCell>
-                      <TableCell>{fDateTime(row.createdAt)}</TableCell>
+                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{fDateTime(row.createdAt)}</TableCell>
                       <TableCell align="right">
                         <Can page="groups" action="write">
                           <IconButton color="default" onClick={(event) => openActions(event, row)}>

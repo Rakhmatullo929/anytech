@@ -71,6 +71,7 @@ type HeadCell = {
   id: string;
   label: string;
   sortKey?: string;
+  sx?: object;
 };
 
 type EditingProductState = {
@@ -119,10 +120,10 @@ export default function ProductsView() {
   const tableHead: HeadCell[] = useMemo(
     () => [
       { id: 'name', label: tx('common.table.name'), sortKey: 'name' },
-      { id: 'sku', label: tx('common.table.sku'), sortKey: 'sku' },
-      { id: 'category', label: tx('common.table.category'), sortKey: 'category__name' },
+      { id: 'sku', label: tx('common.table.sku'), sortKey: 'sku', sx: { display: { xs: 'none', sm: 'table-cell' } } },
+      { id: 'category', label: tx('common.table.category'), sortKey: 'category__name', sx: { display: { xs: 'none', sm: 'table-cell' } } },
       { id: 'totalQuantity', label: tx('common.table.qty'), sortKey: 'total_quantity' },
-      { id: 'totalPurchaseAmount', label: tx('common.table.purchase'), sortKey: 'total_purchase_amount' },
+      { id: 'totalPurchaseAmount', label: tx('common.table.purchase'), sortKey: 'total_purchase_amount', sx: { display: { xs: 'none', sm: 'table-cell' } } },
       { id: '', label: '' },
     ],
     [tx]
@@ -388,7 +389,11 @@ export default function ProductsView() {
         links={[{ name: tx('common.navigation.products'), href: paths.products.root }]}
         action={
           <Can page="products" action="write">
-            <Stack direction="row" spacing={1}>
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={1}
+              alignItems={{ xs: 'stretch', sm: 'center' }}
+            >
               <Button
                 variant="outlined"
                 startIcon={<Iconify icon="eva:cloud-upload-fill" />}
@@ -435,21 +440,21 @@ export default function ProductsView() {
 
             {/* Toolbar: search (left) + filters + export (right) */}
             <Stack
-              direction={{ xs: 'column', sm: 'row' }}
+              direction="row"
               spacing={1}
-              alignItems={{ xs: 'stretch', sm: 'center' }}
+              alignItems="center"
             >
               <TextField
                 size="small"
                 placeholder={tx('products.searchPlaceholder')}
                 value={searchValue}
                 onChange={(e) => setSearch(e.target.value)}
-                sx={{ width: { sm: 280 }, flexShrink: 0 }}
+                sx={{ flexGrow: { xs: 1, sm: 0 }, width: { sm: 280 }, minWidth: 0, flexShrink: 0 }}
               />
 
               <Box sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }} />
 
-              <Stack direction="row" spacing={1} justifyContent={{ xs: 'flex-end', sm: 'flex-start' }}>
+              <Stack direction="row" spacing={1}>
                 <FilterDrawer
                   filtersCount={activeFiltersCount}
                   title={tx('common.actions.filters')}
@@ -484,8 +489,18 @@ export default function ProductsView() {
                   }
                   onClick={handleExport}
                   disabled={exportMutation.isPending}
+                  aria-label={tx('common.actions.export')}
+                  sx={{
+                    px: { xs: 1, sm: 2 },
+                    '& .MuiButton-startIcon': {
+                      mr: { xs: 0, sm: 1 },
+                      ml: { xs: 0, sm: -0.5 },
+                    },
+                  }}
                 >
-                  {tx('common.actions.export')}
+                  <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+                    {tx('common.actions.export')}
+                  </Box>
                 </Button>
               </Stack>
             </Stack>
@@ -540,10 +555,10 @@ export default function ProductsView() {
                           </Can>
                         </Stack>
                       </TableCell>
-                      <TableCell>{row.sku || '-'}</TableCell>
-                      <TableCell>{row.category?.name || '-'}</TableCell>
+                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{row.sku || '-'}</TableCell>
+                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{row.category?.name || '-'}</TableCell>
                       <TableCell>{fNumber(row.totalQuantity)}</TableCell>
-                      <TableCell>{fCurrency(row.totalPurchaseAmount)}</TableCell>
+                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{fCurrency(row.totalPurchaseAmount)}</TableCell>
                       <TableCell align="right">
                         {canWriteProducts ? (
                           <Stack direction="row" spacing={0.5} justifyContent="flex-end">

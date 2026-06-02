@@ -61,7 +61,7 @@ import ClientsTabs from 'src/sections/app/clients/components/clients-tabs';
 
 // ----------------------------------------------------------------------
 
-type HeadCell = { id: string; label: string; sortKey?: string };
+type HeadCell = { id: string; label: string; sortKey?: string; sx?: object };
 
 const GROUPS_QUERY_KEY_BASE = ['clients-groups', 'infinite'] as const;
 
@@ -104,9 +104,9 @@ export default function ClientsView() {
     () => [
       { id: 'name', label: tx('common.table.client'), sortKey: 'name' },
       { id: 'phone', label: tx('common.table.phone') },
-      { id: 'last_purchase', label: tx('clients.detail.lastPurchase'), sortKey: 'last_purchase_at' },
-      { id: 'total_purchases', label: tx('clients.detail.totalPurchasesAmount'), sortKey: 'total_purchases_amount' },
-      { id: 'created', label: tx('common.table.created'), sortKey: 'created_at' },
+      { id: 'last_purchase', label: tx('clients.detail.lastPurchase'), sortKey: 'last_purchase_at', sx: { display: { xs: 'none', sm: 'table-cell' } } },
+      { id: 'total_purchases', label: tx('clients.detail.totalPurchasesAmount'), sortKey: 'total_purchases_amount', sx: { display: { xs: 'none', sm: 'table-cell' } } },
+      { id: 'created', label: tx('common.table.created'), sortKey: 'created_at', sx: { display: { xs: 'none', sm: 'table-cell' } } },
       { id: '', label: '' },
     ],
     [tx]
@@ -289,7 +289,11 @@ export default function ClientsView() {
         links={[{ name: tx('common.navigation.clients'), href: paths.clients.root }]}
         action={
           <Can page="clients" action="write">
-            <Stack direction="row" spacing={1}>
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={1}
+              alignItems={{ xs: 'stretch', sm: 'center' }}
+            >
               <Button
                 variant="outlined"
                 startIcon={<Iconify icon="eva:cloud-upload-fill" />}
@@ -341,21 +345,21 @@ export default function ClientsView() {
 
             {/* Toolbar: search (left) + filters + export (right) */}
             <Stack
-              direction={{ xs: 'column', sm: 'row' }}
+              direction="row"
               spacing={1}
-              alignItems={{ xs: 'stretch', sm: 'center' }}
+              alignItems="center"
             >
               <TextField
                 size="small"
                 placeholder={tx('clients.searchPlaceholder')}
                 value={searchValue}
                 onChange={(e) => setSearch(e.target.value)}
-                sx={{ width: { sm: 280 }, flexShrink: 0 }}
+                sx={{ flexGrow: { xs: 1, sm: 0 }, width: { sm: 280 }, minWidth: 0, flexShrink: 0 }}
               />
 
               <Box sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }} />
 
-              <Stack direction="row" spacing={1} justifyContent={{ xs: 'flex-end', sm: 'flex-start' }}>
+              <Stack direction="row" spacing={1}>
                 <FilterDrawer
                   filtersCount={activeFiltersCount}
                   title={tx('common.actions.filters')}
@@ -397,8 +401,18 @@ export default function ClientsView() {
                   }
                   onClick={handleExport}
                   disabled={exportMutation.isPending}
+                  aria-label={tx('common.actions.export')}
+                  sx={{
+                    px: { xs: 1, sm: 2 },
+                    '& .MuiButton-startIcon': {
+                      mr: { xs: 0, sm: 1 },
+                      ml: { xs: 0, sm: -0.5 },
+                    },
+                  }}
                 >
-                  {tx('common.actions.export')}
+                  <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+                    {tx('common.actions.export')}
+                  </Box>
                 </Button>
               </Stack>
             </Stack>
@@ -436,9 +450,9 @@ export default function ClientsView() {
                         </Can>
                       </TableCell>
                       <TableCell>{row.phone}</TableCell>
-                      <TableCell>{row.lastPurchaseAt ? fDate(row.lastPurchaseAt) : '—'}</TableCell>
-                      <TableCell>{fCurrency(row.totalPurchasesAmount)}</TableCell>
-                      <TableCell>{fDateTime(row.createdAt)}</TableCell>
+                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{row.lastPurchaseAt ? fDate(row.lastPurchaseAt) : '—'}</TableCell>
+                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{fCurrency(row.totalPurchasesAmount)}</TableCell>
+                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{fDateTime(row.createdAt)}</TableCell>
                       <TableCell align="right">
                         {canDetailClients || canWriteClients ? (
                           <IconButton color="default" onClick={(event) => openActions(event, row.id)}>
