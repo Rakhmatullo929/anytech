@@ -30,6 +30,7 @@ type Props = {
 
   client: ClientListItem | null;
   onClientChange: (client: ClientListItem | null) => void;
+  onAddClient: () => void;
   createdBy: TenantUserListItem | null;
   onCreatedByChange: (user: TenantUserListItem | null) => void;
   paymentType: SalePaymentType;
@@ -54,6 +55,7 @@ export default function PosCartDrawer({
   onRemove,
   client,
   onClientChange,
+  onAddClient,
   createdBy,
   onCreatedByChange,
   paymentType,
@@ -156,6 +158,7 @@ export default function PosCartDrawer({
         <PosCartSummary
           client={client}
           onClientChange={onClientChange}
+          onAddClient={onAddClient}
           createdBy={createdBy}
           onCreatedByChange={onCreatedByChange}
           paymentType={paymentType}

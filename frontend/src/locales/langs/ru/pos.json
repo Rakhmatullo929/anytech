@@ -22,6 +22,7 @@
   "emptyCart": "Добавьте товар из списка слева.",
   "productsHeading": "Товары",
   "saleSuccess": "Продажа успешно завершена",
+  "addNewClient": "Добавить нового клиента",
   "selectClient": "Выберите клиента",
   "searchPlaceholder": "Поиск по названию или SKU…",
   "stockShort": "остаток",

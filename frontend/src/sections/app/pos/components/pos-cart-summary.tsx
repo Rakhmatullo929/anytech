@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react';
 
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -9,6 +10,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 
 import AutocompleteInfiniteSingle from 'src/components/autocomplete-infinite/single';
+import Iconify from 'src/components/iconify';
 import { useLocales } from 'src/locales';
 import { fCurrency } from 'src/utils/format-number';
 
@@ -22,6 +24,7 @@ import type { SalePaymentType } from '../api/types';
 type Props = {
   client: ClientListItem | null;
   onClientChange: (client: ClientListItem | null) => void;
+  onAddClient: () => void;
   createdBy: TenantUserListItem | null;
   onCreatedByChange: (user: TenantUserListItem | null) => void;
   paymentType: SalePaymentType;
@@ -37,6 +40,7 @@ type Props = {
 export default function PosCartSummary({
   client,
   onClientChange,
+  onAddClient,
   createdBy,
   onCreatedByChange,
   paymentType,
@@ -109,18 +113,30 @@ export default function PosCartSummary({
 
   return (
     <Stack spacing={2}>
-      <AutocompleteInfiniteSingle<ClientListItem>
-        queryKeyBase={clientQueryKeyBase}
-        fetcher={clientFetcher}
-        value={client}
-        onChange={onClientChange}
-        getOptionLabel={getClientLabel}
-        renderOptionContent={renderClientOption}
-        label={tx('pos.client')}
-        placeholder={tx('pos.selectClient')}
-        noOptionsText={tx('common.table.noData')}
-        required
-      />
+      <Box>
+        <AutocompleteInfiniteSingle<ClientListItem>
+          queryKeyBase={clientQueryKeyBase}
+          fetcher={clientFetcher}
+          value={client}
+          onChange={onClientChange}
+          getOptionLabel={getClientLabel}
+          renderOptionContent={renderClientOption}
+          label={tx('pos.client')}
+          placeholder={tx('pos.selectClient')}
+          noOptionsText={tx('common.table.noData')}
+          required
+        />
+        {!client && (
+          <Button
+            size="small"
+            startIcon={<Iconify icon="mingcute:add-line" width={14} />}
+            onClick={onAddClient}
+            sx={{ mt: 0.5, pl: 0.5, fontSize: 12 }}
+          >
+            {tx('pos.addNewClient')}
+          </Button>
+        )}
+      </Box>
 
       <AutocompleteInfiniteSingle<TenantUserListItem>
         queryKeyBase={userQueryKeyBase}
