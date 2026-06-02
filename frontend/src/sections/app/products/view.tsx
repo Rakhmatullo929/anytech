@@ -33,6 +33,7 @@ import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
 // components
 import Iconify from 'src/components/iconify';
+import MobileListFab from 'src/components/mobile-fab/mobile-list-fab';
 import Scrollbar from 'src/components/scrollbar';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import { ConfirmDialog } from 'src/components/custom-dialog';
@@ -390,9 +391,10 @@ export default function ProductsView() {
         action={
           <Can page="products" action="write">
             <Stack
-              direction={{ xs: 'column', sm: 'row' }}
+              direction="row"
               spacing={1}
-              alignItems={{ xs: 'stretch', sm: 'center' }}
+              alignItems="center"
+              sx={{ display: { xs: 'none', md: 'flex' } }}
             >
               <Button
                 variant="outlined"
@@ -605,6 +607,17 @@ export default function ProductsView() {
           </MenuItem>
         </Can>
       </CustomPopover>
+
+      <Can page="products" action="write">
+        <MobileListFab
+          onClick={handleOpenCreate}
+          secondaryAction={{
+            icon: 'eva:cloud-upload-fill',
+            onClick: handleOpenBulkImport,
+            ariaLabel: tx('products.bulkImport.button'),
+          }}
+        />
+      </Can>
 
       <Can page="products" action="write">
         <ProductUpsertDialog

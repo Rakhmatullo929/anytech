@@ -19,6 +19,7 @@ import Typography from '@mui/material/Typography';
 import Can from 'src/auth/components/can';
 import { useCheckPermission } from 'src/auth/hooks/use-check-permission';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+import MobileListFab from 'src/components/mobile-fab/mobile-list-fab';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
 import Iconify from 'src/components/iconify';
@@ -249,7 +250,12 @@ export default function ClientGroupsView() {
         ]}
         action={
           <Can page="groups" action="write">
-            <Button variant="contained" startIcon={<Iconify icon="mingcute:add-line" />} onClick={handleOpenCreate}>
+            <Button
+              variant="contained"
+              startIcon={<Iconify icon="mingcute:add-line" />}
+              onClick={handleOpenCreate}
+              sx={{ display: { xs: 'none', md: 'inline-flex' } }}
+            >
               {tx('clients.groups.addButton')}
             </Button>
           </Can>
@@ -283,7 +289,7 @@ export default function ClientGroupsView() {
               placeholder={tx('clients.groups.searchPlaceholder')}
               value={searchValue}
               onChange={(event) => setSearch(event.target.value)}
-              sx={{ maxWidth: 360 }}
+              sx={{ width: { xs: '100%', sm: 'auto' }, maxWidth: 360 }}
             />
 
             <Scrollbar>
@@ -358,6 +364,10 @@ export default function ClientGroupsView() {
           {tx('common.actions.delete')}
         </MenuItem>
       </CustomPopover>
+
+      <Can page="groups" action="write">
+        <MobileListFab onClick={handleOpenCreate} />
+      </Can>
 
       <Can page="groups" action="write">
         <GroupUpsertDialog

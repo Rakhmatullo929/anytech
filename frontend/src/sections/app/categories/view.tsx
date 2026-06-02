@@ -29,6 +29,7 @@ import { useRouter } from 'src/routes/hook';
 import { RouterLink } from 'src/routes/components';
 // components
 import Iconify from 'src/components/iconify';
+import MobileListFab from 'src/components/mobile-fab/mobile-list-fab';
 import Scrollbar from 'src/components/scrollbar';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import { ConfirmDialog } from 'src/components/custom-dialog';
@@ -290,7 +291,12 @@ export default function CategoriesView() {
         links={[{ name: tx('common.navigation.categories'), href: paths.categories.root }]}
         action={
           <Can page="categories" action="write">
-            <Button variant="contained" startIcon={<Iconify icon="mingcute:add-line" />} onClick={handleOpenCreate}>
+            <Button
+              variant="contained"
+              startIcon={<Iconify icon="mingcute:add-line" />}
+              onClick={handleOpenCreate}
+              sx={{ display: { xs: 'none', md: 'inline-flex' } }}
+            >
               {tx('categories.addButton')}
             </Button>
           </Can>
@@ -326,7 +332,7 @@ export default function CategoriesView() {
               placeholder={tx('categories.searchPlaceholder')}
               value={searchValue}
               onChange={(e) => setSearch(e.target.value)}
-              sx={{ maxWidth: 360 }}
+              sx={{ width: { xs: '100%', sm: 'auto' }, maxWidth: 360 }}
             />
 
             <Scrollbar>
@@ -409,6 +415,10 @@ export default function CategoriesView() {
           </MenuItem>
         </Can>
       </CustomPopover>
+
+      <Can page="categories" action="write">
+        <MobileListFab onClick={handleOpenCreate} />
+      </Can>
 
       <Can page="categories" action="write">
         <CategoryUpsertDialog

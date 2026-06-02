@@ -32,6 +32,7 @@ import { useCheckPermission } from 'src/auth/hooks/use-check-permission';
 import Can from 'src/auth/components/can';
 // components
 import Iconify from 'src/components/iconify';
+import MobileListFab from 'src/components/mobile-fab/mobile-list-fab';
 import Scrollbar from 'src/components/scrollbar';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import { ConfirmDialog } from 'src/components/custom-dialog';
@@ -290,9 +291,10 @@ export default function ClientsView() {
         action={
           <Can page="clients" action="write">
             <Stack
-              direction={{ xs: 'column', sm: 'row' }}
+              direction="row"
               spacing={1}
-              alignItems={{ xs: 'stretch', sm: 'center' }}
+              alignItems="center"
+              sx={{ display: { xs: 'none', md: 'flex' } }}
             >
               <Button
                 variant="outlined"
@@ -499,6 +501,18 @@ export default function ClientsView() {
           </MenuItem>
         </Can>
       </CustomPopover>
+
+      <Can page="clients" action="write">
+        <MobileListFab
+          onClick={handleOpenCreate}
+          secondaryAction={{
+            icon: 'eva:cloud-upload-fill',
+            onClick: handleOpenExcelPicker,
+            disabled: bulkCreateMutation.isPending,
+            ariaLabel: tx('clients.importExcelButton'),
+          }}
+        />
+      </Can>
 
       <Can page="clients" action="write">
         <ConfirmDialog
