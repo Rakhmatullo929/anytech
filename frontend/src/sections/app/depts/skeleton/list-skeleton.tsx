@@ -15,7 +15,7 @@ export default function DebtsListSkeleton({ headLabel }: Props) {
   return (
     <Card>
       <Stack spacing={2} sx={{ p: 2 }}>
-        <Skeleton variant="rounded" width={220} height={40} />
+        <Skeleton variant="rounded" sx={{ width: '100%', maxWidth: 220 }} height={40} />
 
         <Scrollbar>
           <Table size="small">

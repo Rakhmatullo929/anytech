@@ -54,7 +54,7 @@ import PaymentHistoryView from './payment-history-view';
 
 // ----------------------------------------------------------------------
 
-type HeadCell = { id: string; label: string; sortKey?: string };
+type HeadCell = { id: string; label: string; sortKey?: string; sx?: object };
 
 const CLIENTS_QUERY_KEY_BASE = ['debts-clients', 'infinite'] as const;
 const clientsInfiniteFetcher: AutocompleteInfiniteFetcher<ClientListItem> = ({ page, search }) =>
@@ -74,18 +74,20 @@ function getDeadlineInfo(deadline: string | null): { diff: number } | null {
 function DeadlineCell({
   row,
   tx,
+  sx,
 }: {
   row: DebtListItem;
   tx: (k: string, o?: Record<string, string | number>) => string;
+  sx?: object;
 }) {
-  if (!row.deadline) return <TableCell>—</TableCell>;
+  if (!row.deadline) return <TableCell sx={sx}>—</TableCell>;
   const info = getDeadlineInfo(row.deadline);
-  if (!info) return <TableCell>—</TableCell>;
+  if (!info) return <TableCell sx={sx}>—</TableCell>;
   const { diff } = info;
 
   if (row.status === 'closed') {
     return (
-      <TableCell>
+      <TableCell sx={sx}>
         <Typography variant="body2" color="text.secondary">
           {fDate(row.deadline)}
         </Typography>
@@ -94,7 +96,7 @@ function DeadlineCell({
   }
   if (diff > 0) {
     return (
-      <TableCell>
+      <TableCell sx={sx}>
         <Stack spacing={0.5}>
           <Typography variant="caption" color="text.secondary">{fDate(row.deadline)}</Typography>
           <Chip size="small" label={tx('debts.list.daysLeft', { count: diff })} color="success" variant="soft" />
@@ -104,7 +106,7 @@ function DeadlineCell({
   }
   if (diff === 0) {
     return (
-      <TableCell>
+      <TableCell sx={sx}>
         <Stack spacing={0.5}>
           <Typography variant="caption" color="text.secondary">{fDate(row.deadline)}</Typography>
           <Chip size="small" label={tx('debts.detail.dueToday')} color="warning" variant="soft" />
@@ -113,7 +115,7 @@ function DeadlineCell({
     );
   }
   return (
-    <TableCell>
+    <TableCell sx={sx}>
       <Stack spacing={0.5}>
         <Typography variant="caption" color="text.secondary">{fDate(row.deadline)}</Typography>
         <Chip size="small" label={tx('debts.list.daysOverdue', { count: Math.abs(diff) })} color="error" variant="soft" />
@@ -154,10 +156,10 @@ function DebtsListTab() {
   const tableHead: HeadCell[] = useMemo(
     () => [
       { id: 'client', label: tx('common.table.client'), sortKey: 'client__name' },
-      { id: 'total', label: tx('common.table.total'), sortKey: 'total_amount' },
-      { id: 'paid', label: tx('common.table.paid'), sortKey: 'paid_amount' },
+      { id: 'total', label: tx('common.table.total'), sortKey: 'total_amount', sx: { display: { xs: 'none', sm: 'table-cell' } } },
+      { id: 'paid', label: tx('common.table.paid'), sortKey: 'paid_amount', sx: { display: { xs: 'none', sm: 'table-cell' } } },
       { id: 'rem', label: tx('common.table.rem'), sortKey: 'remaining_amount' },
-      { id: 'deadline', label: tx('debts.list.deadline'), sortKey: 'deadline' },
+      { id: 'deadline', label: tx('debts.list.deadline'), sortKey: 'deadline', sx: { display: { xs: 'none', sm: 'table-cell' } } },
       { id: 'status', label: tx('common.table.status'), sortKey: 'status' },
     ],
     [tx]
@@ -344,8 +346,18 @@ function DebtsListTab() {
             }
             onClick={handleExport}
             disabled={exportMutation.isPending}
+            aria-label={tx('common.actions.export')}
+            sx={{
+              px: { xs: 1, sm: 2 },
+              '& .MuiButton-startIcon': {
+                mr: { xs: 0, sm: 1 },
+                ml: { xs: 0, sm: -0.5 },
+              },
+            }}
           >
-            {tx('common.actions.export')}
+            <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+              {tx('common.actions.export')}
+            </Box>
           </Button>
         </Stack>
 
@@ -383,10 +395,10 @@ function DebtsListTab() {
                         row.clientName
                       )}
                     </TableCell>
-                    <TableCell>{fCurrency(row.totalAmount)}</TableCell>
-                    <TableCell>{fCurrency(row.paidAmount)}</TableCell>
+                    <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{fCurrency(row.totalAmount)}</TableCell>
+                    <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{fCurrency(row.paidAmount)}</TableCell>
                     <TableCell>{fCurrency(row.remaining)}</TableCell>
-                    <DeadlineCell row={row} tx={tx} />
+                    <DeadlineCell row={row} tx={tx} sx={{ display: { xs: 'none', sm: 'table-cell' } }} />
                     <TableCell>
                       {row.status === 'active'
                         ? tx('common.status.rowActive')

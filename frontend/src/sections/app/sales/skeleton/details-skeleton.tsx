@@ -17,15 +17,15 @@ export default function SaleDetailsSkeleton({ headLabel }: Props) {
     <Stack spacing={3}>
       <Card sx={{ p: 3 }}>
         <Stack spacing={1}>
-          <Skeleton width={220} height={24} />
-          <Skeleton width={180} height={22} />
-          <Skeleton width={160} height={22} />
-          <Skeleton width={200} height={28} />
+          <Skeleton sx={{ maxWidth: 220, width: '100%' }} height={24} />
+          <Skeleton sx={{ maxWidth: 180, width: '100%' }} height={22} />
+          <Skeleton sx={{ maxWidth: 160, width: '100%' }} height={22} />
+          <Skeleton sx={{ maxWidth: 200, width: '100%' }} height={28} />
         </Stack>
       </Card>
 
       <Card sx={{ p: 2 }}>
-        <Skeleton width={180} height={32} sx={{ mb: 2 }} />
+        <Skeleton sx={{ maxWidth: 180, width: '100%', mb: 2 }} height={32} />
         <Table size="small">
           <TableHeadCustom headLabel={headLabel} />
           <TableBody>

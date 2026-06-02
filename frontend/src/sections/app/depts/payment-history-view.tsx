@@ -42,7 +42,7 @@ import {
 
 // ----------------------------------------------------------------------
 
-type HeadCell = { id: string; label: string; sortKey?: string };
+type HeadCell = { id: string; label: string; sortKey?: string; sx?: object };
 
 const CLIENTS_QUERY_KEY_BASE = ['dp-clients', 'infinite'] as const;
 const clientsInfiniteFetcher: AutocompleteInfiniteFetcher<ClientListItem> = ({ page, search }) =>
@@ -89,8 +89,8 @@ export default function PaymentHistoryView() {
       { id: 'customer', label: tx('debts.payments.columnCustomer') },
       { id: 'amount', label: tx('debts.payments.columnAmount'), sortKey: 'amount' },
       { id: 'paymentMethod', label: tx('debts.payments.columnPaymentMethod') },
-      { id: 'cashier', label: tx('debts.payments.columnCashier') },
-      { id: 'date', label: tx('debts.payments.columnDate'), sortKey: 'created_at' },
+      { id: 'cashier', label: tx('debts.payments.columnCashier'), sx: { display: { xs: 'none', sm: 'table-cell' } } },
+      { id: 'date', label: tx('debts.payments.columnDate'), sortKey: 'created_at', sx: { display: { xs: 'none', sm: 'table-cell' } } },
     ],
     [tx]
   );
@@ -271,8 +271,18 @@ export default function PaymentHistoryView() {
             }
             onClick={handleExport}
             disabled={exportMutation.isPending}
+            aria-label={tx('common.actions.export')}
+            sx={{
+              px: { xs: 1, sm: 2 },
+              '& .MuiButton-startIcon': {
+                mr: { xs: 0, sm: 1 },
+                ml: { xs: 0, sm: -0.5 },
+              },
+            }}
           >
-            {tx('common.actions.export')}
+            <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+              {tx('common.actions.export')}
+            </Box>
           </Button>
         </Stack>
 
@@ -290,8 +300,8 @@ export default function PaymentHistoryView() {
                   <TableCell>{row.customerName ?? '—'}</TableCell>
                   <TableCell>{fCurrency(row.amount)}</TableCell>
                   <TableCell>{paymentMethodLabel(row.paymentMethod)}</TableCell>
-                  <TableCell>{row.cashierName ?? '—'}</TableCell>
-                  <TableCell>{fDateTime(row.createdAt)}</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{row.cashierName ?? '—'}</TableCell>
+                  <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{fDateTime(row.createdAt)}</TableCell>
                 </TableRow>
               ))}
               <TableNoData notFound={!rows.length} title={tx('common.table.noData')} />

@@ -34,6 +34,7 @@ import {
   TablePaginationCustom,
 } from 'src/components/table';
 import Iconify from 'src/components/iconify';
+import MobileListFab from 'src/components/mobile-fab/mobile-list-fab';
 import { useSnackbar } from 'src/components/snackbar';
 import { useAppUserProfile } from 'src/hooks/use-app-user-profile';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
@@ -65,9 +66,9 @@ export default function UsersView() {
     () => [
       { id: 'name', label: tx('common.table.name') },
       { id: 'phone', label: tx('common.table.phone') },
-      { id: 'email', label: tx('common.table.email') },
-      { id: 'role', label: tx('users.table.role') },
-      { id: 'created', label: tx('common.table.created') },
+      { id: 'email', label: tx('common.table.email'), sx: { display: { xs: 'none', sm: 'table-cell' } } },
+      { id: 'role', label: tx('users.table.role'), sx: { display: { xs: 'none', sm: 'table-cell' } } },
+      { id: 'created', label: tx('common.table.created'), sx: { display: { xs: 'none', sm: 'table-cell' } } },
       { id: '', label: '' },
     ],
     [tx]
@@ -194,6 +195,7 @@ export default function UsersView() {
               variant="contained"
               startIcon={<Iconify icon="mingcute:add-line" />}
               onClick={() => router.push(paths.admin.users.create)}
+              sx={{ display: { xs: 'none', md: 'inline-flex' } }}
             >
               {tx('users.addButton')}
             </Button>
@@ -219,7 +221,7 @@ export default function UsersView() {
               placeholder={tx('users.searchPlaceholder')}
               value={searchValue}
               onChange={(e) => setSearch(e.target.value)}
-              sx={{ maxWidth: 360 }}
+              sx={{ width: { xs: '100%', sm: 'auto' }, maxWidth: 360 }}
             />
 
             <Scrollbar>
@@ -236,11 +238,11 @@ export default function UsersView() {
                         </Can>
                       </TableCell>
                       <TableCell>{row.phone || '-'}</TableCell>
-                      <TableCell>{row.email || '-'}</TableCell>
-                      <TableCell>
+                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{row.email || '-'}</TableCell>
+                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                         <UserRoleLabel role={row.role} label={getRoleLabel(row.role)} />
                       </TableCell>
-                      <TableCell>{fDateTime(row.createdAt)}</TableCell>
+                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{fDateTime(row.createdAt)}</TableCell>
                       <TableCell align="right">
                         {canDetailUsers || canWriteUsers ? (
                           <IconButton color="default" onClick={(event) => openActions(event, row.id)}>
@@ -312,6 +314,10 @@ export default function UsersView() {
           </MenuItem>
         </Can>
       </CustomPopover>
+
+      <Can page="users" action="write">
+        <MobileListFab onClick={() => router.push(paths.admin.users.create)} />
+      </Can>
 
       <Can page="users" action="write">
         <ConfirmDialog

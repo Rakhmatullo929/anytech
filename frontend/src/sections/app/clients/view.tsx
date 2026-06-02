@@ -32,6 +32,7 @@ import { useCheckPermission } from 'src/auth/hooks/use-check-permission';
 import Can from 'src/auth/components/can';
 // components
 import Iconify from 'src/components/iconify';
+import MobileListFab from 'src/components/mobile-fab/mobile-list-fab';
 import Scrollbar from 'src/components/scrollbar';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import { ConfirmDialog } from 'src/components/custom-dialog';
@@ -61,7 +62,7 @@ import ClientsTabs from 'src/sections/app/clients/components/clients-tabs';
 
 // ----------------------------------------------------------------------
 
-type HeadCell = { id: string; label: string; sortKey?: string };
+type HeadCell = { id: string; label: string; sortKey?: string; sx?: object };
 
 const GROUPS_QUERY_KEY_BASE = ['clients-groups', 'infinite'] as const;
 
@@ -104,9 +105,9 @@ export default function ClientsView() {
     () => [
       { id: 'name', label: tx('common.table.client'), sortKey: 'name' },
       { id: 'phone', label: tx('common.table.phone') },
-      { id: 'last_purchase', label: tx('clients.detail.lastPurchase'), sortKey: 'last_purchase_at' },
-      { id: 'total_purchases', label: tx('clients.detail.totalPurchasesAmount'), sortKey: 'total_purchases_amount' },
-      { id: 'created', label: tx('common.table.created'), sortKey: 'created_at' },
+      { id: 'last_purchase', label: tx('clients.detail.lastPurchase'), sortKey: 'last_purchase_at', sx: { display: { xs: 'none', sm: 'table-cell' } } },
+      { id: 'total_purchases', label: tx('clients.detail.totalPurchasesAmount'), sortKey: 'total_purchases_amount', sx: { display: { xs: 'none', sm: 'table-cell' } } },
+      { id: 'created', label: tx('common.table.created'), sortKey: 'created_at', sx: { display: { xs: 'none', sm: 'table-cell' } } },
       { id: '', label: '' },
     ],
     [tx]
@@ -289,7 +290,12 @@ export default function ClientsView() {
         links={[{ name: tx('common.navigation.clients'), href: paths.clients.root }]}
         action={
           <Can page="clients" action="write">
-            <Stack direction="row" spacing={1}>
+            <Stack
+              direction="row"
+              spacing={1}
+              alignItems="center"
+              sx={{ display: { xs: 'none', md: 'flex' } }}
+            >
               <Button
                 variant="outlined"
                 startIcon={<Iconify icon="eva:cloud-upload-fill" />}
@@ -340,61 +346,77 @@ export default function ClientsView() {
             </Can>
 
             {/* Toolbar: search (left) + filters + export (right) */}
-            <Stack direction="row" spacing={1} alignItems="center">
+            <Stack
+              direction="row"
+              spacing={1}
+              alignItems="center"
+            >
               <TextField
                 size="small"
                 placeholder={tx('clients.searchPlaceholder')}
                 value={searchValue}
                 onChange={(e) => setSearch(e.target.value)}
-                sx={{ width: 280 }}
+                sx={{ flexGrow: { xs: 1, sm: 0 }, width: { sm: 280 }, minWidth: 0, flexShrink: 0 }}
               />
 
-              <Box sx={{ flexGrow: 1 }} />
+              <Box sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }} />
 
-              <FilterDrawer
-                filtersCount={activeFiltersCount}
-                title={tx('common.actions.filters')}
-                resetLabel={tx('common.actions.reset')}
-                onReset={() => {
-                  resetFilters();
-                  setSelectedGroups([]);
-                }}
-              >
-                <FilterFieldMultiSelect
-                  label={tx('clients.filters.gender')}
-                  options={genderOptions}
-                  value={gender ? [gender] : []}
-                  onChange={(vals) => setFilters({ gender: vals[vals.length - 1] ?? '' })}
-                />
-                <AutocompleteInfinite<GroupListItem>
-                  queryKeyBase={GROUPS_QUERY_KEY_BASE}
-                  fetcher={groupsInfiniteFetcher}
-                  pageSize={20}
-                  size="small"
-                  value={selectedGroups}
-                  onChange={(groups) => {
-                    setSelectedGroups(groups);
-                    setFilters({ groupIds: groups.map((g) => g.id).join(',') });
+              <Stack direction="row" spacing={1}>
+                <FilterDrawer
+                  filtersCount={activeFiltersCount}
+                  title={tx('common.actions.filters')}
+                  resetLabel={tx('common.actions.reset')}
+                  onReset={() => {
+                    resetFilters();
+                    setSelectedGroups([]);
                   }}
-                  getOptionLabel={(g) => g.name}
-                  label={tx('clients.filters.group')}
-                />
-              </FilterDrawer>
+                >
+                  <FilterFieldMultiSelect
+                    label={tx('clients.filters.gender')}
+                    options={genderOptions}
+                    value={gender ? [gender] : []}
+                    onChange={(vals) => setFilters({ gender: vals[vals.length - 1] ?? '' })}
+                  />
+                  <AutocompleteInfinite<GroupListItem>
+                    queryKeyBase={GROUPS_QUERY_KEY_BASE}
+                    fetcher={groupsInfiniteFetcher}
+                    pageSize={20}
+                    size="small"
+                    value={selectedGroups}
+                    onChange={(groups) => {
+                      setSelectedGroups(groups);
+                      setFilters({ groupIds: groups.map((g) => g.id).join(',') });
+                    }}
+                    getOptionLabel={(g) => g.name}
+                    label={tx('clients.filters.group')}
+                  />
+                </FilterDrawer>
 
-              <Button
-                variant="outlined"
-                startIcon={
-                  exportMutation.isPending ? (
-                    <Iconify icon="svg-spinners:ring-resize" />
-                  ) : (
-                    <Iconify icon="eva:download-fill" />
-                  )
-                }
-                onClick={handleExport}
-                disabled={exportMutation.isPending}
-              >
-                {tx('common.actions.export')}
-              </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={
+                    exportMutation.isPending ? (
+                      <Iconify icon="svg-spinners:ring-resize" />
+                    ) : (
+                      <Iconify icon="eva:download-fill" />
+                    )
+                  }
+                  onClick={handleExport}
+                  disabled={exportMutation.isPending}
+                  aria-label={tx('common.actions.export')}
+                  sx={{
+                    px: { xs: 1, sm: 2 },
+                    '& .MuiButton-startIcon': {
+                      mr: { xs: 0, sm: 1 },
+                      ml: { xs: 0, sm: -0.5 },
+                    },
+                  }}
+                >
+                  <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+                    {tx('common.actions.export')}
+                  </Box>
+                </Button>
+              </Stack>
             </Stack>
 
             <Scrollbar>
@@ -430,9 +452,9 @@ export default function ClientsView() {
                         </Can>
                       </TableCell>
                       <TableCell>{row.phone}</TableCell>
-                      <TableCell>{row.lastPurchaseAt ? fDate(row.lastPurchaseAt) : '—'}</TableCell>
-                      <TableCell>{fCurrency(row.totalPurchasesAmount)}</TableCell>
-                      <TableCell>{fDateTime(row.createdAt)}</TableCell>
+                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{row.lastPurchaseAt ? fDate(row.lastPurchaseAt) : '—'}</TableCell>
+                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{fCurrency(row.totalPurchasesAmount)}</TableCell>
+                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{fDateTime(row.createdAt)}</TableCell>
                       <TableCell align="right">
                         {canDetailClients || canWriteClients ? (
                           <IconButton color="default" onClick={(event) => openActions(event, row.id)}>
@@ -479,6 +501,18 @@ export default function ClientsView() {
           </MenuItem>
         </Can>
       </CustomPopover>
+
+      <Can page="clients" action="write">
+        <MobileListFab
+          onClick={handleOpenCreate}
+          secondaryAction={{
+            icon: 'eva:cloud-upload-fill',
+            onClick: handleOpenExcelPicker,
+            disabled: bulkCreateMutation.isPending,
+            ariaLabel: tx('clients.importExcelButton'),
+          }}
+        />
+      </Can>
 
       <Can page="clients" action="write">
         <ConfirmDialog

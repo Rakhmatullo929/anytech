@@ -40,8 +40,18 @@ export default function FilterDrawer({
           startIcon={<Iconify icon="ic:round-filter-list" />}
           onClick={open.onTrue}
           color={filtersCount > 0 ? 'primary' : 'inherit'}
+          aria-label={title}
+          sx={{
+            px: { xs: 1, sm: 2 },
+            '& .MuiButton-startIcon': {
+              mr: { xs: 0, sm: 1 },
+              ml: { xs: 0, sm: -0.5 },
+            },
+          }}
         >
-          {title}
+          <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+            {title}
+          </Box>
         </Button>
       </Badge>
 
@@ -49,7 +59,7 @@ export default function FilterDrawer({
         anchor="right"
         open={open.value}
         onClose={open.onFalse}
-        PaperProps={{ sx: { width: 320, p: 0 } }}
+        PaperProps={{ sx: { width: { xs: 'calc(100vw - 32px)', sm: 320 }, maxWidth: 320, p: 0 } }}
       >
         <Stack
           direction="row"

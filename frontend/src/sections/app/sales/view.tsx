@@ -49,7 +49,7 @@ import { SalesListSkeleton } from 'src/sections/app/sales/skeleton';
 
 // ----------------------------------------------------------------------
 
-type HeadCell = { id: string; label: string; sortKey?: string };
+type HeadCell = { id: string; label: string; sortKey?: string; sx?: object };
 
 const CLIENTS_QUERY_KEY_BASE = ['sales-clients', 'infinite'] as const;
 const clientsInfiniteFetcher: AutocompleteInfiniteFetcher<ClientListItem> = ({ page, search }) =>
@@ -92,12 +92,12 @@ export default function SalesView() {
   // ── Sorting ──────────────────────────────────────────────────────────────
   const tableHead: HeadCell[] = useMemo(
     () => [
-      { id: 'id', label: tx('common.table.saleId') },
+      { id: 'id', label: tx('common.table.saleId'), sx: { display: { xs: 'none', sm: 'table-cell' } } },
       { id: 'client', label: tx('common.table.client'), sortKey: 'client__name' },
-      { id: 'created_by', label: tx('common.table.createdBy'), sortKey: 'created_by__first_name' },
+      { id: 'created_by', label: tx('common.table.createdBy'), sortKey: 'created_by__first_name', sx: { display: { xs: 'none', sm: 'table-cell' } } },
       { id: 'total', label: tx('common.table.total'), sortKey: 'total_amount' },
       { id: 'pay', label: tx('common.table.pay') },
-      { id: 'date', label: tx('common.table.date'), sortKey: 'created_at' },
+      { id: 'date', label: tx('common.table.date'), sortKey: 'created_at', sx: { display: { xs: 'none', sm: 'table-cell' } } },
     ],
     [tx]
   );
@@ -312,8 +312,18 @@ export default function SalesView() {
                 }
                 onClick={handleExport}
                 disabled={exportMutation.isPending}
+                aria-label={tx('common.actions.export')}
+                sx={{
+                  px: { xs: 1, sm: 2 },
+                  '& .MuiButton-startIcon': {
+                    mr: { xs: 0, sm: 1 },
+                    ml: { xs: 0, sm: -0.5 },
+                  },
+                }}
               >
-                {tx('common.actions.export')}
+                <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+                  {tx('common.actions.export')}
+                </Box>
               </Button>
             </Stack>
 
@@ -328,7 +338,7 @@ export default function SalesView() {
                 <TableBody>
                   {rows.map((row) => (
                     <TableRow key={row.id} hover>
-                      <TableCell>
+                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                         {canDetailSales ? (
                           <Link
                             component={RouterLink}
@@ -342,10 +352,10 @@ export default function SalesView() {
                         )}
                       </TableCell>
                       <TableCell>{row.clientName || '-'}</TableCell>
-                      <TableCell>{row.createdByName || '-'}</TableCell>
+                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{row.createdByName || '-'}</TableCell>
                       <TableCell>{fCurrency(row.totalAmount)}</TableCell>
                       <TableCell>{payLabel[row.paymentType]}</TableCell>
-                      <TableCell>{fDateTime(row.createdAt)}</TableCell>
+                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{fDateTime(row.createdAt)}</TableCell>
                     </TableRow>
                   ))}
                   <TableNoData notFound={!rows.length} title={tx('common.table.noData')} />
