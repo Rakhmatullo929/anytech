@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -36,6 +36,10 @@ import { usePosCart } from './hooks/use-pos-cart';
 
 // ----------------------------------------------------------------------
 
+export const POS_NEW_CLIENT_KEY = 'pos_new_client';
+
+// ----------------------------------------------------------------------
+
 function tenantUserToListItem(u: TenantUser): TenantUserListItem {
   return {
     id: u.id,
@@ -66,6 +70,20 @@ export default function PosView() {
   const isRegisterClosed = !cashRegisterPending && !cashRegisterError && cashRegister?.status === 'closed';
 
   const [client, setClient] = useState<ClientListItem | null>(null);
+
+  // After returning from "Add new customer" flow, auto-select the newly created client.
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(POS_NEW_CLIENT_KEY);
+      if (!raw) return;
+      const newClient = JSON.parse(raw) as ClientListItem;
+      setClient(newClient);
+      sessionStorage.removeItem(POS_NEW_CLIENT_KEY);
+    } catch {
+      // noop — corrupted storage entry is harmless
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [createdBy, setCreatedBy] = useState<TenantUserListItem | null>(() => {
     if (!authUser || !('id' in authUser)) return null;
     return tenantUserToListItem(authUser as TenantUser);
@@ -89,6 +107,10 @@ export default function PosView() {
   const debouncedSearch = useDebounce(search, 400);
 
   const { cart, addProduct, setQty, setPrice, removeLine, clear, subtotal } = usePosCart();
+
+  const handleAddClient = useCallback(() => {
+    router.push(`${paths.clients.create}?returnTo=pos`);
+  }, [router]);
 
   // ── Product infinite list ──────────────────────────────────────────
 
@@ -178,6 +200,7 @@ export default function PosView() {
     onRemove: removeLine,
     client,
     onClientChange: setClient,
+    onAddClient: handleAddClient,
     createdBy,
     onCreatedByChange: setCreatedBy,
     paymentType,
