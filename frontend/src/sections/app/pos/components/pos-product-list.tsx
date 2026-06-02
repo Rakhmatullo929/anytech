@@ -7,6 +7,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 
 import Iconify from 'src/components/iconify';
+import { HEADER } from 'src/layouts/config-layout';
 import { useLocales } from 'src/locales';
 import type { ProductListItem } from 'src/sections/app/products/api/types';
 
@@ -44,6 +45,17 @@ export default function PosProductList({
       sx={{
         flex: 1,
         p: 2,
+        // Desktop: column flex container so the product list can fill
+        // remaining height and scroll independently.
+        display: { md: 'flex' },
+        flexDirection: { md: 'column' },
+        // Clamp height to viewport on desktop so only the product list
+        // scrolls. Offsets: page py (HEADER.H + 8) × 2 + breadcrumbs (~80px
+        // heading + 40px mb) + tabs (~48px + 24px mb) = 192px above-content.
+        maxHeight: {
+          md: `calc(100vh - ${(HEADER.H_MOBILE + 8) * 2 + 192}px)`,
+          lg: `calc(100vh - ${(HEADER.H_DESKTOP + 8) * 2 + 192}px)`,
+        },
         // Flat, full-bleed appearance on mobile/tablet — the parent Box in
         // view.tsx already extends the card edge-to-edge using mx:-2.
         borderRadius: { xs: 0, md: 2 },
@@ -92,9 +104,20 @@ export default function PosProductList({
         )}
       </Box>
 
-      {/* Product list — extra bottom padding on mobile so the FAB doesn't
+      {/* Product list — fills remaining card height on desktop and scrolls
+          internally; extra bottom padding on mobile so the FAB doesn't
           cover the last item */}
-      <Stack spacing={0.5} sx={{ pb: { xs: 10, md: 0 } }}>
+      <Stack
+        spacing={0.5}
+        sx={{
+          pb: { xs: 10, md: 0 },
+          // Desktop: grow to fill remaining card height and scroll.
+          // min-height:0 lets flex shrink below content size so overflow-y works.
+          flex: { md: 1 },
+          overflowY: { md: 'auto' },
+          minHeight: { md: 0 },
+        }}
+      >
         {products.map((product) => (
           <PosProductListItem key={product.id} product={product} onAdd={onAddProduct} />
         ))}
