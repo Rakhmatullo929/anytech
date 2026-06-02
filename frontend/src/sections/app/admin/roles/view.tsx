@@ -10,6 +10,7 @@ import { paths } from 'src/routes/paths';
 import { useCheckPermission } from 'src/auth/hooks/use-check-permission';
 import Can from 'src/auth/components/can';
 import Iconify from 'src/components/iconify';
+import MobileListFab from 'src/components/mobile-fab/mobile-list-fab';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import EmptyContent from 'src/components/empty-content';
 import { ConfirmDialog } from 'src/components/custom-dialog';
@@ -186,7 +187,12 @@ export default function AdminRolesView() {
         ]}
         action={
           <Can page="roles" action="write">
-            <Button variant="contained" startIcon={<Iconify icon="mingcute:add-line" />} onClick={handleOpenCreate}>
+            <Button
+              variant="contained"
+              startIcon={<Iconify icon="mingcute:add-line" />}
+              onClick={handleOpenCreate}
+              sx={{ display: { xs: 'none', md: 'inline-flex' } }}
+            >
               {tx('admin.roles.dialogs.create.submit')}
             </Button>
           </Can>
@@ -250,6 +256,10 @@ export default function AdminRolesView() {
         )}
       </Card>
       )}
+
+      <Can page="roles" action="write">
+        <MobileListFab onClick={handleOpenCreate} />
+      </Can>
 
       <Can page="roles" action="write">
         <RoleCreateDialog

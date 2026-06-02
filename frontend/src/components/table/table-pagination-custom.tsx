@@ -28,6 +28,8 @@ export default function TablePaginationCustom({
         {...other}
         sx={{
           borderTopColor: 'transparent',
+          '.MuiTablePagination-selectLabel': { display: { xs: 'none', sm: 'block' } },
+          '.MuiTablePagination-input': { display: { xs: 'none', sm: 'inline-flex' } },
         }}
       />
 

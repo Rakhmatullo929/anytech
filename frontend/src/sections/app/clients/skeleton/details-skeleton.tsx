@@ -23,9 +23,9 @@ export default function ClientDetailsSkeleton({ headLabel }: Props) {
           <Avatar sx={{ width: 52, height: 52 }}>
             <Skeleton variant="circular" width={52} height={52} />
           </Avatar>
-          <Box sx={{ flexGrow: 1 }}>
-            <Skeleton width={220} height={30} />
-            <Skeleton width={180} height={22} />
+          <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+            <Skeleton sx={{ maxWidth: 220, width: '100%' }} height={30} />
+            <Skeleton sx={{ maxWidth: 180, width: '100%' }} height={22} />
           </Box>
           <Skeleton variant="rounded" width={170} height={32} />
         </Stack>
@@ -41,7 +41,7 @@ export default function ClientDetailsSkeleton({ headLabel }: Props) {
       </Stack>
 
       <Card sx={{ p: 2 }}>
-        <Skeleton width={210} height={30} sx={{ mb: 2 }} />
+        <Skeleton sx={{ maxWidth: 210, width: '100%', mb: 2 }} height={30} />
         <Divider sx={{ mb: 2 }} />
         <Table size="small">
           <TableHeadCustom headLabel={headLabel} />

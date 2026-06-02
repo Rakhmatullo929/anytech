@@ -19,6 +19,7 @@ import Typography from '@mui/material/Typography';
 import Can from 'src/auth/components/can';
 import { useCheckPermission } from 'src/auth/hooks/use-check-permission';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+import MobileListFab from 'src/components/mobile-fab/mobile-list-fab';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
 import Iconify from 'src/components/iconify';
@@ -59,13 +60,13 @@ export default function ClientGroupsView() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
 
-  type HeadCell = { id: string; label: string; sortKey?: string };
+  type HeadCell = { id: string; label: string; sortKey?: string; sx?: object };
 
   const tableHead: HeadCell[] = useMemo(
     () => [
       { id: 'name', label: tx('clients.groups.table.name'), sortKey: 'name' },
       { id: 'clientsCount', label: tx('clients.groups.table.clientsCount'), sortKey: 'clients_count' },
-      { id: 'createdAt', label: tx('common.table.created'), sortKey: 'created_at' },
+      { id: 'createdAt', label: tx('common.table.created'), sortKey: 'created_at', sx: { display: { xs: 'none', sm: 'table-cell' } } },
       { id: '', label: '' },
     ],
     [tx]
@@ -249,7 +250,12 @@ export default function ClientGroupsView() {
         ]}
         action={
           <Can page="groups" action="write">
-            <Button variant="contained" startIcon={<Iconify icon="mingcute:add-line" />} onClick={handleOpenCreate}>
+            <Button
+              variant="contained"
+              startIcon={<Iconify icon="mingcute:add-line" />}
+              onClick={handleOpenCreate}
+              sx={{ display: { xs: 'none', md: 'inline-flex' } }}
+            >
               {tx('clients.groups.addButton')}
             </Button>
           </Can>
@@ -283,7 +289,7 @@ export default function ClientGroupsView() {
               placeholder={tx('clients.groups.searchPlaceholder')}
               value={searchValue}
               onChange={(event) => setSearch(event.target.value)}
-              sx={{ maxWidth: 360 }}
+              sx={{ width: { xs: '100%', sm: 'auto' }, maxWidth: 360 }}
             />
 
             <Scrollbar>
@@ -321,7 +327,7 @@ export default function ClientGroupsView() {
                         </Can>
                       </TableCell>
                       <TableCell>{row.clientsCount}</TableCell>
-                      <TableCell>{fDateTime(row.createdAt)}</TableCell>
+                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{fDateTime(row.createdAt)}</TableCell>
                       <TableCell align="right">
                         <Can page="groups" action="write">
                           <IconButton color="default" onClick={(event) => openActions(event, row)}>
@@ -358,6 +364,10 @@ export default function ClientGroupsView() {
           {tx('common.actions.delete')}
         </MenuItem>
       </CustomPopover>
+
+      <Can page="groups" action="write">
+        <MobileListFab onClick={handleOpenCreate} />
+      </Can>
 
       <Can page="groups" action="write">
         <GroupUpsertDialog

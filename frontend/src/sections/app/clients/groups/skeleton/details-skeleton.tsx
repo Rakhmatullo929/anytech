@@ -17,7 +17,7 @@ export default function ClientGroupDetailsSkeleton() {
     <Stack spacing={3}>
       <Card sx={{ p: 3 }}>
         <Stack spacing={1.5}>
-          <Skeleton variant="text" width={220} height={36} />
+          <Skeleton variant="text" sx={{ maxWidth: 220, width: '100%' }} height={36} />
           <Skeleton variant="text" width="80%" height={24} />
         </Stack>
       </Card>

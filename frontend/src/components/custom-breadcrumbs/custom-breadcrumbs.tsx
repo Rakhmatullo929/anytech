@@ -23,8 +23,13 @@ export default function CustomBreadcrumbs({
 
   return (
     <Box sx={{ ...sx }}>
-      <Stack direction="row" alignItems="center">
-        <Box sx={{ flexGrow: 1 }}>
+      <Stack
+        direction="row"
+        alignItems={{ xs: 'flex-start', sm: 'center' }}
+        flexWrap="wrap"
+        gap={{ xs: 1.5, sm: 0 }}
+      >
+        <Box sx={{ flexGrow: 1, minWidth: 0 }}>
           {/* HEADING */}
           {heading && (
             <Typography variant="h4" gutterBottom>
