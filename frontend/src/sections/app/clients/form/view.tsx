@@ -15,7 +15,8 @@ import Typography from '@mui/material/Typography';
 
 import { useLocales } from 'src/locales';
 import { paths } from 'src/routes/paths';
-import { useParams, useRouter } from 'src/routes/hook';
+import { useParams, useRouter, useSearchParams } from 'src/routes/hook';
+import { POS_NEW_CLIENT_KEY } from 'src/sections/app/pos/view';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import EmptyContent from 'src/components/empty-content';
 import FormProvider, { RHFAutocomplete, RHFTextField } from 'src/components/hook-form';
@@ -64,6 +65,8 @@ export default function ClientFormView({ mode }: Props) {
   const { tx } = useLocales();
   const { id = '' } = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnToPOS = searchParams.get('returnTo') === 'pos';
   const { enqueueSnackbar } = useSnackbar();
 
   const createMutation = useCreateClientMutation();
@@ -174,13 +177,21 @@ export default function ClientFormView({ mode }: Props) {
 
     try {
       if (mode === 'create') {
-        await createMutation.mutateAsync(payload);
+        const createdClient = await createMutation.mutateAsync(payload);
         enqueueSnackbar(tx('clients.toasts.created'), { variant: 'success' });
+        if (returnToPOS) {
+          try {
+            sessionStorage.setItem(POS_NEW_CLIENT_KEY, JSON.stringify(createdClient));
+          } catch { /* noop */ }
+          router.push(paths.pos);
+        } else {
+          router.push(paths.clients.root);
+        }
       } else {
         await updateMutation.mutateAsync({ id, ...payload });
         enqueueSnackbar(tx('clients.toasts.updated'), { variant: 'success' });
+        router.push(paths.clients.root);
       }
-      router.push(paths.clients.root);
     } catch (error) {
       console.error(error);
     }
@@ -209,7 +220,9 @@ export default function ClientFormView({ mode }: Props) {
       <CustomBreadcrumbs
         heading={mode === 'create' ? tx('clients.form.createTitle') : tx('clients.form.editTitle')}
         links={[
-          { name: tx('common.navigation.clients'), href: paths.clients.root },
+          returnToPOS && mode === 'create'
+            ? { name: tx('common.navigation.pos'), href: paths.pos }
+            : { name: tx('common.navigation.clients'), href: paths.clients.root },
           {
             name: mode === 'create' ? tx('clients.form.createTitle') : tx('clients.form.editTitle'),
             href: mode === 'create' ? paths.clients.create : paths.clients.edit(id),
@@ -462,7 +475,9 @@ export default function ClientFormView({ mode }: Props) {
           <Divider />
 
           <Stack direction="row" justifyContent="flex-end" spacing={1.5}>
-            <Button onClick={() => router.push(paths.clients.root)}>{tx('common.actions.cancel')}</Button>
+            <Button onClick={() => router.push(returnToPOS && mode === 'create' ? paths.pos : paths.clients.root)}>
+              {tx('common.actions.cancel')}
+            </Button>
             <Button variant="contained" type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
               {tx('common.actions.save')}
             </Button>
