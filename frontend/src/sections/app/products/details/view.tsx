@@ -276,6 +276,11 @@ export default function ProductDetailsView() {
             },
             {
               icon: 'solar:tag-price-bold',
+              label: `${tx('common.table.salePrice')}: ${fCurrency(product.salePrice)}`,
+              variant: 'soft',
+            },
+            {
+              icon: 'solar:tag-price-bold',
               label: `${tx('products.detail.averagePrice')}: ${fCurrency(product.averagePurchasePrice)}`,
               variant: 'outlined',
             },
@@ -414,6 +419,15 @@ export default function ProductDetailsView() {
                       {tx('common.table.sku')}
                     </Typography>
                     <Typography variant="subtitle2">{product.sku || '-'}</Typography>
+                  </Stack>
+
+                  <Divider />
+
+                  <Stack spacing={0.5}>
+                    <Typography variant="caption" color="text.secondary">
+                      {tx('common.table.salePrice')}
+                    </Typography>
+                    <Typography variant="subtitle2">{fCurrency(product.salePrice)}</Typography>
                   </Stack>
 
                   <Divider />

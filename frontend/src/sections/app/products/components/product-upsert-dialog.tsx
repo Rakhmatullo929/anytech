@@ -19,6 +19,7 @@ type ProductUpsertValues = {
   name: string;
   sku: string;
   category: string;
+  salePrice: string;
   images: ProductImageFormValue[];
 };
 
@@ -51,6 +52,7 @@ export default function ProductUpsertDialog({
       name: '',
       sku: '',
       category: '',
+      salePrice: '0',
       images: [],
     },
   });
@@ -62,6 +64,7 @@ export default function ProductUpsertDialog({
       name: initialValues?.name ?? '',
       sku: initialValues?.sku ?? '',
       category: initialValues?.category ?? '',
+      salePrice: initialValues?.salePrice ?? '0',
       images: initialValues?.images ?? [],
     });
   }, [
@@ -70,6 +73,7 @@ export default function ProductUpsertDialog({
     initialValues?.name,
     initialValues?.sku,
     initialValues?.category,
+    initialValues?.salePrice,
     initialValues?.images,
   ]);
 
@@ -83,6 +87,12 @@ export default function ProductUpsertDialog({
           <Stack spacing={2} sx={{ mt: 1 }}>
             <RHFTextField name="name" label={`${tx('common.table.name')} *`} />
             <RHFTextField name="sku" label={tx('common.table.sku')} />
+            <RHFTextField
+              name="salePrice"
+              label={`${tx('common.table.salePrice')} *`}
+              type="number"
+              inputProps={{ min: 0, step: 'any' }}
+            />
             <RHFSelect name="category" label={tx('common.table.category')}>
               <MenuItem value="">{tx('common.table.allOption')}</MenuItem>
               {categories.map((item) => (

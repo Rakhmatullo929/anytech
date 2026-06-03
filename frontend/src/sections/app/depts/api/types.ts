@@ -81,3 +81,40 @@ export type FetchDebtPaymentsParams = {
 };
 
 export type ExportDebtPaymentsParams = Omit<FetchDebtPaymentsParams, 'page' | 'pageSize'>;
+
+// ── Customer debt summary ──────────────────────────────────────────────
+
+export type CustomerDebtStatus = 'active' | 'partially_paid' | 'overdue' | 'paid';
+
+export type CustomerDebtSummary = {
+  clientId: string;
+  clientName: string;
+  clientPhone: string | null;
+  totalDebt: string;
+  totalPaid: string;
+  remaining: string;
+  debtCount: number;
+  lastDebtDate: string | null;
+  lastPaymentDate: string | null;
+  status: CustomerDebtStatus;
+};
+
+export type CustomerDebtStats = {
+  totalOutstanding: string;
+  customersWithDebt: number;
+  overdueCustomers: number;
+  averageDebt: string;
+};
+
+export type FetchCustomerDebtSummaryParams = {
+  page: number;
+  pageSize: number;
+  ordering?: string;
+  search?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  amountFrom?: string;
+  amountTo?: string;
+};
+
+export type ExportCustomerDebtSummaryParams = Omit<FetchCustomerDebtSummaryParams, 'page' | 'pageSize'>;

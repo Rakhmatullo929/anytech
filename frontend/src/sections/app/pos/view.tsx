@@ -28,7 +28,8 @@ import type { TenantUserListItem } from '../admin/users/api/types';
 
 import { useCreateSaleMutation } from './api/use-pos-api';
 import type { SalePaymentType } from './api/types';
-import { PosCart, PosProductList, PosTodaySales } from './components';
+import { PosCart, PosProductList, PosTodaySales, PosSaleCompleteDialog } from './components';
+import type { InvoiceData } from './components';
 import PosCartDrawer from './components/pos-cart-drawer';
 import PosMobileCartFab from './components/pos-mobile-cart-fab';
 import { PosViewSkeleton } from './skeleton';
@@ -94,6 +95,10 @@ export default function PosView() {
 
   // Mobile cart drawer state
   const [cartOpen, setCartOpen] = useState(false);
+
+  // Invoice dialog state — opened after a sale is completed
+  const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
+  const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
 
   // Tab state persisted in the URL: ?tab=pos | ?tab=sales
   const router = useRouter();
@@ -166,7 +171,7 @@ export default function PosView() {
   const completeSale = useCallback(async () => {
     if (!client) return;
     try {
-      await createSaleMutation.mutateAsync({
+      const result = await createSaleMutation.mutateAsync({
         client: client.id,
         paymentType,
         items: cart.map((l) => ({
@@ -177,6 +182,15 @@ export default function PosView() {
         ...(paymentType === 'debt' && debtDeadlineDays !== '' ? { debtDeadlineDays } : {}),
         ...(createdBy ? { createdByUserId: createdBy.id } : {}),
       });
+
+      // Snapshot cart + client before clearing so the invoice dialog can render them
+      setInvoiceData({
+        sale: result,
+        items: cart.map((l) => ({ name: l.name, quantity: l.quantity, unitPrice: l.unitPrice })),
+        clientPhone: client.phone,
+      });
+      setInvoiceDialogOpen(true);
+
       enqueueSnackbar(tx('pos.saleSuccess'), { variant: 'success' });
       clear();
       setClient(null);
@@ -303,6 +317,13 @@ export default function PosView() {
           <PosTodaySales />
         </Box>
       )}
+
+      {/* ── Invoice dialog ── */}
+      <PosSaleCompleteDialog
+        open={invoiceDialogOpen}
+        onClose={() => setInvoiceDialogOpen(false)}
+        data={invoiceData}
+      />
     </>
   );
 }

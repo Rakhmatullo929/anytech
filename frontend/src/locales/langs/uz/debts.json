@@ -34,7 +34,28 @@
   },
   "tabs": {
     "debts": "Qarzlar",
-    "paymentHistory": "To'lovlar tarixi"
+    "paymentHistory": "To'lovlar tarixi",
+    "customerDebts": "Mijozlar qarzlari"
+  },
+  "customerDebts": {
+    "searchPlaceholder": "Mijoz qidirish...",
+    "columns": {
+      "debtCount": "Qarzlar soni",
+      "lastDebtDate": "Oxirgi qarz",
+      "lastPaymentDate": "Oxirgi to'lov"
+    },
+    "stats": {
+      "totalOutstanding": "Jami qoldiq qarz",
+      "customersWithDebt": "Qarzdor mijozlar",
+      "overdueCustomers": "Muddati o'tgan",
+      "averageDebt": "O'rtacha qarz"
+    },
+    "status": {
+      "active": "Faol",
+      "partially_paid": "Qisman to'langan",
+      "overdue": "Muddati o'tgan",
+      "paid": "To'langan"
+    }
   },
   "payments": {
     "columnCustomer": "Mijoz",

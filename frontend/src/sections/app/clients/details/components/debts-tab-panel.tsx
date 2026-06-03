@@ -4,6 +4,7 @@ import { useLocales } from 'src/locales';
 import Card from '@mui/material/Card';
 import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
+import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -13,6 +14,9 @@ import Typography from '@mui/material/Typography';
 
 import { fCurrency } from 'src/utils/format-number';
 import { fDate } from 'src/utils/format-time';
+import { paths } from 'src/routes/paths';
+import { RouterLink } from 'src/routes/components';
+import { useCheckPermission } from 'src/auth/hooks/use-check-permission';
 import { TableHeadCustom, TableNoData, TablePaginationCustom } from 'src/components/table';
 import { useDebtsListQuery } from 'src/sections/app/depts/api';
 
@@ -41,6 +45,8 @@ type Props = {
 
 export default function DebtsTabPanel({ clientId }: Props) {
   const { tx } = useLocales();
+  const { canDetailPage } = useCheckPermission();
+  const canDetailDebts = canDetailPage('debts');
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -88,7 +94,15 @@ export default function DebtsTabPanel({ clientId }: Props) {
 
             return (
               <TableRow key={row.id} sx={isOverdue ? { bgcolor: 'error.lighter' } : undefined}>
-                <TableCell>{fCurrency(row.totalAmount)}</TableCell>
+                <TableCell>
+                  {canDetailDebts ? (
+                    <Link component={RouterLink} href={paths.debts.details(row.id)} variant="subtitle2">
+                      {fCurrency(row.totalAmount)}
+                    </Link>
+                  ) : (
+                    fCurrency(row.totalAmount)
+                  )}
+                </TableCell>
                 <TableCell>{fCurrency(row.paidAmount)}</TableCell>
                 <TableCell>{fCurrency(row.remaining)}</TableCell>
                 <TableCell>{fDate(row.createdAt)}</TableCell>
