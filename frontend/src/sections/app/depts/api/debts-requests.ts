@@ -2,11 +2,15 @@ import type { Pagination } from 'src/hooks/api';
 import { request, API_ENDPOINTS } from 'src/utils/axios';
 
 import type {
+  CustomerDebtStats,
+  CustomerDebtSummary,
   DebtDetail,
   DebtListItem,
   DebtPaymentHistoryItem,
+  ExportCustomerDebtSummaryParams,
   ExportDebtPaymentsParams,
   ExportDebtsParams,
+  FetchCustomerDebtSummaryParams,
   FetchDebtPaymentsParams,
   FetchDebtsListParams,
   PayDebtPayload,
@@ -109,6 +113,56 @@ export async function exportDebtPaymentsExcel(params: ExportDebtPaymentsParams):
   const link = document.createElement('a');
   link.href = url;
   link.download = 'debt_payments_export.xlsx';
+  link.click();
+  window.URL.revokeObjectURL(url);
+}
+
+export async function fetchCustomerDebtSummary(
+  params: FetchCustomerDebtSummaryParams
+): Promise<Pagination<CustomerDebtSummary>> {
+  return request<Pagination<CustomerDebtSummary>>({
+    method: 'GET',
+    url: API_ENDPOINTS.customerDebtSummary.list,
+    params: {
+      page: params.page,
+      pageSize: params.pageSize,
+      ordering: params.ordering ?? '-last_debt_date',
+      ...(params.search ? { search: params.search } : {}),
+      ...(params.dateFrom ? { date_from: params.dateFrom } : {}),
+      ...(params.dateTo ? { date_to: params.dateTo } : {}),
+      ...(params.amountFrom ? { amount_from: params.amountFrom } : {}),
+      ...(params.amountTo ? { amount_to: params.amountTo } : {}),
+    },
+  });
+}
+
+export async function fetchCustomerDebtStats(): Promise<CustomerDebtStats> {
+  return request<CustomerDebtStats>({
+    method: 'GET',
+    url: API_ENDPOINTS.customerDebtSummary.stats,
+  });
+}
+
+export async function exportCustomerDebtSummaryExcel(
+  params: ExportCustomerDebtSummaryParams
+): Promise<void> {
+  const response = await request<Blob>({
+    method: 'GET',
+    url: API_ENDPOINTS.customerDebtSummary.exportExcel,
+    responseType: 'blob',
+    params: {
+      ordering: params.ordering ?? '-last_debt_date',
+      ...(params.search ? { search: params.search } : {}),
+      ...(params.dateFrom ? { date_from: params.dateFrom } : {}),
+      ...(params.dateTo ? { date_to: params.dateTo } : {}),
+      ...(params.amountFrom ? { amount_from: params.amountFrom } : {}),
+      ...(params.amountTo ? { amount_to: params.amountTo } : {}),
+    },
+  });
+  const url = window.URL.createObjectURL(response as unknown as Blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'customer_debts_export.xlsx';
   link.click();
   window.URL.revokeObjectURL(url);
 }

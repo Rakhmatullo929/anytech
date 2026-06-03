@@ -70,6 +70,11 @@ export const API_ENDPOINTS = {
     list: `${API_V1}/debts/payments/`,
     exportExcel: `${API_V1}/debts/payments/export-excel/`,
   },
+  customerDebtSummary: {
+    list: `${API_V1}/debts/customer-summary/`,
+    stats: `${API_V1}/debts/customer-summary/stats/`,
+    exportExcel: `${API_V1}/debts/customer-summary/export-excel/`,
+  },
   cashRegister: {
     status: `${API_V1}/cash-register/`,
     open: `${API_V1}/cash-register/open/`,

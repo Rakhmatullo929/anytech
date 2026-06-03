@@ -51,8 +51,16 @@ import {
 } from 'src/sections/app/depts/api';
 import { DebtsListSkeleton } from 'src/sections/app/depts/skeleton';
 import PaymentHistoryView from './payment-history-view';
+import CustomerDebtsTab from './customer-debts-tab';
 
 // ----------------------------------------------------------------------
+
+type DebtsTab = 'debts' | 'payments' | 'customer-debts';
+
+function resolveTab(raw: string | null): DebtsTab {
+  if (raw === 'payments' || raw === 'customer-debts') return raw;
+  return 'debts';
+}
 
 type HeadCell = { id: string; label: string; sortKey?: string; sx?: object };
 
@@ -431,7 +439,7 @@ export default function DebtsView() {
   const { tx } = useLocales();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const currentTab = searchParams.get('tab') === 'payments' ? 'payments' : 'debts';
+  const currentTab = resolveTab(searchParams.get('tab'));
 
   const handleTabChange = (_: React.SyntheticEvent, value: string) => {
     router.replace(`${paths.debts.root}?tab=${value}`);
@@ -452,10 +460,12 @@ export default function DebtsView() {
       >
         <Tab value="debts" label={tx('debts.tabs.debts')} />
         <Tab value="payments" label={tx('debts.tabs.paymentHistory')} />
+        <Tab value="customer-debts" label={tx('debts.tabs.customerDebts')} />
       </Tabs>
 
       {currentTab === 'debts' && <DebtsListTab />}
       {currentTab === 'payments' && <PaymentHistoryView />}
+      {currentTab === 'customer-debts' && <CustomerDebtsTab />}
     </>
   );
 }

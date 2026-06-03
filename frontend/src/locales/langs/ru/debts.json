@@ -34,7 +34,28 @@
   },
   "tabs": {
     "debts": "Долги",
-    "paymentHistory": "История погашений"
+    "paymentHistory": "История погашений",
+    "customerDebts": "Долги клиентов"
+  },
+  "customerDebts": {
+    "searchPlaceholder": "Поиск клиента...",
+    "columns": {
+      "debtCount": "Кол-во долгов",
+      "lastDebtDate": "Последний долг",
+      "lastPaymentDate": "Последний платёж"
+    },
+    "stats": {
+      "totalOutstanding": "Общий остаток долга",
+      "customersWithDebt": "Должников",
+      "overdueCustomers": "Просроченных",
+      "averageDebt": "Средний долг"
+    },
+    "status": {
+      "active": "Активный",
+      "partially_paid": "Частично оплачен",
+      "overdue": "Просрочен",
+      "paid": "Оплачен"
+    }
   },
   "payments": {
     "columnCustomer": "Клиент",

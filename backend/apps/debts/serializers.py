@@ -71,6 +71,35 @@ class DebtPaymentListSerializer(serializers.ModelSerializer):
         )
 
 
+# ── Customer-level aggregated summary ─────────────────────────────────
+
+
+class CustomerDebtSummarySerializer(serializers.Serializer):
+    """Aggregated debt data per customer (result of values/annotate query)."""
+
+    client_id = serializers.UUIDField(source="client")
+    client_name = serializers.CharField()
+    client_phone = serializers.CharField(allow_null=True, allow_blank=True)
+    total_debt = serializers.DecimalField(max_digits=14, decimal_places=2)
+    total_paid = serializers.DecimalField(max_digits=14, decimal_places=2)
+    remaining = serializers.DecimalField(max_digits=14, decimal_places=2)
+    debt_count = serializers.IntegerField()
+    last_debt_date = serializers.DateTimeField(allow_null=True)
+    last_payment_date = serializers.DateTimeField(allow_null=True)
+    status = serializers.SerializerMethodField()
+
+    def get_status(self, obj):
+        if obj.get("is_overdue"):
+            return "overdue"
+        remaining = obj.get("remaining") or 0
+        total_paid = obj.get("total_paid") or 0
+        if remaining <= 0:
+            return "paid"
+        if total_paid > 0:
+            return "partially_paid"
+        return "active"
+
+
 # ── Write serializer (input for pay action) ───────────────────────────
 
 
