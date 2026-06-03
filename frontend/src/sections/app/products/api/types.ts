@@ -27,6 +27,7 @@ export type ProductListItem = {
   name: string;
   sku: string | null;
   image: string | null;
+  salePrice: string;
   totalQuantity: number;
   availableQuantity: number;
   totalPurchaseAmount: string;
@@ -80,6 +81,7 @@ export type CreateProductPayload = {
   name: string;
   sku?: string;
   category?: string;
+  salePrice?: string;
   images?: File[];
 };
 
@@ -88,6 +90,7 @@ export type UpdateProductPayload = {
   name: string;
   sku?: string;
   category?: string;
+  salePrice?: string;
   images?: File[];
   keepImageIds?: string[];
 };

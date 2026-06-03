@@ -39,6 +39,7 @@ export async function createProduct(payload: CreateProductPayload): Promise<Prod
   const formData = new FormData();
   formData.append('name', payload.name);
   formData.append('sku', payload.sku?.trim() ? payload.sku.trim() : '');
+  formData.append('sale_price', payload.salePrice ?? '0');
   if (payload.category) {
     formData.append('category', payload.category);
   }
@@ -62,6 +63,7 @@ export async function updateProduct(payload: UpdateProductPayload): Promise<Prod
   const formData = new FormData();
   formData.append('name', payload.name);
   formData.append('sku', payload.sku?.trim() ? payload.sku.trim() : '');
+  formData.append('sale_price', payload.salePrice ?? '0');
   if (payload.category) {
     formData.append('category', payload.category);
   }

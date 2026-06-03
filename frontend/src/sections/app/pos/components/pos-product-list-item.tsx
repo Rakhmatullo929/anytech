@@ -50,7 +50,7 @@ function PosProductListItem({ product, onAdd }: Props) {
       {/* Price + mobile "+" button */}
       <Box sx={{ ml: 1, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 0.5 }}>
         <Typography variant="subtitle2">
-          {fCurrency(parseFloat(product.averagePurchasePrice))}
+          {fCurrency(parseFloat(product.salePrice))}
         </Typography>
 
         {/* Quick-add button — mobile only, thumb-reachable */}

@@ -38,6 +38,7 @@ def _excel_parse_row(row) -> dict:
         "category": _get(2),
         "stock": _get(3),
         "purchasePrice": _get(4),
+        "salePrice": _get(5),
     }
 
 
@@ -88,6 +89,7 @@ class ProductViewSet(TenantQuerySetMixin, ModelViewSet):
         "total_quantity",
         "total_purchase_amount",
         "average_purchase_price",
+        "sale_price",
         "category__name",
     ]
     ordering = ["-created_at"]
@@ -164,7 +166,7 @@ class ProductViewSet(TenantQuerySetMixin, ModelViewSet):
         ws = wb.active
         ws.title = "Products"
 
-        headers = ["Name", "SKU", "Category", "Quantity", "Purchase Amount", "Avg. Price"]
+        headers = ["Name", "SKU", "Category", "Quantity", "Purchase Amount", "Avg. Price", "Sale Price"]
         header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
         header_font = Font(bold=True, color="FFFFFF")
 
@@ -182,6 +184,7 @@ class ProductViewSet(TenantQuerySetMixin, ModelViewSet):
                 product.total_quantity,
                 float(product.total_purchase_amount),
                 float(product.average_purchase_price),
+                float(product.sale_price),
             ])
 
         for col in ws.columns:
@@ -221,7 +224,7 @@ class ProductViewSet(TenantQuerySetMixin, ModelViewSet):
         ws = wb.active
         ws.title = "Products"
 
-        headers = ["name", "sku", "category", "stock", "purchasePrice"]
+        headers = ["name", "sku", "category", "stock", "purchasePrice", "salePrice"]
         header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
         header_font = Font(bold=True, color="FFFFFF")
 
@@ -231,7 +234,7 @@ class ProductViewSet(TenantQuerySetMixin, ModelViewSet):
             cell.fill = header_fill
             cell.alignment = Alignment(horizontal="center")
 
-        ws.append(["Example Product", "SKU-001", "Electronics", 10, "9.99"])
+        ws.append(["Example Product", "SKU-001", "Electronics", 10, "9.99", "14.99"])
 
         for col in ws.columns:
             ws.column_dimensions[col[0].column_letter].width = 20
@@ -331,6 +334,17 @@ class ProductViewSet(TenantQuerySetMixin, ModelViewSet):
                 except InvalidOperation:
                     errors.append(_("Purchase price must be a number."))
 
+            sale_price: Decimal = Decimal("0.00")
+            if row["salePrice"]:
+                try:
+                    parsed_sale_price = Decimal(row["salePrice"])
+                    if parsed_sale_price < 0:
+                        errors.append(_("Sale price must be non-negative."))
+                    else:
+                        sale_price = parsed_sale_price
+                except InvalidOperation:
+                    errors.append(_("Sale price must be a number."))
+
             if errors:
                 row_errors.append({"row": row_num, "errors": errors})
             else:
@@ -340,6 +354,7 @@ class ProductViewSet(TenantQuerySetMixin, ModelViewSet):
                     "category": row["category"],
                     "stock": stock,
                     "purchasePrice": purchase_price,
+                    "salePrice": sale_price,
                 })
 
         if not valid_rows:
@@ -382,6 +397,7 @@ class ProductViewSet(TenantQuerySetMixin, ModelViewSet):
                     name=row["name"],
                     sku=row["sku"],
                     category=category_map.get(row["category"].lower()) if row["category"] else None,
+                    sale_price=row["salePrice"],
                 )
                 for row in valid_rows
             ]
