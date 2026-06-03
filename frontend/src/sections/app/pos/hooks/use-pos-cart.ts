@@ -51,7 +51,7 @@ export function usePosCart() {
           productId: product.id,
           name: product.name,
           quantity: 1,
-          unitPrice: parseFloat(product.averagePurchasePrice) || 0,
+          unitPrice: parseFloat(product.salePrice) || 0,
           availableStock: product.availableQuantity,
         },
       ];

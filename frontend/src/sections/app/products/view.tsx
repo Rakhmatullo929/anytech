@@ -124,6 +124,7 @@ export default function ProductsView() {
       { id: 'sku', label: tx('common.table.sku'), sortKey: 'sku', sx: { display: { xs: 'none', sm: 'table-cell' } } },
       { id: 'category', label: tx('common.table.category'), sortKey: 'category__name', sx: { display: { xs: 'none', sm: 'table-cell' } } },
       { id: 'totalQuantity', label: tx('common.table.qty'), sortKey: 'total_quantity' },
+      { id: 'salePrice', label: tx('common.table.salePrice'), sortKey: 'sale_price', sx: { display: { xs: 'none', sm: 'table-cell' } } },
       { id: 'totalPurchaseAmount', label: tx('common.table.purchase'), sortKey: 'total_purchase_amount', sx: { display: { xs: 'none', sm: 'table-cell' } } },
       { id: '', label: '' },
     ],
@@ -334,6 +335,7 @@ export default function ProductsView() {
     name: string;
     sku: string;
     category: string;
+    salePrice: string;
     images: ProductImageFormValue[];
   }) => {
     const normalizedName = values.name.trim();
@@ -348,6 +350,7 @@ export default function ProductsView() {
           name: normalizedName,
           sku: normalizedSku || undefined,
           category: values.category || undefined,
+          salePrice: values.salePrice || '0',
           images: values.images.filter((item): item is File => item instanceof File),
         });
         enqueueSnackbar(tx('products.toasts.created'), { variant: 'success' });
@@ -362,6 +365,7 @@ export default function ProductsView() {
           name: normalizedName,
           sku: normalizedSku || undefined,
           category: values.category || undefined,
+          salePrice: values.salePrice || '0',
           images: values.images.filter((item): item is File => item instanceof File),
           keepImageIds,
         });
@@ -560,6 +564,7 @@ export default function ProductsView() {
                       <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{row.sku || '-'}</TableCell>
                       <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{row.category?.name || '-'}</TableCell>
                       <TableCell>{fNumber(row.totalQuantity)}</TableCell>
+                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{fCurrency(row.salePrice)}</TableCell>
                       <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{fCurrency(row.totalPurchaseAmount)}</TableCell>
                       <TableCell align="right">
                         {canWriteProducts ? (
@@ -630,6 +635,7 @@ export default function ProductsView() {
                   name: editingProduct.product.name,
                   sku: editingProduct.product.sku ?? '',
                   category: editingProduct.product.category?.id ?? '',
+                  salePrice: editingProduct.product.salePrice ?? '0',
                   images: editingProduct.existingImages,
                 }
               : undefined

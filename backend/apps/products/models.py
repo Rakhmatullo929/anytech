@@ -17,6 +17,7 @@ class Product(models.Model):
     )
     name = models.CharField(max_length=255)
     sku = models.CharField(max_length=100, blank=True, null=True)
+    sale_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -30,6 +31,10 @@ class Product(models.Model):
                 fields=["tenant", "sku"],
                 name="unique_sku_per_tenant",
                 condition=models.Q(sku__isnull=False),
+            ),
+            models.CheckConstraint(
+                condition=models.Q(sale_price__gte=0),
+                name="product_sale_price_gte_zero",
             ),
         ]
 
