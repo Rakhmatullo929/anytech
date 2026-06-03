@@ -36,6 +36,23 @@
     "heading": "Bugungi savdolar",
     "empty": "Bugun hali savdo yo'q"
   },
+  "invoice": {
+    "dialogTitle": "Hisob-faktura",
+    "heading": "HISOB-FAKTURA",
+    "number": "Raqam",
+    "date": "Sana",
+    "time": "Vaqt",
+    "cashier": "Sotuvchi",
+    "payment": "To'lov",
+    "customer": "Mijoz",
+    "subtotal": "Jami (chegirmasiz)",
+    "print": "Chop etish",
+    "thankYou": "Xarid uchun rahmat!",
+    "paymentCash": "Naqd",
+    "paymentCard": "Karta",
+    "paymentTransfer": "O'tkazma",
+    "paymentDebt": "Qarzga"
+  },
   "validation": {
     "qtyMin": "Kamida 1",
     "qtyExceedsStock": "Mavjud: {{max}}",

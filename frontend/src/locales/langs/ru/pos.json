@@ -36,6 +36,23 @@
     "heading": "Сегодняшние продажи",
     "empty": "Сегодня пока нет продаж"
   },
+  "invoice": {
+    "dialogTitle": "Счёт-фактура",
+    "heading": "СЧЁТ-ФАКТУРА",
+    "number": "Номер",
+    "date": "Дата",
+    "time": "Время",
+    "cashier": "Продавец",
+    "payment": "Оплата",
+    "customer": "Клиент",
+    "subtotal": "Сумма (без скидок)",
+    "print": "Печать",
+    "thankYou": "Спасибо за покупку!",
+    "paymentCash": "Наличные",
+    "paymentCard": "Карта",
+    "paymentTransfer": "Перевод",
+    "paymentDebt": "В долг"
+  },
   "validation": {
     "qtyMin": "Минимум 1",
     "qtyExceedsStock": "В наличии: {{max}}",
