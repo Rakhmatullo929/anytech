@@ -6,3 +6,5 @@ export { default as PosCartSummary } from './pos-cart-summary';
 export { default as PosTodaySales } from './pos-today-sales';
 export { default as PosCartDrawer } from './pos-cart-drawer';
 export { default as PosMobileCartFab } from './pos-mobile-cart-fab';
+export { default as PosSaleCompleteDialog } from './pos-sale-complete-dialog';
+export type { InvoiceData, InvoiceCartItem } from './pos-invoice-print';
